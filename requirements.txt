@@ -1,0 +1,9 @@
+# Web Scraping
+beautifulsoup4==4.12.3
+requests==2.31.0
+
+# Banco de Dados
+pymongo==4.6.3
+
+# API (FastAPI e Servidor)
+fastapi[standard]==0.111.0

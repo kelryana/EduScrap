@@ -1,0 +1,138 @@
+/* Paleta de Cores baseada no Robô */
+:root {
+    --azul-escuro: #09184D;
+    --azul-claro: #79D3E6;
+    --laranja: #F27A18;
+    --fundo: #F4F7F6;
+    --branco: #FFFFFF;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--fundo);
+    color: var(--azul-escuro);
+}
+
+header {
+    background-color: var(--azul-escuro);
+    color: var(--branco);
+    padding: 2rem;
+    text-align: center;
+    border-bottom: 5px solid var(--azul-claro);
+}
+
+header h1 span {
+    color: var(--laranja);
+}
+
+main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.controles {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+button {
+    background-color: var(--branco);
+    color: var(--azul-escuro);
+    border: 2px solid var(--azul-escuro);
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+button:hover {
+    background-color: var(--azul-claro);
+    color: var(--azul-escuro);
+}
+
+button.ativo {
+    background-color: var(--laranja);
+    color: var(--branco);
+    border-color: var(--laranja);
+}
+
+/* Grid dos Cards */
+.grid-vagas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Estilo Individual do Card */
+.card {
+    background-color: var(--branco);
+    border: 2px solid var(--azul-escuro);
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 4px 4px 0px var(--azul-claro); /* Sombreado duro estilo cartoon */
+    transition: transform 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 6px 6px 0px var(--laranja);
+}
+
+.card-categoria {
+    background-color: var(--azul-claro);
+    color: var(--azul-escuro);
+    font-size: 0.8rem;
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.card-titulo {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    line-height: 1.4;
+}
+
+.card-fonte {
+    font-size: 0.9rem;
+    color: gray;
+    margin-bottom: 15px;
+}
+
+.card-link {
+    background-color: var(--azul-escuro);
+    color: var(--branco);
+    text-decoration: none;
+    text-align: center;
+    padding: 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.card-link:hover {
+    background-color: var(--laranja);
+}
+
+.carregando {
+    text-align: center;
+    grid-column: 1 / -1;
+    font-size: 1.2rem;
+    color: var(--laranja);
+}
