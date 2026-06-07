@@ -53,3 +53,5 @@ fastapi dev main.py
 
 A API estará rodando em http://localhost:8000. 
 Você pode testar os endpoints interativamente acessando http://localhost:8000/docs.
+
+Abra o Index.html
