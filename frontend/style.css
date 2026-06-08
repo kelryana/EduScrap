@@ -42,6 +42,7 @@ main {
     justify-content: center;
     gap: 1rem;
     margin-bottom: 2rem;
+    flex-wrap: wrap; /* Isso faz os botões pularem de linha se a tela for pequena */
 }
 
 button {
@@ -135,4 +136,23 @@ button.ativo {
     grid-column: 1 / -1;
     font-size: 1.2rem;
     color: var(--laranja);
+}
+
+/* Classe especial para os cards de notícias */
+.card-verde {
+    border-color: #2E8B57;
+    box-shadow: 4px 4px 0px #b0f2c2;
+}
+
+.card-verde .card-categoria {
+    background-color: #b0f2c2;
+    color: #1a5233;
+}
+
+.card-verde .card-link {
+    background-color: #2E8B57;
+}
+
+.card-verde .card-link:hover {
+    background-color: #1a5233;
 }

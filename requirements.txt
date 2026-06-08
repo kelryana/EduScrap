@@ -1,9 +1,13 @@
-# Web Scraping
+# Web Scraping (Páginas Estáticas)
 beautifulsoup4==4.12.3
 requests==2.31.0
+
+# Web Scraping (Páginas Dinâmicas - Robô CIEE)
+selenium==4.21.0
+webdriver-manager==4.0.1
 
 # Banco de Dados
 pymongo==4.6.3
 
-# API (FastAPI e Servidor)
+# API (Back-end)
 fastapi[standard]==0.111.0

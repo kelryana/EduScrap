@@ -83,11 +83,7 @@ if __name__ == "__main__":
     
     # A lista onde você coloca as páginas específicas que quer ler
     paginas_alvo = [
-        "https://portal.uern.br/prae/2026-2/",
-        "https://portal.uern.br/prae/2025-2/",
-        "https://portal.uern.br/prae/2024-2/",
-        "https://portal.uern.br/prae/2023-2/",
-        "https://portal.uern.br/prae/2022-2/"
+        "https://portal.uern.br/prae/2026-2/"
     ]
     
     for pagina in paginas_alvo:

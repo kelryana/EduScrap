@@ -87,8 +87,7 @@ if __name__ == "__main__":
     
     # Lista de páginas alvo da PROEX
     paginas_alvo_proex = [
-        "https://portal.uern.br/proex/2026-2/",
-        "https://portal.uern.br/proex/2025-2/"
+        "https://portal.uern.br/proex/2026-2/"
     ]
     
     for pagina in paginas_alvo_proex:
