@@ -230,9 +230,6 @@ def acionar_todos_os_robos():
         print("-> Raspando CIEE (Atenção ao navegador!)...")
         subprocess.run([python_exe, "scraper_ciee.py"])
         
-        print("-> Raspando Notícias...")
-        atualizar_noticias_agora()
-        
         return {"mensagem": "Varredura 100% concluída!"}
         
     except Exception as e:
