@@ -48,50 +48,107 @@ async function realizarPesquisa() {
 }
 
 // 2. NOVA FUNÇÃO: Painel Analítico (Gráficos)
+// 2. RECURSO ANALÍTICO VISUAL: Dashboard Acadêmico com Barras de Gráfico CSS
 async function carregarEstatisticas() {
     const container = document.getElementById('container-vagas');
-    container.style.display = 'grid';
-    container.style.gridTemplateColumns = 'repeat(auto-fit, minmax(250px, 1fr))';
-    container.style.gap = '20px';
-    container.innerHTML = '<p class="carregando">Processando Dashboard...</p>';
+    // Reinicia o layout para bloco único de dashboard, removendo o grid de cards
+    container.style.display = 'block'; 
+    container.innerHTML = '<p class="carregando">Gerando painel visual...</p>';
 
-    document.querySelectorAll('.controles button').forEach(b => b.classList.remove('ativo'));
+    // Atualiza o estado visual das abas
+    document.querySelectorAll('.controles button').forEach(botao => {
+        botao.classList.remove('ativo');
+    });
     document.getElementById('btn-analises').classList.add('ativo');
 
-    const res = await fetch(`${API_URL}/estatisticas`);
-    const dados = await res.json();
+    try {
+        // Busca as agregações do MongoDB no backend
+        const resposta = await fetch(`${API_URL}/estatisticas`);
+        const dados = await resposta.json();
 
-    // Cria cards elegantes para o dashboard
-    container.innerHTML = `
-        <div class="card" style="border-left: 5px solid var(--laranja);">
-            <h3>🏢 Estágios</h3>
-            <p style="font-size: 2rem; font-weight: bold;">${dados.totais.estagios}</p>
-        </div>
-        <div class="card" style="border-left: 5px solid var(--azul-claro);">
-            <h3>💰 Bolsas</h3>
-            <p style="font-size: 2rem; font-weight: bold;">${dados.totais.bolsas}</p>
-        </div>
-        <div class="card" style="border-left: 5px solid var(--verde-forte);">
-            <h3>⚡ Notícias</h3>
-            <p style="font-size: 2rem; font-weight: bold;">${dados.totais.noticias}</p>
-        </div>
-        <div class="card" style="grid-column: 1 / -1;">
-            <h3>📊 Distribuição de Categorias (PRAE)</h3>
-            <div style="margin-top: 15px;">
-                ${dados.prae_categorias.map(c => `
-                    <div style="margin-bottom: 10px;">
-                        <div style="display: flex; justify-content: space-between;">
-                            <span>${c.categoria}</span>
-                            <span><b>${c.total}</b></span>
-                        </div>
-                        <div style="background: #eee; height: 8px; border-radius: 4px;">
-                            <div style="background: var(--laranja); height: 100%; width: ${(c.total / 10) * 100}%; border-radius: 4px;"></div>
+        // 1. Constrói o HTML do Dashboard Visual
+        let html = `
+            <div class="dashboard-container">
+                <div class="dashboard-header">
+                    <h2 class="dashboard-titulo">Dashboard Acadêmico <span>(Live)</span></h2>
+                    <p class="dashboard-subtitulo">Visão consolidada da volumetria e distribuição de oportunidades.</p>
+                </div>
+
+                <div class="dash-grid-contadores">
+                    <div class="dash-card-contador contador-prae">
+                        <span class="contador-icone">🎓</span>
+                        <div class="contador-info">
+                            <h4 class="contador-label">Estágios (PRAE)</h4>
+                            <p class="contador-numero">${dados.totais.estagios}</p>
                         </div>
                     </div>
-                `).join('')}
+                    <div class="dash-card-contador contador-proex">
+                        <span class="contador-icone">💰</span>
+                        <div class="contador-info">
+                            <h4 class="contador-label">Bolsas (PROEX)</h4>
+                            <p class="contador-numero">${dados.totais.bolsas}</p>
+                        </div>
+                    </div>
+                    <div class="dash-card-contador contador-ufersa">
+                        <span class="contador-icone">🏛️</span>
+                        <div class="contador-info">
+                            <h4 class="contador-label">UFERSA Editais</h4>
+                            <p class="contador-numero">${dados.totais.ufersa}</p>
+                        </div>
+                    </div>
+                    <div class="dash-card-contador contador-noticias">
+                        <span class="contador-icone">⚡</span>
+                        <div class="contador-info">
+                            <h4 class="contador-label">Notícias Tech</h4>
+                            <p class="contador-numero">${dados.totais.noticias}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dash-secao-grafico">
+                    <h3 class="grafico-titulo">📂 Distribuição Física por Categoria (PRAE Estágios)</h3>
+                    
+                    <div class="grafico-barras-container">
+        `;
+
+        if (dados.prae_categorias.length === 0) {
+            html += `<p style="text-align: center; color: gray; font-style: italic; padding: 2rem;">Não existem dados analíticos disponíveis.</p>`;
+        } else {
+            // Calcula o maior valor para definir a escala 100% das barras
+            const maxVal = Math.max(...dados.prae_categorias.map(i => i.total));
+
+            // Mapeia os dados do MongoDB para barras visuais
+            dados.prae_categorias.forEach(item => {
+                // Define o percentual da barra baseado no maior valor
+                const percentual = maxVal > 0 ? (item.total / maxVal) * 100 : 0;
+                
+                html += `
+                    <div class="grafico-item-barra">
+                        <div class="barra-legenda">
+                            <span class="legenda-nome">${item.categoria}</span>
+                            <span class="legenda-valor">${item.total} edital(is)</span>
+                        </div>
+                        <div class="barra-estrutura">
+                            <div class="barra-preenchimento" style="width: ${percentual}%;"></div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        html += `
+                    </div>
+                </div>
             </div>
-        </div>
-    `;
+        `;
+        
+        // Injeta o HTML final no container
+        container.innerHTML = html;
+        
+    } catch (erro) {
+        console.error("Erro no Dashboard:", erro);
+        container.innerHTML = '<p class="carregando" style="color: red;">Falha ao gerar o painel visual das estatísticas.</p>';
+    }
 }
 
 // 3. NOVA FUNÇÃO: MongoDB Inspector

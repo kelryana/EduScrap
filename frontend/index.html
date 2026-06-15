@@ -8,7 +8,6 @@
 </head>
 <body>
     <header style="position: relative;">
-        
         <button id="btn-buscar-tudo" onclick="acionarTodosOsRobos()">Buscar 🤖</button>
 
         <div class="logo">
@@ -29,15 +28,17 @@
             <button id="btn-ufersa" onclick="carregarDados('ufersa')">Ver Editais (UFERSA)</button>
             <button id="btn-ciee" onclick="carregarDados('ciee')">Ver Vagas (CIEE)</button>
             <button id="btn-noticias" onclick="carregarDados('noticias')" style="border-color: #2E8B57;">Notícias Tech ⚡</button>
-            
-            <button id="btn-analises" onclick="carregarEstatisticas()" style="border-color: #F27A18;">Painel Analítico 📊</button>
-            <button id="btn-inspector" onclick="carregarInspector()" style="border-color: #9C27B0;">MongoDB Inspector 🛡️</button>
+            <button id="btn-analises" onclick="carregarEstatisticas()" style="border-color: #F27A18;">Resumo Acadêmico 📊</button>
         </div>
 
         <div id="container-vagas" class="grid-vagas">
             <p class="carregando">Carregando oportunidades do banco de dados...</p>
         </div>
     </main>
+
+    <footer style="margin-top: 50px; padding: 20px; text-align: center; border-top: 1px solid #e0e0e0; font-size: 0.8rem; color: #888;">
+        <p>© TechHub UERN Mossoró | <span onclick="carregarInspector()" style="cursor: pointer; text-decoration: underline; color: #666;">Painel do Administrador (Metadados NoSQL)</span></p>
+    </footer>
 
     <script src="script.js"></script>
 </body>

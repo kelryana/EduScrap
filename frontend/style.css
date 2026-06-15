@@ -306,3 +306,181 @@ main {
     margin: 2px;
     font-family: monospace;
 }
+
+/* ====================================================================
+   MÓDULO DE DESIGN PREMIUM: DASHBOARD VISUAL ACADÊMICO (BANCO DE DADOS II)
+   ==================================================================== */
+
+/* Container Principal do Painel */
+.dashboard-container {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.02);
+    margin: 0 auto;
+    max-width: 900px;
+    animation: surgimento 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Alinhamento e Tipografia do Título do Painel */
+.dashboard-header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #edf2f7;
+}
+
+.dashboard-titulo {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--azul-escuro);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dashboard-titulo span {
+    font-size: 0.8rem;
+    background: #edf2f7;
+    color: #4a5568;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.dashboard-subtitulo {
+    font-size: 0.95rem;
+    color: #718096;
+    margin-top: 6px;
+}
+
+/* Grid dos Cards de Indicadores Rápidos (KPIs) */
+.dash-grid-contadores {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.2rem;
+    margin-bottom: 3rem;
+}
+
+/* Card de Métrica Individual */
+.dash-card-contador {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dash-card-contador:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+}
+
+/* Bordas Sutilmente Coloridas para Identificação Visual Rápida */
+.contador-prae { border-left: 4px solid var(--laranja); }
+.contador-proex { border-left: 4px solid var(--azul-claro); }
+.contador-ufersa { border-left: 4px solid var(--purpura); }
+.contador-noticias { border-left: 4px solid var(--verde-forte); }
+
+.contador-icone {
+    font-size: 1.8rem;
+    line-height: 1;
+}
+
+.contador-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.contador-label {
+    font-size: 0.75rem;
+    color: #718096;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.contador-numero {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--azul-escuro);
+    line-height: 1.1;
+    margin-top: 2px;
+}
+
+/* Painel de Distribuição por Categorias (Simulando o Gráfico de Barras) */
+.dash-secao-grafico {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 2rem;
+}
+
+.grafico-titulo {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--azul-escuro);
+}
+
+.grafico-metadado {
+    font-size: 0.75rem;
+    color: var(--purpura);
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    margin-top: 2px;
+    margin-bottom: 2rem;
+    display: block;
+}
+
+/* Distribuidor Linear das Barras */
+.grafico-barras-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.grafico-item-barra {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Legendas do Topo de Cada Barra */
+.barra-legenda {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 6px;
+}
+
+.legenda-valor {
+    color: var(--azul-escuro);
+    font-weight: 700;
+    background: #e2e8f0;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+/* Trilho de Fundo da Barra de Progresso */
+.barra-estrutura {
+    background-color: #edf2f7;
+    height: 10px;
+    border-radius: 20px;
+    overflow: hidden;
+    width: 100%;
+}
+
+/* Animação e Preenchimento Real da Barra do Gráfico */
+.barra-preenchimento {
+    background: linear-gradient(90deg, var(--azul-escuro) 0%, #1a365d 100%);
+    height: 100%;
+    border-radius: 20px;
+    width: 0%; /* O JavaScript altera este valor dinamicamente via inline style */
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); /* Efeito suave de carregamento */
+}
