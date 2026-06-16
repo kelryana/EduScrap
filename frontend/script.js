@@ -1,6 +1,10 @@
 // URL base da sua API FastAPI
 const API_URL = "http://localhost:8000/api";
 
+// Controle de estado global da paginação
+let paginaAtual = 1;
+let tipoAtual = 'estagios';
+
 // Quando a página carregar, puxa os estágios por padrão
 window.onload = () => {
     carregarDados('estagios');
@@ -8,11 +12,15 @@ window.onload = () => {
 
 // --- FUNÇÕES DE BUSCA E NAVEGAÇÃO ---
 
-async function carregarDados(tipo) {
+async function carregarDados(tipo, novaPagina = 1) {
+    tipoAtual = tipo;
+    paginaAtual = novaPagina;
+    
     const container = document.getElementById('container-vagas');
     container.style.display = 'grid'; // Garante o layout grid
     container.innerHTML = '<p class="carregando">Buscando dados no banco...</p>';
 
+    // Remove a classe ativa de todos os botões
     document.querySelectorAll('.controles button').forEach(botao => {
         botao.classList.remove('ativo');
     });
@@ -21,13 +29,55 @@ async function carregarDados(tipo) {
     if(botaoAtivo) botaoAtivo.classList.add('ativo');
 
     try {
-        const resposta = await fetch(`${API_URL}/${tipo}`);
-        const dados = await resposta.json();
-        renderizarCards(dados);
+        // Envia os parâmetros de paginação via URL Query String para o MongoDB
+        const resposta = await fetch(`${API_URL}/${tipo}?pagina=${paginaAtual}&limite=6`);
+        const objetoPaginado = await resposta.json();
+        
+        // Envia apenas o array '.dados' para renderizar os cards
+        renderizarCards(objetoPaginado.dados);
+        
+        // Injeta os controles visuais de paginação logo após os cards
+        renderizarControlesPaginacao(objetoPaginado.pagina_atual, objetoPaginado.total_documentos, objetoPaginado.limite_por_pagina);
+        
     } catch (erro) {
-        console.error("Erro ao buscar dados:", erro);
+        console.error("Erro ao buscar dados paginados:", erro);
         container.innerHTML = '<p class="carregando" style="color: red;">Erro ao conectar com a API. O FastAPI está rodando?</p>';
     }
+}
+
+// Renderiza os botões de Anterior e Próximo mantendo o seu estilo original robusto
+function renderizarControlesPaginacao(atual, total, limite) {
+    const antigo = document.getElementById('bloco-paginacao');
+    if(antigo) antigo.remove();
+    
+    const totalPaginas = Math.ceil(total / limite);
+    if(totalPaginas <= 1) return; 
+
+    const mainContainer = document.querySelector('main');
+    const blocoPaginacao = document.createElement('div');
+    blocoPaginacao.id = 'bloco-paginacao';
+    
+    blocoPaginacao.style.cssText = `
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        margin-top: 40px;
+    `;
+
+    blocoPaginacao.innerHTML = `
+        <button ${atual === 1 ? 'disabled' : ''} onclick="carregarDados('${tipoAtual}', ${atual - 1})" 
+            style="background: #fff; color: var(--azul-escuro); border: 3px solid var(--azul-escuro); padding: 8px 16px; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 3px 3px 0 var(--azul-escuro); opacity: ${atual === 1 ? '0.5' : '1'}">
+            ◀ Anterior
+        </button>
+        <span style="font-weight: bold; color: var(--azul-escuro);">Página ${atual} de ${totalPaginas}</span>
+        <button ${atual >= totalPaginas ? 'disabled' : ''} onclick="carregarDados('${tipoAtual}', ${atual + 1})" 
+            style="background: #fff; color: var(--azul-escuro); border: 3px solid var(--azul-escuro); padding: 8px 16px; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 3px 3px 0 var(--azul-escuro); opacity: ${atual >= totalPaginas ? '0.5' : '1'}">
+            Próximo ▶
+        </button>
+    `;
+    
+    mainContainer.appendChild(blocoPaginacao);
 }
 
 // 1. Pesquisa Textual via Índices Otimizados do MongoDB
@@ -38,12 +88,13 @@ async function realizarPesquisa() {
     const container = document.getElementById('container-vagas');
     container.innerHTML = '<p class="carregando">Consultando índices no MongoDB...</p>';
     
+    const antigo = document.getElementById('bloco-paginacao');
+    if(antigo) antigo.remove();
+
     try {
         const resposta = await fetch(`${API_URL}/pesquisar?termo=${termo}`);
         const dados = await resposta.json();
         renderizarCards(dados);
-        
-        // Remove o estado ativo de todos os botões, já que estamos numa busca livre
         document.querySelectorAll('.controles button').forEach(b => b.classList.remove('ativo'));
     } catch (e) {
         container.innerHTML = '<p class="carregando" style="color: red;">Erro na pesquisa.</p>';
@@ -52,6 +103,9 @@ async function realizarPesquisa() {
 
 // 2. RECURSO ANALÍTICO VISUAL: Dashboard Acadêmico com Barras de Gráfico CSS
 async function carregarEstatisticas() {
+    const antigo = document.getElementById('bloco-paginacao');
+    if(antigo) antigo.remove();
+
     const container = document.getElementById('container-vagas');
     container.style.display = 'block'; 
     container.innerHTML = '<p class="carregando">Gerando painel visual...</p>';
@@ -105,6 +159,7 @@ async function carregarEstatisticas() {
 
                 <div class="dash-secao-grafico">
                     <h3 class="grafico-titulo">📂 Distribuição Física por Categoria (PRAE Estágios)</h3>
+                    <p class="grafico-metadado">Pipeline: MongoDB Aggregation <b>$group</b> + <b>$sort</b></p>
                     
                     <div class="grafico-barras-container">
         `;
@@ -121,7 +176,7 @@ async function carregarEstatisticas() {
                     <div class="grafico-item-barra">
                         <div class="barra-legenda">
                             <span class="legenda-nome">${item.categoria}</span>
-                            <span class="legenda-valor">${item.total} editais</span>
+                            <span class="legenda-valor">${item.total} edital(is)</span>
                         </div>
                         <div class="barra-estrutura">
                             <div class="barra-preenchimento" style="width: ${percentual}%;"></div>
@@ -145,13 +200,15 @@ async function carregarEstatisticas() {
     }
 }
 
-// 3. NOVA VERSÃO ATUALIZADA: MongoDB Inspector (Metadados Físicos & Auditoria)
+// 3. MongoDB Inspector COMPLETO E CORRIGIDO PARA JAVASCRIPT
 async function carregarInspector() {
+    const antigo = document.getElementById('bloco-paginacao');
+    if(antigo) antigo.remove();
+
     const container = document.getElementById('container-vagas');
     container.style.display = 'block';
     container.innerHTML = '<p class="carregando">Lendo metadados físicos e regras do JSON Schema...</p>';
 
-    // Remove a classe ativa das abas principais do discente
     document.querySelectorAll('.controles button').forEach(b => b.classList.remove('ativo'));
 
     try {
@@ -170,31 +227,31 @@ async function carregarInspector() {
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
         `;
 
-        // Vasculha as coleções devolvidas pela API e monta caixas estruturadas
-        info.colecoes.forEach(col => {
-            const indexBadges = col.indices.map(idx => `<span class="badge-index">${idx}</span>`).join(' ');
-            
-            // Cria uma tag verde destacada caso o validador nativo esteja de pé
-            const validadorStatus = col.has_validator 
-                ? `<span style="background: #E8F5E9; color: #1B5E20; font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; border: 2px solid var(--azul-escuro); font-weight: bold; margin-left: auto; box-shadow: 2px 2px 0px var(--azul-escuro);">VALIDADOR ATIVO</span>` 
-                : "";
+        // CORREÇÃO EFETIVA: Usando sintaxe nativa JS para varrer o array do objeto info
+        if (info && info.colecoes) {
+            info.colecoes.forEach(col => {
+                const indexBadges = col.indices.map(idx => `<span class="badge-index">${idx}</span>`).join(' ');
+                const validadorStatus = col.has_validator 
+                    ? `<span style="background: #E8F5E9; color: #1B5E20; font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; border: 2px solid var(--azul-escuro); font-weight: bold; margin-left: auto; box-shadow: 2px 2px 0px var(--azul-escuro);">VALIDADOR ATIVO</span>` 
+                    : "";
 
-            html += `
-                <div class="db-inspector-card">
-                    <div style="display: flex; align-items: center; margin-bottom: 12px; border-bottom: 2px solid var(--azul-escuro); padding-bottom: 6px;">
-                        <h3 style="color: var(--azul-escuro); font-size: 1.05rem; font-weight: bold;">📁 col: ${col.colecao}</h3>
-                        ${validadorStatus}
+                html += `
+                    <div class="db-inspector-card">
+                        <div style="display: flex; align-items: center; margin-bottom: 12px; border-bottom: 2px solid var(--azul-escuro); padding-bottom: 6px;">
+                            <h3 style="color: var(--azul-escuro); font-size: 1.05rem; font-weight: bold;">📁 col: ${col.colecao}</h3>
+                            ${validadorStatus}
+                        </div>
+                        <p style="font-size: 0.9rem; margin-bottom: 6px; color: #333;">Documentos Ativos: <strong>${col.documentos}</strong></p>
+                        <p style="font-size: 0.9rem; margin-bottom: 12px; color: #333;">Alocação Física: <strong>${col.tamanho_kb} KB</strong></p>
+                        
+                        <div style="border-top: 1.5px dashed var(--azul-escuro); padding-top: 8px; margin-top: 10px;">
+                            <p style="font-size: 0.75rem; font-weight: 800; color: var(--azul-escuro); margin-bottom: 6px; letter-spacing: 0.5px;">ESTRUTURAS DE ÍNDICE:</p>
+                            <div style="display: flex; flex-wrap: wrap; gap: 4px;">${indexBadges}</div>
+                        </div>
                     </div>
-                    <p style="font-size: 0.9rem; margin-bottom: 6px; color: #333;">Documentos Ativos: <strong>${col.documentos}</strong></p>
-                    <p style="font-size: 0.9rem; margin-bottom: 12px; color: #333;">Alocação Física: <strong>${col.tamanho_kb} KB</strong></p>
-                    
-                    <div style="border-top: 1.5px dashed var(--azul-escuro); padding-top: 8px; margin-top: 10px;">
-                        <p style="font-size: 0.75rem; font-weight: 800; color: var(--azul-escuro); margin-bottom: 6px; letter-spacing: 0.5px;">ESTRUTURAS DE ÍNDICE:</p>
-                        <div style="display: flex; flex-wrap: wrap; gap: 4px;">${indexBadges}</div>
-                    </div>
-                </div>
-            `;
-        });
+                `;
+            });
+        }
 
         html += `
                 </div>
@@ -218,7 +275,7 @@ function renderizarCards(listaDeVagas) {
     const container = document.getElementById('container-vagas');
     container.innerHTML = ''; 
 
-    if (listaDeVagas.length === 0) {
+    if (!listaDeVagas || listaDeVagas.length === 0) {
         container.innerHTML = '<p class="carregando">Nenhuma oportunidade encontrada no banco.</p>';
         return;
     }
@@ -244,6 +301,9 @@ async function acionarTodosOsRobos() {
     const container = document.getElementById('container-vagas');
     const btn = document.getElementById('btn-buscar-tudo');
     
+    const antigo = document.getElementById('bloco-paginacao');
+    if(antigo) antigo.remove();
+
     btn.innerText = "⏳ Raspando...";
     btn.disabled = true;
     

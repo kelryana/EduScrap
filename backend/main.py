@@ -27,52 +27,99 @@ db = client["hub_estudantes"]
 def raiz():
     return {"mensagem": "A API do TechHub está online! Acesse /docs para testar."}
 
-# ==========================================
-# ROTAS PADRÃO DE CONSULTA (Preservadas)
-# ==========================================
+# ====================================================================
+# ROTAS COM PAGINAÇÃO ATIVA EM NÍVEL DE CURSOR NO MONGODB ($skip e $limit)
+# ====================================================================
 
 @app.get("/api/estagios")
-def listar_estagios():
+def listar_estagios(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1)):
+    """
+    Retorna os estágios da PRAE aplicando paginação nativa em disco com skip e limit.
+    """
     colecao = db["vagas_estagio"]
+    
+    # Cálculo matemático do pulo de documentos baseado na página atual
+    pulo = (pagina - 1) * limite
+    
     lista_vagas = []
-    for vaga in colecao.find():
+    # O banco executa o skip e o limit antes de trazer os documentos para o Python
+    for vaga in colecao.find().skip(pulo).limit(limite):
         vaga["_id"] = str(vaga["_id"])
         lista_vagas.append(vaga)
-    return lista_vagas
+        
+    return {
+        "pagina_atual": pagina,
+        "limite_por_pagina": limite,
+        "total_documentos": colecao.count_documents({}),
+        "dados": lista_vagas
+    }
 
 @app.get("/api/bolsas")
-def listar_bolsas():
+def listar_bolsas(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1)):
+    """
+    Retorna as bolsas da PROEX aplicando paginação nativa.
+    """
     colecao = db["vagas_bolsa"]
+    pulo = (pagina - 1) * limite
+    
     lista_bolsas = []
-    for bolsa in colecao.find():
+    for bolsa in colecao.find().skip(pulo).limit(limite):
         bolsa["_id"] = str(bolsa["_id"])
         lista_bolsas.append(bolsa)
-    return lista_bolsas
+        
+    return {
+        "pagina_atual": pagina,
+        "limite_por_pagina": limite,
+        "total_documentos": colecao.count_documents({}),
+        "dados": lista_bolsas
+    }
 
 @app.get("/api/ufersa")
-def listar_ufersa():
+def listar_ufersa(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1)):
+    """
+    Retorna os editais da UFERSA aplicando paginação nativa.
+    """
     colecao = db["vagas_ufersa"]
+    pulo = (pagina - 1) * limite
+    
     lista_ufersa = []
-    for edital in colecao.find():
+    for edital in colecao.find().skip(pulo).limit(limite):
         edital["_id"] = str(edital["_id"])
         lista_ufersa.append(edital)
-    return lista_ufersa
+        
+    return {
+        "pagina_atual": pagina,
+        "limite_por_pagina": limite,
+        "total_documentos": colecao.count_documents({}),
+        "dados": lista_ufersa
+    }
 
 @app.get("/api/ciee")
-def listar_ciee():
+def listar_ciee(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1)):
+    """
+    Retorna as vagas do CIEE aplicando paginação nativa.
+    """
     colecao = db["vagas_ciee"]
+    pulo = (pagina - 1) * limite
+    
     lista_ciee = []
-    for vaga in colecao.find():
+    for vaga in colecao.find().skip(pulo).limit(limite):
         vaga["_id"] = str(vaga["_id"])
         lista_ciee.append(vaga)
-    return lista_ciee
+        
+    return {
+        "pagina_atual": pagina,
+        "limite_por_pagina": limite,
+        "total_documentos": colecao.count_documents({}),
+        "dados": lista_ciee
+    }
 
 
 # ====================================================================
-# RECURSO AVANÇADO 1: CACHE INTELIGENTE POR TIMESTAMP (TTL CONTROL)
+# RECURSO AVANÇADO DE CACHE INTELIGENTE POR TIMESTAMP (TTL CONTROL)
 # ====================================================================
 @app.get("/api/noticias")
-def listar_noticias():
+def listar_noticias(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1)):
     """
     Evita requisições abusivas e repetitivas a portais externos controlando
     um ciclo de vida (TTL) de cache de 10 minutos persistido no MongoDB.
@@ -80,30 +127,34 @@ def listar_noticias():
     colecao_cache = db["controle_cache"]
     ultimo_registro = colecao_cache.find_one({"tipo": "noticias"})
     
-    # Define a janela de tempo limite tolerável (10 minutos atrás)
     tempo_limite = datetime.now() - timedelta(minutes=10)
     
-    # Se o cache não existir ou já tiver expirado, aciona o scraper externo
     if not ultimo_registro or ultimo_registro["data_execucao"] < tempo_limite:
         print("[CACHE] Cache expirado ou inexistente. A acionar robô de notícias...")
         atualizar_noticias_agora()
         
-        # Atualiza o estado físico do timestamp no MongoDB usando $set e upsert
         colecao_cache.update_one(
             {"tipo": "noticias"},
             {"$set": {"data_execucao": datetime.now()}},
             upsert=True
         )
     else:
-        print("[CACHE] Dados recuperados localmente via cache ativo do MongoDB (0ms network cost).")
+        print("[CACHE] Dados recuperados localmente via cache ativo do MongoDB.")
     
     colecao = db["vagas_noticias"]
+    pulo = (pagina - 1) * limite
+    
     lista_noticias = []
-    for noticia in colecao.find():
+    for noticia in colecao.find().skip(pulo).limit(limite):
         noticia["_id"] = str(noticia["_id"])
         lista_noticias.append(noticia)
         
-    return lista_noticias
+    return {
+        "pagina_atual": pagina,
+        "limite_por_pagina": limite,
+        "total_documentos": colecao.count_documents({}),
+        "dados": lista_noticias
+    }
 
 
 # ==========================================
@@ -155,7 +206,6 @@ def obter_estatisticas():
 @app.get("/api/db-status")
 def obter_status_do_banco():
     status_colecoes = []
-    # Adicionada a nova coleção de logs na listagem do Inspetor Técnico
     colecoes = ["vagas_estagio", "vagas_bolsa", "vagas_ufersa", "vagas_ciee", "vagas_noticias", "historico_varreduras"]
     
     for col_name in colecoes:
@@ -198,16 +248,14 @@ def obter_status_do_banco():
 
 
 # ====================================================================
-# RECURSO AVANÇADO 2: GOVERNANÇA, LOGS E AUDITORIA DE RASPAGEM
+# RECURSO AVANÇADO DE GOVERNANÇA, LOGS E AUDITORIA DE RASPAGEM
 # ====================================================================
 @app.get("/api/buscar-tudo")
 def acionar_todos_os_robos():
     print("\n[SISTEMA] Iniciando a Varredura Global de Infraestrutura...")
     
-    # Captura o marco temporal exato do início da rotina
     inicio_varredura = datetime.now()
     
-    # Executa os purges de coleções transacionais
     db["vagas_estagio"].delete_many({})
     db["vagas_bolsa"].delete_many({})
     db["vagas_ufersa"].delete_many({})
@@ -237,7 +285,6 @@ def acionar_todos_os_robos():
         status_final = "Erro"
         detalhe_erro = str(e)
     
-    # Coleta de métricas e persistência do documento de log assíncrono
     fim_varredura = datetime.now()
     log_auditoria = {
         "data_execucao": inicio_varredura,
@@ -252,7 +299,6 @@ def acionar_todos_os_robos():
         }
     }
     
-    # Insere o registo de governança de forma persistente no MongoDB
     db["historico_varreduras"].insert_one(log_auditoria)
     
     if status_final == "Erro":
