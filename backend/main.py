@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
 import subprocess
 import sys
+import re
 from datetime import datetime, timedelta
 
 # Importa a função de raspagem assíncrona de notícias
@@ -22,29 +23,118 @@ app.add_middleware(
 client = MongoClient("mongodb://localhost:27017/")
 db = client["hub_estudantes"]
 
+
+# ====================================================================
+# INFRAESTRUTURA DE BANCO: NORMALIZAÇÃO E RESOLUÇÃO DE FONTES (IDEIA 3)
+# ====================================================================
+def garantir_metadados_fontes():
+    """
+    Abordagem Híbrida NoSQL: Mantém uma coleção normatizada contendo a governança,
+    links oficiais e metadados de cada portal institucional parceiro.
+    """
+    colecao = db["fontes_provedores"]
+    
+    # Dicionário mestre de metadados das instituições de Mossoró e região
+    fontes_mestre = [
+        {
+            "_id": "prae_uern",
+            "nome_oficial": "Pró-Reitoria de Assuntos Estudantis - UERN",
+            "url_oficial": "https://prae.uern.br",
+            "frequencia_monitoramento": "Diário",
+            "foco_vagas": "Estágios Acadêmicos, Residência e Auxílios Financeiros"
+        },
+        {
+            "_id": "proex_uern",
+            "nome_oficial": "Pró-Reitoria de Extensão - UERN",
+            "url_oficial": "https://proex.uern.br",
+            "frequencia_monitoramento": "Diário",
+            "foco_vagas": "Bolsas de Extensão, Cultura e Projetos de Pesquisa"
+        },
+        {
+            "_id": "ufersa_oficial",
+            "nome_oficial": "Portal de Editais - UFERSA",
+            "url_oficial": "https://ufersa.edu.br",
+            "frequencia_monitoramento": "A cada 12 horas",
+            "foco_vagas": "Editais de Concursos, Estágios e Assistência Estudantil"
+        },
+        {
+            "_id": "ciee_agente",
+            "nome_oficial": "Centro de Integração Empresa-Escola (CIEE)",
+            "url_oficial": "https://web.ciee.org.br",
+            "frequencia_monitoramento": "A cada 6 horas",
+            "foco_vagas": "Vagas de Estágio Comercial e Jovem Aprendiz Técnico"
+        }
+    ]
+    
+    for fonte in fontes_mestre:
+        # Usa upsert para garantir que os links oficiais se mantenham atualizados sem duplicar registros
+        colecao.update_one({"_id": fonte["_id"]}, {"$set": fonte}, upsert=True)
+
+# Inicializa as tabelas de metadados mestre na subida do servidor
+garantir_metadados_fontes()
+
+
+def resolver_vinculo_fonte(documento: dict):
+    """
+    Executa a junção lógica baseada em referência (DBRef Manual) em tempo
+    de execução, agregando os metadados ricos da instituição ao edital.
+    """
+    if not documento:
+        return documento
+        
+    fonte_id = documento.get("fonte_id")
+    if fonte_id:
+        fonte_meta = db["fontes_provedores"].find_one({"_id": fonte_id})
+        if fonte_meta:
+            # Acopla dinamicamente os metadados ricos estruturados para consumo do front-end
+            documento["meta_fonte"] = {
+                "nome_oficial": fonte_meta.get("nome_oficial"),
+                "url_oficial": fonte_meta.get("url_oficial"),
+                "frequencia": fonte_meta.get("frequencia_monitoramento")
+            }
+    return documento
+
+
+# ====================================================================
+# FUNÇÃO AUXILIAR: INTELIGÊNCIA ARTIFICIAL BASEADA EM REGEX (DATA CLEANSING)
+# ====================================================================
+def extrair_e_converter_data(texto: str) -> datetime:
+    if not texto:
+        return None
+    padrao_data = r"\b(\d{2})/(\d{2})/(\d{4})\b"
+    resultado = re.search(padrao_data, texto)
+    if resultado:
+        dia, mes, ano = resultado.groups()
+        try:
+            return datetime(int(ano), int(mes), int(dia))
+        except ValueError:
+            return None
+    return None
+
+
 # Rota de teste
 @app.get("/")
 def raiz():
     return {"mensagem": "A API do TechHub está online! Acesse /docs para testar."}
 
+
 # ====================================================================
-# ROTAS COM PAGINAÇÃO ATIVA EM NÍVEL DE CURSOR NO MONGODB ($skip e $limit)
+# ROTAS COM PAGINAÇÃO ATIVA E RESOLUÇÃO DE FONTES INTEGRADA
 # ====================================================================
 
 @app.get("/api/estagios")
 def listar_estagios(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1)):
-    """
-    Retorna os estágios da PRAE aplicando paginação nativa em disco com skip e limit.
-    """
     colecao = db["vagas_estagio"]
-    
-    # Cálculo matemático do pulo de documentos baseado na página atual
     pulo = (pagina - 1) * limite
     
     lista_vagas = []
-    # O banco executa o skip e o limit antes de trazer os documentos para o Python
     for vaga in colecao.find().skip(pulo).limit(limite):
         vaga["_id"] = str(vaga["_id"])
+        if isinstance(vaga.get("data_vencimento"), datetime):
+            vaga["data_vencimento_formatada"] = vaga["data_vencimento"].strftime("%d/%m/%Y")
+        
+        # Injeta os metadados normatizados da PRAE no JSON de saída
+        vaga = resolver_vinculo_fonte(vaga)
         lista_vagas.append(vaga)
         
     return {
@@ -56,15 +146,16 @@ def listar_estagios(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1)):
 
 @app.get("/api/bolsas")
 def listar_bolsas(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1)):
-    """
-    Retorna as bolsas da PROEX aplicando paginação nativa.
-    """
     colecao = db["vagas_bolsa"]
     pulo = (pagina - 1) * limite
     
     lista_bolsas = []
     for bolsa in colecao.find().skip(pulo).limit(limite):
         bolsa["_id"] = str(bolsa["_id"])
+        if isinstance(bolsa.get("data_vencimento"), datetime):
+            bolsa["data_vencimento_formatada"] = bolsa["data_vencimento"].strftime("%d/%m/%Y")
+            
+        bolsa = resolver_vinculo_fonte(bolsa)
         lista_bolsas.append(bolsa)
         
     return {
@@ -76,15 +167,16 @@ def listar_bolsas(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1)):
 
 @app.get("/api/ufersa")
 def listar_ufersa(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1)):
-    """
-    Retorna os editais da UFERSA aplicando paginação nativa.
-    """
     colecao = db["vagas_ufersa"]
     pulo = (pagina - 1) * limite
     
     lista_ufersa = []
     for edital in colecao.find().skip(pulo).limit(limite):
         edital["_id"] = str(edital["_id"])
+        if isinstance(edital.get("data_vencimento"), datetime):
+            edital["data_vencimento_formatada"] = edital["data_vencimento"].strftime("%d/%m/%Y")
+            
+        edital = resolver_vinculo_fonte(edital)
         lista_ufersa.append(edital)
         
     return {
@@ -96,15 +188,16 @@ def listar_ufersa(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1)):
 
 @app.get("/api/ciee")
 def listar_ciee(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1)):
-    """
-    Retorna as vagas do CIEE aplicando paginação nativa.
-    """
     colecao = db["vagas_ciee"]
     pulo = (pagina - 1) * limite
     
     lista_ciee = []
     for vaga in colecao.find().skip(pulo).limit(limite):
         vaga["_id"] = str(vaga["_id"])
+        if isinstance(vaga.get("data_vencimento"), datetime):
+            vaga["data_vencimento_formatada"] = vaga["data_vencimento"].strftime("%d/%m/%Y")
+            
+        vaga = resolver_vinculo_fonte(vaga)
         lista_ciee.append(vaga)
         
     return {
@@ -115,15 +208,8 @@ def listar_ciee(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1)):
     }
 
 
-# ====================================================================
-# RECURSO AVANÇADO DE CACHE INTELIGENTE POR TIMESTAMP (TTL CONTROL)
-# ====================================================================
 @app.get("/api/noticias")
 def listar_noticias(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1)):
-    """
-    Evita requisições abusivas e repetitivas a portais externos controlando
-    um ciclo de vida (TTL) de cache de 10 minutos persistido no MongoDB.
-    """
     colecao_cache = db["controle_cache"]
     ultimo_registro = colecao_cache.find_one({"tipo": "noticias"})
     
@@ -165,20 +251,22 @@ def listar_noticias(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1)):
 def pesquisar_unificado(termo: str = Query(..., min_length=2)):
     colecoes = ["vagas_estagio", "vagas_bolsa", "vagas_ufersa", "vagas_ciee"]
     resultados = []
-    
     for col_name in db.list_collection_names():
         if col_name in colecoes:
             try:
                 cursor = db[col_name].find({"$text": {"$search": termo}})
                 for doc in cursor:
                     doc["_id"] = str(doc["_id"])
+                    doc = resolver_vinculo_fonte(doc)
                     resultados.append(doc)
             except Exception:
                 cursor = db[col_name].find({"nome": {"$regex": termo, "$options": "i"}})
                 for doc in cursor:
                     doc["_id"] = str(doc["_id"])
+                    doc = resolver_vinculo_fonte(doc)
                     resultados.append(doc)
     return resultados
+
 
 @app.get("/api/estatisticas")
 def obter_estatisticas():
@@ -190,23 +278,42 @@ def obter_estatisticas():
         "noticias": db["vagas_noticias"].count_documents({})
     }
     
+    agora = datetime.now()
+    janela_limite = agora + timedelta(days=7)
+    
+    query_reta_final = {
+        "data_vencimento": {
+            "$gte": agora,
+            "$lte": janela_limite
+        }
+    }
+    
+    total_reta_final = (
+        db["vagas_estagio"].count_documents(query_reta_final) +
+        db["vagas_bolsa"].count_documents(query_reta_final) +
+        db["vagas_ufersa"].count_documents(query_reta_final) +
+        db["vagas_ciee"].count_documents(query_reta_final)
+    )
+    
     pipeline_prae = [
         {"$group": {"_id": "$categoria", "total": {"$sum": 1}}},
         {"$sort": {"total": -1}}
     ]
     distribuicao_prae = list(db["vagas_estagio"].aggregate(pipeline_prae))
-    
     formatar = lambda lista: [{"categoria": item["_id"] if item["_id"] else "Geral / Não Especificada", "total": item["total"]} for item in lista]
     
     return {
         "totais": totais,
+        "reta_final_urgente": total_reta_final,
         "prae_categorias": formatar(distribuicao_prae)
     }
+
 
 @app.get("/api/db-status")
 def obter_status_do_banco():
     status_colecoes = []
-    colecoes = ["vagas_estagio", "vagas_bolsa", "vagas_ufersa", "vagas_ciee", "vagas_noticias", "historico_varreduras"]
+    # Adicionado fontes_provedores para auditoria física em tempo real
+    colecoes = ["vagas_estagio", "vagas_bolsa", "vagas_ufersa", "vagas_ciee", "vagas_noticias", "historico_varreduras", "fontes_provedores"]
     
     for col_name in colecoes:
         colecao = db[col_name]
@@ -248,7 +355,7 @@ def obter_status_do_banco():
 
 
 # ====================================================================
-# RECURSO AVANÇADO DE GOVERNANÇA, LOGS E AUDITORIA DE RASPAGEM
+# SCRIPT DE EXECUÇÃO GLOBAL COM PIPELINES DE MAPEAMENTO NoSQL
 # ====================================================================
 @app.get("/api/buscar-tudo")
 def acionar_todos_os_robos():
@@ -275,12 +382,41 @@ def acionar_todos_os_robos():
         print("-> A raspar UFERSA...")
         subprocess.run([python_exe, "scraper_ufersa.py"])
         
-        print("-> A raspar CIEE (Atenção ao navegador!)...")
+        print("-> A raspar CIEE...")
         subprocess.run([python_exe, "scraper_ciee.py"])
         
         print("-> A raspar Notícias...")
         atualizar_noticias_agora()
         
+        # ------------------------------------------------------------
+        # PIPELINE DE HIGIENIZAÇÃO E CRUZA DE REFERÊNCIAS NOSQL
+        # ------------------------------------------------------------
+        print("[MIGRAÇÃO] Rodando Normalização Heurística de Dados...")
+        
+        # Mapeia qual coleção pertence a qual chave identificadora de fonte
+        mapeamento_fontes = {
+            "vagas_estagio": "prae_uern",
+            "vagas_bolsa": "proex_uern",
+            "vagas_ufersa": "ufersa_oficial",
+            "vagas_ciee": "ciee_agente"
+        }
+        
+        for col_name, id_fonte in mapeamento_fontes.items():
+            cursor = db[col_name].find()
+            for doc in cursor:
+                texto_alvo = f"{doc.get('nome', '')} {doc.get('categoria', '')}"
+                data_detectada = extrair_e_converter_data(texto_alvo)
+                
+                # Monta a carga de atualização injetando a chave estrangeira (Referência)
+                payload_atualizacao = {"fonte_id": id_fonte}
+                if data_detectada:
+                    payload_atualizacao["data_vencimento"] = data_detectada
+                    
+                db[col_name].update_one(
+                    {"_id": doc["_id"]},
+                    {"$set": payload_atualizacao}
+                )
+                    
     except Exception as e:
         status_final = "Erro"
         detalhe_erro = str(e)
@@ -304,4 +440,4 @@ def acionar_todos_os_robos():
     if status_final == "Erro":
         return {"erro": detalhe_erro}
         
-    return {"mensagem": "Varredura global concluída e registada com sucesso na base de logs!"}
+    return {"mensagem": "Varredura global concluída e normatizada com sucesso!"}
