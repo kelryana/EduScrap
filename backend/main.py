@@ -6,7 +6,7 @@ import sys
 import re
 from datetime import datetime, timedelta
 
-# Importa a função de raspagem assíncrona de notícias
+# Importa a função de raspagem assíncrona de notícias original
 from scraper_noticias import atualizar_noticias_agora
 
 app = FastAPI(title="API TechHub UERN")
@@ -25,7 +25,7 @@ db = client["hub_estudantes"]
 
 
 # ====================================================================
-# INFRAESTRUTURA DE BANCO: NORMALIZAÇÃO E RESOLUÇÃO DE FONTES (IDEIA 3)
+# INFRAESTRUTURA DE BANCO: NORMALIZAÇÃO E RESOLUÇÃO DE FONTES
 # ====================================================================
 def garantir_metadados_fontes():
     """
@@ -54,15 +54,23 @@ def garantir_metadados_fontes():
             "_id": "ufersa_oficial",
             "nome_oficial": "Portal de Editais - UFERSA",
             "url_oficial": "https://ufersa.edu.br",
-            "frequencia_monitoramento": "A cada 12 horas",
+            "frequencia_monitoramento": "A cada 12 hours",
             "foco_vagas": "Editais de Concursos, Estágios e Assistência Estudantil"
         },
         {
             "_id": "ciee_agente",
             "nome_oficial": "Centro de Integração Empresa-Escola (CIEE)",
             "url_oficial": "https://web.ciee.org.br",
-            "frequencia_monitoramento": "A cada 6 horas",
+            "frequencia_monitoramento": "A cada 6 hours",
             "foco_vagas": "Vagas de Estágio Comercial e Jovem Aprendiz Técnico"
+        },
+        # ADIÇÃO ESTRATÉGICA: Vinculo relacional para a nova esteira de dados
+        {
+            "_id": "portal_uern_oficial",
+            "nome_oficial": "Portal UERN - Text Mining",
+            "url_oficial": "https://portal.uern.br",
+            "frequencia_monitoramento": "Diário",
+            "foco_vagas": "Editais Internos Filtrados por Inteligência de Mineração"
         }
     ]
     
@@ -208,6 +216,31 @@ def listar_ciee(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1)):
     }
 
 
+# ====================================================================
+# ENDPOINT DE CONTINGÊNCIA: CARREGAMENTO DE COORDENADAS MINERADAS UERN
+# ====================================================================
+@app.get("/api/portal_uern")
+def listar_portal_uern(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1)):
+    colecao = db["vagas_portal_uern"]
+    pulo = (pagina - 1) * limite
+    
+    lista_portal = []
+    for edital in colecao.find().skip(pulo).limit(limite):
+        edital["_id"] = str(edital["_id"])
+        if isinstance(edital.get("data_vencimento"), datetime):
+            edital["data_vencimento_formatada"] = edital["data_vencimento"].strftime("%d/%m/%Y")
+            
+        edital = resolver_vinculo_fonte(edital)
+        lista_portal.append(edital)
+        
+    return {
+        "pagina_atual": pagina,
+        "limite_por_pagina": limite,
+        "total_documentos": colecao.count_documents({}),
+        "dados": lista_portal
+    }
+
+
 @app.get("/api/noticias")
 def listar_noticias(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1)):
     colecao_cache = db["controle_cache"]
@@ -249,7 +282,7 @@ def listar_noticias(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1)):
 
 @app.get("/api/pesquisar")
 def pesquisar_unificado(termo: str = Query(..., min_length=2)):
-    colecoes = ["vagas_estagio", "vagas_bolsa", "vagas_ufersa", "vagas_ciee"]
+    colecoes = ["vagas_estagio", "vagas_bolsa", "vagas_ufersa", "vagas_ciee", "vagas_portal_uern"]
     resultados = []
     for col_name in db.list_collection_names():
         if col_name in colecoes:
@@ -275,7 +308,8 @@ def obter_estatisticas():
         "bolsas": db["vagas_bolsa"].count_documents({}),
         "ufersa": db["vagas_ufersa"].count_documents({}),
         "ciee": db["vagas_ciee"].count_documents({}),
-        "noticias": db["vagas_noticias"].count_documents({})
+        "noticias": db["vagas_noticias"].count_documents({}),
+        "portal_uern": db["vagas_portal_uern"].count_documents({}) # Alimentação do novo contador do card
     }
     
     agora = datetime.now()
@@ -312,8 +346,8 @@ def obter_estatisticas():
 @app.get("/api/db-status")
 def obter_status_do_banco():
     status_colecoes = []
-    # Adicionado fontes_provedores para auditoria física em tempo real
-    colecoes = ["vagas_estagio", "vagas_bolsa", "vagas_ufersa", "vagas_ciee", "vagas_noticias", "historico_varreduras", "fontes_provedores"]
+    # Adicionado vagas_portal_uern para auditoria transparente
+    colecoes = ["vagas_estagio", "vagas_bolsa", "vagas_ufersa", "vagas_ciee", "vagas_noticias", "vagas_portal_uern", "historico_varreduras", "fontes_provedores"]
     
     for col_name in colecoes:
         colecao = db[col_name]
@@ -355,7 +389,7 @@ def obter_status_do_banco():
 
 
 # ====================================================================
-# SCRIPT DE EXECUÇÃO GLOBAL COM PIPELINES DE MAPEAMENTO NoSQL
+# SCRIPT DE EXECUÇÃO GLOBAL INTEGRADO (PRESERVA SISTEMA ANTIGO RÁPIDO)
 # ====================================================================
 @app.get("/api/buscar-tudo")
 def acionar_todos_os_robos():
@@ -388,6 +422,9 @@ def acionar_todos_os_robos():
         print("-> A raspar Notícias...")
         atualizar_noticias_agora()
         
+        # NOTA TÉCNICA: A coleção 'vagas_portal_uern' é alimentada de forma assíncrona 
+        # via script de sementes (popular_portal.py) para contornar bloqueios do Cloudflare.
+        
         # ------------------------------------------------------------
         # PIPELINE DE HIGIENIZAÇÃO E CRUZA DE REFERÊNCIAS NOSQL
         # ------------------------------------------------------------
@@ -398,7 +435,8 @@ def acionar_todos_os_robos():
             "vagas_estagio": "prae_uern",
             "vagas_bolsa": "proex_uern",
             "vagas_ufersa": "ufersa_oficial",
-            "vagas_ciee": "ciee_agente"
+            "vagas_ciee": "ciee_agente",
+            "vagas_portal_uern": "portal_uern_oficial"
         }
         
         for col_name, id_fonte in mapeamento_fontes.items():
@@ -431,7 +469,8 @@ def acionar_todos_os_robos():
             "estagios": db["vagas_estagio"].count_documents({}),
             "bolsas": db["vagas_bolsa"].count_documents({}),
             "ufersa": db["vagas_ufersa"].count_documents({}),
-            "noticias": db["vagas_noticias"].count_documents({})
+            "noticias": db["vagas_noticias"].count_documents({}),
+            "portal_uern": db["vagas_portal_uern"].count_documents({})
         }
     }
     

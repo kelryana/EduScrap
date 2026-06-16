@@ -154,6 +154,13 @@ async function carregarEstatisticas() {
                             <p class="contador-numero">${dados.totais.noticias}</p>
                         </div>
                     </div>
+                    <div class="dash-card-contador" style="border: 3px solid var(--azul-escuro); box-shadow: 4px 4px 0 var(--azul-escuro);">
+                        <span class="contador-icone">🔍</span>
+                        <div class="contador-info">
+                            <h4 class="contador-label">Portal UERN (Minerado)</h4>
+                            <p class="contador-numero">${dados.totais.portal_uern || 0}</p>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="dash-secao-grafico">
@@ -225,7 +232,7 @@ function renderizarCards(listaDeVagas) {
         }
 
         // Resolução Parcial Dinâmica dos Metadados das Fontes Normalizadas
-        let linkFonteHTML = `Fonte: ${vaga.fonte}`;
+        let linkFonteHTML = `Fonte: ${vaga.fonte || 'Não Especificada'}`;
         if (vaga.meta_fonte) {
             linkFonteHTML = `
                 <a href="${vaga.meta_fonte.url_oficial}" target="_blank" 
