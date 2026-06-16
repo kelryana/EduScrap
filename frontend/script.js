@@ -30,7 +30,7 @@ async function carregarDados(tipo) {
     }
 }
 
-// 1. NOVA FUNÇÃO: Pesquisa Textual via MongoDB
+// 1. Pesquisa Textual via Índices Otimizados do MongoDB
 async function realizarPesquisa() {
     const termo = document.getElementById('input-busca').value;
     if (!termo) return;
@@ -42,31 +42,29 @@ async function realizarPesquisa() {
         const resposta = await fetch(`${API_URL}/pesquisar?termo=${termo}`);
         const dados = await resposta.json();
         renderizarCards(dados);
+        
+        // Remove o estado ativo de todos os botões, já que estamos numa busca livre
+        document.querySelectorAll('.controles button').forEach(b => b.classList.remove('ativo'));
     } catch (e) {
         container.innerHTML = '<p class="carregando" style="color: red;">Erro na pesquisa.</p>';
     }
 }
 
-// 2. NOVA FUNÇÃO: Painel Analítico (Gráficos)
 // 2. RECURSO ANALÍTICO VISUAL: Dashboard Acadêmico com Barras de Gráfico CSS
 async function carregarEstatisticas() {
     const container = document.getElementById('container-vagas');
-    // Reinicia o layout para bloco único de dashboard, removendo o grid de cards
     container.style.display = 'block'; 
     container.innerHTML = '<p class="carregando">Gerando painel visual...</p>';
 
-    // Atualiza o estado visual das abas
     document.querySelectorAll('.controles button').forEach(botao => {
         botao.classList.remove('ativo');
     });
     document.getElementById('btn-analises').classList.add('ativo');
 
     try {
-        // Busca as agregações do MongoDB no backend
         const resposta = await fetch(`${API_URL}/estatisticas`);
         const dados = await resposta.json();
 
-        // 1. Constrói o HTML do Dashboard Visual
         let html = `
             <div class="dashboard-container">
                 <div class="dashboard-header">
@@ -114,19 +112,16 @@ async function carregarEstatisticas() {
         if (dados.prae_categorias.length === 0) {
             html += `<p style="text-align: center; color: gray; font-style: italic; padding: 2rem;">Não existem dados analíticos disponíveis.</p>`;
         } else {
-            // Calcula o maior valor para definir a escala 100% das barras
             const maxVal = Math.max(...dados.prae_categorias.map(i => i.total));
 
-            // Mapeia os dados do MongoDB para barras visuais
             dados.prae_categorias.forEach(item => {
-                // Define o percentual da barra baseado no maior valor
                 const percentual = maxVal > 0 ? (item.total / maxVal) * 100 : 0;
                 
                 html += `
                     <div class="grafico-item-barra">
                         <div class="barra-legenda">
                             <span class="legenda-nome">${item.categoria}</span>
-                            <span class="legenda-valor">${item.total} edital(is)</span>
+                            <span class="legenda-valor">${item.total} editais</span>
                         </div>
                         <div class="barra-estrutura">
                             <div class="barra-preenchimento" style="width: ${percentual}%;"></div>
@@ -142,7 +137,6 @@ async function carregarEstatisticas() {
             </div>
         `;
         
-        // Injeta o HTML final no container
         container.innerHTML = html;
         
     } catch (erro) {
@@ -151,32 +145,81 @@ async function carregarEstatisticas() {
     }
 }
 
-// 3. NOVA FUNÇÃO: MongoDB Inspector
+// 3. NOVA VERSÃO ATUALIZADA: MongoDB Inspector (Metadados Físicos & Auditoria)
 async function carregarInspector() {
     const container = document.getElementById('container-vagas');
     container.style.display = 'block';
-    container.innerHTML = '<p class="carregando">Lendo metadados físicos...</p>';
+    container.innerHTML = '<p class="carregando">Lendo metadados físicos e regras do JSON Schema...</p>';
 
+    // Remove a classe ativa das abas principais do discente
     document.querySelectorAll('.controles button').forEach(b => b.classList.remove('ativo'));
-    document.getElementById('btn-inspector').classList.add('ativo');
 
-    const res = await fetch(`${API_URL}/db-status`);
-    const info = await res.json();
+    try {
+        const res = await fetch(`${API_URL}/db-status`);
+        const info = await res.json();
 
-    container.innerHTML = `
-        <div class="card" style="grid-column: 1/-1;">
-            <h3>🛡️ MongoDB Inspector</h3>
-            <pre>${JSON.stringify(info, null, 2)}</pre>
-        </div>
-    `;
+        let html = `
+            <div style="background: white; border: 3px solid var(--azul-escuro); border-radius: 12px; padding: 2.5rem; box-shadow: 6px 6px 0px var(--azul-claro); margin-bottom: 2rem; animation: surgimento 0.4s ease-out;">
+                <h2 style="color: var(--azul-escuro); margin-bottom: 0.5rem; border-bottom: 4px solid var(--azul-escuro); padding-bottom: 8px; font-weight: 800;">
+                    🛡️ MongoDB Physical Inspector
+                </h2>
+                <p style="color: #555; margin-bottom: 2rem; font-size: 0.95rem;">
+                    Monitoramento em tempo real de armazenamento, índices invertidos em disco e integridade NoSQL.
+                </p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+        `;
+
+        // Vasculha as coleções devolvidas pela API e monta caixas estruturadas
+        info.colecoes.forEach(col => {
+            const indexBadges = col.indices.map(idx => `<span class="badge-index">${idx}</span>`).join(' ');
+            
+            // Cria uma tag verde destacada caso o validador nativo esteja de pé
+            const validadorStatus = col.has_validator 
+                ? `<span style="background: #E8F5E9; color: #1B5E20; font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; border: 2px solid var(--azul-escuro); font-weight: bold; margin-left: auto; box-shadow: 2px 2px 0px var(--azul-escuro);">VALIDADOR ATIVO</span>` 
+                : "";
+
+            html += `
+                <div class="db-inspector-card">
+                    <div style="display: flex; align-items: center; margin-bottom: 12px; border-bottom: 2px solid var(--azul-escuro); padding-bottom: 6px;">
+                        <h3 style="color: var(--azul-escuro); font-size: 1.05rem; font-weight: bold;">📁 col: ${col.colecao}</h3>
+                        ${validadorStatus}
+                    </div>
+                    <p style="font-size: 0.9rem; margin-bottom: 6px; color: #333;">Documentos Ativos: <strong>${col.documentos}</strong></p>
+                    <p style="font-size: 0.9rem; margin-bottom: 12px; color: #333;">Alocação Física: <strong>${col.tamanho_kb} KB</strong></p>
+                    
+                    <div style="border-top: 1.5px dashed var(--azul-escuro); padding-top: 8px; margin-top: 10px;">
+                        <p style="font-size: 0.75rem; font-weight: 800; color: var(--azul-escuro); margin-bottom: 6px; letter-spacing: 0.5px;">ESTRUTURAS DE ÍNDICE:</p>
+                        <div style="display: flex; flex-wrap: wrap; gap: 4px;">${indexBadges}</div>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `
+                </div>
+                <div style="margin-top: 30px; padding: 15px; border: 2px dashed var(--azul-escuro); border-radius: 8px; background: #FFFDE7; text-align: left;">
+                    <p style="color: var(--azul-escuro); font-weight: bold; font-size: 0.95rem; margin-bottom: 4px;">💡 Insight para a Apresentação Técnica:</p>
+                    <p style="font-size: 0.85rem; color: #333; line-height: 1.4;">A coleção <b>historico_varreduras</b> funciona de forma assíncrona gravando metadados de governança a cada varredura dos robôs, persistindo o tempo de resposta do script externo e logs estruturados em caso de falha operaria.</p>
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = html;
+    } catch (erro) {
+        console.error("Erro ao inspecionar banco:", erro);
+        container.innerHTML = '<p class="carregando" style="color: red;">Não foi possível ler os metadados físicos do MongoDB.</p>';
+    }
 }
+
+// --- RENDERIZAÇÃO ---
 
 function renderizarCards(listaDeVagas) {
     const container = document.getElementById('container-vagas');
     container.innerHTML = ''; 
 
     if (listaDeVagas.length === 0) {
-        container.innerHTML = '<p class="carregando">Nenhuma oportunidade encontrada.</p>';
+        container.innerHTML = '<p class="carregando">Nenhuma oportunidade encontrada no banco.</p>';
         return;
     }
 
@@ -196,7 +239,7 @@ function renderizarCards(listaDeVagas) {
     });
 }
 
-// Função que aciona o Botão Vermelho
+// Função que aciona o Botão Vermelho (Raspagem Global + Geração de Logs)
 async function acionarTodosOsRobos() {
     const container = document.getElementById('container-vagas');
     const btn = document.getElementById('btn-buscar-tudo');
@@ -204,7 +247,12 @@ async function acionarTodosOsRobos() {
     btn.innerText = "⏳ Raspando...";
     btn.disabled = true;
     
-    container.innerHTML = '<div style="text-align: center; padding: 40px;"><h2>Protocolo Iniciado...</h2></div>';
+    container.innerHTML = `
+        <div style="text-align: center; padding: 40px;">
+            <h2 style="color: #DC143C; margin-bottom: 15px; font-size: 1.8rem;">Iniciando Protocolo de Varredura...</h2>
+            <p style="font-size: 1.1rem; color: var(--azul-escuro);">Os scrapers assíncronos foram disparados. Limpando instâncias antigas e populando coleções...</p>
+        </div>
+    `;
     
     try {
         await fetch(`${API_URL}/buscar-tudo`);
@@ -212,7 +260,7 @@ async function acionarTodosOsRobos() {
         btn.disabled = false;
         carregarDados('estagios');
     } catch (erro) {
-        container.innerHTML = '<p class="carregando" style="color: red;">Erro ao rodar robôs.</p>';
+        container.innerHTML = '<p class="carregando" style="color: red;">Erro crítico na execução dos robôs externos.</p>';
         btn.innerText = "Erro!";
         btn.disabled = false;
     }

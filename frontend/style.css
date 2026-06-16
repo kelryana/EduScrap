@@ -1,5 +1,9 @@
-/* Paleta de Cores Otimizada */
+/* ====================================================================
+   ESTILO ATUALIZADO: RETORNO AO DESIGN ORIGINAL REFINADO
+   ==================================================================== */
+
 :root {
+    /* Resgatando a sua paleta forte e contrastante */
     --azul-escuro: #09184D;
     --azul-claro: #79D3E6;
     --laranja: #F27A18;
@@ -27,7 +31,7 @@ body {
     min-height: 100vh;
 }
 
-/* Header Premium */
+/* Header Premium Original (Voltou a ser azul escuro marcante) */
 header {
     background-color: var(--azul-escuro);
     color: var(--branco);
@@ -54,7 +58,7 @@ header p {
     font-weight: 500;
 }
 
-/* Estilização da Nova Barra de Busca */
+/* Barra de Busca (Mantendo o estilo caixa robusta, mas com encaixe melhor) */
 .busca-container {
     display: flex;
     max-width: 600px;
@@ -85,7 +89,7 @@ header p {
     cursor: pointer;
     font-weight: bold;
     box-shadow: 2px 2px 0px var(--azul-escuro);
-    position: static !important; /* Anula o absoluto do botão de buscar tudo */
+    position: static !important;
 }
 
 .busca-container button:hover {
@@ -111,7 +115,7 @@ main {
     flex-wrap: wrap;
 }
 
-/* Estilo dos Botões - Efeito Cartoon Moderno (Neo-Brutalismo) */
+/* Seus Botões Marcantes Originais com a Sombra Sólida Estilosa */
 .controles button {
     background-color: var(--branco);
     color: var(--azul-escuro);
@@ -147,7 +151,7 @@ main {
     transition: all 0.3s;
 }
 
-/* Design Lindo para os Cards */
+/* Seus Cards Originais com Contorno Forte e Sombra Azul Claro */
 .card {
     background-color: var(--branco);
     border: 3px solid var(--azul-escuro);
@@ -196,6 +200,11 @@ main {
     margin-bottom: 15px;
     line-height: 1.4;
     color: var(--azul-escuro);
+    /* Mantém o texto alinhado sem quebrar o tamanho das caixas */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .card-fonte {
@@ -308,31 +317,29 @@ main {
 }
 
 /* ====================================================================
-   MÓDULO DE DESIGN PREMIUM: DASHBOARD VISUAL ACADÊMICO (BANCO DE DADOS II)
+   DASHBOARD REFINADO (Mantendo a identidade visual forte e robusta)
    ==================================================================== */
 
-/* Container Principal do Painel */
 .dashboard-container {
     background: #ffffff;
-    border: 1px solid #e2e8f0;
+    border: 3px solid var(--azul-escuro);
     border-radius: 16px;
     padding: 2.5rem;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.02);
+    box-shadow: 6px 6px 0px var(--azul-claro);
     margin: 0 auto;
     max-width: 900px;
-    animation: surgimento 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: surgimento 0.4s ease-out;
 }
 
-/* Alinhamento e Tipografia do Título do Painel */
 .dashboard-header {
     margin-bottom: 2.5rem;
     padding-bottom: 1.5rem;
-    border-bottom: 1px solid #edf2f7;
+    border-bottom: 3px dashed var(--azul-escuro);
 }
 
 .dashboard-titulo {
     font-size: 1.8rem;
-    font-weight: 700;
+    font-weight: 800;
     color: var(--azul-escuro);
     display: flex;
     align-items: center;
@@ -341,21 +348,19 @@ main {
 
 .dashboard-titulo span {
     font-size: 0.8rem;
-    background: #edf2f7;
-    color: #4a5568;
+    background: var(--azul-escuro);
+    color: white;
     padding: 4px 10px;
-    border-radius: 20px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
+    border-radius: 6px;
+    font-weight: bold;
 }
 
 .dashboard-subtitulo {
     font-size: 0.95rem;
-    color: #718096;
+    color: #555;
     margin-top: 6px;
 }
 
-/* Grid dos Cards de Indicadores Rápidos (KPIs) */
 .dash-grid-contadores {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -363,124 +368,61 @@ main {
     margin-bottom: 3rem;
 }
 
-/* Card de Métrica Individual */
 .dash-card-contador {
     background: #ffffff;
-    border: 1px solid #e2e8f0;
+    border: 3px solid var(--azul-escuro);
     border-radius: 12px;
     padding: 1.25rem;
     display: flex;
     align-items: center;
     gap: 1rem;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s ease;
 }
 
 .dash-card-contador:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
 }
 
-/* Bordas Sutilmente Coloridas para Identificação Visual Rápida */
-.contador-prae { border-left: 4px solid var(--laranja); }
-.contador-proex { border-left: 4px solid var(--azul-claro); }
-.contador-ufersa { border-left: 4px solid var(--purpura); }
-.contador-noticias { border-left: 4px solid var(--verde-forte); }
+/* Cards com as suas sombras sólidas originais */
+.contador-prae { box-shadow: 4px 4px 0 var(--laranja); }
+.contador-proex { box-shadow: 4px 4px 0 var(--azul-claro); }
+.contador-ufersa { box-shadow: 4px 4px 0 var(--purpura); }
+.contador-noticias { box-shadow: 4px 4px 0 var(--verde-forte); }
 
-.contador-icone {
-    font-size: 1.8rem;
-    line-height: 1;
-}
+.contador-icone { font-size: 1.8rem; line-height: 1; }
+.contador-info { display: flex; flex-direction: column; }
+.contador-label { font-size: 0.75rem; color: #555; text-transform: uppercase; font-weight: bold; }
+.contador-numero { font-size: 2rem; font-weight: 800; color: var(--azul-escuro); }
 
-.contador-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.contador-label {
-    font-size: 0.75rem;
-    color: #718096;
-    text-transform: uppercase;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-}
-
-.contador-numero {
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--azul-escuro);
-    line-height: 1.1;
-    margin-top: 2px;
-}
-
-/* Painel de Distribuição por Categorias (Simulando o Gráfico de Barras) */
 .dash-secao-grafico {
     background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    border: 3px solid var(--azul-escuro);
     border-radius: 12px;
     padding: 2rem;
 }
 
-.grafico-titulo {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--azul-escuro);
-}
+.grafico-titulo { font-size: 1.1rem; font-weight: 700; color: var(--azul-escuro); }
+.grafico-metadado { font-size: 0.75rem; color: var(--purpura); font-family: monospace; font-weight: bold; margin-bottom: 2rem; display: block; }
+.grafico-barras-container { display: flex; flex-direction: column; gap: 1.5rem; }
+.grafico-item-barra { display: flex; flex-direction: column; }
+.barra-legenda { display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 700; color: var(--azul-escuro); margin-bottom: 6px; }
+.legenda-valor { color: var(--branco); font-weight: bold; background: var(--azul-escuro); padding: 2px 8px; border-radius: 6px; font-size: 0.8rem; }
 
-.grafico-metadado {
-    font-size: 0.75rem;
-    color: var(--purpura);
-    font-family: 'Courier New', Courier, monospace;
-    font-weight: bold;
-    margin-top: 2px;
-    margin-bottom: 2rem;
-    display: block;
-}
-
-/* Distribuidor Linear das Barras */
-.grafico-barras-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.grafico-item-barra {
-    display: flex;
-    flex-direction: column;
-}
-
-/* Legendas do Topo de Cada Barra */
-.barra-legenda {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #4a5568;
-    margin-bottom: 6px;
-}
-
-.legenda-valor {
-    color: var(--azul-escuro);
-    font-weight: 700;
-    background: #e2e8f0;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 0.8rem;
-}
-
-/* Trilho de Fundo da Barra de Progresso */
+/* Trilho com contorno robusto */
 .barra-estrutura {
     background-color: #edf2f7;
-    height: 10px;
-    border-radius: 20px;
+    height: 14px;
+    border-radius: 6px;
     overflow: hidden;
     width: 100%;
+    border: 2px solid var(--azul-escuro);
 }
 
-/* Animação e Preenchimento Real da Barra do Gráfico */
+/* Gráfico Laranja Vibrante Marcante */
 .barra-preenchimento {
-    background: linear-gradient(90deg, var(--azul-escuro) 0%, #1a365d 100%);
+    background: var(--laranja);
     height: 100%;
-    border-radius: 20px;
-    width: 0%; /* O JavaScript altera este valor dinamicamente via inline style */
-    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); /* Efeito suave de carregamento */
+    border-radius: 6px;
+    width: 0%;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
