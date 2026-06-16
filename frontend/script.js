@@ -101,7 +101,6 @@ async function realizarPesquisa() {
     }
 }
 
-// 2. RECURSO ANALÍTICO VISUAL: Dashboard Acadêmico com Barras de Gráfico CSS
 async function carregarEstatisticas() {
     const antigo = document.getElementById('bloco-paginacao');
     if(antigo) antigo.remove();
@@ -122,8 +121,8 @@ async function carregarEstatisticas() {
         let html = `
             <div class="dashboard-container">
                 <div class="dashboard-header">
-                    <h2 class="dashboard-titulo">Dashboard Acadêmico <span>(Live)</span></h2>
-                    <p class="dashboard-subtitulo">Visão consolidada da volumetria e distribuição de oportunidades.</p>
+                    <h2 class="dashboard-titulo">Indicadores Globais <span>(Tempo Real)</span></h2>
+                    <p class="dashboard-subtitulo">Distribuição analítica volumétrica de oportunidades coletadas por agentes automatizados.</p>
                 </div>
 
                 <div class="dash-grid-contadores">
@@ -158,8 +157,8 @@ async function carregarEstatisticas() {
                 </div>
 
                 <div class="dash-secao-grafico">
-                    <h3 class="grafico-titulo">📂 Distribuição Física por Categoria (PRAE Estágios)</h3>
-                    <p class="grafico-metadado">Pipeline: MongoDB Aggregation <b>$group</b> + <b>$sort</b></p>
+                    <h3 class="grafico-titulo">📂 Distribuição de Editais de Vagas por Setor</h3>
+                    <span class="grafico-metadado">Métrica baseada na agregação de categorias transacionais ativas</span>
                     
                     <div class="grafico-barras-container">
         `;
@@ -176,7 +175,7 @@ async function carregarEstatisticas() {
                     <div class="grafico-item-barra">
                         <div class="barra-legenda">
                             <span class="legenda-nome">${item.categoria}</span>
-                            <span class="legenda-valor">${item.total} edital(is)</span>
+                            <span class="legenda-valor">${item.total} editais</span>
                         </div>
                         <div class="barra-estrutura">
                             <div class="barra-preenchimento" style="width: ${percentual}%;"></div>
@@ -200,77 +199,9 @@ async function carregarEstatisticas() {
     }
 }
 
-// 3. MongoDB Inspector COMPLETO E CORRIGIDO PARA JAVASCRIPT
-async function carregarInspector() {
-    const antigo = document.getElementById('bloco-paginacao');
-    if(antigo) antigo.remove();
-
-    const container = document.getElementById('container-vagas');
-    container.style.display = 'block';
-    container.innerHTML = '<p class="carregando">Lendo metadados físicos e regras do JSON Schema...</p>';
-
-    document.querySelectorAll('.controles button').forEach(b => b.classList.remove('ativo'));
-
-    try {
-        const res = await fetch(`${API_URL}/db-status`);
-        const info = await res.json();
-
-        let html = `
-            <div style="background: white; border: 3px solid var(--azul-escuro); border-radius: 12px; padding: 2.5rem; box-shadow: 6px 6px 0px var(--azul-claro); margin-bottom: 2rem; animation: surgimento 0.4s ease-out;">
-                <h2 style="color: var(--azul-escuro); margin-bottom: 0.5rem; border-bottom: 4px solid var(--azul-escuro); padding-bottom: 8px; font-weight: 800;">
-                    🛡️ MongoDB Physical Inspector
-                </h2>
-                <p style="color: #555; margin-bottom: 2rem; font-size: 0.95rem;">
-                    Monitoramento em tempo real de armazenamento, índices invertidos em disco e integridade NoSQL.
-                </p>
-
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-        `;
-
-        // CORREÇÃO EFETIVA: Usando sintaxe nativa JS para varrer o array do objeto info
-        if (info && info.colecoes) {
-            info.colecoes.forEach(col => {
-                const indexBadges = col.indices.map(idx => `<span class="badge-index">${idx}</span>`).join(' ');
-                const validadorStatus = col.has_validator 
-                    ? `<span style="background: #E8F5E9; color: #1B5E20; font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; border: 2px solid var(--azul-escuro); font-weight: bold; margin-left: auto; box-shadow: 2px 2px 0px var(--azul-escuro);">VALIDADOR ATIVO</span>` 
-                    : "";
-
-                html += `
-                    <div class="db-inspector-card">
-                        <div style="display: flex; align-items: center; margin-bottom: 12px; border-bottom: 2px solid var(--azul-escuro); padding-bottom: 6px;">
-                            <h3 style="color: var(--azul-escuro); font-size: 1.05rem; font-weight: bold;">📁 col: ${col.colecao}</h3>
-                            ${validadorStatus}
-                        </div>
-                        <p style="font-size: 0.9rem; margin-bottom: 6px; color: #333;">Documentos Ativos: <strong>${col.documentos}</strong></p>
-                        <p style="font-size: 0.9rem; margin-bottom: 12px; color: #333;">Alocação Física: <strong>${col.tamanho_kb} KB</strong></p>
-                        
-                        <div style="border-top: 1.5px dashed var(--azul-escuro); padding-top: 8px; margin-top: 10px;">
-                            <p style="font-size: 0.75rem; font-weight: 800; color: var(--azul-escuro); margin-bottom: 6px; letter-spacing: 0.5px;">ESTRUTURAS DE ÍNDICE:</p>
-                            <div style="display: flex; flex-wrap: wrap; gap: 4px;">${indexBadges}</div>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        html += `
-                </div>
-                <div style="margin-top: 30px; padding: 15px; border: 2px dashed var(--azul-escuro); border-radius: 8px; background: #FFFDE7; text-align: left;">
-                    <p style="color: var(--azul-escuro); font-weight: bold; font-size: 0.95rem; margin-bottom: 4px;">💡 Insight para a Apresentação Técnica:</p>
-                    <p style="font-size: 0.85rem; color: #333; line-height: 1.4;">A coleção <b>historico_varreduras</b> funciona de forma assíncrona gravando metadados de governança a cada varredura dos robôs, persistindo o tempo de resposta do script externo e logs estruturados em caso de falha operaria.</p>
-                </div>
-            </div>
-        `;
-        
-        container.innerHTML = html;
-    } catch (erro) {
-        console.error("Erro ao inspecionar banco:", erro);
-        container.innerHTML = '<p class="carregando" style="color: red;">Não foi possível ler os metadados físicos do MongoDB.</p>';
-    }
-}
-
-// --- RENDERIZAÇÃO ---
-
+// ====================================================================
+// MODIFICAÇÃO 2: RENDERS COM BADGES DE ALERTA E HIGIENIZAÇÃO DE FONTES
+// ====================================================================
 function renderizarCards(listaDeVagas) {
     const container = document.getElementById('container-vagas');
     container.innerHTML = ''; 
@@ -282,18 +213,110 @@ function renderizarCards(listaDeVagas) {
 
     listaDeVagas.forEach(vaga => {
         const temaVerde = vaga.categoria === "Notícia Tech" ? "card-verde" : "";
+        
+        // Inserção da Badge Dinâmica Interativa se houver prazo detectado por Regex no banco
+        let badgeDataHTML = "";
+        if (vaga.data_vencimento_formatada) {
+            badgeDataHTML = `
+                <div style="background: #FFF5F5; color: #DC143C; border: 2px solid var(--azul-escuro); padding: 4px 8px; font-size: 0.75rem; font-weight: 800; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 10px; box-shadow: 2px 2px 0 var(--azul-escuro);">
+                    🔥 Inscrições até ${vaga.data_vencimento_formatada}
+                </div>
+            `;
+        }
+
+        // Resolução Parcial Dinâmica dos Metadados das Fontes Normalizadas
+        let linkFonteHTML = `Fonte: ${vaga.fonte}`;
+        if (vaga.meta_fonte) {
+            linkFonteHTML = `
+                <a href="${vaga.meta_fonte.url_oficial}" target="_blank" 
+                   title="Portal Mestre: ${vaga.meta_fonte.nome_oficial} &#10;Ciclo do Robô: ${vaga.meta_fonte.frequencia}"
+                   style="color: var(--azul-escuro); text-decoration: underline; font-weight: bold; cursor: pointer;">
+                    📍 ${vaga.meta_fonte.nome_oficial.split(" - ")[0]} ℹ️
+                </a>
+            `;
+        }
+
         const cardHTML = `
             <div class="card ${temaVerde}">
                 <div>
-                    <span class="card-categoria">${vaga.categoria || 'Geral'}</span>
+                    <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                        <span class="card-categoria">${vaga.categoria || 'Geral'}</span>
+                        ${badgeDataHTML}
+                    </div>
                     <h3 class="card-titulo">${vaga.nome}</h3>
-                    <p class="card-fonte">Fonte: ${vaga.fonte}</p>
+                    <p class="card-fonte" style="margin-bottom: 15px;">${linkFonteHTML}</p>
                 </div>
-                <a href="${vaga.link}" target="_blank" class="card-link">Acessar</a>
+                <a href="${vaga.link}" target="_blank" class="card-link">Acessar Edital</a>
             </div>
         `;
         container.innerHTML += cardHTML;
     });
+}
+
+// ====================================================================
+// MODIFICAÇÃO 3: MONITORES DE SUPORTE OPERACIONAL (STATUS DA INFRAESTRUTURA)
+// ====================================================================
+async function carregarInspector() {
+    const antigo = document.getElementById('bloco-paginacao');
+    if(antigo) antigo.remove();
+
+    const container = document.getElementById('container-vagas');
+    container.style.display = 'block';
+    container.innerHTML = '<p class="carregando">Lendo integridade dos nós e volumes de armazenamento...</p>';
+
+    document.querySelectorAll('.controles button').forEach(b => b.classList.remove('ativo'));
+
+    try {
+        const res = await fetch(`${API_URL}/db-status`);
+        const info = await res.json();
+
+        let html = `
+            <div style="background: white; border: 3px solid var(--azul-escuro); border-radius: 12px; padding: 2.5rem; box-shadow: 6px 6px 0px var(--azul-claro); margin-bottom: 2rem; animation: surgimento 0.4s ease-out;">
+                <h2 style="color: var(--azul-escuro); margin-bottom: 0.5rem; border-bottom: 4px solid var(--azul-escuro); padding-bottom: 8px; font-weight: 800;">
+                    🖥️ Status da Infraestrutura e Governança NoSQL
+                </h2>
+                <p style="color: #555; margin-bottom: 2rem; font-size: 0.95rem;">
+                    Relatório transparente volumétrico do cluster NoSQL e integridade estrutural das coleções.
+                </p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+        `;
+
+        if (info && info.colecoes) {
+            info.colecoes.forEach(col => {
+                const indexBadges = col.indices.map(idx => `<span class="badge-index">${idx}</span>`).join(' ');
+                const validadorStatus = col.has_validator 
+                    ? `<span style="background: #E8F5E9; color: #1B5E20; font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; border: 2px solid var(--azul-escuro); font-weight: bold; margin-left: auto; box-shadow: 2px 2px 0px var(--azul-escuro);">VALIDADOR ATIVO</span>` 
+                    : "";
+
+                html += `
+                    <div class="db-inspector-card">
+                        <div style="display: flex; align-items: center; margin-bottom: 12px; border-bottom: 2px solid var(--azul-escuro); padding-bottom: 6px;">
+                            <h3 style="color: var(--azul-escuro); font-size: 1.05rem; font-weight: bold;">📁 Coleção: ${col.colecao}</h3>
+                            ${validadorStatus}
+                        </div>
+                        <p style="font-size: 0.9rem; margin-bottom: 6px; color: #333;">Documentos Ativos: <strong>${col.documentos}</strong></p>
+                        <p style="font-size: 0.9rem; margin-bottom: 12px; color: #333;">Alocação Física: <strong>${col.tamanho_kb} KB</strong></p>
+                        
+                        <div style="border-top: 1.5px dashed var(--azul-escuro); padding-top: 8px; margin-top: 10px;">
+                            <p style="font-size: 0.75rem; font-weight: 800; color: var(--azul-escuro); margin-bottom: 6px; letter-spacing: 0.5px;">ESTRUTURAS DE ÍNDICES:</p>
+                            <div style="display: flex; flex-wrap: wrap; gap: 4px;">${indexBadges}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        html += `
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = html;
+    } catch (erro) {
+        console.error("Erro ao inspecionar banco:", erro);
+        container.innerHTML = '<p class="carregando" style="color: red;">Não foi possível ler os metadados de infraestrutura.</p>';
+    }
 }
 
 // Função que aciona o Botão Vermelho (Raspagem Global + Geração de Logs)
