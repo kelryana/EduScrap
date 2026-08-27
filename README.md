@@ -1,4 +1,4 @@
-# TechHub UERN 🎓
+# EduScrap 🎓
 <img width="2412" height="1110" alt="image" src="https://github.com/user-attachments/assets/ed2eed09-927e-42d5-8561-65c9a025b704" />
 
 O **TechHub UERN** é um agregador automático de oportunidades acadêmicas, desenvolvido como projeto para a disciplina de Banco de Dados II. 
