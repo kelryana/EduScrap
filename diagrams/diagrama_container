@@ -1,0 +1,71 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam packageStyle rectangle
+
+' Ajustes de cores globais
+skinparam rectangle {
+    BackgroundColor<<system>> #F2F2F2
+    BorderColor<<system>> #666666
+    
+    BackgroundColor<<external>> #808080
+    FontColor<<external>> #FFFFFF
+    
+    BackgroundColor<<scraper>> #333333
+    FontColor<<scraper>> #FFFFFF
+    
+    BackgroundColor<<proc>> #6B1D9C
+    FontColor<<proc>> #FFFFFF
+    
+    BackgroundColor<<api>> #EAB308
+    FontColor<<api>> #000000
+    
+    BackgroundColor<<person>> #0B4C8C
+    FontColor<<person>> #FFFFFF
+}
+
+skinparam database {
+    BackgroundColor #DCFCE7
+    BorderColor #22C55E
+    FontColor #000000
+}
+
+title EduScrap - Arquitetura de Containers
+
+' Atores externos
+rectangle "«person»\n\n<b>Administrador</b>\n\nGerencia fontes e regras" as admin <<person>>
+rectangle "«person»\n\n<b>Estudante</b>\n\nConsulta vagas e editais" as estudante <<person>>
+
+' Sistemas Externos
+rectangle "«external_system»\n<b>Portais UERN/UFERSA</b>\n\nSites institucionais" as portais <<external>>
+rectangle "«external_system»\n<b>JOUERN</b>\n\nDiário Oficial (PDFs)" as jouern <<external>>
+rectangle "«external_system»\n<b>CIEE & Outros</b>\n\nAPIs de estágio" as ciee <<external>>
+
+' Fronteira EduScrap
+rectangle "<b>Plataforma EduScrap</b>\n<font size=10>[system]</font>" <<system>> {
+    rectangle "«scraper»\n«container»\n<b>Engine de Coleta</b>\n<i>[Python + Selenium]</i>\n\nScraping de portais" as engine <<scraper>>
+    rectangle "«proc»\n«container»\n<b>Normalizador</b>\n<i>[Python]</i>\n\nLimpeza e deduplicação" as normalizador <<proc>>
+    rectangle "«proc»\n«container»\n<b>Serviço de Alertas</b>\n<i>[Python/SMTP]</i>\n\nNotificações por email" as alertas <<proc>>
+    rectangle "«api»\n«container»\n<b>API REST</b>\n<i>[Flask/FastAPI]</i>\n\nInterface e orquestração" as api <<api>>
+    
+    database "«db»\n«container»\n<b>MongoDB</b>\n<i>[NoSQL]</i>\n\nVagas, editais e usuários" as mongodb
+    database "«db»\n«container»\n<b>Redis Cache</b>\n<i>[In-Memory]</i>\n\nSessões e respostas rápidas" as redis
+}
+
+' Relacionamentos e Conexões
+engine --> portais : Web scraping\n<i>[HTTP/HTML]</i>
+engine --> jouern : Download\n<i>[HTTP/PDF]</i>
+engine --> ciee : Integração\n<i>[REST/JSON]</i>
+
+engine --> normalizador : Raw data\n<i>[Message Queue]</i>
+normalizador --> alertas : Novas vagas\n<i>[Event]</i>
+normalizador --> mongodb : Persistência\n<i>[Insert/Update]</i>
+
+api --> mongodb : CRUD\n<i>[MongoDB]</i>
+api --> redis : Cache\n<i>[Redis]</i>
+
+admin --> api : Configura\n<i>[HTTPS]</i>
+estudante --> api : Busca/filtra\n<i>[HTTPS]</i>
+alertas --> estudante : Alertas\n<i>[SMTP]</i>
+
+@enduml

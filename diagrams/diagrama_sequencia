@@ -1,0 +1,47 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+title Sequência: Coleta Assíncrona e Consulta do Usuário
+
+participant "Agendador\n(Cron)" as Cron
+participant "Engine de\nColeta" as Scraper
+participant "Normalizador" as Norm
+participant "MongoDB" as DB
+participant "Estudante" as Stud
+participant "API\nREST" as API
+
+== Fase 1: Coleta em Segundo Plano (Assíncrono) ==
+
+Cron -> Scraper: Dispara Job 
+Cron -->> Scraper: Job Enfileirado
+
+Scraper -> Scraper: Baixa HTML/PDF dos Portais
+Scraper -> Norm: Envia Dados Brutos (Texto)
+
+note right of Scraper
+  "Fire and Forget"
+  O Scraper não espera
+  processamento terminar.
+end note
+
+Scraper -->> Scraper: Pronto para próxima tarefa
+
+Norm -> Norm: Aplica Regex e Valida Datas\n(isola Vagas "Vigentes")
+Norm -> DB: Persiste Documentos Normalizados
+DB -->> Norm: Ack (Confirmação de Escrita)
+
+== Fase 2: Consulta do Usuário (Tempo Real) ==
+
+Stud -> API: Seleciona Curso "Informática"
+API -> DB: Query Filtrada (Curso + Status="Aberto")
+DB -->> API: Retorna Lista JSON (Dados Normalizados)
+API -->> Stud: Exibe Feed Instantâneo (< 2s)
+
+note right of API
+  O usuário NÃO espera o scraping.
+  Os dados já estão prontos no BD.
+end note
+
+@enduml
