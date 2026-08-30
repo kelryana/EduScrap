@@ -1,0 +1,38 @@
+@startuml eduscrap_componentes_normalizador
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title <b>Detalhamento Interno: Normalizador de Dados</b>
+
+' Estilo visual limpo
+skinparam backgroundColor #FFFFFF
+skinparam DefaultFontName "Arial"
+skinparam Shadowing false
+skinparam RoundCorner 5
+
+' Definição dos componentes internos do Normalizador
+Component(pdf_reader, "Leitor de PDF", "pdfplumber", "Extrai texto bruto de Diários Oficiais")
+Component(regex_engine, "Motor Regex", "re (Python)", "Padrões para datas, títulos e valores")
+Component(nlp_module, "Módulo NLP", "spaCy (Opcional)", "Classificação semântica se Regex falhar")
+Component(validator, "Validador de Regras", "Python", "Verifica vigência e duplicatas")
+Component(json_builder, "Construtor JSON", "Python", "Padroniza saída para MongoDB")
+
+' Banco de dados de apoio (padrões)
+ComponentDb(regex_db, "Base de Padrões", "JSON/YAML", "Expressões regulares salvas por fonte")
+
+' Relações internas
+Rel(pdf_reader, regex_engine, "Texto Bruto", "")
+Rel(regex_engine, regex_db, "Consulta Padrões", "")
+Rel(regex_engine, validator, "Dados Extraídos", "")
+Rel(regex_engine, nlp_module, "Fallback", "Se confiança baixa")
+Rel(nlp_module, validator, "Dados Enriquecidos", "")
+Rel(validator, json_builder, "Dados Validados", "")
+
+' Nota explicativa sobre a lógica de negócio
+Note right of validator
+  <b>Regra de Vigência:</b>
+  Compara Data Extraída vs Data Atual.
+  Se Data < Hoje → Status: "Encerrado"
+  Senão → Status: "Aberto"
+End Note
+
+@enduml
