@@ -1,0 +1,50 @@
+
+{
+  "areas": {
+    "Tecnologia": [
+      "Ciência da Computação",
+      "Sistemas de Informação",
+      "Engenharia de Software",
+      "Ciência de Dados",
+      "Tecnologia da Informação"
+    ],
+    "Saúde": [
+      "Enfermagem",
+      "Medicina",
+      "Farmácia",
+      "Fisioterapia",
+      "Nutrição",
+      "Psicologia"
+    ],
+    "Humanas": [
+      "História",
+      "Geografia",
+      "Filosofia",
+      "Sociologia",
+      "Pedagogia",
+      "Letras"
+    ],
+    "Exatas": [
+      "Matemática",
+      "Física",
+      "Química",
+      "Estatística"
+    ],
+    "Direito": [
+      "Direito"
+    ],
+    "Comunicação": [
+      "Jornalismo",
+      "Publicidade e Propaganda",
+      "Rádio e TV"
+    ]
+  },
+  "keywords": {
+    "Tecnologia": ["computação", "software", "tecnologia", "dados", "programação", "TI"],
+    "Saúde": ["saúde", "enfermagem", "medicina", "hospital", "clínica", "paciente"],
+    "Humanas": ["história", "geografia", "filosofia", "sociologia", "educação", "pedagogia"],
+    "Exatas": ["matemática", "física", "química", "estatística", "cálculo"],
+    "Direito": ["direito", "jurídico", "lei", "justiça", "tribunal"],
+    "Comunicação": ["comunicação", "jornalismo", "mídia", "publicidade", "imprensa"]
+  }
+}
