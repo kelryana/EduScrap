@@ -1,21 +1,22 @@
 #requirements.txt 
+
 # Web Scraping
+
 requests>=2.31.0
 beautifulsoup4>=4.12.0
 selenium>=4.15.0
 pdfplumber>=0.10.0
 PyPDF2>=3.0.0
+lxml>=4.9.0
 
 # API e Framework Web
+
 flask>=3.0.0
 flask-cors>=4.0.0
-
-# Banco de Dados
-pymongo>=4.6.0
-
-# Agendamento e Utilitários
-python-dotenv>=1.0.0
+pymongo>=4.5.0
 schedule>=1.2.0
+python-dotenv>=1.0.0
 
-# Testes
-pytest>=7.4.0
+# Utilities
+
+logging>=0.4.9
