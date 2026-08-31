@@ -15,9 +15,6 @@ def atualizar_noticias_agora():
     noticias_inseridas = 0
     headers = {'User-Agent': 'Mozilla/5.0'}
     
-    # ==========================================
-    # FONTE 1: G1 TECNOLOGIA
-    # ==========================================
     try:
         print("-> Buscando no G1 Tecnologia...")
         resposta_g1 = requests.get("https://g1.globo.com/tecnologia/", headers=headers)
@@ -39,16 +36,11 @@ def atualizar_noticias_agora():
     except Exception as e:
         print(f"Erro no G1: {e}")
 
-    # ==========================================
-    # FONTE 2: CANALTECH (Últimas Notícias)
-    # ==========================================
     try:
         print("-> Buscando no Canaltech...")
         resposta_ct = requests.get("https://canaltech.com.br/ultimas/", headers=headers)
         soup_ct = BeautifulSoup(resposta_ct.text, 'html.parser')
-        
-        # No Canaltech, os títulos das notícias geralmente ficam em tags <h3> ou <h2>
-        # Vamos procurar os títulos e "subir" para achar o link principal
+      
         titulos = soup_ct.find_all(['h3', 'h2'])
         
         # Contador para limitar a 6 notícias também

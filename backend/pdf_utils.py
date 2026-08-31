@@ -99,16 +99,7 @@ def baixar_pdf(url: str, timeout: int = 15, usar_cache: bool = True) -> Optional
 
 
 def extrair_texto_pdf(arquivo_pdf_bytes: BytesIO, max_paginas: int = 10) -> str:
-    """
-    Extrai texto de um arquivo PDF.
-
-    Args:
-        arquivo_pdf_bytes: BytesIO com o conteúdo do PDF
-        max_paginas: Número máximo de páginas a extrair (0 = todas)
-
-    Returns:
-        String com o texto extraído ou string vazia se falhar
-    """
+   
     if not PDFMINER_AVAILABLE:
         print("   ⚠️  pdfminer.six não disponível")
         return ""
@@ -149,18 +140,8 @@ def extrair_texto_pdf(arquivo_pdf_bytes: BytesIO, max_paginas: int = 10) -> str:
         print(f"   ❌ Erro ao extrair texto do PDF: {e}")
         return ""
 
-
 def extrair_data_de_texto(texto: str) -> Optional[str]:
-    """
-    Extrai data de vencimento de um texto usando múltiplos padrões regex.
-    Retorna no formato YYYY-MM-DD para consistência com a API.
-
-    Args:
-        texto: Texto onde procurar a data
-
-    Returns:
-        String no formato YYYY-MM-DD ou None
-    """
+  
     if not texto or len(texto) < 5:
         return None
 
@@ -250,16 +231,7 @@ def extrair_data_de_texto(texto: str) -> Optional[str]:
 
 
 def extrair_data_vencimento_pdf(url_pdf: str, timeout: int = 15) -> Optional[str]:
-    """
-    Baixa um PDF e extrai a data de vencimento.
-
-    Args:
-        url_pdf: URL do arquivo PDF
-        timeout: Timeout em segundos para download
-
-    Returns:
-        String no formato YYYY-MM-DD ou None
-    """
+    
     print(f"   🔍 Extraindo data do PDF...")
 
     # Baixa o PDF
@@ -283,16 +255,7 @@ def extrair_data_vencimento_pdf(url_pdf: str, timeout: int = 15) -> Optional[str
 
 
 def extrair_data_vencimento_hibrido(texto_html: str, url_pdf: str) -> Optional[str]:
-    """
-    Estratégia híbrida: tenta HTML primeiro (rápido), depois PDF (preciso).
-
-    Args:
-        texto_html: Texto extraído do HTML
-        url_pdf: URL do PDF
-
-    Returns:
-        String no formato YYYY-MM-DD ou None
-    """
+  
     # Passo 1: Tentar no HTML
     if texto_html:
         data_html = extrair_data_de_texto(texto_html)
@@ -313,15 +276,7 @@ def extrair_data_vencimento_hibrido(texto_html: str, url_pdf: str) -> Optional[s
 
 
 def verificar_status(data_vencimento: Optional[str]) -> str:
-    """
-    Verifica se a data está vigente ou vencida.
-
-    Args:
-        data_vencimento: Data no formato YYYY-MM-DD
-
-    Returns:
-        "vigente" ou "vencido"
-    """
+  
     if not data_vencimento:
         return "vigente"  # Fallback
     
@@ -336,19 +291,8 @@ def verificar_status(data_vencimento: Optional[str]) -> str:
     except (ValueError, TypeError):
         return "vigente"
 
-
 def extrair_e_validar_data(texto_html: str, url_pdf: str) -> Tuple[Optional[str], str]:
-    """
-    Função principal para ser usada nos scrapers.
-    Retorna (data_vencimento, status_vigencia)
-
-    Args:
-        texto_html: Texto do HTML
-        url_pdf: URL do PDF
-
-    Returns:
-        Tupla com (data_vencimento, status_vigencia)
-    """
+   
     data = extrair_data_vencimento_hibrido(texto_html, url_pdf)
     status = verificar_status(data)
     return data, status
