@@ -117,11 +117,6 @@ def extrair_e_converter_data(texto: str) -> datetime:
 def raiz():
     return {"mensagem": "A API do TechHub está online! Acesse /docs para testar."}
 
-
-# ====================================================================
-# ROTAS COM PAGINAÇÃO ATIVA E RESOLUÇÃO DE FONTES INTEGRADA
-# ====================================================================
-
 @app.get("/api/estagios")
 def listar_estagios(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), apenas_vigentes: bool = False):
     colecao = db["vagas_estagio"]
@@ -225,10 +220,6 @@ def listar_ciee(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), apen
         "dados": lista_ciee
     }
 
-
-# ====================================================================
-# ENDPOINT DE CONTINGÊNCIA: CARREGAMENTO DE COORDENADAS MINERADAS UERN
-# ====================================================================
 @app.get("/api/portal_uern")
 def listar_portal_uern(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), apenas_vigentes: bool = False):
     colecao = db["vagas_portal_uern"]
@@ -295,11 +286,6 @@ def listar_noticias(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), 
         "dados": lista_noticias
     }
 
-
-# ==========================================
-# RECURSOS DE INFRAESTRUTURA & PESQUISA
-# ==========================================
-
 @app.get("/api/pesquisar")
 def pesquisar_unificado(termo: str = Query(..., min_length=2)):
     colecoes = ["vagas_estagio", "vagas_bolsa", "vagas_ufersa", "vagas_ciee", "vagas_portal_uern"]
@@ -319,7 +305,6 @@ def pesquisar_unificado(termo: str = Query(..., min_length=2)):
                     doc = resolver_vinculo_fonte(doc)
                     resultados.append(doc)
     return resultados
-
 
 @app.get("/api/estatisticas")
 def obter_estatisticas():
@@ -361,8 +346,6 @@ def obter_estatisticas():
         "reta_final_urgente": total_reta_final,
         "prae_categorias": formatar(distribuicao_prae)
     }
-
-
 @app.get("/api/db-status")
 def obter_status_do_banco():
     status_colecoes = []
@@ -406,11 +389,6 @@ def obter_status_do_banco():
         "host": "MongoDB Local (localhost:27017)",
         "colecoes": status_colecoes
     }
-
-
-# ====================================================================
-# SCRIPT DE EXECUÇÃO GLOBAL INTEGRADO (PRESERVA SISTEMA ANTIGO RÁPIDO)
-# ====================================================================
 @app.get("/api/buscar-tudo")
 def acionar_todos_os_robos():
     print("\n[SISTEMA] Iniciando a Varredura Global de Infraestrutura...")
@@ -442,12 +420,6 @@ def acionar_todos_os_robos():
         print("-> A raspar Notícias...")
         atualizar_noticias_agora()
 
-        # NOTA TÉCNICA: A coleção 'vagas_portal_uern' é alimentada de forma assíncrona
-        # via script de sementes (popular_portal.py) para contornar bloqueios do Cloudflare.
-
-        # ------------------------------------------------------------
-        # PIPELINE DE HIGIENIZAÇÃO E CRUZA DE REFERÊNCIAS NOSQL
-        # ------------------------------------------------------------
         print("[MIGRAÇÃO] Rodando Normalização Heurística de Dados...")
 
         # Mapeia qual coleção pertence a qual chave identificadora de fonte

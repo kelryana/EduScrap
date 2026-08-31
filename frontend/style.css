@@ -23,7 +23,6 @@ body {
     overflow-x: hidden;
 }
 
-/* --- FUNDO QUADRICULADO (Já existente) --- */
 body::before {
     content: '';
     position: absolute;
@@ -47,12 +46,10 @@ body::before {
     pointer-events: none; /* Allows interaction with content above */
 }
 
-/* Base para todas as formas posicionadas */
 .forma, .detalhe {
     position: absolute;
 }
 
-/* 1. Círculo Grande com Padrão de Pontos (Superior Esquerdo) */
 .circulo-pontilhado {
   position: absolute;
   top: -39px;
@@ -76,7 +73,6 @@ body::before {
   clip-path: polygon(100% 0, 0 40%, 100% 100%);
 }
 
-/* 3. Círculo Sólido Central */
 .circulo-solido-centro {
   position: absolute;
   top: 16%;
@@ -262,9 +258,7 @@ body::before {
   user-select: none;
   z-index: 0;
 }
-/* ======================================================== */
 
-/* --- HEADER MEMPHIS INSPIRADO --- */
 .memphis-header {
     position: relative;
     width: 100%;
@@ -368,7 +362,6 @@ body::before {
     margin-left: 6px;
 }
 
-/* --- ESTILOS ANTIGOS DO HEADER (OCULTADOS) --- */
 header {
     display: none;
 }

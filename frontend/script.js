@@ -18,8 +18,6 @@ function toggleFiltroVigentes() {
     carregarDados(tipoAtual, 1);
 }
 
-// --- FUNÇÕES DE BUSCA E NAVEGAÇÃO ---
-
 async function carregarDados(tipo, novaPagina = 1) {
     tipoAtual = tipo;
     paginaAtual = novaPagina;
@@ -52,7 +50,6 @@ async function carregarDados(tipo, novaPagina = 1) {
         container.innerHTML = '<p class="carregando" style="color: red;">Erro ao conectar com a API. O FastAPI está rodando?</p>';
     }
 }
-
 function renderizarControlesPaginacao(atual, total, limite) {
     const antigo = document.getElementById('bloco-paginacao');
     if(antigo) antigo.remove();
@@ -71,7 +68,6 @@ function renderizarControlesPaginacao(atual, total, limite) {
         gap: 15px;
         margin-top: 40px;
     `;
-
     blocoPaginacao.innerHTML = `
         <button ${atual === 1 ? 'disabled' : ''} onclick="carregarDados('${tipoAtual}', ${atual - 1})"
             style="background: #fff; color: var(--azul-escuro); border: 3px solid var(--azul-escuro); padding: 8px 16px; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 3px 3px 0 var(--azul-escuro); opacity: ${atual === 1 ? '0.5' : '1'}">
@@ -86,7 +82,6 @@ function renderizarControlesPaginacao(atual, total, limite) {
 
     mainContainer.appendChild(blocoPaginacao);
 }
-
 // 1. Pesquisa Textual via Índices Otimizados do MongoDB
 async function realizarPesquisa() {
     const termo = document.getElementById('input-busca').value;
@@ -107,7 +102,6 @@ async function realizarPesquisa() {
         container.innerHTML = '<p class="carregando" style="color: red;">Erro na pesquisa.</p>';
     }
 }
-
 async function carregarEstatisticas() {
     const antigo = document.getElementById('bloco-paginacao');
     if(antigo) antigo.remove();
@@ -324,7 +318,6 @@ async function carregarInspector() {
         container.innerHTML = '<p class="carregando" style="color: red;">Não foi possível ler os metadados de infraestrutura.</p>';
     }
 }
-
 // Função que aciona o Botão Vermelho (Raspagem Global + Geração de Logs)
 async function acionarTodosOsRobos() {
     const container = document.getElementById('container-vagas');
