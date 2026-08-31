@@ -1,13 +1,13 @@
 # Eduscrap UERN - Dashboard de Oportunidades
 
-![TechHub UERN](https://img.shields.io/badge/TechHub-UERN-orange)
+![EduScrap](https://img.shields.io/badge/TechHub-UERN-orange)
 ![Python](https://img.shields.io/badge/Python-3.8+-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green)
 ![MongoDB](https://img.shields.io/badge/MongoDB-4.4+-brightgreen)
 
 ## 📖 Sobre o Projeto
 
-O **TechHub UERN** é uma plataforma completa de agregação de oportunidades acadêmicas e profissionais para estudantes da UERN (Universidade do Estado do Rio Grande do Norte) e região. O sistema realiza web scraping de diversos portais institucionais e disponibiliza as informações em uma API REST moderna com frontend intuitivo.
+O **EduScrap** é uma plataforma completa de agregação de oportunidades acadêmicas e profissionais para estudantes da UERN (Universidade do Estado do Rio Grande do Norte) e região. O sistema realiza web scraping de diversos portais institucionais e disponibiliza as informações em uma API REST moderna com frontend intuitivo.
 
 ### Funcionalidades Principais
 
