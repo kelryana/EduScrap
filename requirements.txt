@@ -11,6 +11,8 @@ lxml>=4.9.0
 
 # API e Framework Web
 
+fastapi>=0.109.1
+uvicorn>=0.20.0
 flask>=3.0.0
 flask-cors>=4.0.0
 pymongo>=4.5.0
