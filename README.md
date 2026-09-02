@@ -1,4 +1,4 @@
-# Eduscrap UERN - Dashboard de Oportunidades
+# Eduscrap UERN 
 
 ![EduScrap](https://img.shields.io/badge/TechHub-UERN-orange)
 ![Python](https://img.shields.io/badge/Python-3.8+-blue)
