@@ -1,11 +1,13 @@
-#requirements.txt 
+#requirements.txt
 
 # Web Scraping
 
 requests>=2.31.0
 beautifulsoup4>=4.12.0
 selenium>=4.15.0
+webdriver-manager>=4.0.1
 pdfplumber>=0.10.0
+pdfminer.six>=20221105
 PyPDF2>=3.0.0
 lxml>=4.9.0
 
@@ -18,6 +20,12 @@ flask-cors>=4.0.0
 pymongo>=4.5.0
 schedule>=1.2.0
 python-dotenv>=1.0.0
+
+# Testes e Qualidade
+
+pytest>=8.0.0
+mongomock>=4.1.2
+httpx>=0.27.0
 
 # Utilities
 

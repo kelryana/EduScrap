@@ -1,18 +1,28 @@
-##backend/main.py
-from fastapi import FastAPI, Query
-from fastapi.middleware.cors import CORSMiddleware
-from pymongo import MongoClient
+##backend/main.py 
+import logging
+import os
 import subprocess
 import sys
 import re
 from datetime import datetime, timedelta
 
-# Importa a função de raspagem assíncrona de notícias original
+from dotenv import load_dotenv
+from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
+from pymongo import MongoClient
+
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"))
+
+logging.basicConfig(
+    level=os.getenv("LOG_LEVEL", "INFO").upper(),
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+)
+logger = logging.getLogger("api.main")
+
 from scraper_noticias import atualizar_noticias_agora
 
 app = FastAPI(title="API TechHub UERN")
 
-# Configuração do CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -21,16 +31,30 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-client = MongoClient("mongodb://localhost:27017/")
-db = client["hub_estudantes"]
+API_KEY = os.getenv("API_KEY", "")
+
+
+def verificar_api_key(x_api_key: str = Header(default=None)):
+    """Dependência FastAPI: exige o header X-API-Key válido."""
+    if not API_KEY:
+        # Proteção desativada (apenas desenvolvimento local sem API_KEY no .env)
+        return True
+    if x_api_key != API_KEY:
+        raise HTTPException(
+            status_code=401,
+            detail="Acesso negado: informe o cabeçalho X-API-Key válido.",
+        )
+    return True
+
+MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
+MONGODB_DB = os.getenv("MONGODB_DB", "hub_estudantes")
+
+client = MongoClient(MONGODB_URI)
+db = client[MONGODB_DB]
 def garantir_metadados_fontes():
-    """
-    Abordagem Híbrida NoSQL: Mantém uma coleção normatizada contendo a governança,
-    links oficiais e metadados de cada portal institucional parceiro.
-    """
+    
     colecao = db["fontes_provedores"]
 
-    # Dicionário mestre de metadados das instituições de Mossoró e região
     fontes_mestre = [
         {
             "_id": "prae_uern",
@@ -60,7 +84,7 @@ def garantir_metadados_fontes():
             "frequencia_monitoramento": "A cada 6 hours",
             "foco_vagas": "Vagas de Estágio Comercial e Jovem Aprendiz Técnico"
         },
-        # ADIÇÃO ESTRATÉGICA: Vinculo relacional para a nova esteira de dados
+        
         {
             "_id": "portal_uern_oficial",
             "nome_oficial": "Portal UERN - Text Mining",
@@ -71,10 +95,8 @@ def garantir_metadados_fontes():
     ]
 
     for fonte in fontes_mestre:
-        # Usa upsert para garantir que os links oficiais se mantenham atualizados sem duplicar registros
         colecao.update_one({"_id": fonte["_id"]}, {"$set": fonte}, upsert=True)
 
-# Inicializa as tabelas de metadados mestre na subida do servidor
 garantir_metadados_fontes()
 
 
@@ -254,7 +276,7 @@ def listar_noticias(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), 
     tempo_limite = datetime.now() - timedelta(minutes=10)
 
     if not ultimo_registro or ultimo_registro["data_execucao"] < tempo_limite:
-        print("[CACHE] Cache expirado ou inexistente. A acionar robô de notícias...")
+        logger.info("[CACHE] Cache expirado ou inexistente. Acionando robô de notícias...")
         atualizar_noticias_agora()
 
         colecao_cache.update_one(
@@ -263,7 +285,7 @@ def listar_noticias(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), 
             upsert=True
         )
     else:
-        print("[CACHE] Dados recuperados localmente via cache ativo do MongoDB.")
+        logger.info("[CACHE] Dados recuperados localmente via cache ativo do MongoDB.")
 
     colecao = db["vagas_noticias"]
     pulo = (pagina - 1) * limite
@@ -389,9 +411,9 @@ def obter_status_do_banco():
         "host": "MongoDB Local (localhost:27017)",
         "colecoes": status_colecoes
     }
-@app.get("/api/buscar-tudo")
+@app.get("/api/buscar-tudo", dependencies=[Depends(verificar_api_key)])
 def acionar_todos_os_robos():
-    print("\n[SISTEMA] Iniciando a Varredura Global de Infraestrutura...")
+    logger.info("[SISTEMA] Iniciando a Varredura Global de Infraestrutura...")
 
     inicio_varredura = datetime.now()
 
@@ -405,22 +427,22 @@ def acionar_todos_os_robos():
     detalhe_erro = None
 
     try:
-        print("-> A raspar PRAE...")
+        logger.info("-> A raspar PRAE...")
         subprocess.run([python_exe, "scraper_prae.py"])
 
-        print("-> A raspar PROEX...")
+        logger.info("-> A raspar PROEX...")
         subprocess.run([python_exe, "scraper_proex.py"])
 
-        print("-> A raspar UFERSA...")
+        logger.info("-> A raspar UFERSA...")
         subprocess.run([python_exe, "scraper_ufersa.py"])
 
-        print("-> A raspar CIEE...")
+        logger.info("-> A raspar CIEE...")
         subprocess.run([python_exe, "scraper_ciee.py"])
 
-        print("-> A raspar Notícias...")
+        logger.info("-> A raspar Notícias...")
         atualizar_noticias_agora()
 
-        print("[MIGRAÇÃO] Rodando Normalização Heurística de Dados...")
+        logger.info("[MIGRAÇÃO] Rodando Normalização Heurística de Dados...")
 
         # Mapeia qual coleção pertence a qual chave identificadora de fonte
         mapeamento_fontes = {
@@ -450,6 +472,7 @@ def acionar_todos_os_robos():
     except Exception as e:
         status_final = "Erro"
         detalhe_erro = str(e)
+        logger.error(f"[VARREDURA] Falha durante a varredura global: {e}", exc_info=True)
 
     fim_varredura = datetime.now()
     log_auditoria = {
@@ -472,3 +495,13 @@ def acionar_todos_os_robos():
         return {"erro": detalhe_erro}
 
     return {"mensagem": "Varredura global concluída e normatizada com sucesso!"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(
+        app,
+        host=os.getenv("FASTAPI_HOST", "0.0.0.0"),
+        port=int(os.getenv("FASTAPI_PORT", "8000")),
+    )

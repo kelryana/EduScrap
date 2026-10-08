@@ -8,12 +8,31 @@ from datetime import datetime, timedelta
 import time
 import re
 import json
+import logging
+import os
+from pathlib import Path
+
+from dotenv import load_dotenv
 from pymongo import MongoClient
+
+# Carrega variáveis de ambiente do .env na raiz do projeto
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+
+logging.basicConfig(
+    level=os.getenv("LOG_LEVEL", "INFO").upper(),
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+)
+logger = logging.getLogger(__name__)
+
+MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
+MONGODB_DB = os.getenv("MONGODB_DB", "hub_estudantes")
+CHROMEDRIVER_PATH = os.getenv("CHROMEDRIVER_PATH", "/usr/local/bin/chromedriver")
+
 
 def conectar_banco():
     """Conecta ao MongoDB e retorna a coleção vagas_portal_uern"""
-    client = MongoClient("mongodb://localhost:27017/")
-    db = client["hub_estudantes"]
+    client = MongoClient(MONGODB_URI)
+    db = client[MONGODB_DB]
     return db["vagas_portal_uern"]
 
 # Palavras-chave para filtrar oportunidades relevantes
@@ -39,7 +58,13 @@ def criar_navegador_headless():
     opcoes.add_experimental_option("excludeSwitches", ["enable-automation"])
     opcoes.add_experimental_option("useAutomationExtension", False)
 
-    service = Service("/usr/local/bin/chromedriver")
+    # Usa o caminho do driver definido no .env; se não existir,
+    # recorre ao webdriver-manager para baixar o driver automaticamente.
+    if CHROMEDRIVER_PATH and Path(CHROMEDRIVER_PATH).exists():
+        service = Service(CHROMEDRIVER_PATH)
+    else:
+        logger.warning(f"chromedriver não encontrado em '{CHROMEDRIVER_PATH}'; baixando via webdriver-manager...")
+        service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=opcoes)
 
     # Executa CDP para remover flags de automação
@@ -111,7 +136,7 @@ def minerar_portal_uern():
     e extraindo apenas notícias relevantes para estudantes
     """
     print("\n" + "="*70)
-    print("🕵️‍♂️ INICIANDO MINERAÇÃO DO PORTAL UERN (ANTI-CLOUDFLARE)")
+    print("INICIANDO MINERAÇÃO DO PORTAL UERN (ANTI-CLOUDFLARE)")
     print("="*70)
 
     colecao = conectar_banco()
@@ -119,7 +144,7 @@ def minerar_portal_uern():
 
     try:
         # Limpa dados antigos
-        print("\n🧹 Limpando coleção 'vagas_portal_uern'...")
+        print("\nLimpando coleção 'vagas_portal_uern'...")
         colecao.delete_many({})
 
         # Inicializa navegador
@@ -128,11 +153,11 @@ def minerar_portal_uern():
 
         # Acessa página principal de notícias
         url_principal = "https://portal.uern.br/todas-as-noticias/"
-        print(f"📡 Acessando: {url_principal}")
+        print(f"Acessando: {url_principal}")
         driver.get(url_principal)
 
         # Aguarda carregamento completo (Cloudflare pode demorar)
-        print("⏳ Aguardando carregamento (Cloudflare challenge)...")
+        print("Aguardando carregamento (Cloudflare challenge)...")
         time.sleep(8)
 
         # Rola página para carregar conteúdo dinâmico
@@ -162,11 +187,11 @@ def minerar_portal_uern():
 
         # Limita às 15 mais recentes para não sobrecarregar
         urls_para_analisar = urls_noticias[:15]
-        print(f"📋 Selecionadas {len(urls_para_analisar)} notícias para análise profunda")
+        print(f"Selecionadas {len(urls_para_analisar)} notícias para análise profunda")
 
         # Mineração profunda em cada notícia
         noticias_validas = []
-        print("\n🔍 Passo 3: Análise profunda de conteúdo (Text Mining)...")
+        print("\nPasso 3: Análise profunda de conteúdo (Text Mining)...")
 
         for i, url_noticia in enumerate(urls_para_analisar, start=1):
             print(f"\n[{i}/{len(urls_para_analisar)}] Analisando: {url_noticia[:60]}...")
@@ -197,7 +222,7 @@ def minerar_portal_uern():
                 eh_relevante, palavras_chave = analisar_relevancia(conteudo_analise)
 
                 if eh_relevante:
-                    print(f"   ✅ OPORTUNIDADE DETECTADA!")
+                    print(f"   OPORTUNIDADE DETECTADA!")
                     print(f"   📝 Título: {titulo[:80]}")
                     print(f"   🔑 Palavras-chave: {', '.join(palavras_chave[:5])}")
 
@@ -235,7 +260,7 @@ def minerar_portal_uern():
 
         # Insere no banco
         if noticias_validas:
-            print(f"\n💾 Passo 4: Persistindo {len(noticias_validas)} oportunidades no MongoDB...")
+            print(f"\nPasso 4: Persistindo {len(noticias_validas)} oportunidades no MongoDB...")
             colecao.insert_many(noticias_validas)
 
             print("\n" + "="*70)
@@ -243,14 +268,14 @@ def minerar_portal_uern():
             print("="*70)
 
             # Mostra resumo
-            print("\n📊 RESUMO DAS OPORTUNIDADES:")
+            print("\nRESUMO DAS OPORTUNIDADES:")
             for i, noticia in enumerate(noticias_validas, start=1):
                 print(f"  {i}. {noticia['nome'][:70]}...")
                 print(f"     Categoria: {noticia['categoria']}")
                 print(f"     Link: {noticia['link'][:60]}...")
         else:
             print("\n⚠️ Nenhuma oportunidade relevante encontrada nesta varredura.")
-            print("💡 Isso pode ser normal se não houver novas publicações recentes.")
+            print("Isso pode ser normal se não houver novas publicações recentes.")
 
         return len(noticias_validas)
 
@@ -261,9 +286,9 @@ def minerar_portal_uern():
 
     finally:
         if driver:
-            print("\n🔒 Fechando navegador...")
+            print("\nFechando navegador...")
             driver.quit()
 
 if __name__ == "__main__":
     total = minerar_portal_uern()
-    print(f"\n🎯 Total de oportunidades mineradas: {total}")
+    print(f"\nTotal de oportunidades mineradas: {total}")

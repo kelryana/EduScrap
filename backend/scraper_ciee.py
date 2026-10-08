@@ -1,10 +1,12 @@
-##backend/scraper_ciee.py 
+##backend/scraper_ciee.py
 
 import logging
+import os
 import re
 import time
 import sys
 from datetime import datetime
+from pathlib import Path
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -18,11 +20,16 @@ from webdriver_manager.firefox import GeckoDriverManager
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
 
-MONGO_URI = "mongodb://localhost:27017/"
-DB_NAME = "hub_estudantes"
-COLLECTION_NAME = "vagas_ciee"
-CIDADE = "Mossoró"
-URL_CIEE = "https://portal.ciee.org.br/"
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+
+MONGO_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
+DB_NAME = os.getenv("MONGODB_DB", "hub_estudantes")
+COLLECTION_NAME = os.getenv("CIEE_COLLECTION", "vagas_ciee")
+CIDADE = os.getenv("CIEE_CIDADE", "Mossoró")
+URL_CIEE = os.getenv("CIEE_URL", "https://portal.ciee.org.br/")
+GECKODRIVER_PATH = os.getenv("GECKODRIVER_PATH", "")  # vazio => download automático
 
 logging.basicConfig(
     level=logging.INFO,
@@ -42,8 +49,8 @@ class ScraperCIEEHibrido:
         self.colecao = None
         self.session_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-        logger.info(f"🆕 Sessão iniciada: {self.session_id}")
-        logger.info(f"🎯 Buscando por: {cidade}")
+        logger.info(f"Sessão iniciada: {self.session_id}")
+        logger.info(f"Buscando por: {cidade}")
 
     def conectar_mongodb(self):
         """Conecta ao MongoDB e prepara a coleção"""
@@ -58,7 +65,7 @@ class ScraperCIEEHibrido:
             self.colecao.create_index("coletado_em")
             self.colecao.create_index("cidade")
 
-            logger.info("✅ Conectado ao MongoDB com índices")
+            logger.info("Conectado ao MongoDB com índices")
             return True
 
         except Exception as e:
@@ -79,14 +86,17 @@ class ScraperCIEEHibrido:
             options.set_preference("general.useragent.override",
                 "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0")
             options.set_preference("permissions.default.image", 2)
-
-            service = Service(GeckoDriverManager().install())
+        
+            if GECKODRIVER_PATH and Path(GECKODRIVER_PATH).exists():
+                service = Service(GECKODRIVER_PATH)
+            else:
+                service = Service(GeckoDriverManager().install())
             self.driver = webdriver.Firefox(service=service, options=options)
 
             self.driver.set_page_load_timeout(30)
             self.driver.implicitly_wait(10)
 
-            logger.info("✅ Firefox headless configurado")
+            logger.info("Firefox headless configurado")
             return True
 
         except Exception as e:
@@ -96,7 +106,7 @@ class ScraperCIEEHibrido:
     def buscar_cidade(self):
         """Busca pela cidade e CLICA NA SUGESTÃO"""
         try:
-            logger.info(f"🔍 Buscando por '{self.cidade}'...")
+            logger.info(f"Buscando por '{self.cidade}'...")
 
             # Encontrar o campo de busca
             campo = None
@@ -112,7 +122,7 @@ class ScraperCIEEHibrido:
                         EC.presence_of_element_located((By.XPATH, xpath))
                     )
                     if campo and campo.is_enabled() and campo.is_displayed():
-                        logger.info(f"✅ Campo encontrado: {xpath}")
+                        logger.info(f"Campo encontrado: {xpath}")
                         break
                 except:
                     continue
@@ -135,7 +145,6 @@ class ScraperCIEEHibrido:
             try:
                 sugestao = None
 
-                # 🔥 CORRIGIDO: Procurar por "MOSSORÓ - RN" (texto EXATO)
                 texto_sugestao = f"{self.cidade.upper()} - RN"
                 logger.info(f"🔍 Procurando sugestão: '{texto_sugestao}'")
 
@@ -165,7 +174,7 @@ class ScraperCIEEHibrido:
                         pass
 
                 if sugestao:
-                    # Rolar e clicar
+                    
                     self.driver.execute_script("arguments[0].scrollIntoView(true);", sugestao)
                     time.sleep(0.5)
                     sugestao.click()
@@ -187,7 +196,7 @@ class ScraperCIEEHibrido:
                     if self.cidade.lower() in pagina_texto:
                         logger.info(f"✅ Busca por '{self.cidade}' confirmada!")
 
-                        # Verificar se há vagas
+                        
                         try:
                             botoes = self.driver.find_elements(By.XPATH, "//*[contains(text(), 'Ver detalhes')]")
                             logger.info(f"✅ {len(botoes)} vagas encontradas")
@@ -214,28 +223,187 @@ class ScraperCIEEHibrido:
             logger.error(f"❌ Erro na busca: {e}")
             return False
 
-    def extrair_vagas(self):
-        """Extrai vagas filtrando por Mossoró"""
-        try:
-            logger.info("📊 Extraindo vagas...")
+    
+    @staticmethod
+    def _eh_linha_ignorada(linha: str) -> bool:
+       
+        ruido = ("00:00", "Compartilhar", "Ver detalhes", "Carregar mais", "Candidatar-se")
+        return any(p in linha for p in ruido)
 
-            # Aguardar carregamento
+    @staticmethod
+    def _parece_empresa(linha: str, cidade: str) -> bool:
+       
+        padroes_empresa = [
+            "LTDA", "S/A", "S.A.", "SS", "MEI", "EIRELI",
+            "INDÚSTRIA", "COMÉRCIO", "SERVIÇOS", "CONSULTORIA",
+            "ASSOCIADOS", "PARCEIROS", "GRUPO", "HOLDING",
+        ]
+        eh_empresa = any(p in linha.upper() for p in padroes_empresa)
+        if not (eh_empresa and len(linha) < 50 and cidade.upper() not in linha.upper()):
+            return False
+        
+        return " - RN" not in linha.upper() and "/" not in linha and not linha.upper().startswith("MOSSORÓ")
+
+    @staticmethod
+    def _parece_endereco(linha: str, cidade: str) -> bool:
+       
+        upper = linha.upper()
+        return cidade.upper() in upper or " - RN" in upper or "/RN" in upper
+
+    @staticmethod
+    def _extrair_data_vencimento(texto_card: str):
+        
+        data_match = re.search(r"\b(\d{2})/(\d{2})/(\d{4})\b", texto_card)
+        if not data_match:
+            return None
+        try:
+            dia, mes, ano = int(data_match.group(1)), int(data_match.group(2)), int(data_match.group(3))
+            return datetime(ano, mes, dia)
+        except ValueError:
+            return None
+
+    def _montar_link(self, card, codigo_vaga: str) -> str:
+      
+        if codigo_vaga == "N/A":
+            return URL_CIEE
+        link_detalhe = f"{URL_CIEE.rstrip('/')}/quero-uma-vaga/?codigoVaga={codigo_vaga}"
+        try:
+            link_elem = card.find_element(By.TAG_NAME, "a")
+            href = link_elem.get_attribute("href")
+            if href:
+                link_detalhe = href
+        except Exception:
+            pass
+        return link_detalhe
+
+    def _parse_card(self, texto_card: str, link: str) -> dict:
+        
+        linhas = [linha.strip() for linha in texto_card.split('\n') if linha.strip()]
+
+        nome = "Vaga CIEE"
+        categoria = "Estágio/Jovem Aprendiz"
+        salario = "A combinar"
+        area = "Área não especificada"
+        codigo_vaga = "N/A"
+        endereco = ""
+        cidade_encontrada = ""
+        empresa = ""
+        area_encontrada = False
+
+        for j, linha in enumerate(linhas):
+            if self._eh_linha_ignorada(linha):
+                continue
+
+           
+            if linha.isdigit() and len(linha) >= 6:
+                codigo_vaga = linha
+                continue
+
+            if linha in ["Estágio", "Aprendiz"]:
+                nome = linha
+                if j + 1 < len(linhas):
+                    categoria = linhas[j + 1]
+                continue
+
+            
+            if "R$" in linha:
+                salario = linha
+                continue
+
+            if self._parece_empresa(linha, self.cidade):
+                empresa = linha
+                continue
+
+           
+            if self._parece_endereco(linha, self.cidade):
+                endereco = linha
+                cidade_encontrada = self.cidade
+                continue
+
+            
+            if not area_encontrada and 4 < len(linha) < 80:
+                area = linha
+                area_encontrada = True
+                continue
+
+        vaga = {
+            "codigo": codigo_vaga,
+            "titulo": nome,
+            "categoria": categoria,
+            "salario": salario,
+            "area": area,
+            "endereco": endereco,
+            "cidade": cidade_encontrada if cidade_encontrada else self.cidade,
+            "empresa": empresa,
+            "nome_completo": f"[{codigo_vaga}] {nome} - {area} ({salario})",
+            "link": link,
+            "fonte": "CIEE",
+            "coletado_em": datetime.now(),
+            "session_id": self.session_id,
+        }
+
+        data_vencimento = self._extrair_data_vencimento(texto_card)
+        if data_vencimento:
+            vaga["data_vencimento"] = data_vencimento
+
+        return vaga
+
+    def _carregar_paginacao(self, max_cliques: int = 10):
+        """Trata a paginação infinite-scroll clicando em 'Carregar mais'.
+
+        Retorna a quantidade de cliques realizados. Falhas de elemento
+        são tratadas como fim da paginação (comportamento esperado).
+        """
+        cliques = 0
+        while cliques < max_cliques:
+            try:
+                botao = self.driver.find_element(
+                    By.XPATH, "//*[contains(text(), 'Carregar mais')]"
+                )
+                if not botao.is_displayed():
+                    break
+                self.driver.execute_script("arguments[0].click();", botao)
+                cliques += 1
+                logger.info(f"📄 Paginação: clique {cliques} em 'Carregar mais'")
+                time.sleep(2)
+            except Exception:
+                break  # não há mais paginação
+        return cliques
+
+    def _localizar_botoes_detalhe(self):
+        """Localiza os botões 'Ver detalhes' visíveis na página."""
+        try:
+            botoes = WebDriverWait(self.driver, 20).until(
+                EC.presence_of_all_elements_located((By.XPATH, "//*[contains(text(), 'Ver detalhes')]"))
+            )
+            logger.info(f"Encontrados {len(botoes)} botões 'Ver detalhes'")
+            return botoes
+        except Exception:
+            return []
+
+    def extrair_vagas(self):
+        """Extrai vagas filtrando pela cidade configurada.
+
+        Orquestra as funções menores: paginação -> localização dos
+        cards -> parsing puro -> filtro por cidade.
+        """
+        try:
+            logger.info("Extraindo vagas...")
+
+            # Aguardar carregamento inicial
             time.sleep(3)
 
-            # Buscar botões "Ver detalhes"
-            try:
-                botoes = WebDriverWait(self.driver, 20).until(
-                    EC.presence_of_all_elements_located((By.XPATH, "//*[contains(text(), 'Ver detalhes')]"))
-                )
-                logger.info(f"📌 Encontrados {len(botoes)} botões 'Ver detalhes'")
-            except:
-                botoes = []
+            # PASSO 1: tratar paginação (infinite scroll)
+            self._carregar_paginacao()
 
+            # PASSO 2: localizar os botões "Ver detalhes"
+            botoes = self._localizar_botoes_detalhe()
             if not botoes:
                 logger.warning("⚠️ Nenhum botão 'Ver detalhes' encontrado")
                 self.driver.save_screenshot(f"ciee_sem_botoes_{self.session_id}.png")
                 return False
 
+            # PASSO 3: extrair os dados de cada card (parsing puro)
             cards_processados = set()
             vagas_temp = []
 
@@ -250,151 +418,46 @@ class ScraperCIEEHibrido:
                         continue
                     cards_processados.add(texto_card)
 
-                    linhas = [linha.strip() for linha in texto_card.split('\n') if linha.strip()]
-
-                    # Valores padrão
-                    nome = "Vaga CIEE"
-                    categoria = "Estágio/Jovem Aprendiz"
-                    salario = "A combinar"
-                    area = "Área não especificada"
-                    codigo_vaga = "N/A"
-                    link = "#"
-                    endereco = ""
-                    cidade_encontrada = ""
-                    empresa = ""  # 🔥 NOVO: variável para empresa
-
-                    # Extrair código e endereço
-                    area_encontrada = False
-                    for j, linha in enumerate(linhas):
-                        # 🔥 IGNORAR elementos indesejados primeiro
-                        if ("00:00" in linha or "Compartilhar" in linha or
-                            "Ver detalhes" in linha or "Carregar mais" in linha or
-                            "Candidatar-se" in linha):
-                            continue
-
-                        # Capturar código (número com 6+ dígitos)
-                        if linha.isdigit() and len(linha) >= 6:
-                            codigo_vaga = linha
-                            continue
-
-                        # Nome e categoria
-                        if linha in ["Estágio", "Aprendiz"]:
-                            nome = linha
-                            if j + 1 < len(linhas):
-                                categoria = linhas[j + 1]
-                            continue
-
-                        # Salário
-                        if "R$" in linha:
-                            salario = linha
-                            continue
-
-                        # 🔥 EMPRESA: Verificar ANTES do endereço (empresa pode ter RN no nome)
-                        # Padrões comuns de empresas brasileiras
-                        padroes_empresa = [
-                            "LTDA", "S/A", "S.A.", "SS", "MEI", "EIRELI",
-                            "INDÚSTRIA", "COMÉRCIO", "SERVIÇOS", "CONSULTORIA",
-                            "ASSOCIADOS", "PARCEIROS", "GRUPO", "HOLDING"
-                        ]
-
-                        # Verifica se parece nome de empresa (primeira letra maiúscula, tem padrão empresarial)
-                        eh_empresa = any(p in linha.upper() for p in padroes_empresa)
-
-                        # Empresa costuma ser curta (1-3 palavras) e não contém cidade/salário
-                        # IMPORTANTE: Não pode conter " - RN" ou "/" (típico de endereço)
-                        if eh_empresa and len(linha) < 50 and self.cidade not in linha.upper():
-                            if " - RN" not in linha.upper() and "/" not in linha and not linha.upper().startswith("MOSSORÓ"):
-                                empresa = linha
-                                continue
-
-                        # Endereço (contém cidade ou estado)
-                        if self.cidade.upper() in linha.upper() or " - RN" in linha.upper() or "/RN" in linha:
-                            endereco = linha
-                            cidade_encontrada = self.cidade
-                            continue
-
-                        # 🔥 ÁREA: Se chegou aqui, é provavelmente a área
-                        # Área geralmente é descritiva e não muito longa
-                        if not area_encontrada and len(linha) > 4 and len(linha) < 80:
-                            area = linha
-                            area_encontrada = True
-                            continue
-
-                    # Construir URL a partir do código
-                    if codigo_vaga != "N/A":
-                        link_detalhe = f"https://portal.ciee.org.br/quero-uma-vaga/?codigoVaga={codigo_vaga}"
-
-                        try:
-                            link_elem = card.find_element(By.TAG_NAME, "a")
-                            link = link_elem.get_attribute("href")
-                            if link:
-                                link_detalhe = link
-                        except:
-                            pass
-
-                        link = link_detalhe
-                    else:
-                        link = "https://portal.ciee.org.br/"
-
-                    # Montar vaga
-                    vaga = {
-                        "codigo": codigo_vaga,
-                        "titulo": nome,
-                        "categoria": categoria,
-                        "salario": salario,
-                        "area": area,
-                        "endereco": endereco,
-                        "cidade": cidade_encontrada if cidade_encontrada else self.cidade,
-                        "empresa": empresa,
-                        "nome_completo": f"[{codigo_vaga}] {nome} - {area} ({salario})",
-                        "link": link,
-                        "fonte": "CIEE",
-                        "coletado_em": datetime.now(),
-                        "session_id": self.session_id
-                    }
-
-                    # Tentar extrair data e converter para datetime
-                    data_match = re.search(r"\b(\d{2})/(\d{2})/(\d{4})\b", texto_card)
-                    if data_match:
-                        try:
-                            dia, mes, ano = int(data_match.group(1)), int(data_match.group(2)), int(data_match.group(3))
-                            data_vencimento = datetime(ano, mes, dia)
-                            vaga["data_vencimento"] = data_vencimento
-                        except ValueError:
-                            pass
+                    link = self._montar_link(card, codigo_vaga="N/A")
+                    # Reusa o parser puro; o código/link definitivo é recalculado
+                    # a partir do texto extraído para manter consistência.
+                    vaga = self._parse_card(texto_card, link)
+                    vaga["link"] = self._montar_link(card, vaga["codigo"])
 
                     vagas_temp.append(vaga)
 
-                    # Log com código e endereço
                     endereco_log = vaga['endereco'][:30] if vaga['endereco'] else 'sem endereço'
-                    logger.info(f"  📝 Vaga {i+1}: [{codigo_vaga}] {vaga['titulo'][:20]} - {endereco_log}")
+                    logger.info(f" Vaga {i+1}: [{vaga['codigo']}] {vaga['titulo'][:20]} - {endereco_log}")
 
                 except Exception as e:
                     logger.debug(f"⚠️ Erro no card {i}: {e}")
                     continue
 
-            # Filtrar por endereço que contém a cidade
-            vagas_filtradas = []
-            for vaga in vagas_temp:
-                texto_completo = f"{vaga.get('nome_completo', '')} {vaga.get('area', '')} {vaga.get('endereco', '')}"
-                if self.cidade in texto_completo or "RN" in texto_completo:
-                    vaga["cidade"] = self.cidade
-                    vagas_filtradas.append(vaga)
-                    logger.info(f"  ✅ Vaga de {self.cidade}: [{vaga['codigo']}] {vaga['titulo'][:20]} - {vaga['endereco'][:30]}")
-
-            self.vagas = vagas_filtradas
+            # PASSO 4: filtrar por endereço que contém a cidade/UF
+            self.vagas = self._filtrar_por_cidade(vagas_temp)
 
             if not self.vagas:
                 logger.warning(f"⚠️ Nenhuma vaga de {self.cidade} encontrada!")
                 self.driver.save_screenshot(f"ciee_sem_vagas_{self.cidade}_{self.session_id}.png")
                 return False
 
-            logger.info(f"📊 Total extraído: {len(self.vagas)} vagas de {self.cidade}")
+            logger.info(f"Total extraído: {len(self.vagas)} vagas de {self.cidade}")
             return True
 
         except Exception as e:
             logger.error(f"❌ Erro na extração: {e}")
             return False
+
+    def _filtrar_por_cidade(self, vagas: list) -> list:
+        """Mantém apenas as vagas cujo texto contenha a cidade ou a UF RN."""
+        filtradas = []
+        for vaga in vagas:
+            texto_completo = f"{vaga.get('nome_completo', '')} {vaga.get('area', '')} {vaga.get('endereco', '')}"
+            if self.cidade in texto_completo or "RN" in texto_completo:
+                vaga["cidade"] = self.cidade
+                filtradas.append(vaga)
+                logger.info(f"Vaga de {self.cidade}: [{vaga['codigo']}] {vaga['titulo'][:20]} - {vaga['endereco'][:30]}")
+        return filtradas
 
     def salvar_mongodb(self):
         """Salva as vagas no MongoDB com deduplicação"""
@@ -402,7 +465,7 @@ class ScraperCIEEHibrido:
             logger.warning("⚠️ Nenhuma vaga para salvar")
             return 0
 
-        logger.info(f"💾 Salvando {len(self.vagas)} vagas no MongoDB...")
+        logger.info(f"Salvando {len(self.vagas)} vagas no MongoDB...")
 
         salvos = 0
         atualizados = 0
@@ -430,7 +493,7 @@ class ScraperCIEEHibrido:
                 logger.warning(f"⚠️ Erro ao salvar vaga: {e}")
                 erros += 1
 
-        logger.info(f"✅ {salvos} novas vagas salvas, {atualizados} atualizadas")
+        logger.info(f"{salvos} novas vagas salvas, {atualizados} atualizadas")
         if erros > 0:
             logger.warning(f"⚠️ {erros} vagas com erro")
 
@@ -439,17 +502,17 @@ class ScraperCIEEHibrido:
     def gerar_relatorio(self):
         """Gera um relatório da execução"""
         logger.info("=" * 60)
-        logger.info("📊 RELATÓRIO DE EXECUÇÃO")
+        logger.info("RELATÓRIO DE EXECUÇÃO")
         logger.info("=" * 60)
-        logger.info(f"🆔 Sessão: {self.session_id}")
-        logger.info(f"🏙️  Cidade: {self.cidade}")
-        logger.info(f"📊 Vagas extraídas: {len(self.vagas)}")
+        logger.info(f"Sessão: {self.session_id}")
+        logger.info(f"Cidade: {self.cidade}")
+        logger.info(f"Vagas extraídas: {len(self.vagas)}")
         logger.info("=" * 60)
 
         for i, vaga in enumerate(self.vagas, 1):
             logger.info(f"{i}. [{vaga.get('codigo', 'N/A')}] {vaga.get('titulo', 'Sem título')}")
             logger.info(f"   📌 Área: {vaga.get('area', 'N/E')}")
-            logger.info(f"   💰 Salário: {vaga.get('salario', 'N/I')}")
+            logger.info(f"   Salário: {vaga.get('salario', 'N/I')}")
             if vaga.get('data_vencimento'):
                 logger.info(f"   📅 Vence: {vaga['data_vencimento']}")
             logger.info("   ---")
@@ -457,7 +520,7 @@ class ScraperCIEEHibrido:
     def executar(self):
         """Executa o scraper completo"""
         logger.info("=" * 60)
-        logger.info("🚀 SCRAPER CIEE HÍBRIDO")
+        logger.info("SCRAPER CIEE HÍBRIDO")
         logger.info("=" * 60)
         logger.info(f"📍 Busca por: {self.cidade}")
         logger.info(f"🌐 URL: {URL_CIEE}")
@@ -486,9 +549,9 @@ class ScraperCIEEHibrido:
             self.gerar_relatorio()
 
             logger.info("=" * 60)
-            logger.info(f"✅ SCRAPER CONCLUÍDO COM SUCESSO!")
-            logger.info(f"   📊 {len(self.vagas)} vagas extraídas")
-            logger.info(f"   💾 {salvos} vagas salvas")
+            logger.info(f"SCRAPER CONCLUÍDO COM SUCESSO!")
+            logger.info(f"  {len(self.vagas)} vagas extraídas")
+            logger.info(f"   {salvos} vagas salvas")
             logger.info("=" * 60)
 
             return True
@@ -503,7 +566,7 @@ class ScraperCIEEHibrido:
         finally:
             if self.driver:
                 self.driver.quit()
-                logger.info("🔚 Navegador fechado")
+                logger.info("Navegador fechado")
 def main():
     import argparse
 

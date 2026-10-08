@@ -1,6 +1,6 @@
 #--- src/api/routes.py
 
-API Routes - Rotas da API RESTful
+# API Routes - Rotas da API RESTful
 
 from flask import Blueprint, jsonify, request
 from datetime import datetime

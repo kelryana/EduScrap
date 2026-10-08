@@ -1,14 +1,29 @@
-##backend/scraper_ufersa.py 
+##backend/scraper_ufersa.py
 
 import requests
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
 import re
 from datetime import datetime
+import logging
+import os
+
+from dotenv import load_dotenv
+# Carrega variáveis de ambiente do .env na raiz do projeto
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"))
+
+logging.basicConfig(
+    level=os.getenv("LOG_LEVEL", "INFO").upper(),
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+)
+logger = logging.getLogger(__name__)
+
+MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
+MONGODB_DB = os.getenv("MONGODB_DB", "hub_estudantes")
 
 def conectar_banco():
-    client = MongoClient("mongodb://localhost:27017/")
-    db = client["hub_estudantes"]
+    client = MongoClient(MONGODB_URI)
+    db = client[MONGODB_DB]
     return db["vagas_ufersa"]
 
 def extrair_data_vencimento(texto):
@@ -32,12 +47,12 @@ def extrair_data_vencimento(texto):
     return None
 
 def raspar_lista_ufersa(url_menu, ano_filtro, colecao_bd):
-    print(f"Passo 1: Acessando o menu da UFERSA: {url_menu} (Filtro: {ano_filtro})")
+    logger.info(f"Passo 1: Acessando o menu da UFERSA: {url_menu} (Filtro: {ano_filtro})")
     headers = {'User-Agent': 'Mozilla/5.0'}
 
     resposta_menu = requests.get(url_menu, headers=headers)
     if resposta_menu.status_code != 200:
-        print("Erro ao acessar a página de lista.")
+        logger.info("Erro ao acessar a página de lista.")
         return
 
     soup_menu = BeautifulSoup(resposta_menu.text, 'html.parser')
@@ -56,7 +71,7 @@ def raspar_lista_ufersa(url_menu, ano_filtro, colecao_bd):
 
             if url_edital not in links_visitados:
                 links_visitados.add(url_edital)
-                print(f"\n-> Encontrou: {texto_link[:50]}...")
+                logger.info(f"\n-> Encontrou: {texto_link[:50]}...")
 
                 try:
                     resposta_edital = requests.get(url_edital, headers=headers)
@@ -91,12 +106,12 @@ def raspar_lista_ufersa(url_menu, ano_filtro, colecao_bd):
                         upsert=True
                     )
                     editais_inseridos += 1
-                    print("   [Salvo no banco com sucesso]")
+                    logger.info("   [Salvo no banco com sucesso]")
 
                 except Exception as e:
-                    print(f"   [Erro ao ler a página do edital: {e}]")
+                    logger.info(f"   [Erro ao ler a página do edital: {e}]")
 
-    print(f"\nFinalizado! {editais_inseridos} editais da UFERSA salvos.")
+    logger.info(f"\nFinalizado! {editais_inseridos} editais da UFERSA salvos.")
 
 if __name__ == "__main__":
     colecao = conectar_banco()

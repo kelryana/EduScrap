@@ -1,14 +1,29 @@
-##backend/scraper_prae.py 
+##backend/scraper_prae.py
 
 import requests
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
 import re
 from datetime import datetime
+import logging
+import os
+
+from dotenv import load_dotenv
+# Carrega variáveis de ambiente do .env na raiz do projeto
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"))
+
+logging.basicConfig(
+    level=os.getenv("LOG_LEVEL", "INFO").upper(),
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+)
+logger = logging.getLogger(__name__)
+
+MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
+MONGODB_DB = os.getenv("MONGODB_DB", "hub_estudantes")
 
 def conectar_banco():
-    client = MongoClient("mongodb://localhost:27017/")
-    db = client["hub_estudantes"]
+    client = MongoClient(MONGODB_URI)
+    db = client[MONGODB_DB]
     return db["vagas_estagio"]
 
 def extrair_data_vencimento(texto):
@@ -32,7 +47,7 @@ def extrair_data_vencimento(texto):
     return None
 
 def raspar_pagina_prae(url, colecao_bd):
-    print(f"Acessando a página específica: {url}")
+    logger.info(f"Acessando a página específica: {url}")
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
@@ -40,7 +55,7 @@ def raspar_pagina_prae(url, colecao_bd):
     resposta = requests.get(url, headers=headers)
 
     if resposta.status_code != 200:
-        print(f"Erro ao acessar a página. Código: {resposta.status_code}")
+        logger.error(f"Erro ao acessar a página. Código: {resposta.status_code}")
         return
 
     soup = BeautifulSoup(resposta.text, 'html.parser')
@@ -99,7 +114,7 @@ def raspar_pagina_prae(url, colecao_bd):
             )
             editais_inseridos += 1
 
-    print(f"Sucesso! {editais_inseridos} editais oficiais processados nesta página.\n")
+    logger.info(f"Sucesso! {editais_inseridos} editais oficiais processados nesta página.\n")
 
 if __name__ == "__main__":
     colecao = conectar_banco()
@@ -112,4 +127,4 @@ if __name__ == "__main__":
     for pagina in paginas_alvo:
         raspar_pagina_prae(pagina, colecao)
 
-    print("Finalizado! Verifique o MongoDB Compass.")
+    logger.info("Finalizado! Verifique o MongoDB Compass.")

@@ -64,7 +64,7 @@ class MongoDBHandler:
         except Exception as e:
             logger.error(f"Erro ao criar índices: {str(e)}")
 
-    def insert_edital(self, edital_ Dict[str, Any]) -> Optional[str]:
+    def insert_edital(self, edital_data: Dict[str, Any]) -> Optional[str]:
     
         try:
             edital_data['atualizado_em'] = datetime.now().isoformat()
@@ -78,7 +78,7 @@ class MongoDBHandler:
             logger.error(f"Erro ao inserir edital: {str(e)}")
             return None
 
-    def insert_vaga(self, vaga_ Dict[str, Any]) -> Optional[str]:
+    def insert_vaga(self, vaga_data: Dict[str, Any]) -> Optional[str]:
      
         try:
             vaga_data['atualizado_em'] = datetime.now().isoformat()
@@ -89,7 +89,7 @@ class MongoDBHandler:
             logger.error(f"Erro ao inserir vaga: {str(e)}")
             return None
 
-    def insert_noticia(self, noticia_ Dict[str, Any]) -> Optional[str]:
+    def insert_noticia(self, noticia_data: Dict[str, Any]) -> Optional[str]:
      
         try:
             noticia_data['atualizado_em'] = datetime.now().isoformat()
@@ -98,6 +98,52 @@ class MongoDBHandler:
             return str(result.inserted_id)
         except Exception as e:
             logger.error(f"Erro ao inserir notícia: {str(e)}")
+            return None
+
+    def upsert_documento(self, doc: Dict[str, Any], collection_name: str, identifier_field: str) -> Optional[str]:
+        """
+        Realiza upsert (update se existir, insert se não existir) de um documento.
+        
+        Args:
+            doc: Documento a ser inserido/atualizado
+            collection_name: Nome da coleção onde salvar
+            identifier_field: Campo usado para identificar documentos duplicados
+            
+        Returns:
+            ID do documento inserido/atualizado ou None em caso de erro
+        """
+        try:
+            # Adiciona timestamp de atualização
+            doc['atualizado_em'] = datetime.now().isoformat()
+            
+            # Define o filtro para encontrar documento existente
+            filter_criteria = {identifier_field: doc[identifier_field]}
+            
+            # Realiza upsert
+            result = self.db[collection_name].replace_one(
+                filter_criteria,
+                doc,
+                upsert=True
+            )
+            
+            # Se foi um insert, obtemos o ID do documento recém-inserido
+            if result.upserted_id:
+                logger.info(f"Documento inserido com ID: {result.upserted_id}")
+                return str(result.upserted_id)
+            else:
+                # Se foi um update, precisamos buscar o ID do documento
+                found_doc = self.db[collection_name].find_one(filter_criteria)
+                if found_doc:
+                    doc_id = str(found_doc['_id'])
+                    logger.info(f"Documento atualizado com ID: {doc_id}")
+                    return doc_id
+                else:
+                    # Caso raro: documento não encontrado após replace_one
+                    logger.warning(f"Documento não encontrado após upsert: {filter_criteria}")
+                    return None
+                    
+        except Exception as e:
+            logger.error(f"Erro ao realizar upsert: {str(e)}")
             return None
 
     def get_oportunidades(

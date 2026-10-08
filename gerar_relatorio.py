@@ -32,8 +32,7 @@ DESCRICAO_BIBLIOTECAS = {
     "logging": "Registro estruturado de eventos dos scrapers (console + arquivos .log).",
 }
 
-# Descrição das coleções MongoDB inferida do código
-DESCRICAO_COLECOES = {
+    "schedule": "Agendador leve em Python (Scheduler) para varreduras periódicas e atualização de status.",
     "python-dotenv": "Carregamento de variáveis de ambiente (.env), ex.: MONGODB_URI.",
     "logging": "Registro estruturado de eventos dos scrapers (console + arquivos .log).",
 }

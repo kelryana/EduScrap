@@ -77,7 +77,12 @@ class RegexEngine:
 
         for name, pattern in date_patterns.items():
             matches = pattern.findall(text)
-            dates.extend(matches if isinstance(matches[0], str) else [m[0] for m in matches])
+            if matches:  # Check if matches is not empty before accessing first element
+                if isinstance(matches[0], str):
+                    dates.extend(matches)
+                else:
+                    # Handle tuple results (groups)
+                    dates.extend([match[0] if isinstance(match, tuple) else match for match in matches])
 
         logger.info(f"{len(dates)} datas extraídas")
         return list(set(dates))  # Remove duplicatas
@@ -102,7 +107,7 @@ class RegexEngine:
         if pattern:
             match = pattern.search(text)
             if match:
-                result = match.group(1)
+                result = match.group(1)  # Grupo capturado
                 logger.info(f"Título extraído: {result}")
                 return result
 
@@ -111,14 +116,14 @@ class RegexEngine:
         if pattern:
             match = pattern.search(text)
             if match:
-                result = match.group(1)
+                result = match.group(1)  # Grupo capturado
                 logger.info(f"Título extraído: {result}")
                 return result
 
         return None
 
     def extract_currency_values(self, text: str) -> List[str]:
-     
+      
         pattern = self._compiled_patterns.get('values', {}).get('currency')
         if pattern:
             matches = pattern.findall(text)
@@ -129,30 +134,60 @@ class RegexEngine:
     def detect_status(self, text: str) -> str:
       
         text_lower = text.lower()
+        
+        # Verifica palavras-chave para status aberto
+        open_keywords = self.patterns.get('status', {}).get('open_keywords', [])
+        for keyword in open_keywords:
+            if keyword.lower() in text_lower:
+                logger.info(f"Status detectado: Aberto (encontrado '{keyword}')")
+                return "Aberto"
 
-        status_patterns = self.patterns.get('status', {})
+        # Verifica palavras-chave para status fechado
+        closed_keywords = self.patterns.get('status', {}).get('closed_keywords', [])
+        for keyword in closed_keywords:
+            if keyword.lower() in text_lower:
+                logger.info(f"Status detectado: Encerrado (encontrado '{keyword}')")
+                return "Encerrado"
 
-        # Verifica palavras de fechamento
-        for keyword in status_patterns.get('closed_keywords', []):
-            if keyword in text_lower:
-                logger.info("Status detectado: Encerrado")
-                return 'Encerrado'
+        # Padrões dinâmicos (mais flexíveis)
+        open_patterns = [
+            r'(inscrições?|candidaturas?)\s+(abertas?|disponívei[sl])',
+            r'(processo|seleção)\s+em\s+(andamento|aberto)',
+            r'vagas?\s+disponívei[sl]',
+            r'prazo\s+(em\s+aberto|disponível)'
+        ]
+        
+        for pattern in open_patterns:
+            if re.search(pattern, text_lower, re.IGNORECASE):
+                return "Aberto"
 
-        # Verifica palavras de abertura
-        for keyword in status_patterns.get('open_keywords', []):
-            if keyword in text_lower:
-                logger.info("Status detectado: Aberto")
-                return 'Aberto'
+        closed_patterns = [
+            r'(inscrições?|candidaturas?)\s+(encerradas?|finalizadas?|concluídas?)',
+            r'prazo\s+(encerrado|finalizado|concluído)',
+            r'vagas?\s+(preenchidas?|fechadas?)',
+            r'(processo|seleção)\s+(encerrad[oa]|finalizad[oa]|concluíd[oa])'
+        ]
+        
+        for pattern in closed_patterns:
+            if re.search(pattern, text_lower, re.IGNORECASE):
+                return "Encerrado"
 
-        logger.info("Status indefinido")
-        return 'Indefinido'
+        logger.info("Status detectado: Indefinido")
+        return "Indefinido"
 
-    def extract_all(self, text: str) -> Dict[str, Any]:
-     
-        return {
-            'datas': self.extract_dates(text),
-            'edital_numero': self.extract_edital_number(text),
-            'titulo': self.extract_title(text),
-            'valores': self.extract_currency_values(text),
-            'status': self.detect_status(text)
-        }
+    def extract_numbers(self, text: str) -> List[str]:
+      
+        pattern = self._compiled_patterns.get('values', {}).get('number')
+        if pattern:
+            matches = pattern.findall(text)
+            logger.info(f"{len(matches)} números extraídos")
+            return matches
+        return []
+
+    def extract_by_pattern(self, text: str, category: str, pattern_name: str) -> List[str]:
+      
+        pattern = self._compiled_patterns.get(category, {}).get(pattern_name)
+        if pattern:
+            matches = pattern.findall(text)
+            return matches if matches else []
+        return []
