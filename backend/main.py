@@ -120,6 +120,25 @@ def resolver_vinculo_fonte(documento: dict):
             }
     return documento
 
+def enriquecer_prazo(documento: dict):
+    """
+    Calcula o status do prazo de inscrição comparando data_vencimento com a data atual.
+    Adiciona: data_vencimento_formatada, status_prazo ('vigente' | 'vencido' | 'sem_prazo')
+    e dias_restantes (negativo quando já venceu).
+    """
+    if not documento:
+        return documento
+
+    vencimento = documento.get("data_vencimento")
+    if isinstance(vencimento, datetime):
+        documento["data_vencimento_formatada"] = vencimento.strftime("%d/%m/%Y")
+        dias = (vencimento.date() - datetime.now().date()).days
+        documento["dias_restantes"] = dias
+        documento["status_prazo"] = "vigente" if dias >= 0 else "vencido"
+    else:
+        documento["status_prazo"] = "sem_prazo"
+    return documento
+
 def extrair_e_converter_data(texto: str) -> datetime:
     if not texto:
         return None
@@ -151,8 +170,7 @@ def listar_estagios(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), 
     lista_vagas = []
     for vaga in colecao.find(filtro).skip(pulo).limit(limite):
         vaga["_id"] = str(vaga["_id"])
-        if isinstance(vaga.get("data_vencimento"), datetime):
-            vaga["data_vencimento_formatada"] = vaga["data_vencimento"].strftime("%d/%m/%Y")
+        vaga = enriquecer_prazo(vaga)
 
         vaga = resolver_vinculo_fonte(vaga)
         lista_vagas.append(vaga)
@@ -176,8 +194,7 @@ def listar_bolsas(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), ap
     lista_bolsas = []
     for bolsa in colecao.find(filtro).skip(pulo).limit(limite):
         bolsa["_id"] = str(bolsa["_id"])
-        if isinstance(bolsa.get("data_vencimento"), datetime):
-            bolsa["data_vencimento_formatada"] = bolsa["data_vencimento"].strftime("%d/%m/%Y")
+        bolsa = enriquecer_prazo(bolsa)
 
         bolsa = resolver_vinculo_fonte(bolsa)
         lista_bolsas.append(bolsa)
@@ -201,8 +218,7 @@ def listar_ufersa(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), ap
     lista_ufersa = []
     for edital in colecao.find(filtro).skip(pulo).limit(limite):
         edital["_id"] = str(edital["_id"])
-        if isinstance(edital.get("data_vencimento"), datetime):
-            edital["data_vencimento_formatada"] = edital["data_vencimento"].strftime("%d/%m/%Y")
+        edital = enriquecer_prazo(edital)
 
         edital = resolver_vinculo_fonte(edital)
         lista_ufersa.append(edital)
@@ -229,8 +245,7 @@ def listar_ciee(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), apen
 
         vaga["nome"] = vaga.get("nome_completo") or vaga.get("titulo") or "Vaga CIEE"
 
-        if isinstance(vaga.get("data_vencimento"), datetime):
-            vaga["data_vencimento_formatada"] = vaga["data_vencimento"].strftime("%d/%m/%Y")
+        vaga = enriquecer_prazo(vaga)
 
         vaga = resolver_vinculo_fonte(vaga)
         lista_ciee.append(vaga)
@@ -254,8 +269,7 @@ def listar_portal_uern(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1
     lista_portal = []
     for edital in colecao.find(filtro).skip(pulo).limit(limite):
         edital["_id"] = str(edital["_id"])
-        if isinstance(edital.get("data_vencimento"), datetime):
-            edital["data_vencimento_formatada"] = edital["data_vencimento"].strftime("%d/%m/%Y")
+        edital = enriquecer_prazo(edital)
 
         edital = resolver_vinculo_fonte(edital)
         lista_portal.append(edital)
@@ -297,8 +311,7 @@ def listar_noticias(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), 
     lista_noticias = []
     for noticia in colecao.find(filtro).skip(pulo).limit(limite):
         noticia["_id"] = str(noticia["_id"])
-        if isinstance(noticia.get("data_vencimento"), datetime):
-            noticia["data_vencimento_formatada"] = noticia["data_vencimento"].strftime("%d/%m/%Y")
+        noticia = enriquecer_prazo(noticia)
         lista_noticias.append(noticia)
 
     return {
@@ -318,13 +331,13 @@ def pesquisar_unificado(termo: str = Query(..., min_length=2)):
                 cursor = db[col_name].find({"$text": {"$search": termo}})
                 for doc in cursor:
                     doc["_id"] = str(doc["_id"])
-                    doc = resolver_vinculo_fonte(doc)
+                    doc = enriquecer_prazo(resolver_vinculo_fonte(doc))
                     resultados.append(doc)
             except Exception:
                 cursor = db[col_name].find({"nome": {"$regex": termo, "$options": "i"}})
                 for doc in cursor:
                     doc["_id"] = str(doc["_id"])
-                    doc = resolver_vinculo_fonte(doc)
+                    doc = enriquecer_prazo(resolver_vinculo_fonte(doc))
                     resultados.append(doc)
     return resultados
 

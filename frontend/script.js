@@ -218,15 +218,30 @@ function renderizarCards(listaDeVagas) {
     listaDeVagas.forEach(vaga => {
         const temaVerde = vaga.categoria === "Notícia Tech" ? "card-verde" : "";
 
-        // Inserção da Badge Dinâmica Interativa se houver prazo detectado por Regex no banco
+        // Badge dinâmica de prazo: diferencia editais vigentes de encerrados
         let badgeDataHTML = "";
-        if (vaga.data_vencimento_formatada) {
+        const estiloBadgeBase = "border: 2px solid var(--azul-escuro); padding: 4px 8px; font-size: 0.75rem; font-weight: 800; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 10px; box-shadow: 2px 2px 0 var(--azul-escuro);";
+        const dias = vaga.dias_restantes;
+
+        if (vaga.data_vencimento_formatada && vaga.status_prazo === "vencido") {
+            const decorridos = Math.abs(dias);
             badgeDataHTML = `
-                <div style="background: #FFF5F5; color: #DC143C; border: 2px solid var(--azul-escuro); padding: 4px 8px; font-size: 0.75rem; font-weight: 800; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 10px; box-shadow: 2px 2px 0 var(--azul-escuro);">
-                    🔥 Inscrições até ${vaga.data_vencimento_formatada}
+                <div style="background: #EDEDED; color: #555; ${estiloBadgeBase}">
+                    ⛔ Encerrado em ${vaga.data_vencimento_formatada} (há ${decorridos} dia${decorridos === 1 ? '' : 's'})
+                </div>
+            `;
+        } else if (vaga.data_vencimento_formatada) {
+            let complemento = "";
+            if (dias === 0) complemento = " (último dia!)";
+            else if (typeof dias === "number") complemento = ` (faltam ${dias} dia${dias === 1 ? '' : 's'})`;
+            badgeDataHTML = `
+                <div style="background: #FFF5F5; color: #DC143C; ${estiloBadgeBase}">
+                    🔥 Inscrições até ${vaga.data_vencimento_formatada}${complemento}
                 </div>
             `;
         }
+
+        const classeVencido = vaga.status_prazo === "vencido" ? "card-vencido" : "";
 
         // Resolução Parcial Dinâmica dos Metadados das Fontes Normalizadas
         let linkFonteHTML = `Fonte: ${vaga.fonte || 'Não Especificada'}`;
@@ -241,7 +256,7 @@ function renderizarCards(listaDeVagas) {
         }
 
         const cardHTML = `
-            <div class="card ${temaVerde}">
+            <div class="card ${temaVerde} ${classeVencido}">
                 <div>
                     <div style="display: flex; flex-direction: column; align-items: flex-start;">
                         <span class="card-categoria">${vaga.categoria || 'Geral'}</span>
