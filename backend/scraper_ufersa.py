@@ -9,6 +9,7 @@ import logging
 import os
 
 from dotenv import load_dotenv
+from pdf_utils import extrair_data_vencimento_datetime
 # Carrega variáveis de ambiente do .env na raiz do projeto
 load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"))
 
@@ -89,6 +90,11 @@ def raspar_lista_ufersa(url_menu, ano_filtro, colecao_bd):
                             break
 
                     data_vencimento = extrair_data_vencimento(nome_edital)
+
+                    if not data_vencimento:
+                        # Procura o prazo no texto da página do edital e, depois, no PDF
+                        texto_pagina = soup_edital.get_text(" ", strip=True)
+                        data_vencimento = extrair_data_vencimento_datetime(texto_pagina, link_pdf)
 
                     documento = {
                         "nome": nome_edital,

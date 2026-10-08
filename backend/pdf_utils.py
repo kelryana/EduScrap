@@ -266,6 +266,19 @@ def extrair_data_vencimento_hibrido(texto_html: str, url_pdf: str) -> Optional[s
     return None
 
 
+def extrair_data_vencimento_datetime(texto_html: str, url_pdf: str) -> Optional[datetime]:
+    """
+    Versão para os scrapers: busca o prazo no texto (HTML) e, se não achar, no PDF do edital.
+    Retorna datetime (formato salvo no MongoDB) ou None. Nunca lança exceção.
+    """
+    try:
+        data_str = extrair_data_vencimento_hibrido(texto_html, url_pdf)
+        return datetime.strptime(data_str, "%Y-%m-%d") if data_str else None
+    except Exception as e:
+        logger.warning(f"Falha ao extrair prazo de {url_pdf}: {e}")
+        return None
+
+
 def verificar_status(data_vencimento: Optional[str]) -> str:
 
     if not data_vencimento:

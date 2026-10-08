@@ -14,6 +14,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from pymongo import MongoClient
+from pdf_utils import extrair_data_de_texto
 
 # Carrega variáveis de ambiente do .env na raiz do projeto
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
@@ -207,8 +208,14 @@ def minerar_portal_uern():
                 titulo_tag = soup_interna.find("h1")
                 titulo = titulo_tag.get_text(strip=True) if titulo_tag else "Título não identificado"
 
-                # Extrai corpo do texto (parágrafos)
-                paragrafos = soup_interna.find_all("p")
+                # Extrai corpo do texto apenas do conteúdo da notícia
+                # (evita pegar datas do rodapé/sidebar, que se repetem em todas as páginas)
+                corpo = (
+                    soup_interna.find(class_=re.compile(r"entry-content|post-content|single-content|td-post-content"))
+                    or soup_interna.find("article")
+                    or soup_interna
+                )
+                paragrafos = corpo.find_all("p")
                 texto_completo = " ".join([p.get_text(strip=True) for p in paragrafos])
 
                 # Extrai resumo/meta descrição se disponível
@@ -226,8 +233,9 @@ def minerar_portal_uern():
                     print(f"   📝 Título: {titulo[:80]}")
                     print(f"   🔑 Palavras-chave: {', '.join(palavras_chave[:5])}")
 
-                    # Extrai data aproximada
-                    data_vencimento = extrair_data_do_texto(texto_completo)
+                    # Extrai o prazo priorizando "inscrições até", "prazo", períodos "X a Y"
+                    data_str = extrair_data_de_texto(f"{titulo} {texto_completo}")
+                    data_vencimento = datetime.strptime(data_str, "%Y-%m-%d") if data_str else None
 
                     # Determina categoria baseada nas palavras-chave
                     categoria = "Notícia Geral"

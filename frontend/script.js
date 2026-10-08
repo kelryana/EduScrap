@@ -221,9 +221,18 @@ function renderizarCards(listaDeVagas) {
         // Badge dinâmica de prazo: diferencia editais vigentes de encerrados
         let badgeDataHTML = "";
         const estiloBadgeBase = "border: 2px solid var(--azul-escuro); padding: 4px 8px; font-size: 0.75rem; font-weight: 800; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 10px; box-shadow: 2px 2px 0 var(--azul-escuro);";
-        const dias = vaga.dias_restantes;
 
-        if (vaga.data_vencimento_formatada && vaga.status_prazo === "vencido") {
+        // Garante o cálculo mesmo se a API ainda não enviar status_prazo/dias_restantes
+        let dias = vaga.dias_restantes;
+        let status = vaga.status_prazo;
+        if (vaga.data_vencimento_formatada && typeof dias !== "number") {
+            const [d, m, a] = vaga.data_vencimento_formatada.split("/").map(Number);
+            const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+            dias = Math.round((new Date(a, m - 1, d) - hoje) / 86400000);
+            status = dias >= 0 ? "vigente" : "vencido";
+        }
+
+        if (vaga.data_vencimento_formatada && status === "vencido") {
             const decorridos = Math.abs(dias);
             badgeDataHTML = `
                 <div style="background: #EDEDED; color: #555; ${estiloBadgeBase}">
@@ -231,17 +240,21 @@ function renderizarCards(listaDeVagas) {
                 </div>
             `;
         } else if (vaga.data_vencimento_formatada) {
-            let complemento = "";
-            if (dias === 0) complemento = " (último dia!)";
-            else if (typeof dias === "number") complemento = ` (faltam ${dias} dia${dias === 1 ? '' : 's'})`;
+            const complemento = dias === 0 ? " (último dia!)" : ` (faltam ${dias} dia${dias === 1 ? '' : 's'})`;
             badgeDataHTML = `
                 <div style="background: #FFF5F5; color: #DC143C; ${estiloBadgeBase}">
                     🔥 Inscrições até ${vaga.data_vencimento_formatada}${complemento}
                 </div>
             `;
+        } else {
+            badgeDataHTML = `
+                <div style="background: #FFFBEA; color: #8A6D00; ${estiloBadgeBase}">
+                    ❔ Prazo não identificado — confira no edital
+                </div>
+            `;
         }
 
-        const classeVencido = vaga.status_prazo === "vencido" ? "card-vencido" : "";
+        const classeVencido = status === "vencido" ? "card-vencido" : "";
 
         // Resolução Parcial Dinâmica dos Metadados das Fontes Normalizadas
         let linkFonteHTML = `Fonte: ${vaga.fonte || 'Não Especificada'}`;

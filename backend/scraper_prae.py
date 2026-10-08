@@ -9,6 +9,7 @@ import logging
 import os
 
 from dotenv import load_dotenv
+from pdf_utils import extrair_data_vencimento_datetime
 # Carrega variáveis de ambiente do .env na raiz do projeto
 load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"))
 
@@ -96,6 +97,10 @@ def raspar_pagina_prae(url, colecao_bd):
             if not data_vencimento:
                 texto_completo = f"{nome_edital} {categoria_texto}"
                 data_vencimento = extrair_data_vencimento(texto_completo)
+
+            if not data_vencimento:
+                # Título raramente traz o prazo: lê o PDF do edital
+                data_vencimento = extrair_data_vencimento_datetime(texto_bruto, link_pdf)
 
             documento = {
                 "nome": nome_edital,
