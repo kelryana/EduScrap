@@ -40,6 +40,8 @@ EduScrap-UERN/
 │   └── patterns.json        # Padrões de busca
 ├── diagrams/             # Diagramas do sistema
 ├── tests/                # Testes automatizados
+├── start.sh              # Script de inicialização completa automatizada
+├── Makefile              # Comandos rápidos (make run, test, scrape, setup)
 ├── requirements.txt      # Dependências Python
 └── README.md            # Este arquivo
 ```
@@ -69,6 +71,35 @@ Antes de começar, certifique-se de ter instalado:
 git clone <url-do-repositorio>
 cd EduScrap
 ```
+
+---
+
+## ⚡ Inicialização Rápida Automatizada (Recomendado) 🚀
+
+Para subir todo o projeto (MongoDB, Backend FastAPI e Frontend) e abrir no navegador com apenas um comando:
+
+```bash
+./start.sh
+```
+
+> **Dica:** Você também pode utilizar o Makefile executando:
+> ```bash
+> make run
+> ```
+
+### O que o script de automação faz:
+1. Ativa o ambiente virtual (`venv`).
+2. Verifica se o MongoDB está rodando e tenta iniciar caso esteja inativo.
+3. Executa a configuração do banco (`database_setup.py`).
+4. Inicia a API FastAPI na porta `8000` (com *hot-reload* ativado).
+5. Inicia o servidor HTTP do Frontend na porta `3000`.
+6. Abre automaticamente seu navegador em `http://localhost:3000`.
+7. **Encerramento limpo:** Basta pressionar `Ctrl + C` no terminal para parar todos os serviços de uma vez.
+
+### URLs da Aplicação:
+- **Frontend Dashboard:** [http://localhost:3000](http://localhost:3000)
+- **API FastAPI:** [http://localhost:8000](http://localhost:8000)
+- **Documentação Interativa (Swagger):** [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---
 
@@ -432,6 +463,9 @@ cd backend
 python scraper_ciee.py
 python scraper_uern.py
 python scraper_noticias.py
+
+# Ou via Makefile na raiz:
+make scrape
 ```
 
 ---
@@ -441,10 +475,15 @@ python scraper_noticias.py
 Para executar os testes automatizados:
 
 ```bash
+# Via Makefile (recomendado)
+make test
+
+# Ou diretamente com pytest na raiz
+pytest tests/
+
+# Ou dentro da pasta tests
 cd tests
 python -m pytest
-# ou
-python teste.py
 ```
 
 ---
