@@ -112,12 +112,14 @@ def raspar_pagina_proex(url, colecao_bd):
             if data_vencimento:
                 documento["data_vencimento"] = data_vencimento
 
-            colecao_bd.update_one(
+            # Update the record based on the link
+            result = colecao_bd.update_one(
                 {"link": link_pdf},
                 {"$set": documento},
                 upsert=True
             )
-            editais_inseridos += 1
+            if result.upserted_id or result.modified_count > 0:
+                editais_inseridos += 1
 
     logger.info(f"Sucesso! {editais_inseridos} editais de Bolsa (PROEX) processados.\n")
 
@@ -126,10 +128,16 @@ if __name__ == "__main__":
 
     # Lista de páginas alvo da PROEX
     paginas_alvo_proex = [
-        "https://portal.uern.br/proex/2026-2/"
+        "https://portal.uern.br/proex/2026-2/",
+        "https://portal.uern.br/proex/",
+        "https://portal.uern.br/proex/2026/",
+        "https://portal.uern.br/proex/editais/"
     ]
 
     for pagina in paginas_alvo_proex:
-        raspar_pagina_proex(pagina, colecao)
+        try:
+            raspar_pagina_proex(pagina, colecao)
+        except Exception as e:
+            logger.error(f"Erro ao processar a página {pagina}: {e}")
 
     logger.info("Finalizado! Verifique o MongoDB Compass.")

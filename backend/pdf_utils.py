@@ -220,6 +220,23 @@ def extrair_data_de_texto(texto: str) -> Optional[str]:
             except (ValueError, TypeError):
                 continue
 
+    # Se nenhum padrão funcionou, tenta encontrar datas genéricas
+    # mas apenas para conteúdo que não seja de notícias tecnológicas
+    if 'notícia tech' not in texto.lower() and 'g1' not in texto.lower() and 'canaltech' not in texto.lower():
+        # Procurar por qualquer data no texto para outros tipos de conteúdo
+        generic_date_pattern = r'\b(\d{1,2})[/\-](\d{1,2})[/\-](\d{4})\b'
+        generic_match = re.search(generic_date_pattern, texto, re.IGNORECASE)
+        if generic_match:
+            try:
+                dia, mes, ano = int(generic_match.group(1)), int(generic_match.group(2)), int(generic_match.group(3))
+                if 2020 <= ano <= 2035:
+                    data_encontrada = datetime(ano, mes, dia)
+                    data_str = data_encontrada.strftime('%Y-%m-%d')
+                    logger.info(f"Data genérica encontrada: {data_str}")
+                    return data_str
+            except (ValueError, IndexError):
+                pass
+    
     return None
 def extrair_data_vencimento_pdf(url_pdf: str, timeout: int = 15) -> Optional[str]:
 

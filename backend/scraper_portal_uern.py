@@ -41,7 +41,8 @@ PALAVRAS_CHAVE_OPORTUNIDADES = [
     "estágio", "estágios", "bolsa", "bolsas", "vaga", "vagas",
     "seleção", "edital", "pnaes", "auxílio", "residência", "monitoria",
     "inscrições", "cursos", "vagas abertas", "processo seletivo",
-    "extensão", "pesquisa", "iniciação científica"
+    "extensão", "pesquisa", "iniciação científica", "notícia", "publicação",
+    "chamada", "convocação", "aviso", "comunicado", "evento", "atividade"
 ]
 
 def criar_navegador_headless():
@@ -88,7 +89,7 @@ def criar_navegador_headless():
 def extrair_data_do_texto(texto):
     """Tenta extrair uma data do texto para usar como vencimento"""
     if not texto:
-        return datetime.now()
+        return None
 
     # Padrões comuns de data no Brasil
     padroes = [
@@ -114,8 +115,8 @@ def extrair_data_do_texto(texto):
             except (ValueError, AttributeError):
                 pass
 
-    # Se não encontrar data específica, retorna data atual + 7 dias (padrão)
-    return datetime.now() + timedelta(days=7)
+    # Se não encontrar data específica, retorna None para não adicionar data inválida
+    return None
 
 def analisar_relevancia(texto):
     """Analisa se o conteúdo contém palavras-chave de oportunidade"""
@@ -237,6 +238,13 @@ def minerar_portal_uern():
                     data_str = extrair_data_de_texto(f"{titulo} {texto_completo}")
                     data_vencimento = datetime.strptime(data_str, "%Y-%m-%d") if data_str else None
 
+                    # Se não encontrar data no conteúdo, tenta extrair do título ou corpo
+                    if not data_vencimento:
+                        # Procura por datas em formatos comuns
+                        data_from_content = extrair_data_do_texto(f"{titulo} {texto_completo}")
+                        if data_from_content:
+                            data_vencimento = data_from_content
+
                     # Determina categoria baseada nas palavras-chave
                     categoria = "Notícia Geral"
                     if any(p in palavras_chave for p in ["estágio", "vaga", "seleção"]):
@@ -280,6 +288,7 @@ def minerar_portal_uern():
             for i, noticia in enumerate(noticias_validas, start=1):
                 print(f"  {i}. {noticia['nome'][:70]}...")
                 print(f"     Categoria: {noticia['categoria']}")
+                print(f"     Data de vencimento: {noticia.get('data_vencimento', 'Não especificada')}")
                 print(f"     Link: {noticia['link'][:60]}...")
         else:
             print("\n⚠️ Nenhuma oportunidade relevante encontrada nesta varredura.")

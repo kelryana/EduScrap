@@ -106,13 +106,15 @@ def raspar_lista_ufersa(url_menu, ano_filtro, colecao_bd):
                     if data_vencimento:
                         documento["data_vencimento"] = data_vencimento
 
-                    colecao_bd.update_one(
+                    # Update the record based on the name
+                    result = colecao_bd.update_one(
                         {"nome": nome_edital},
                         {"$set": documento},
                         upsert=True
                     )
-                    editais_inseridos += 1
-                    logger.info("   [Salvo no banco com sucesso]")
+                    if result.upserted_id or result.modified_count > 0:
+                        editais_inseridos += 1
+                        logger.info("   [Salvo no banco com sucesso]")
 
                 except Exception as e:
                     logger.info(f"   [Erro ao ler a página do edital: {e}]")
@@ -122,7 +124,13 @@ def raspar_lista_ufersa(url_menu, ano_filtro, colecao_bd):
 if __name__ == "__main__":
     colecao = conectar_banco()
 
-    url_alvo = "https://proae.ufersa.edu.br/2026-2/"
+    url_alvo = "https://proae.ufersa.edu.br/"
     ano_desejado = "2026"
 
     raspar_lista_ufersa(url_alvo, ano_desejado, colecao)
+    
+    # Try alternative URLs if needed
+    try:
+        raspar_lista_ufersa("https://proae.ufersa.edu.br/2026-2/", ano_desejado, colecao)
+    except Exception as e:
+        logger.error(f"Erro ao tentar URL alternativa: {e}")

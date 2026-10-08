@@ -222,36 +222,48 @@ function renderizarCards(listaDeVagas) {
         let badgeDataHTML = "";
         const estiloBadgeBase = "border: 2px solid var(--azul-escuro); padding: 4px 8px; font-size: 0.75rem; font-weight: 800; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 10px; box-shadow: 2px 2px 0 var(--azul-escuro);";
 
-        // Garante o cálculo mesmo se a API ainda não enviar status_prazo/dias_restantes
-        let dias = vaga.dias_restantes;
-        let status = vaga.status_prazo;
-        if (vaga.data_vencimento_formatada && typeof dias !== "number") {
-            const [d, m, a] = vaga.data_vencimento_formatada.split("/").map(Number);
-            const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
-            dias = Math.round((new Date(a, m - 1, d) - hoje) / 86400000);
-            status = dias >= 0 ? "vigente" : "vencido";
-        }
+        // Verifica se é um tipo de conteúdo que não tem prazo por natureza (como notícias técnicas)
+        const naoTemPrazoPorNatureza = vaga.status_prazo === "sem_prazo_aplicavel";
 
-        if (vaga.data_vencimento_formatada && status === "vencido") {
-            const decorridos = Math.abs(dias);
+        if (naoTemPrazoPorNatureza) {
+            // Para notícias técnicas e outros conteúdos sem prazo por natureza, mostra mensagem apropriada
             badgeDataHTML = `
-                <div style="background: #EDEDED; color: #555; ${estiloBadgeBase}">
-                    ⛔ Encerrado em ${vaga.data_vencimento_formatada} (há ${decorridos} dia${decorridos === 1 ? '' : 's'})
-                </div>
-            `;
-        } else if (vaga.data_vencimento_formatada) {
-            const complemento = dias === 0 ? " (último dia!)" : ` (faltam ${dias} dia${dias === 1 ? '' : 's'})`;
-            badgeDataHTML = `
-                <div style="background: #FFF5F5; color: #DC143C; ${estiloBadgeBase}">
-                    🔥 Inscrições até ${vaga.data_vencimento_formatada}${complemento}
+                <div style="background: #F0F8FF; color: #4169E1; ${estiloBadgeBase}">
+                    📰 Conteúdo informativo (sem prazo de inscrição)
                 </div>
             `;
         } else {
-            badgeDataHTML = `
-                <div style="background: #FFFBEA; color: #8A6D00; ${estiloBadgeBase}">
-                    ❔ Prazo não identificado — confira no edital
-                </div>
-            `;
+            // Garante o cálculo mesmo se a API ainda não enviar status_prazo/dias_restantes
+            let dias = vaga.dias_restantes;
+            let status = vaga.status_prazo;
+            if (vaga.data_vencimento_formatada && typeof dias !== "number") {
+                const [d, m, a] = vaga.data_vencimento_formatada.split("/").map(Number);
+                const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+                dias = Math.round((new Date(a, m - 1, d) - hoje) / 86400000);
+                status = dias >= 0 ? "vigente" : "vencido";
+            }
+
+            if (vaga.data_vencimento_formatada && status === "vencido") {
+                const decorridos = Math.abs(dias);
+                badgeDataHTML = `
+                    <div style="background: #EDEDED; color: #555; ${estiloBadgeBase}">
+                        ⛔ Encerrado em ${vaga.data_vencimento_formatada} (há ${decorridos} dia${decorridos === 1 ? '' : 's'})
+                    </div>
+                `;
+            } else if (vaga.data_vencimento_formatada) {
+                const complemento = dias === 0 ? " (último dia!)" : ` (faltam ${dias} dia${dias === 1 ? '' : 's'})`;
+                badgeDataHTML = `
+                    <div style="background: #FFF5F5; color: #DC143C; ${estiloBadgeBase}">
+                        🔥 Inscrições até ${vaga.data_vencimento_formatada}${complemento}
+                    </div>
+                `;
+            } else {
+                badgeDataHTML = `
+                    <div style="background: #FFFBEA; color: #8A6D00; ${estiloBadgeBase}">
+                        ❔ Prazo não identificado — confira no edital
+                    </div>
+                `;
+            }
         }
 
         const classeVencido = status === "vencido" ? "card-vencido" : "";

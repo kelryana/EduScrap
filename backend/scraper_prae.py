@@ -112,12 +112,14 @@ def raspar_pagina_prae(url, colecao_bd):
             if data_vencimento:
                 documento["data_vencimento"] = data_vencimento
 
-            colecao_bd.update_one(
+            # Update the record based on the link
+            result = colecao_bd.update_one(
                 {"link": link_pdf},
                 {"$set": documento},
                 upsert=True
             )
-            editais_inseridos += 1
+            if result.upserted_id or result.modified_count > 0:
+                editais_inseridos += 1
 
     logger.info(f"Sucesso! {editais_inseridos} editais oficiais processados nesta página.\n")
 
@@ -126,10 +128,16 @@ if __name__ == "__main__":
 
     # A lista onde você coloca as páginas específicas que quer ler
     paginas_alvo = [
-        "https://portal.uern.br/prae/2026-2/"
+        "https://portal.uern.br/prae/2026-2/",
+        "https://portal.uern.br/prae/",
+        "https://portal.uern.br/prae/2026/",
+        "https://portal.uern.br/prae/editais/"
     ]
 
     for pagina in paginas_alvo:
-        raspar_pagina_prae(pagina, colecao)
+        try:
+            raspar_pagina_prae(pagina, colecao)
+        except Exception as e:
+            logger.error(f"Erro ao processar a página {pagina}: {e}")
 
     logger.info("Finalizado! Verifique o MongoDB Compass.")

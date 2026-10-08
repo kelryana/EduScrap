@@ -130,6 +130,22 @@ def enriquecer_prazo(documento: dict):
         return documento
 
     vencimento = documento.get("data_vencimento")
+    
+    # Para notícias tecnológicas, não aplicamos o conceito de prazo
+    categoria = documento.get("categoria", "")
+    fonte = documento.get("fonte", "")
+    fonte_id = documento.get("fonte_id", "")
+    
+    # Verifica se é conteúdo de notícia técnica que não tem prazo por natureza
+    if ("notícia tech" in categoria.lower() or 
+        "g1" in fonte.lower() or 
+        "canaltech" in fonte.lower() or
+        "noticias" in fonte_id.lower()):
+        
+        # Não adiciona informações de prazo para este tipo de conteúdo
+        documento["status_prazo"] = "sem_prazo_aplicavel"  # Indica que o tipo de conteúdo não tem prazo
+        return documento
+
     if isinstance(vencimento, datetime):
         documento["data_vencimento_formatada"] = vencimento.strftime("%d/%m/%Y")
         dias = (vencimento.date() - datetime.now().date()).days
