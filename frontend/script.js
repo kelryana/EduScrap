@@ -749,6 +749,7 @@ function renderizarCards(listaDeVagas) {
                         <span>Até ${vaga.data_vencimento_formatada}${complemento}</span>
                     </div>
                 `;
+            }
         }
 
         const classeVencido = status === "vencido" ? "card-vencido" : "";
