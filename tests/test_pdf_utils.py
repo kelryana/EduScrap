@@ -3,7 +3,7 @@ from unittest.mock import patch, MagicMock
 import io
 from datetime import datetime, timedelta
 from io import BytesIO
-# Import from the backend module structure
+
 from backend.pdf_utils import (
     extrair_data_de_texto,
     verificar_status,
@@ -16,33 +16,26 @@ from backend.pdf_utils import (
 
 
 class TestExtrairDataDeTexto:
-    """Test cases for extrair_data_de_texto function"""
-
     def test_extrair_data_de_texto_with_valid_date_formats(self):
-        """Test extracting dates from various valid formats"""
-        # Test DD/MM/YYYY format
+        
         text = "O edital foi publicado em 15/03/2024 e as inscrições terminam em 30/04/2024."
         result = extrair_data_de_texto(text)
         assert result is not None
-        # The function should return the earliest date found
+       
         assert result == "2024-03-15"
 
-        # Test full date format
         text = "As inscrições começam em 15 de março de 2024 e terminam em 30 de abril de 2024."
         result = extrair_data_de_texto(text)
         assert result == "2024-03-15"
 
-        # Test mixed formats
         text = "Inicio: 01/01/2024 | Término: 31 de dezembro de 2024"
         result = extrair_data_de_texto(text)
         assert result == "2024-01-01"
 
-        # Test date with different separators
         text = "Evento em 25-12-2024 e 05.06.2024"
         result = extrair_data_de_texto(text)
         assert result == "2024-12-25"
 
-        # Test date with varying year positions
         text = "Datas: 2024/03/15, 2025.04.30 e 2026-05-15"
         result = extrair_data_de_texto(text)
         assert result == "2024-03-15"

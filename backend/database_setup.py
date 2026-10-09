@@ -5,7 +5,7 @@ import logging
 import os
 
 from dotenv import load_dotenv
-# Carrega variáveis de ambiente do .env na raiz do projeto
+
 load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"))
 
 logging.basicConfig(
@@ -69,7 +69,7 @@ def configurar_banco_avancado():
         })
         logger.info("JSON Schema acoplado com sucesso!")
     except Exception as e:
-        logger.info(f"⚠️ Nota do Validador: {e}")
+        logger.info(f"Nota do Validador: {e}")
 
     print("\n" + "="*60)
     logger.info("SISTEMA OTIMIZADO COM SUCESSO!")

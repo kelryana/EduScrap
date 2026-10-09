@@ -30,8 +30,7 @@ def db_handler(mock_mongo_client):
 def app(db_handler):
     flask_app = create_app()
     flask_app.config['TESTING'] = True
-    
-    # Injeta db_handler mockado em routes
+ 
     with patch('backend.api.routes.get_db_handler', return_value=db_handler):
         yield flask_app
 

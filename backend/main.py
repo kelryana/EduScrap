@@ -41,9 +41,9 @@ API_KEY = os.getenv("API_KEY", "")
 
 
 def verificar_api_key(x_api_key: str = Header(default=None)):
-    """Dependência FastAPI: exige o header X-API-Key válido."""
+
     if not API_KEY:
-        # Proteção desativada (apenas desenvolvimento local sem API_KEY no .env)
+       
         return True
     if x_api_key != API_KEY:
         raise HTTPException(
@@ -59,7 +59,7 @@ client = MongoClient(MONGODB_URI)
 db = client[MONGODB_DB]
 
 def obter_usuario_logado(authorization: str = Header(default=None)):
-    """Dependência FastAPI que extrai e valida o token JWT do header Authorization."""
+   
     if not authorization:
         raise HTTPException(status_code=401, detail="Token de autorização não fornecido")
     parts = authorization.split()
@@ -78,7 +78,7 @@ def obter_usuario_logado(authorization: str = Header(default=None)):
     return user
 
 def obter_usuario_opcional(authorization: str = Header(default=None)):
-    """Dependência FastAPI que recupera o usuário se o token for enviado, sem abortar se anônimo."""
+    
     if not authorization:
         return None
     try:

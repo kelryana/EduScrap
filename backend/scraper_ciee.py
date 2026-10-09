@@ -53,13 +53,13 @@ class ScraperCIEEHibrido:
         logger.info(f"Buscando por: {cidade}")
 
     def conectar_mongodb(self):
-        """Conecta ao MongoDB e prepara a coleção"""
+       
         try:
             client = MongoClient(MONGO_URI)
             db = client[DB_NAME]
             self.colecao = db[COLLECTION_NAME]
 
-            # Criar índices para performance (SEM unique no link)
+
             self.colecao.create_index("codigo", unique=True, sparse=True)
             self.colecao.create_index("link")
             self.colecao.create_index("coletado_em")
@@ -73,7 +73,7 @@ class ScraperCIEEHibrido:
             return False
 
     def configurar_driver(self):
-        """Configura o Firefox em modo headless"""
+     
         try:
             options = Options()
 
@@ -104,11 +104,10 @@ class ScraperCIEEHibrido:
             return False
 
     def buscar_cidade(self):
-        """Busca pela cidade e CLICA NA SUGESTÃO"""
+        
         try:
             logger.info(f"Buscando por '{self.cidade}'...")
 
-            # Encontrar o campo de busca
             campo = None
             seletores = [
                 "//input[contains(@placeholder, 'cidade')]",
@@ -138,7 +137,7 @@ class ScraperCIEEHibrido:
             # PASSO 2: DIGITAR A CIDADE
             campo.clear()
             campo.send_keys(self.cidade)
-            logger.info(f"✅ Digitado '{self.cidade}'")
+            logger.info(f"Digitado '{self.cidade}'")
             time.sleep(2)
 
             # PASSO 3: CLICAR NA SUGESTÃO (CORRIGIDO!)
@@ -154,14 +153,14 @@ class ScraperCIEEHibrido:
                 for elem in sugestoes:
                     if elem.is_displayed() and elem.is_enabled():
                         sugestao = elem
-                        logger.info("✅ Sugestão encontrada (li)")
+                        logger.info("Sugestão encontrada (li)")
                         break
 
                 # Estratégia 2: Procurar por ID específico
                 if not sugestao:
                     try:
                         sugestao = self.driver.find_element(By.ID, "2408003")
-                        logger.info("✅ Sugestão encontrada por ID")
+                        logger.info("Sugestão encontrada por ID")
                     except:
                         pass
 
@@ -169,7 +168,7 @@ class ScraperCIEEHibrido:
                 if not sugestao:
                     try:
                         sugestao = self.driver.find_element(By.CSS_SELECTOR, "#ComboCidade li")
-                        logger.info("✅ Sugestão encontrada por CSS")
+                        logger.info("Sugestão encontrada por CSS")
                     except:
                         pass
 
@@ -178,14 +177,14 @@ class ScraperCIEEHibrido:
                     self.driver.execute_script("arguments[0].scrollIntoView(true);", sugestao)
                     time.sleep(0.5)
                     sugestao.click()
-                    logger.info(f"✅ Sugestão '{texto_sugestao}' clicada!")
+                    logger.info(f"Sugestão '{texto_sugestao}' clicada!")
                     time.sleep(2)
 
                     # PASSO 4: CLICAR NO BOTÃO "Aplicar"
                     try:
                         aplicar = self.driver.find_element(By.XPATH, "//*[contains(text(), 'Aplicar')]")
                         aplicar.click()
-                        logger.info("✅ Botão 'Aplicar' clicado")
+                        logger.info("Botão 'Aplicar' clicado")
                         time.sleep(2)
                     except:
                         pass
@@ -194,12 +193,12 @@ class ScraperCIEEHibrido:
                     time.sleep(2)
                     pagina_texto = self.driver.page_source.lower()
                     if self.cidade.lower() in pagina_texto:
-                        logger.info(f"✅ Busca por '{self.cidade}' confirmada!")
+                        logger.info(f"Busca por '{self.cidade}' confirmada!")
 
                         
                         try:
                             botoes = self.driver.find_elements(By.XPATH, "//*[contains(text(), 'Ver detalhes')]")
-                            logger.info(f"✅ {len(botoes)} vagas encontradas")
+                            logger.info(f"{len(botoes)} vagas encontradas")
                         except:
                             pass
 
@@ -271,16 +270,16 @@ class ScraperCIEEHibrido:
             match = re.search(padrao, texto_card)
             if match:
                 try:
-                    # Handle different formats
+                   
                     if any("/" in g for g in match.groups()):
                         dia, mes, ano = int(match.group(1)), int(match.group(2)), int(match.group(3))
                     elif "de" in match.group(0).lower():
-                        # Handle Brazilian Portuguese format
+                       
                         dia = int(match.group(1))
                         mes_texto = match.group(2).lower()
                         ano = int(match.group(3))
                         
-                        # Portuguese month names
+                      
                         meses = {
                             "jan": 1, "january": 1, "janeiro": 1,
                             "fev": 2, "feb": 2, "february": 2, "fevereiro": 2,
@@ -405,11 +404,7 @@ class ScraperCIEEHibrido:
         return vaga
 
     def _carregar_paginacao(self, max_cliques: int = 10):
-        """Trata a paginação infinite-scroll clicando em 'Carregar mais'.
-
-        Retorna a quantidade de cliques realizados. Falhas de elemento
-        são tratadas como fim da paginação (comportamento esperado).
-        """
+      
         cliques = 0
         while cliques < max_cliques:
             try:
@@ -427,7 +422,7 @@ class ScraperCIEEHibrido:
         return cliques
 
     def _localizar_botoes_detalhe(self):
-        """Localiza os botões 'Ver detalhes' visíveis na página."""
+       
         try:
             botoes = WebDriverWait(self.driver, 20).until(
                 EC.presence_of_all_elements_located((By.XPATH, "//*[contains(text(), 'Ver detalhes')]"))
@@ -438,11 +433,7 @@ class ScraperCIEEHibrido:
             return []
 
     def extrair_vagas(self):
-        """Extrai vagas filtrando pela cidade configurada.
-
-        Orquestra as funções menores: paginação -> localização dos
-        cards -> parsing puro -> filtro por cidade.
-        """
+       
         try:
             logger.info("Extraindo vagas...")
 
@@ -518,7 +509,7 @@ class ScraperCIEEHibrido:
     def salvar_mongodb(self):
         """Salva as vagas no MongoDB com deduplicação"""
         if not self.vagas:
-            logger.warning("⚠️ Nenhuma vaga para salvar")
+            logger.warning(" Nenhuma vaga para salvar")
             return 0
 
         logger.info(f"Salvando {len(self.vagas)} vagas no MongoDB...")
@@ -546,17 +537,17 @@ class ScraperCIEEHibrido:
                     atualizados += 1
 
             except Exception as e:
-                logger.warning(f"⚠️ Erro ao salvar vaga: {e}")
+                logger.warning(f"Erro ao salvar vaga: {e}")
                 erros += 1
 
         logger.info(f"{salvos} novas vagas salvas, {atualizados} atualizadas")
         if erros > 0:
-            logger.warning(f"⚠️ {erros} vagas com erro")
+            logger.warning(f"{erros} vagas com erro")
 
         return salvos
 
     def gerar_relatorio(self):
-        """Gera um relatório da execução"""
+       
         logger.info("=" * 60)
         logger.info("RELATÓRIO DE EXECUÇÃO")
         logger.info("=" * 60)
@@ -567,19 +558,19 @@ class ScraperCIEEHibrido:
 
         for i, vaga in enumerate(self.vagas, 1):
             logger.info(f"{i}. [{vaga.get('codigo', 'N/A')}] {vaga.get('titulo', 'Sem título')}")
-            logger.info(f"   📌 Área: {vaga.get('area', 'N/E')}")
+            logger.info(f"    Área: {vaga.get('area', 'N/E')}")
             logger.info(f"   Salário: {vaga.get('salario', 'N/I')}")
             if vaga.get('data_vencimento'):
-                logger.info(f"   📅 Vence: {vaga['data_vencimento']}")
+                logger.info(f"   Vence: {vaga['data_vencimento']}")
             logger.info("   ---")
 
     def executar(self):
-        """Executa o scraper completo"""
+       
         logger.info("=" * 60)
         logger.info("SCRAPER CIEE HÍBRIDO")
         logger.info("=" * 60)
-        logger.info(f"📍 Busca por: {self.cidade}")
-        logger.info(f"🌐 URL: {URL_CIEE}")
+        logger.info(f"Busca por: {self.cidade}")
+        logger.info(f"URL: {URL_CIEE}")
         logger.info("=" * 60)
 
         if not self.conectar_mongodb():
@@ -594,11 +585,11 @@ class ScraperCIEEHibrido:
             time.sleep(2)
 
             if not self.buscar_cidade():
-                logger.error("❌ Falha na busca")
+                logger.error("Falha na busca")
                 return False
 
             if not self.extrair_vagas():
-                logger.warning("⚠️ Nenhuma vaga extraída")
+                logger.warning("Nenhuma vaga extraída")
                 return False
 
             salvos = self.salvar_mongodb()

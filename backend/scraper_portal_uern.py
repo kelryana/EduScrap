@@ -46,7 +46,7 @@ PALAVRAS_CHAVE_OPORTUNIDADES = [
 ]
 
 def criar_navegador_headless():
-    """Cria uma instância do Chrome em modo headless com configurações anti-detecção"""
+   
     opcoes = Options()
     opcoes.add_argument("--headless=new")  # Novo modo headless mais moderno
     opcoes.add_argument("--no-sandbox")
@@ -56,12 +56,11 @@ def criar_navegador_headless():
     opcoes.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
     opcoes.add_argument("--lang=pt-BR")
 
-    # Evitar detecção de automação
+   
     opcoes.add_experimental_option("excludeSwitches", ["enable-automation"])
     opcoes.add_experimental_option("useAutomationExtension", False)
 
-    # Usa o caminho do driver definido no .env; se não existir,
-    # recorre ao webdriver-manager para baixar o driver automaticamente.
+
     if CHROMEDRIVER_PATH and Path(CHROMEDRIVER_PATH).exists():
         service = Service(CHROMEDRIVER_PATH)
     else:
@@ -69,7 +68,7 @@ def criar_navegador_headless():
         service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=opcoes)
 
-    # Executa CDP para remover flags de automação
+    
     driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
         "source": """
             Object.defineProperty(navigator, 'webdriver', {
@@ -87,7 +86,7 @@ def criar_navegador_headless():
     return driver
 
 def extrair_data_do_texto(texto):
-    """Tenta extrair uma data do texto para usar como vencimento"""
+   
     if not texto:
         return None
 
@@ -119,7 +118,7 @@ def extrair_data_do_texto(texto):
     return None
 
 def analisar_relevancia(texto):
-    """Analisa se o conteúdo contém palavras-chave de oportunidade"""
+   
     if not texto:
         return False, []
 
@@ -133,10 +132,7 @@ def analisar_relevancia(texto):
     return len(palavras_encontradas) > 0, palavras_encontradas
 
 def minerar_portal_uern():
-    """
-    Realiza a mineração completa do Portal da UERN, contornando Cloudflare
-    e extraindo apenas notícias relevantes para estudantes
-    """
+  
     print("\n" + "="*70)
     print("INICIANDO MINERAÇÃO DO PORTAL UERN (ANTI-CLOUDFLARE)")
     print("="*70)
@@ -150,7 +146,7 @@ def minerar_portal_uern():
         colecao.delete_many({})
 
         # Inicializa navegador
-        print("\n🌐 Passo 1: Inicializando navegador Selenium com stealth...")
+        print("\n Passo 1: Inicializando navegador Selenium com stealth...")
         driver = criar_navegador_headless()
 
         # Acessa página principal de notícias
@@ -172,7 +168,7 @@ def minerar_portal_uern():
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
         # Extrai links de notícias priorizando a área principal de conteúdo (ordem cronológica)
-        print("\n🔗 Passo 2: Mapeando links de notícias...")
+        print("\nPasso 2: Mapeando links de notícias...")
         conteudo_principal = soup.find('main') or soup.find(id='content') or soup.find(id='primary') or soup
         links_ancora = conteudo_principal.find_all("a", href=True)
 
@@ -188,7 +184,7 @@ def minerar_portal_uern():
                 if url_limpa not in urls_noticias:
                     urls_noticias.append(url_limpa)
 
-        print(f"✅ {len(urls_noticias)} notícias encontradas na página principal")
+        print(f"{len(urls_noticias)} notícias encontradas na página principal")
 
         # Pega as mais recentes da página principal
         urls_para_analisar = urls_noticias[:15]
@@ -234,8 +230,8 @@ def minerar_portal_uern():
 
                 if eh_relevante:
                     print(f"   OPORTUNIDADE DETECTADA!")
-                    print(f"   📝 Título: {titulo[:80]}")
-                    print(f"   🔑 Palavras-chave: {', '.join(palavras_chave[:5])}")
+                    print(f"   Título: {titulo[:80]}")
+                    print(f"   Palavras-chave: {', '.join(palavras_chave[:5])}")
 
                     # Extrai o prazo priorizando "inscrições até", "prazo", períodos "X a Y"
                     data_str = extrair_data_de_texto(f"{titulo} {texto_completo}")
@@ -263,7 +259,7 @@ def minerar_portal_uern():
 
                     if data_vencimento:
                         documento["data_vencimento"] = data_vencimento
-                        print(f"   ✅ Prazo de inscrição detectado: {data_vencimento.strftime('%d/%m/%Y')}")
+                        print(f"   Prazo de inscrição detectado: {data_vencimento.strftime('%d/%m/%Y')}")
                     else:
                         print(f"   ℹOportunidade sem prazo específico detectado")
 
@@ -281,7 +277,7 @@ def minerar_portal_uern():
             colecao.insert_many(noticias_validas)
 
             print("\n" + "="*70)
-            print(f"✅ SUCESSO! {len(noticias_validas)} oportunidades mineradas e salvas!")
+            print(f" SUCESSO! {len(noticias_validas)} oportunidades mineradas e salvas!")
             print("="*70)
 
             # Mostra resumo

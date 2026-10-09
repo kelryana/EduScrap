@@ -27,7 +27,7 @@ class Settings:
     API_KEY: str = os.getenv("API_KEY", "")
 
     CHROMEDRIVER_PATH: str = os.getenv("CHROMEDRIVER_PATH", "/usr/local/bin/chromedriver")
-    GECKODRIVER_PATH: str = os.getenv("GECKODRIVER_PATH", "")  # vazio => webdriver-manager baixa o driver
+    GECKODRIVER_PATH: str = os.getenv("GECKODRIVER_PATH", "")  
     CIEE_CIDADE: str = os.getenv("CIEE_CIDADE", "Mossoro")
     CIEE_URL: str = os.getenv("CIEE_URL", "https://portal.ciee.org.br/")
 

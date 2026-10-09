@@ -5,34 +5,31 @@ from unittest.mock import patch, MagicMock
 import mongomock
 from pymongo import MongoClient
 
-# Import the app after setting up the mocking in conftest.py
 from backend.api.app import create_app
 
 @pytest.fixture
 def client():
-    """Create a test client for the API"""
+  
     app = create_app()
     app.config['TESTING'] = True
     with app.test_client() as test_client:
         yield test_client
 
 def test_estagios_endpoint(client):
-    """Test /api/vagas endpoint (equivalent to estagios) returns 200 and proper structure"""
+  
     response = client.get("/api/vagas")
     assert response.status_code == 200
-    
-    # Check that response contains expected fields
+   
     data = response.get_json()
     assert "success" in data
     assert "count" in data
     assert "data" in data
 
 def test_bolsas_endpoint(client):
-    """Test /api/editais endpoint (equivalent to bolsas) returns 200 and proper structure"""
+  
     response = client.get("/api/editais")
     assert response.status_code == 200
-    
-    # Check that response contains expected fields
+
     data = response.get_json()
     assert "success" in data
     assert "count" in data

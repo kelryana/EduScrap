@@ -78,18 +78,16 @@ cleanup() {
 }
 trap cleanup SIGINT SIGTERM EXIT
 
-# 4. Iniciar Backend FastAPI
+
 echo "[4/4] Iniciando Backend FastAPI (Porta 8000)..."
-sleep 1  # Pequena pausa para garantir que a porta esteja liberada
+sleep 1  
 (cd "$PROJECT_ROOT/backend" && uvicorn main:app --reload --host 0.0.0.0 --port 8000) &
 BACKEND_PID=$!
 
-# Aguardar 2s para a API subir
 sleep 2
 
-# 5. Iniciar Servidor Frontend
 echo "[5/4] Iniciando Servidor Frontend (Porta 3000)..."
-sleep 1  # Pequena pausa para garantir que a porta esteja liberada
+sleep 1  
 (cd "$PROJECT_ROOT/frontend" && python3 -m http.server 3000) &
 FRONTEND_PID=$!
 

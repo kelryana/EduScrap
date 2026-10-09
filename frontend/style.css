@@ -32,7 +32,6 @@ body {
     flex-direction: column;
 }
 
-/* Padrão de fundo quadriculado (Graph Paper Grid) */
 .bg-grid-pattern {
     background-size: 28px 28px;
     background-image: 
@@ -40,13 +39,11 @@ body {
         linear-gradient(to bottom, rgba(15, 23, 42, 0.08) 1px, transparent 1px);
 }
 
-/* Padrão de bolinhas halftone para o círculo superior direito */
 .bg-halftone {
     background-image: radial-gradient(#0F172A 1.5px, transparent 1.5px);
     background-size: 8px 8px;
 }
 
-/* Efeito de clique e hover neo-brutalista nos botões */
 .neo-btn {
     transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }

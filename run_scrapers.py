@@ -52,14 +52,14 @@ SCRAPERS = {
 }
 
 def obter_python_bin():
-    """Retorna o executável Python do ambiente virtual se existir, ou o atual."""
+   
     venv_python = PROJECT_ROOT / "venv" / "bin" / "python"
     if venv_python.exists():
         return str(venv_python)
     return sys.executable
 
 def obter_contagem_colecao(nome_colecao):
-    """Consulta rápida da quantidade de documentos no MongoDB (se conectado)."""
+   
     try:
         from pymongo import MongoClient
         uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
@@ -70,7 +70,7 @@ def obter_contagem_colecao(nome_colecao):
         return None
 
 def executar_scraper(chave, info):
-    """Executa um scraper em processo isolado gravando logs dedicados."""
+   
     python_bin = obter_python_bin()
     script_path = BACKEND_DIR / info["script"]
     log_file_path = LOGS_DIR / f"{chave}.log"
@@ -174,11 +174,11 @@ def main():
     modo = "SEQUENCIAL" if args.serial else "PARALELO CONCORRENTE"
 
     print("\n" + "=" * 65)
-    print("      🚀 EDUSCRAP - VARREDURA AUTOMATIZADA DE DADOS")
+    print("      EDUSCRAP - VARREDURA AUTOMATIZADA DE DADOS")
     print("=" * 65)
-    print(f"  ⚡ Modo de Execução: {modo}")
-    print(f"  🎯 Fontes Ativas:    {total} ({', '.join(selecionados.keys())})")
-    print(f"  📁 Pasta de Logs:    {LOGS_DIR}/")
+    print(f"  Modo de Execução: {modo}")
+    print(f"  Fontes Ativas:    {total} ({', '.join(selecionados.keys())})")
+    print(f"   Pasta de Logs:    {LOGS_DIR}/")
     print("=" * 65 + "\n")
 
     inicio_global = time.time()
@@ -187,16 +187,16 @@ def main():
     if args.serial or total == 1:
         # Modo sequencial
         for chave, info in selecionados.items():
-            print(f"  ⏳ {info['icone']} Executando: {info['nome']}...")
+            print(f"  {info['icone']} Executando: {info['nome']}...")
             res = executar_scraper(chave, info)
             resultados.append(res)
             if res["sucesso"]:
-                print(f"     ✅ Concluído em {res['duracao']}s! (Itens na base: {res['total_itens']})")
+                print(f"     Concluído em {res['duracao']}s! (Itens na base: {res['total_itens']})")
             else:
                 print(f"     ❌ Falhou ({res['erro']}). Veja o log: {res['log']}")
     else:
         # Modo paralelo concorrente (máxima performance e tempo reduzido)
-        print("  ⏳ Iniciando raspagens simultâneas em segundo plano...")
+        print("  Iniciando raspagens simultâneas em segundo plano...")
         with ThreadPoolExecutor(max_workers=min(total, 6)) as executor:
             futuros = {
                 executor.submit(executar_scraper, chave, info): chave
@@ -206,7 +206,7 @@ def main():
                 res = futuro.result()
                 resultados.append(res)
                 if res["sucesso"]:
-                    print(f"  ✅ {res['info']['icone']} {res['info']['nome']:<34} | {res['duracao']:>4}s | Itens: {res['total_itens']}")
+                    print(f"  {res['info']['icone']} {res['info']['nome']:<34} | {res['duracao']:>4}s | Itens: {res['total_itens']}")
                 else:
                     print(f"  ❌ {res['info']['icone']} {res['info']['nome']:<34} | FALHOU ({res['erro']}) | Log: logs/{res['chave']}.log")
 
@@ -217,10 +217,10 @@ def main():
     falhas = total - sucessos
 
     print("\n" + "=" * 65)
-    print("                 📊 RESUMO DA OPERAÇÃO")
+    print("                  RESUMO DA OPERAÇÃO")
     print("=" * 65)
-    print(f"  ⏱️ Tempo Total Decorrido: {tempo_total}s (tempo do mais lento, sem acumular)")
-    print(f"  ✔️ Sucessos:              {sucessos}/{total}")
+    print(f"   Tempo Total Decorrido: {tempo_total}s (tempo do mais lento, sem acumular)")
+    print(f"   Sucessos:              {sucessos}/{total}")
     if falhas > 0:
         print(f"  ⚠️ Falhas:                {falhas}/{total} (consulte os arquivos em logs/)")
     print("=" * 65 + "\n")

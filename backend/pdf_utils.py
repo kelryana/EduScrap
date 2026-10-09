@@ -322,7 +322,7 @@ def extrair_e_validar_data(texto_html: str, url_pdf: str) -> Tuple[Optional[str]
     return data, status
 
 def limpar_cache_pdf():
-    """Limpa o cache de PDFs"""
+   
     global _CACHE_PDF
     _CACHE_PDF = {}
     logger.info("Cache de PDFs limpo")
@@ -331,22 +331,22 @@ def limpar_cache_pdf():
 if __name__ == "__main__":
     # Teste rápido
     print("="*60)
-    print("🧪 TESTANDO PDF UTILS")
+    print("TESTANDO PDF UTILS")
     print("="*60)
 
-    # Teste com texto HTML
+   
     texto_teste = """
     EDITAL Nº 001/2026
     Período de inscrições: 10/01/2026 a 15/02/2026
     Prazo final: 20/02/2026
     """
 
-    print("\n🔍 Teste com texto HTML:")
+    print("\nTeste com texto HTML:")
     data = extrair_data_de_texto(texto_teste)
     print(f"   Data extraída: {data}")
 
-    # Teste de status
-    print("\n🔍 Teste de verificação de status:")
+   
+    print("\nTeste de verificação de status:")
     data_teste = "2024-12-31"
     status = verificar_status(data_teste)
     print(f"   Data {data_teste} -> {status}")
@@ -356,4 +356,4 @@ if __name__ == "__main__":
     print(f"   Data {data_teste} -> {status}")
 
     print("\n" + "="*60)
-    print("✅ Testes concluídos")
+    print("Testes concluídos")

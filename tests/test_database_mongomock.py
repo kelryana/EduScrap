@@ -27,10 +27,8 @@ def test_upsert_new_document(db_handler):
         'timestamp': '2023-01-01T00:00:00Z'
     }
     
-    # Perform upsert
     result = db_handler.upsert_documento(doc, 'test_collection', 'link')
-    
-    # Verify the document was inserted
+  
     assert result is not None
     collection = db_handler.db['test_collection']
     stored_doc = collection.find_one({'link': 'https://example.com/test'})

@@ -17,13 +17,12 @@ class TestRegexEngine:
  
         if result is not None:
             assert "025" in result or "2026" in result
-        # If no match is found, that's also acceptable based on the current implementation
 
     def test_extract_date_br_numeric(self, engine):
         texto = "Prazo final: 30/09/2026"
         dates = engine.extract_dates(texto)
         assert isinstance(dates, list)
-        # Check if the date was extracted in some form
+
         if dates:
             assert any("2026" in date for date in dates)
 
@@ -31,7 +30,7 @@ class TestRegexEngine:
         texto = "Inscrições até 15 de dezembro de 2026"
         dates = engine.extract_dates(texto)
         assert isinstance(dates, list)
-        # Check if the date was extracted in some form
+       
         if dates:
             assert any("2026" in date for date in dates)
 

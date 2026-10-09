@@ -2,7 +2,6 @@
 
 const API_URL = "http://localhost:8000/api";
 
-// Lista mestre de cursos e áreas para os seletores
 const TODOS_CURSOS = [
     "Ciência da Computação", "Sistemas de Informação", "Medicina",
     "Enfermagem", "Direito", "Administração", "Ciências Contábeis",
@@ -15,13 +14,11 @@ const TODAS_AREAS = [
     "Extensão", "Pesquisa", "Inovação"
 ];
 
-// Estado global do aplicativo
 let paginaAtual = 1;
 let tipoAtual = 'estagios';
 let filtroVigentesAtivo = false;
 let usuarioAtual = null;
 
-// Inicialização
 window.addEventListener('DOMContentLoaded', () => {
     inicializarAutenticacao();
     configurarChipsClick();
