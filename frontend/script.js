@@ -589,6 +589,88 @@ function formatarTituloEdital(texto) {
     }).join('');
 }
 
+// Normaliza categorias gigantescas para tags compactas e legíveis
+function normalizarCategoriaTag(categoria, tipoContexto) {
+    if (!categoria) {
+        const mapaFallback = {
+            'estagios': 'Estágios (PRAE)',
+            'bolsas': 'Bolsas (PROEX)',
+            'ufersa': 'Editais UFERSA',
+            'ciee': 'Vagas CIEE',
+            'portal_uern': 'Portal UERN',
+            'noticias': 'Notícia Tech'
+        };
+        return mapaFallback[tipoContexto] || 'Oportunidade';
+    }
+
+    const cLower = categoria.toLowerCase();
+    if (cLower.includes('inclusão digital') || cLower.includes('inclusao digital')) return 'Inclusão Digital';
+    if (cLower.includes('moradia')) return 'Auxílio Moradia';
+    if (cLower.includes('creche')) return 'Auxílio Creche';
+    if (cLower.includes('transporte')) return 'Auxílio Transporte';
+    if (cLower.includes('alimentação') || cLower.includes('alimentacao')) return 'Auxílio Alimentação';
+    if (cLower.includes('permanência') || cLower.includes('permanencia')) return 'Permanência Estudantil';
+    if (cLower.includes('estágio') || cLower.includes('estagio') || cLower.includes('prae')) return 'Estágios (PRAE)';
+    if (cLower.includes('bolsa') || cLower.includes('proex')) return 'Bolsas (PROEX)';
+    if (cLower.includes('ufersa')) return 'Editais UFERSA';
+    if (cLower.includes('ciee')) return 'Vagas CIEE';
+    if (cLower.includes('notícia') || cLower.includes('tech')) return 'Notícia Tech';
+    if (cLower.includes('portal uern')) return 'Portal UERN';
+
+    if (categoria.length <= 26) {
+        return formatarTituloEdital(categoria);
+    }
+
+    return formatarTituloEdital(categoria.substring(0, 24).trim()) + '...';
+}
+
+// Higieniza jargões burocráticos oficiais e extrai o número do edital e o objeto direto
+function sintetizarTituloEdital(textoOriginal) {
+    if (!textoOriginal || typeof textoOriginal !== 'string') {
+        return { numeroEdital: null, tituloLimpo: '' };
+    }
+
+    let t = textoOriginal.trim();
+    let numeroEdital = null;
+
+    // 1. Extração do número do edital (ex: Edital Nº 077/2026)
+    const matchNumero = t.match(/^(Edital\s+(?:N[º°o]\s*)?[\d\w\/\.-]+)\s*[-–—:]*\s*/i);
+    if (matchNumero) {
+        numeroEdital = formatarTituloEdital(matchNumero[1].trim());
+        t = t.substring(matchNumero[0].length).trim();
+    }
+
+    // 2. Remove ruídos burocráticos e siglas repetitivas
+    t = t.replace(/^[-\s–—]*(?:prae|proex|proeg|uern|ufersa)[-\s–—]+/i, '');
+    t = t.replace(/^(?:praetorna|torna)\s+p[úu]blic[oa]\s+(?:o|a|os|as)?\s*/i, '');
+    t = t.replace(/^o\s+(processo|resultado|edital)/i, '$1');
+
+    // 3. Destaca o Tipo de Ação
+    t = t.replace(/^resultado\s+final\s+d[oe]\s+/i, 'Resultado Final: ');
+    t = t.replace(/^resultado\s+preliminar\s+d[oe]\s+/i, 'Resultado Preliminar: ');
+    t = t.replace(/^resultado\s+parcial\s+d[oe]\s+/i, 'Resultado Parcial: ');
+    t = t.replace(/^convoca\s*(?:os\s+estudantes|candidatos)?\s*/i, 'Convocação: ');
+    t = t.replace(/^homologa\s*(?:os\s+estudantes|candidatos|inscrições)?\s*/i, 'Homologação: ');
+    t = t.replace(/^retifica\s*(?:o\s+edital|a\s+publicação)?\s*/i, 'Retificação: ');
+
+    // 4. Encurta fórmulas longas do objeto
+    t = t.replace(/processo\s+seletivo\s+para\s+preenchimento\s+de\s+vagas\s+remanescentes\s+d[oe]\s+/gi, 'Vagas Remanescentes – ');
+    t = t.replace(/processo\s+seletivo\s+para\s+preenchimento\s+de\s+vagas\s+d[oe]\s+/gi, 'Vagas – ');
+    t = t.replace(/programa\s+de\s+apoio\s+[àa]\s+perman[êe]ncia\s+estudantil\s+da\s+uern/gi, 'Permanência Estudantil');
+    t = t.replace(/programa\s+de\s+apoio\s+[àa]\s+perman[êe]ncia\s+estudantil/gi, 'Permanência Estudantil');
+    t = t.replace(/exclusivamente\s+na\s+modalidade\s+/gi, '');
+    t = t.replace(/\s*,\s*semestre\s+(\d{4}\.\d)/gi, ' ($1)');
+    t = t.replace(/\s*\.\s*$/, '');
+    t = t.replace(/\s{2,}/g, ' ').trim();
+
+    const tituloFormatado = formatarTituloEdital(t);
+
+    return {
+        numeroEdital,
+        tituloLimpo: tituloFormatado || formatarTituloEdital(textoOriginal)
+    };
+}
+
 function toggleFiltroVigentes() {
     const checkbox = document.getElementById('filtroVigentes');
     filtroVigentesAtivo = checkbox.checked;
@@ -667,7 +749,8 @@ function renderizarCards(listaDeVagas) {
         const idStr = String(vaga._id);
         const ehFavorito = vaga.favorito === true || favSet.has(idStr);
         const ehNoticia = vaga.categoria === "Notícia Tech" || tipoAtual === "noticias";
-        const corTag = corCategoriaMap[vaga.categoria] || "#112244";
+        const categoriaFormatada = normalizarCategoriaTag(vaga.categoria, tipoAtual);
+        const corTag = corCategoriaMap[vaga.categoria] || corCategoriaMap[categoriaFormatada] || "#112244";
 
         let badgeStatusHTML = "";
         let status = vaga.status_prazo || "";
@@ -714,7 +797,14 @@ function renderizarCards(listaDeVagas) {
         }
 
         const classeVencido = status === "vencido" ? "card-vencido" : "";
-        const tituloFormatado = formatarTituloEdital(vaga.nome);
+        const infoEdital = sintetizarTituloEdital(vaga.nome);
+
+        const numeroEditalHTML = infoEdital.numeroEdital ? `
+            <div class="card-edital-numero">
+                <i class="ph-bold ph-file-text"></i>
+                <span>${infoEdital.numeroEdital}</span>
+            </div>
+        ` : '';
 
         let linkFonteHTML = vaga.fonte || 'Universidade';
         if (vaga.meta_fonte && vaga.meta_fonte.nome_oficial) {
@@ -732,13 +822,15 @@ function renderizarCards(listaDeVagas) {
             <div class="card ${classeVencido}">
                 <div class="card-topo">
                     <div class="card-tags-row">
-                        <span class="card-categoria-tag" style="background-color: ${corTag};">
-                            ${vaga.categoria || 'Geral'}
+                        <span class="card-categoria-tag" style="background-color: ${corTag};" title="${vaga.categoria || 'Geral'}">
+                            ${categoriaFormatada}
                         </span>
                         ${badgeStatusHTML}
                     </div>
 
-                    <h3 class="card-titulo" title="${vaga.nome}">${tituloFormatado}</h3>
+                    ${numeroEditalHTML}
+
+                    <h3 class="card-titulo" title="${vaga.nome}">${infoEdital.tituloLimpo}</h3>
                     
                     <div class="card-meta-box">
                         <i class="ph-bold ph-buildings meta-icone"></i>

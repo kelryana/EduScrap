@@ -50,11 +50,11 @@
       }
     </script>
     
-    <link rel="stylesheet" href="style.css?v=11">
+    <link rel="stylesheet" href="style.css?v=14">
 </head>
 <body class="bg-[#FAFBFD] text-brand-dark min-h-screen bg-grid-pattern font-sans antialiased selection:bg-brand-yellow selection:text-brand-dark">
 
-    <section id="landing-hero" class="landing-section w-full max-w-6xl mx-auto px-4 sm:px-6">
+    <section id="landing-hero" class="landing-section w-full max-w-7xl mx-auto px-4 sm:px-6">
         <!-- Barra de Navegação Superior da Landing -->
         <nav class="landing-navbar">
             <div class="nav-brand">
@@ -81,7 +81,7 @@
         </nav>
 
         <!-- CONTAINER GERAL DO HERO (DIMENSÃO DO CARD PARA ANCORAGEM PERFEITA DOS ELEMENTOS) -->
-        <div class="relative w-full max-w-5xl py-8 my-4 mx-auto">
+        <div class="relative w-full max-w-6xl py-8 my-4 mx-auto">
 
             <!-- ================= ELEMENTOS MEMPHIS FLUTUANTES (LADO ESQUERDO) ================= -->
             
@@ -149,21 +149,21 @@
             </div>
 
             <!-- ================= CARD CENTRAL BRANCO ================= -->
-            <div class="relative w-full bg-white border-3 border-brand-dark rounded-3xl shadow-brutal-xl overflow-hidden p-6 sm:p-10 lg:p-12 pl-6 sm:pl-14 lg:pl-16 z-10">
+            <div class="relative w-full bg-white border-3 border-brand-dark rounded-3xl shadow-brutal-xl overflow-hidden p-8 sm:p-12 lg:p-14 pl-8 sm:pl-16 lg:pl-18 z-10">
               
-              <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-center">
+              <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
                 
                 <!-- COLUNA DA ESQUERDA: TEXTO E BOTÕES (COM RESPIRO LATERAL SEGURO) -->
                 <div class="lg:col-span-7 space-y-6 relative z-30">
                   
                   <!-- Selo Superior (Pill Badge) -->
-                  <div class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border-2 border-brand-dark bg-white font-display font-extrabold text-xs text-brand-dark shadow-brutal-sm">
-                    <span>✦</span>
+                  <div class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-brand-dark bg-white font-display font-extrabold text-xs sm:text-sm text-brand-dark shadow-brutal-sm">
+                    <span class="text-brand-orange text-base">✦</span>
                     <span>Portal Universitário de Oportunidades</span>
                   </div>
 
                   <!-- Título Principal com Destaque e Onda Amarela -->
-                  <h1 class="font-display font-extrabold text-3xl sm:text-4xl lg:text-[2.85rem] text-brand-dark tracking-tight leading-[1.18]">
+                  <h1 class="font-display font-extrabold text-3xl sm:text-5xl lg:text-[3.25rem] text-brand-dark tracking-tight leading-[1.16]">
                     Descubra editais e vagas em 
                     <span class="relative inline-block text-brand-orange">
                       tempo real
@@ -176,18 +176,18 @@
                   </h1>
 
                   <!-- Descrição de Apoio -->
-                  <p class="text-slate-600 text-sm sm:text-base leading-relaxed max-w-xl font-medium">
+                  <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-xl font-medium">
                     O <strong>EduScrap</strong> monitora e unifica automaticamente as oportunidades da UERN, UFERSA, CIEE, PRAE e PROEX. Personalize seu perfil, salve seus editais favoritos e não perca nenhum prazo de inscrição.
                   </p>
 
                   <!-- Botões de Ação (ALINHADOS LADO A LADO) -->
-                  <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-2">
-                    <a href="#area-oportunidades" class="px-5 sm:px-6 py-3.5 rounded-xl border-2.5 border-brand-dark bg-brand-orange hover:bg-brand-orange-hover text-white font-extrabold text-sm sm:text-base shadow-brutal neo-btn inline-flex items-center justify-center gap-2 whitespace-nowrap">
+                  <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
+                    <a href="#area-oportunidades" class="px-6 sm:px-7 py-4 rounded-xl border-2.5 border-brand-dark bg-brand-orange hover:bg-brand-orange-hover text-white font-extrabold text-base sm:text-lg shadow-brutal neo-btn inline-flex items-center justify-center gap-2.5 whitespace-nowrap">
                       <span>Explorar Oportunidades</span>
-                      <span class="text-lg">→</span>
+                      <span class="text-xl">→</span>
                     </a>
                     
-                    <button type="button" onclick="abrirModalAuth('register')" class="px-5 sm:px-6 py-3.5 rounded-xl border-2.5 border-brand-dark bg-white hover:bg-slate-50 text-brand-dark font-extrabold text-sm sm:text-base shadow-brutal neo-btn inline-flex items-center justify-center gap-2 whitespace-nowrap">
+                    <button type="button" onclick="abrirModalAuth('register')" class="px-6 sm:px-7 py-4 rounded-xl border-2.5 border-brand-dark bg-white hover:bg-slate-50 text-brand-dark font-extrabold text-base sm:text-lg shadow-brutal neo-btn inline-flex items-center justify-center gap-2.5 whitespace-nowrap">
                       <span>🎓 Criar Perfil de Aluno</span>
                     </button>
                   </div>
@@ -197,7 +197,7 @@
                 <!-- COLUNA DA DIREITA: COMPOSIÇÃO DA FOTO DA ESTUDANTE -->
                 <div class="lg:col-span-5 relative flex justify-center items-center pt-4 lg:pt-0">
                   
-                  <div class="relative w-full max-w-[300px] sm:max-w-[340px] flex items-center justify-center py-2">
+                  <div class="relative w-full max-w-[320px] sm:max-w-[370px] flex items-center justify-center py-2">
                     
                     <!-- Estrela decorativa laranja superior direita -->
                     <div class="absolute -top-1 -right-2 text-brand-orange text-3xl font-black select-none z-20">
@@ -205,7 +205,7 @@
                     </div>
 
                     <!-- FOTO DA ESTUDANTE (MOLDURA COM BORDA BRUTALISTA) -->
-                    <div class="relative z-10 w-[260px] sm:w-[290px] h-[330px] sm:h-[370px] rounded-2xl border-3 border-brand-dark bg-gradient-to-b from-[#FFFDE7] to-[#FFE082] overflow-hidden shadow-brutal-xl flex items-end justify-center">
+                    <div class="relative z-10 w-[280px] sm:w-[320px] h-[360px] sm:h-[410px] rounded-2xl border-3 border-brand-dark bg-gradient-to-b from-[#FFFDE7] to-[#FFE082] overflow-hidden shadow-brutal-xl flex items-end justify-center">
                       <img 
                         src="assets/estudante.png" 
                         alt="Estudante universitária"
@@ -565,7 +565,7 @@
         </div>
     </footer>
 
-    <script src="script.js?v=8"></script>
+    <script src="script.js?v=9"></script>
     <script>
         function scrollParaBusca() {
             const target = document.getElementById('area-oportunidades');
