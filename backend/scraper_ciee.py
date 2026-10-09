@@ -252,15 +252,71 @@ class ScraperCIEEHibrido:
 
     @staticmethod
     def _extrair_data_vencimento(texto_card: str):
+        """Extracts date information from text using multiple formats"""
+        if not texto_card:
+            return None
+
+        # Common date patterns
+        padroes = [
+            r"\b(\d{2})/(\d{2})/(\d{4})\b",  # dd/mm/yyyy
+            r"\b(\d{2})-(\d{2})-(\d{4})\b",  # dd-mm-yyyy
+            r"\b(\d{2})/(\d{2})/(\d{2})\b",  # dd/mm/yy
+            r"\b(\d{1,2}) de (\w+) de (\d{4})\b",  # d de month de yyyy (Brazilian Portuguese)
+            r"\b(\d{1,2}) (\w+) (\d{4})\b",  # d month yyyy
+            r"\b(\d{4})-(\d{2})-(\d{2})\b",  # yyyy-mm-dd
+            r"\b(\d{2})\.(\d{2})\.(\d{4})\b",  # dd.mm.yyyy
+        ]
+
+        for padrao in padroes:
+            match = re.search(padrao, texto_card)
+            if match:
+                try:
+                    # Handle different formats
+                    if any("/" in g for g in match.groups()):
+                        dia, mes, ano = int(match.group(1)), int(match.group(2)), int(match.group(3))
+                    elif "de" in match.group(0).lower():
+                        # Handle Brazilian Portuguese format
+                        dia = int(match.group(1))
+                        mes_texto = match.group(2).lower()
+                        ano = int(match.group(3))
+                        
+                        # Portuguese month names
+                        meses = {
+                            "jan": 1, "january": 1, "janeiro": 1,
+                            "fev": 2, "feb": 2, "february": 2, "fevereiro": 2,
+                            "mar": 3, "março": 3, "marco": 3, "march": 3,
+                            "abr": 4, "april": 4, "abril": 4,
+                            "mai": 5, "may": 5, "maio": 5,
+                            "jun": 6, "june": 6, "junho": 6,
+                            "jul": 7, "july": 7, "julho": 7,
+                            "ago": 8, "aug": 8, "agosto": 8,
+                            "set": 9, "sep": 9, "september": 9, "setembro": 9,
+                            "out": 10, "oct": 10, "october": 10, "outubro": 10,
+                            "nov": 11, "november": 11, "novembro": 11,
+                            "dez": 12, "dec": 12, "december": 12, "dezembro": 12
+                        }
+                        
+                        mes = meses.get(mes_texto, None)
+                        if not mes:
+                            continue
+                    else:
+                        # For other formats without separators
+                        if len(match.group(3)) == 2:  # yy format
+                            ano = int("20" + match.group(3))  # Assume 21st century
+                        else:
+                            ano = int(match.group(3))
+                        dia, mes = int(match.group(1)), int(match.group(2))
+                    
+                    # Validate date
+                    if 1 <= mes <= 12:
+                        try:
+                            return datetime(ano, mes, dia)
+                        except ValueError:
+                            continue
+                except (ValueError, IndexError):
+                    continue
         
-        data_match = re.search(r"\b(\d{2})/(\d{2})/(\d{4})\b", texto_card)
-        if not data_match:
-            return None
-        try:
-            dia, mes, ano = int(data_match.group(1)), int(data_match.group(2)), int(data_match.group(3))
-            return datetime(ano, mes, dia)
-        except ValueError:
-            return None
+        return None
 
     def _montar_link(self, card, codigo_vaga: str) -> str:
       

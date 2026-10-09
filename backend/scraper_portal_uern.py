@@ -245,28 +245,34 @@ def minerar_portal_uern():
                         if data_from_content:
                             data_vencimento = data_from_content
 
-                    # Determina categoria baseada nas palavras-chave
-                    categoria = "Notícia Geral"
-                    if any(p in palavras_chave for p in ["estágio", "vaga", "seleção"]):
-                        categoria = "Seleção de Estágio"
-                    elif any(p in palavras_chave for p in ["bolsa", "bolsas", "extensão", "pesquisa"]):
-                        categoria = "Bolsas e Editais"
-                    elif any(p in palavras_chave for p in ["curso", "inscrição", "matrícula"]):
-                        categoria = "Cursos e Inscrições"
+                    # SÓ adiciona o documento se encontrar uma data válida
+                    if data_vencimento:
+                        print(f"   ✅ Data encontrada: {data_vencimento.strftime('%Y-%m-%d')}")
 
-                    # Cria documento
-                    documento = {
-                        "nome": titulo,
-                        "link": url_noticia,
-                        "categoria": categoria,
-                        "fonte_id": "portal_uern_oficial",
-                        "data_vencimento": data_vencimento,
-                        "palavras_chave": palavras_chave,
-                        "resumo": resumo[:200] if resumo else texto_completo[:200],
-                        "data_mineracao": datetime.now()
-                    }
+                        # Determina categoria baseada nas palavras-chave
+                        categoria = "Notícia Geral"
+                        if any(p in palavras_chave for p in ["estágio", "vaga", "seleção"]):
+                            categoria = "Seleção de Estágio"
+                        elif any(p in palavras_chave for p in ["bolsa", "bolsas", "extensão", "pesquisa"]):
+                            categoria = "Bolsas e Editais"
+                        elif any(p in palavras_chave for p in ["curso", "inscrição", "matrícula"]):
+                            categoria = "Cursos e Inscrições"
 
-                    noticias_validas.append(documento)
+                        # Cria documento
+                        documento = {
+                            "nome": titulo,
+                            "link": url_noticia,
+                            "categoria": categoria,
+                            "fonte_id": "portal_uern_oficial",
+                            "data_vencimento": data_vencimento,
+                            "palavras_chave": palavras_chave,
+                            "resumo": resumo[:200] if resumo else texto_completo[:200],
+                            "data_mineracao": datetime.now()
+                        }
+
+                        noticias_validas.append(documento)
+                    else:
+                        print(f"   ❌ Nenhuma data encontrada - ignorando esta entrada")
                 else:
                     print(f"   ❌ Não relevante - descartada")
 
@@ -288,11 +294,11 @@ def minerar_portal_uern():
             for i, noticia in enumerate(noticias_validas, start=1):
                 print(f"  {i}. {noticia['nome'][:70]}...")
                 print(f"     Categoria: {noticia['categoria']}")
-                print(f"     Data de vencimento: {noticia.get('data_vencimento', 'Não especificada')}")
+                print(f"     Data de vencimento: {noticia['data_vencimento']}")
                 print(f"     Link: {noticia['link'][:60]}...")
         else:
             print("\n⚠️ Nenhuma oportunidade relevante encontrada nesta varredura.")
-            print("Isso pode ser normal se não houver novas publicações recentes.")
+            print("Isso pode ser normal se não houver novas publicações recentes com datas válidas.")
 
         return len(noticias_validas)
 

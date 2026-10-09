@@ -39,7 +39,19 @@ async function carregarDados(tipo, novaPagina = 1) {
             url += `&apenas_vigentes=true`;
         }
 
-        const resposta = await fetch(url);
+        const resposta = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            // Add timeout to avoid hanging requests
+            signal: AbortSignal.timeout(10000) // 10 seconds timeout
+        });
+        
+        if (!resposta.ok) {
+            throw new Error(`Erro na requisição: ${resposta.status} - ${resposta.statusText}`);
+        }
+        
         const objetoPaginado = await resposta.json();
 
         renderizarCards(objetoPaginado.dados);
@@ -47,15 +59,27 @@ async function carregarDados(tipo, novaPagina = 1) {
 
     } catch (erro) {
         console.error("Erro ao buscar dados paginados:", erro);
-        container.innerHTML = '<p class="carregando" style="color: red;">Erro ao conectar com a API. O FastAPI está rodando?</p>';
+        container.innerHTML = `<p class="carregando" style="color: red;">Erro ao conectar com a API: ${erro.message || 'O FastAPI está rodando?'}</p>`;
+        
+        // Additional troubleshooting info
+        console.log("Tentando verificar status da API...");
+        try {
+            const statusResponse = await fetch(`${API_URL}/../`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                signal: AbortSignal.timeout(5000)
+            });
+            console.log("Resposta do status da API:", statusResponse.status);
+        } catch (statusError) {
+            console.log("Erro ao verificar status da API:", statusError);
+        }
     }
 }
 function renderizarControlesPaginacao(atual, total, limite) {
     const antigo = document.getElementById('bloco-paginacao');
     if(antigo) antigo.remove();
-
-    const totalPaginas = Math.ceil(total / limite);
-    if(totalPaginas <= 1) return;
 
     const mainContainer = document.querySelector('main');
     const blocoPaginacao = document.createElement('div');
@@ -94,12 +118,24 @@ async function realizarPesquisa() {
     if(antigo) antigo.remove();
 
     try {
-        const resposta = await fetch(`${API_URL}/pesquisar?termo=${termo}`);
+        const resposta = await fetch(`${API_URL}/pesquisar?termo=${termo}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            signal: AbortSignal.timeout(10000)
+        });
+        
+        if (!resposta.ok) {
+            throw new Error(`Erro na pesquisa: ${resposta.status} - ${resposta.statusText}`);
+        }
+        
         const dados = await resposta.json();
         renderizarCards(dados);
         document.querySelectorAll('.controles button').forEach(b => b.classList.remove('ativo'));
     } catch (e) {
-        container.innerHTML = '<p class="carregando" style="color: red;">Erro na pesquisa.</p>';
+        console.error("Erro na pesquisa:", e);
+        container.innerHTML = `<p class="carregando" style="color: red;">Erro na pesquisa: ${e.message}</p>`;
     }
 }
 async function carregarEstatisticas() {
@@ -116,7 +152,18 @@ async function carregarEstatisticas() {
     document.getElementById('btn-analises').classList.add('ativo');
 
     try {
-        const resposta = await fetch(`${API_URL}/estatisticas`);
+        const resposta = await fetch(`${API_URL}/estatisticas`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            signal: AbortSignal.timeout(10000)
+        });
+        
+        if (!resposta.ok) {
+            throw new Error(`Erro ao carregar estatísticas: ${resposta.status} - ${resposta.statusText}`);
+        }
+        
         const dados = await resposta.json();
 
         let html = `
@@ -203,7 +250,7 @@ async function carregarEstatisticas() {
 
     } catch (erro) {
         console.error("Erro no Dashboard:", erro);
-        container.innerHTML = '<p class="carregando" style="color: red;">Falha ao gerar o painel visual das estatísticas.</p>';
+        container.innerHTML = `<p class="carregando" style="color: red;">Falha ao gerar o painel visual das estatísticas: ${erro.message}</p>`;
     }
 }
 function renderizarCards(listaDeVagas) {
@@ -224,14 +271,21 @@ function renderizarCards(listaDeVagas) {
 
         // Verifica se é um tipo de conteúdo que não tem prazo por natureza (como notícias técnicas)
         const naoTemPrazoPorNatureza = vaga.status_prazo === "sem_prazo_aplicavel";
-
+        
+        // Verifica se é do CIEE ou Portal UERN sem data de vencimento
+        const ehCIEE = vaga.fonte && vaga.fonte.includes("CIEE");
+        const ehPortalUERN = vaga.fonte_id && vaga.fonte_id.includes("portal_uern");
+        
+        // Se for notícia tech, CIEE ou Portal UERN sem prazo, não mostramos badge de prazo
         if (naoTemPrazoPorNatureza) {
-            // Para notícias técnicas e outros conteúdos sem prazo por natureza, mostra mensagem apropriada
-            badgeDataHTML = `
-                <div style="background: #F0F8FF; color: #4169E1; ${estiloBadgeBase}">
-                    📰 Conteúdo informativo (sem prazo de inscrição)
-                </div>
-            `;
+            // Para notícias técnicas e outros conteúdos sem prazo por natureza, não mostramos badge alguma
+            badgeDataHTML = ``;
+        } else if (ehPortalUERN && !vaga.data_vencimento_formatada) {
+            // Para entradas do Portal UERN sem data de vencimento, também não mostramos badge
+            badgeDataHTML = ``;
+        } else if (ehCIEE && !vaga.data_vencimento_formatada) {
+            // Para entradas do CIEE sem data de vencimento, também não mostramos badge
+            badgeDataHTML = ``;
         } else {
             // Garante o cálculo mesmo se a API ainda não enviar status_prazo/dias_restantes
             let dias = vaga.dias_restantes;
@@ -251,7 +305,7 @@ function renderizarCards(listaDeVagas) {
                     </div>
                 `;
             } else if (vaga.data_vencimento_formatada) {
-                const complemento = dias === 0 ? " (último dia!)" : ` (faltam ${dias} dia${dias === 1 ? '' : 's'})`;
+                const complemento = dias === 0 ? " (último dia!)" : ` (${dias} dia${dias === 1 ? '' : 's'})`;
                 badgeDataHTML = `
                     <div style="background: #FFF5F5; color: #DC143C; ${estiloBadgeBase}">
                         🔥 Inscrições até ${vaga.data_vencimento_formatada}${complemento}
@@ -307,7 +361,18 @@ async function carregarInspector() {
     document.querySelectorAll('.controles button').forEach(b => b.classList.remove('ativo'));
 
     try {
-        const res = await fetch(`${API_URL}/db-status`);
+        const res = await fetch(`${API_URL}/db-status`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            signal: AbortSignal.timeout(10000)
+        });
+        
+        if (!res.ok) {
+            throw new Error(`Erro ao carregar status do banco: ${res.status} - ${res.statusText}`);
+        }
+        
         const info = await res.json();
 
         let html = `
@@ -319,7 +384,7 @@ async function carregarInspector() {
                     Relatório transparente volumétrico do cluster NoSQL e integridade estrutural das coleções.
                 </p>
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr); gap: 20px;">
         `;
 
         if (info && info.colecoes) {
@@ -340,7 +405,7 @@ async function carregarInspector() {
 
                         <div style="border-top: 1.5px dashed var(--azul-escuro); padding-top: 8px; margin-top: 10px;">
                             <p style="font-size: 0.75rem; font-weight: 800; color: var(--azul-escuro); margin-bottom: 6px; letter-spacing: 0.5px;">ESTRUTURAS DE ÍNDICES:</p>
-                            <div style="display: flex; flex-wrap: wrap; gap: 4px;">${indexBadges}</div>
+                            <div style="display: flex; flex-wrap: gap: 4px;">${indexBadges}</div>
                         </div>
                     </div>
                 `;
@@ -355,7 +420,7 @@ async function carregarInspector() {
         container.innerHTML = html;
     } catch (erro) {
         console.error("Erro ao inspecionar banco:", erro);
-        container.innerHTML = '<p class="carregando" style="color: red;">Não foi possível ler os metadados de infraestrutura.</p>';
+        container.innerHTML = `<p class="carregando" style="color: red;">Não foi possível ler os metadados de infraestrutura: ${erro.message}</p>`;
     }
 }
 // Função que aciona o Botão Vermelho (Raspagem Global + Geração de Logs)
@@ -377,12 +442,24 @@ async function acionarTodosOsRobos() {
     `;
 
     try {
-        await fetch(`${API_URL}/buscar-tudo`);
+        const resposta = await fetch(`${API_URL}/buscar-tudo`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            signal: AbortSignal.timeout(60000) // 60 seconds timeout for this longer operation
+        });
+        
+        if (!resposta.ok) {
+            throw new Error(`Erro ao acionar robôs: ${resposta.status} - ${resposta.statusText}`);
+        }
+        
         btn.innerText = "Buscar 🤖";
         btn.disabled = false;
         carregarDados('estagios');
     } catch (erro) {
-        container.innerHTML = '<p class="carregando" style="color: red;">Erro crítico na execução dos robôs externos.</p>';
+        console.error("Erro ao acionar robôs:", erro);
+        container.innerHTML = `<p class="carregando" style="color: red;">Erro crítico na execução dos robôs externos: ${erro.message}</p>`;
         btn.innerText = "Erro!";
         btn.disabled = false;
     }

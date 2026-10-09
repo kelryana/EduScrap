@@ -13,6 +13,18 @@ echo "============================================================"
 echo "          🚀 INICIALIZANDO PROJETO EDUSCRAP UERN            "
 echo "============================================================"
 
+# Função para matar processos em uma porta específica
+kill_port_processes() {
+    local port=$1
+    echo "  -> Verificando processos na porta $port..."
+    local pids=$(lsof -ti:$port 2>/dev/null)
+    if [ ! -z "$pids" ]; then
+        echo "  -> Matando processos na porta $port (PID: $pids)..."
+        kill -9 $pids 2>/dev/null || true
+        sleep 2  # Aguarda um pouco para liberar a porta
+    fi
+}
+
 # 1. Verificar ambiente virtual
 if [ -d "venv" ]; then
     echo "[1/4] Ativando ambiente virtual (venv)..."
@@ -50,6 +62,11 @@ fi
 echo "[3/4] Garantindo índices e coleções no MongoDB..."
 python3 backend/database_setup.py || echo "⚠️ Aviso: Configuração de banco falhou (verifique se o MongoDB está rodando)."
 
+# Kill any existing processes on our target ports
+echo "[3.5/4] Liberando portas 8000 (Backend) e 3000 (Frontend)..."
+kill_port_processes 8000
+kill_port_processes 3000
+
 # Trap para encerrar todos os processos ao pressionar Ctrl+C
 cleanup() {
     echo ""
@@ -60,6 +77,9 @@ cleanup() {
     if [ -n "$FRONTEND_PID" ]; then
         kill "$FRONTEND_PID" 2>/dev/null || true
     fi
+    # Certificar-se de que nenhuma instância permanece
+    kill_port_processes 8000
+    kill_port_processes 3000
     echo "✔️ Todos os serviços foram finalizados. Até a próxima!"
     exit 0
 }
@@ -67,14 +87,16 @@ trap cleanup SIGINT SIGTERM EXIT
 
 # 4. Iniciar Backend FastAPI
 echo "[4/4] Iniciando Backend FastAPI (Porta 8000)..."
+sleep 1  # Pequena pausa para garantir que a porta esteja liberada
 (cd "$PROJECT_ROOT/backend" && uvicorn main:app --reload --host 0.0.0.0 --port 8000) &
 BACKEND_PID=$!
 
-# Aguardar 1.5s para a API subir
-sleep 1.5
+# Aguardar 2s para a API subir
+sleep 2
 
 # 5. Iniciar Servidor Frontend
 echo "[5/4] Iniciando Servidor Frontend (Porta 3000)..."
+sleep 1  # Pequena pausa para garantir que a porta esteja liberada
 (cd "$PROJECT_ROOT/frontend" && python3 -m http.server 3000) &
 FRONTEND_PID=$!
 

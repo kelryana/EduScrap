@@ -140,8 +140,8 @@ def enriquecer_prazo(documento: dict):
     if ("notícia tech" in categoria.lower() or 
         "g1" in fonte.lower() or 
         "canaltech" in fonte.lower() or
-        "noticias" in fonte_id.lower()):
-        
+        "noticias" in fonte_id.lower() or
+        "ciee_agente" == fonte_id):  # CIEE entries don't have deadlines either
         # Não adiciona informações de prazo para este tipo de conteúdo
         documento["status_prazo"] = "sem_prazo_aplicavel"  # Indica que o tipo de conteúdo não tem prazo
         return documento
