@@ -6,6 +6,8 @@
 ![MongoDB](https://img.shields.io/badge/MongoDB-4.4+-brightgreen)
 
 <img width="1513" height="979" alt="image" src="https://github.com/user-attachments/assets/19b74131-1666-46ec-b56f-ffd2038b51b8" />
+<img width="1736" height="1102" alt="image" src="https://github.com/user-attachments/assets/135ae845-5956-4b59-ae17-afa1539dafe0" />
+
    
 ## Sobre o Projeto
 
