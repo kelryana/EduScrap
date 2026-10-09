@@ -410,7 +410,7 @@ body {
     background-color: var(--color-navy);
     color: var(--color-white);
     padding: 0.65rem 2rem;
-    font-size: 3.0rem; /* Increased for prominence */
+    font-size: 2.7rem; 
     font-weight: 900;
     border: 3px solid var(--color-navy);
     border-radius: 8px;
@@ -419,7 +419,8 @@ body {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     cursor: default;
     user-select: none;
-    margin-top: -2rem; /* Move the logo higher */
+    margin-top: -2rem;
+    margin-bottom: 2.5rem;
 }
 
 .logo-box:hover {
@@ -1120,8 +1121,8 @@ body {
     background-color: var(--color-white);
     color: var(--color-navy);
     border: 3px solid var(--color-navy);
-    padding: 6px 12px;
-    font-size: 0.85rem;
+    padding: 10px 18px;
+    font-size: 1.1rem;
     font-weight: 800;
     font-family: inherit;
     box-shadow: 3px 3px 0 var(--color-navy);
@@ -1140,7 +1141,7 @@ body {
     background: var(--color-white);
     border: 3px solid var(--color-navy);
     color: var(--color-navy);
-    padding: 6px 10px;
+    padding: 10px 14px;
     font-weight: 800;
     cursor: pointer;
     box-shadow: 3px 3px 0 var(--color-navy);
@@ -1155,21 +1156,6 @@ body {
     color: var(--color-red);
 }
 
-/* 2. Banner de Boas-Vindas Personalizado */
-.banner-usuario-memphis {
-    margin-top: 10px;
-    background-color: #FFFDE7;
-    border: 3px solid var(--color-navy);
-    padding: 10px 16px;
-    box-shadow: 4px 4px 0 var(--color-navy);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 0.9rem;
-    font-weight: 600;
-    gap: 12px;
-    flex-wrap: wrap;
-}
 .btn-banner-ajustar {
     background-color: var(--color-cyan);
     border: 2px solid var(--color-navy);
