@@ -208,14 +208,14 @@ function abrirModalPerfil() {
     containerCursos.innerHTML = '';
     TODOS_CURSOS.forEach(curso => {
         const sel = cursosSalvos.includes(curso) ? 'chip-selecionado' : '';
-        containerCursos.innerHTML += `<button type="button" class="chip-opcao ${sel}" data-valor="${curso}">${curso}</button>`;
+        containerCursos.innerHTML += `<button type="button" class="chip-opcao ${sel}" data-valor="${curso}"><span class="chip-check">✓</span> ${curso}</button>`;
     });
 
     const containerAreas = document.getElementById('perfil-chips-areas');
     containerAreas.innerHTML = '';
     TODAS_AREAS.forEach(area => {
         const sel = areasSalvas.includes(area) ? 'chip-selecionado' : '';
-        containerAreas.innerHTML += `<button type="button" class="chip-opcao ${sel}" data-valor="${area}">${area}</button>`;
+        containerAreas.innerHTML += `<button type="button" class="chip-opcao ${sel}" data-valor="${area}"><span class="chip-check">✓</span> ${area}</button>`;
     });
 
     document.getElementById('perfil-receber-emails').checked = emailNotif;
@@ -532,9 +532,61 @@ async function carregarFeedPersonalizado() {
 // ==========================================
 
 function destacarBotaoAtivo(idBotao) {
-    document.querySelectorAll('.filtro-btn').forEach(btn => btn.classList.remove('ativo'));
+    document.querySelectorAll('.tab-origem-btn, .btn-filtro-aluno').forEach(btn => btn.classList.remove('ativo'));
     const btn = document.getElementById(idBotao);
     if (btn) btn.classList.add('ativo');
+}
+
+function formatarTituloEdital(texto) {
+    if (!texto || typeof texto !== 'string') return '';
+    
+    // Detecta proporção de letras maiúsculas
+    const letras = texto.replace(/[^a-zA-ZáéíóúÁÉÍÓÚãõÃÕâêîôûÂÊÎÔÛçÇ]/g, '');
+    if (letras.length === 0) return texto;
+    const maiusculas = letras.replace(/[^A-ZÁÉÍÓÚÃÕÂÊÎÔÛÇ]/g, '').length;
+    if (maiusculas / letras.length < 0.6) {
+        return texto; // Texto já possui caixa mista natural
+    }
+
+    // Siglas oficiais e acrônimos que devem ser mantidos em maiúsculas
+    const siglas = new Set([
+        'UERN', 'UFERSA', 'PRAE', 'PROEX', 'PROEG', 'PROPESP', 'PROPLAN', 'PROGEP',
+        'CIEE', 'TI', 'PIBIC', 'PIBEX', 'PIBID', 'FAPERN', 'CAPES', 'CNPQ', 'CNPQ',
+        'SEI', 'EAD', 'DED', 'FACHS', 'FASSO', 'FE', 'FANAT', 'FAD', 'FAEN', 'FAME',
+        'PCD', 'SUS', 'MEC', 'RN', 'BR', 'PDF', 'CLT', 'MEI', 'CPF', 'RG', 'HTML', 'CSS', 'JS', 'API'
+    ]);
+
+    const minusculas = new Set([
+        'de', 'da', 'do', 'das', 'dos', 'em', 'no', 'na', 'nos', 'nas', 
+        'a', 'o', 'as', 'os', 'e', 'ou', 'com', 'por', 'para', 'pelo', 'pela', 'ao', 'aos', 'à', 'às'
+    ]);
+
+    const tokens = texto.split(/(\s+|[-/.,;:()ºª°"'])/);
+    let primeiroTokenValido = true;
+
+    return tokens.map(token => {
+        if (!token || /^\s+$/.test(token) || /^[-/.,;:()ºª°"']+$/.test(token)) {
+            return token;
+        }
+
+        const upper = token.toUpperCase();
+        if (siglas.has(upper)) {
+            primeiroTokenValido = false;
+            return upper;
+        }
+        if (upper === 'Nº' || upper === 'NO' || upper === 'N°') {
+            primeiroTokenValido = false;
+            return 'Nº';
+        }
+
+        const lower = token.toLowerCase();
+        if (!primeiroTokenValido && minusculas.has(lower)) {
+            return lower;
+        }
+
+        primeiroTokenValido = false;
+        return lower.charAt(0).toUpperCase() + lower.slice(1);
+    }).join('');
 }
 
 function toggleFiltroVigentes() {
@@ -557,7 +609,7 @@ async function carregarDados(tipo, novaPagina = 1) {
 
     const container = document.getElementById('container-vagas');
     container.style.display = 'grid';
-    container.innerHTML = '<p class="carregando">Buscando dados no banco...</p>';
+    container.innerHTML = '<p class="carregando">Buscando oportunidades oficiais...</p>';
 
     try {
         let url = `${API_URL}/${tipo}?pagina=${paginaAtual}&limite=6`;
@@ -594,19 +646,19 @@ function renderizarCards(listaDeVagas) {
             <div class="status-box">
                 <div class="status-box-decor"></div>
                 <h3 class="status-box-titulo">Nenhum Resultado Encontrado</h3>
-                <p class="status-box-texto">Não foram localizadas oportunidades para o filtro atual.</p>
+                <p class="status-box-texto">Não foram localizadas oportunidades para o filtro selecionado.</p>
             </div>
         `;
         return;
     }
 
     const corCategoriaMap = {
-        "Estágios (PRAE)": "var(--color-navy)",
-        "Bolsas (PROEX)": "var(--color-orange)",
-        "UFERSA": "var(--color-purple)",
-        "Vagas CIEE": "var(--color-navy)",
-        "Portal UERN": "var(--color-orange)",
-        "Notícia Tech": "var(--color-green)"
+        "Estágios (PRAE)": "#112244",
+        "Bolsas (PROEX)": "#FF7A00",
+        "UFERSA": "#6B21A8",
+        "Vagas CIEE": "#0F4C81",
+        "Portal UERN": "#C2410C",
+        "Notícia Tech": "#1E7E34"
     };
 
     const favSet = (usuarioAtual && usuarioAtual.favoritos) ? new Set(usuarioAtual.favoritos.map(String)) : new Set();
@@ -615,13 +667,11 @@ function renderizarCards(listaDeVagas) {
         const idStr = String(vaga._id);
         const ehFavorito = vaga.favorito === true || favSet.has(idStr);
         const ehNoticia = vaga.categoria === "Notícia Tech" || tipoAtual === "noticias";
-        const temaVerde = ehNoticia ? "card-verde" : "";
-        const corTag = corCategoriaMap[vaga.categoria] || "var(--color-navy)";
+        const corTag = corCategoriaMap[vaga.categoria] || "#112244";
 
-        let badgeDataHTML = "";
-        const estiloBadgeBase = "border: 2px solid var(--color-navy); padding: 3px 8px; font-size: 0.75rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; box-shadow: 2px 2px 0 var(--color-navy);";
-
+        let badgeStatusHTML = "";
         let status = vaga.status_prazo || "";
+        
         if (!ehNoticia && vaga.data_vencimento_formatada) {
             let dias = vaga.dias_restantes;
             if (typeof dias !== "number") {
@@ -632,59 +682,81 @@ function renderizarCards(listaDeVagas) {
             }
 
             if (status === "vencido") {
-                const decorridos = Math.abs(dias);
-                badgeDataHTML = `
-                    <div style="background: #EAEAEA; color: #555; ${estiloBadgeBase}">
-                        ⛔ Encerrado em ${vaga.data_vencimento_formatada} (há ${decorridos} d)
+                badgeStatusHTML = `
+                    <div class="badge-status badge-status-encerrado" title="Inscrições finalizadas em ${vaga.data_vencimento_formatada}">
+                        <i class="ph-bold ph-clock"></i>
+                        <span>Encerrado em ${vaga.data_vencimento_formatada}</span>
                     </div>
                 `;
             } else {
-                const complemento = dias === 0 ? " (último dia!)" : ` (${dias} d)`;
-                badgeDataHTML = `
-                    <div style="background: #FFF5F5; color: var(--color-red); ${estiloBadgeBase}">
-                        🔥 Até ${vaga.data_vencimento_formatada}${complemento}
+                const complemento = dias === 0 ? " (último dia!)" : ` (${dias}d restantes)`;
+                badgeStatusHTML = `
+                    <div class="badge-status badge-status-vigente" title="Inscrições abertas até ${vaga.data_vencimento_formatada}">
+                        <i class="ph-bold ph-check-circle"></i>
+                        <span>Até ${vaga.data_vencimento_formatada}${complemento}</span>
                     </div>
                 `;
             }
+        } else if (ehNoticia) {
+            badgeStatusHTML = `
+                <div class="badge-status badge-status-neutro">
+                    <i class="ph-bold ph-newspaper"></i>
+                    <span>Atualização Tech</span>
+                </div>
+            `;
+        } else {
+            badgeStatusHTML = `
+                <div class="badge-status badge-status-neutro">
+                    <i class="ph-bold ph-info"></i>
+                    <span>Fluxo Contínuo</span>
+                </div>
+            `;
         }
 
         const classeVencido = status === "vencido" ? "card-vencido" : "";
+        const tituloFormatado = formatarTituloEdital(vaga.nome);
 
-        let linkFonteHTML = `Fonte: ${vaga.fonte || 'Não Especificada'}`;
-        if (vaga.meta_fonte) {
+        let linkFonteHTML = vaga.fonte || 'Universidade';
+        if (vaga.meta_fonte && vaga.meta_fonte.nome_oficial) {
+            const nomeCurto = vaga.meta_fonte.nome_oficial.split(" - ")[0];
             linkFonteHTML = `
-                <a href="${vaga.meta_fonte.url_oficial}" target="_blank"
-                   title="Portal Mestre: ${vaga.meta_fonte.nome_oficial}"
-                   style="color: var(--color-navy); text-decoration: underline; font-weight: 800; cursor: pointer;">
-                    📍 ${vaga.meta_fonte.nome_oficial.split(" - ")[0]} ℹ️
+                <a href="${vaga.meta_fonte.url_oficial}" target="_blank" rel="noopener noreferrer"
+                   title="${vaga.meta_fonte.nome_oficial}"
+                   class="meta-link-oficial">
+                    ${nomeCurto} ↗
                 </a>
             `;
         }
 
         const cardHTML = `
-            <div class="card ${temaVerde} ${classeVencido}">
+            <div class="card ${classeVencido}">
                 <div class="card-topo">
                     <div class="card-tags-row">
                         <span class="card-categoria-tag" style="background-color: ${corTag};">
                             ${vaga.categoria || 'Geral'}
                         </span>
-                        ${badgeDataHTML}
+                        ${badgeStatusHTML}
                     </div>
 
-                    <h3 class="card-titulo">${vaga.nome}</h3>
-                    <p class="card-fonte">${linkFonteHTML}</p>
+                    <h3 class="card-titulo" title="${vaga.nome}">${tituloFormatado}</h3>
+                    
+                    <div class="card-meta-box">
+                        <i class="ph-bold ph-buildings meta-icone"></i>
+                        <span class="meta-texto"><strong>Origem:</strong> ${linkFonteHTML}</span>
+                    </div>
                 </div>
 
                 <div class="card-acoes-row">
-                    <a href="${vaga.link}" target="_blank" class="card-link-btn">
-                        Ver Detalhes →
+                    <a href="${vaga.link}" target="_blank" rel="noopener noreferrer" class="card-link-btn">
+                        <span>Ver Edital Oficial</span>
+                        <i class="ph-bold ph-arrow-up-right"></i>
                     </a>
 
                     <button id="fav-btn-${idStr}" 
                         class="btn-favoritar-card ${ehFavorito ? 'favoritado' : ''}" 
                         onclick="toggleFavorito('${idStr}', event)"
                         title="${ehFavorito ? 'Remover dos favoritos' : 'Salvar oportunidade'}">
-                        <i class="${ehFavorito ? 'ph-fill ph-star' : 'ph ph-star'}"></i>
+                        <i class="${ehFavorito ? 'ph-fill ph-star' : 'ph-bold ph-star'}"></i>
                         <span>${ehFavorito ? 'Salvo' : 'Salvar'}</span>
                     </button>
                 </div>
@@ -749,7 +821,7 @@ async function realizarPesquisa() {
 
         const dados = await resposta.json();
         renderizarCards(dados);
-        document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('ativo'));
+        document.querySelectorAll('.tab-origem-btn, .btn-filtro-aluno').forEach(b => b.classList.remove('ativo'));
     } catch (e) {
         console.error("Erro na pesquisa:", e);
         container.innerHTML = `<div class="status-box" style="border-color: var(--color-red);"><h3 class="status-box-titulo" style="color: var(--color-red);">Erro na Pesquisa</h3><p class="status-box-texto">${e.message}</p></div>`;

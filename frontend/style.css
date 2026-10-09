@@ -23,11 +23,9 @@ html {
 }
 
 body {
-    background-color: var(--color-white);
-    background-image: 
-        linear-gradient(var(--color-gray) 2px, transparent 2px),
-        linear-gradient(90deg, var(--color-gray) 2px, transparent 2px);
-    background-size: 30px 30px;
+    background-color: #F8F9FA;
+    background-image: radial-gradient(rgba(17, 34, 68, 0.08) 1.5px, transparent 1.5px);
+    background-size: 24px 24px;
     color: var(--color-navy);
     min-height: 100vh;
     overflow-x: hidden;
@@ -36,270 +34,16 @@ body {
     flex-direction: column;
 }
 
-/* --- UTILITÁRIOS MEMPHIS --- */
-.memphis-border {
-    border: 3px solid var(--color-navy);
-}
-
-.memphis-shadow {
-    box-shadow: 6px 6px 0px var(--color-navy);
-    transition: all 0.15s ease-in-out;
-}
-
-.memphis-shadow-hover:hover {
-    transform: translate(-3px, -3px);
-    box-shadow: 9px 9px 0px var(--color-navy);
-}
-
-.memphis-shadow-active:active {
-    transform: translate(3px, 3px) !important;
-    box-shadow: 3px 3px 0px var(--color-navy) !important;
-}
-
 /* ==========================================================================
-   FORMAS GEOMÉTRICAS MEMPHIS COMPLETAS (BACKGROUND ART)
-   ========================================================================== */
-.memphis-shapes-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 0;
-    pointer-events: none;
-    overflow: hidden;
-}
-
-/* Formas geométricas agora são estáticas (sem movimento/idle) */
-.shape-float {
-    /* Sem animação flutuante */
-}
-
-/* 1. Rosca Memphis Laranja */
-.donut-orange {
-    position: absolute;
-    top: 15%;
-    left: -40px;
-    width: 150px;
-    height: 150px;
-    background-color: var(--color-orange);
-    border: 5px solid var(--color-navy);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 8px 8px 0px var(--color-navy);
-    opacity: 0.85;
-}
-.donut-orange::after {
-    content: '';
-    width: 60px;
-    height: 60px;
-    background-color: var(--color-white);
-    border: 5px solid var(--color-navy);
-    border-radius: 50%;
-}
-
-/* 2. Linha Zigue-Zague Laranja */
-.zigzag-line {
-    position: absolute;
-    top: 48%;
-    right: 2%;
-    width: 220px;
-    height: 36px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' width='100%25' height='100%25'%3E%3Cpath d='M0,60 L50,20 L100,60 L150,20 L200,60 L250,20 L300,60 L350,20 L400,60 L450,20 L500,60 L550,20 L600,60' fill='none' stroke='%23FF7A00' stroke-width='25' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: repeat-x;
-    background-size: contain;
-    opacity: 0.9;
-}
-
-/* 3. Triângulo Laranja com Sombra Densa */
-.triangle-orange {
-    position: absolute;
-    bottom: 12%;
-    right: 4%;
-    width: 0;
-    height: 0;
-    border-left: 70px solid transparent;
-    border-right: 70px solid transparent;
-    border-bottom: 120px solid var(--color-orange);
-    filter: drop-shadow(7px 5px 0px var(--color-navy));
-    opacity: 0.85;
-}
-
-/* 4. Círculo com Listras Diagonais */
-.circle-stripes {
-    position: absolute;
-    bottom: 15%;
-    left: 3%;
-    width: 100px;
-    height: 100px;
-    border: 5px solid var(--color-navy);
-    border-radius: 50%;
-    background: repeating-linear-gradient(45deg, var(--color-orange), var(--color-orange) 6px, var(--color-navy) 6px, var(--color-navy) 12px);
-    box-shadow: 6px 6px 0px var(--color-navy);
-    opacity: 0.9;
-}
-
-/* 5. Cruzes Tipográficas */
-.cross {
-    position: absolute;
-    font-size: 80px;
-    font-weight: 900;
-    color: var(--color-navy);
-    user-select: none;
-    line-height: 1;
-    opacity: 0.85;
-}
-
-/* 6. Círculo Pontilhado */
-.circulo-pontilhado {
-    position: absolute;
-    top: 2%;
-    right: 12%;
-    width: 150px;
-    height: 150px;
-    background-color: var(--color-navy);
-    border-radius: 50%;
-    background-image: radial-gradient(var(--color-white) 16%, transparent 17%);
-    background-size: 14px 14px;
-    opacity: 0.75;
-    box-shadow: 6px 6px 0px var(--color-orange);
-}
-
-/* 7. Triângulo Listrado Azul e Branco */
-.triangulo-listrado {
-    position: absolute;
-    top: 28%;
-    right: -20px;
-    width: 180px;
-    height: 160px;
-    background: repeating-linear-gradient(-45deg, var(--color-navy), var(--color-navy) 8px, var(--color-white) 8px, var(--color-white) 16px);
-    clip-path: polygon(100% 0, 0 40%, 100% 100%);
-    opacity: 0.85;
-}
-
-/* 8. Círculo Sólido Lateral */
-.circulo-solido-centro {
-    position: absolute;
-    top: 36%;
-    left: -40px;
-    width: 130px;
-    height: 130px;
-    background-color: var(--color-orange);
-    border: 4px solid var(--color-navy);
-    border-radius: 50%;
-    box-shadow: 5px 5px 0px var(--color-navy);
-    opacity: 0.85;
-}
-
-/* 9. Textura de Zigue-Zague Central */
-.textura-zigzag-centro {
-    position: absolute;
-    top: 50%;
-    left: 2%;
-    width: 110px;
-    height: 110px;
-    background: linear-gradient(135deg, var(--color-navy) 25%, transparent 25%) -20px 0, 
-                linear-gradient(225deg, var(--color-navy) 25%, transparent 25%) -20px 0, 
-                linear-gradient(45deg, var(--color-navy) 25%, transparent 25%), 
-                linear-gradient(315deg, var(--color-navy) 25%, var(--color-white) 25%);
-    background-size: 32px 32px;
-    border: 4px solid var(--color-navy);
-    border-radius: 50%;
-    box-shadow: 5px 5px 0px var(--color-orange);
-    opacity: 0.85;
-}
-
-/* 10. Quadrado Rotacionado com Pontos */
-.quadrado-rotacionado {
-    position: absolute;
-    bottom: 28%;
-    right: 8%;
-    width: 100px;
-    height: 100px;
-    background-color: var(--color-navy);
-    transform: rotate(25deg);
-    border: 3px solid var(--color-navy);
-    background-image: radial-gradient(var(--color-orange) 20%, transparent 21%);
-    background-size: 16px 16px;
-    box-shadow: 6px 6px 0px var(--color-orange);
-    opacity: 0.85;
-}
-
-/* 11. Barra Diagonal Colorida */
-.barra-diagonal {
-    position: absolute;
-    bottom: 5%;
-    left: 18%;
-    width: 160px;
-    height: 36px;
-    background-color: var(--color-orange);
-    transform: rotate(-35deg);
-    border: 4px solid var(--color-navy);
-    box-shadow: 5px 5px 0px var(--color-navy);
-    opacity: 0.85;
-}
-
-/* 12. Arco Vazado */
-.arco-inferior {
-    position: absolute;
-    bottom: 8%;
-    left: 55%;
-    width: 110px;
-    height: 110px;
-    border: 16px solid var(--color-navy);
-    border-radius: 50%;
-    border-bottom-color: transparent;
-    border-left-color: transparent;
-    transform: rotate(45deg);
-    opacity: 0.8;
-}
-
-/* 13. Cruzes em Grupo */
-.cruzes-grupo {
-    position: absolute;
-    top: 25px;
-    left: 6%;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 34px;
-    font-weight: 900;
-    color: var(--color-navy);
-    letter-spacing: 6px;
-    opacity: 0.8;
-}
-
-/* 14. Linhas Onduladas Tracejadas */
-.linha-ondulada-1 {
-    position: absolute;
-    bottom: 60px;
-    right: 28%;
-    width: 120px;
-    height: 20px;
-    border-bottom: 5px dashed var(--color-orange);
-    transform: skewX(-30deg);
-}
-
-.linha-ondulada-2 {
-    position: absolute;
-    top: 22%;
-    left: 18%;
-    width: 110px;
-    height: 20px;
-    border-bottom: 5px dashed var(--color-navy);
-    transform: skewX(30deg);
-}
-
-/* ==========================================================================
-   LANDING HERO SECTION (DESIGN INSTAX + NEOBRUTALISMO MEMPHIS)
+   LANDING HERO SECTION (NEOBRUTALISMO ACADÊMICO REFINADO)
    ========================================================================== */
 .landing-section {
     position: relative;
     z-index: 10;
-    max-width: 1280px;
+    max-width: 1200px;
     width: 100%;
     margin: 0 auto;
-    padding: 1.5rem 1.25rem 3rem 1.25rem;
+    padding: 1.5rem 1.25rem 2.5rem 1.25rem;
 }
 
 /* Navigation Bar */
@@ -308,9 +52,10 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 1rem 1.5rem;
-    background: var(--color-white);
-    border: 3px solid var(--color-navy);
-    box-shadow: 6px 6px 0px var(--color-navy);
+    background: #FFFFFF;
+    border: 2.5px solid var(--color-navy);
+    border-radius: 10px;
+    box-shadow: 5px 5px 0px var(--color-navy);
     margin-bottom: 2rem;
 }
 
@@ -326,6 +71,7 @@ body {
     background: var(--color-orange);
     color: var(--color-white);
     border: 2px solid var(--color-navy);
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -335,8 +81,8 @@ body {
 }
 
 .nav-brand-title {
-    font-size: 1.5rem;
-    font-weight: 900;
+    font-size: 1.45rem;
+    font-weight: 800;
     color: var(--color-navy);
     letter-spacing: -0.5px;
 }
@@ -344,10 +90,10 @@ body {
 .nav-links {
     display: none;
     align-items: center;
-    gap: 2rem;
+    gap: 1.75rem;
 }
 
-@media (min-width: 820px) {
+@media (min-width: 840px) {
     .nav-links {
         display: flex;
     }
@@ -358,51 +104,42 @@ body {
     text-decoration: none;
     font-weight: 700;
     font-size: 0.95rem;
-    transition: color 0.15s ease;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.15s ease;
 }
 
 .nav-link:hover {
     color: var(--color-orange);
+    background: rgba(255, 122, 0, 0.08);
 }
 
-.btn-nav-action {
-    background-color: var(--color-orange);
-    color: var(--color-white);
-    border: 2px solid var(--color-navy);
-    padding: 0.55rem 1.25rem;
-    font-weight: 800;
-    font-size: 0.9rem;
-    text-decoration: none;
-    display: inline-flex;
+.nav-actions-container {
+    display: flex;
     align-items: center;
-    gap: 6px;
-    box-shadow: 3px 3px 0px var(--color-navy);
-    transition: all 0.15s ease;
-}
-
-.btn-nav-action:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 5px 5px 0px var(--color-navy);
+    gap: 12px;
 }
 
 /* Card Principal da Hero */
 .hero-card-container {
-    background: var(--color-white);
-    border: 4px solid var(--color-navy);
-    box-shadow: 12px 12px 0px var(--color-navy);
-    padding: 3rem 2rem;
+    background: #FFFFFF;
+    border: 3px solid var(--color-navy);
+    border-radius: 16px;
+    box-shadow: 8px 8px 0px var(--color-navy);
+    padding: 2.75rem 2rem;
     position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    gap: 3rem;
+    gap: 2.5rem;
 }
 
 @media (min-width: 960px) {
     .hero-card-container {
         flex-direction: row;
         align-items: center;
-        padding: 4rem 3.5rem;
+        padding: 3.5rem 3rem;
+        gap: 3.5rem;
     }
 }
 
@@ -412,20 +149,20 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: radial-gradient(rgba(17, 34, 68, 0.08) 2px, transparent 2px);
-    background-size: 24px 24px;
+    background-image: radial-gradient(rgba(17, 34, 68, 0.04) 2px, transparent 2px);
+    background-size: 20px 20px;
     pointer-events: none;
     z-index: 1;
 }
 
 .hero-content-col {
-    flex: 1.15;
+    flex: 1.2;
     position: relative;
     z-index: 2;
 }
 
 .hero-visual-col {
-    flex: 0.85;
+    flex: 0.8;
     position: relative;
     z-index: 2;
     display: flex;
@@ -437,88 +174,64 @@ body {
 .hero-badge {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    background: var(--color-white);
-    border: 2.5px solid var(--color-navy);
-    box-shadow: 4px 4px 0px var(--color-navy);
-    padding: 6px 14px;
-    margin-bottom: 1.5rem;
+    gap: 8px;
+    background: #FFF8E1;
+    border: 2px solid var(--color-navy);
+    border-radius: 20px;
+    box-shadow: 2px 2px 0px var(--color-navy);
+    padding: 5px 14px;
+    margin-bottom: 1.25rem;
 }
 
-.hero-badge-icon {
-    font-size: 1.25rem;
+.hero-badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--color-orange);
+    box-shadow: 0 0 0 2px rgba(255, 122, 0, 0.25);
 }
 
-.hero-badge-texts {
-    display: flex;
-    flex-direction: column;
-    text-align: left;
-}
-
-.hero-badge-tag {
-    font-size: 0.7rem;
+.hero-badge-text {
+    font-size: 0.82rem;
     font-weight: 800;
-    color: #777;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.hero-badge-title {
-    font-size: 0.85rem;
-    font-weight: 900;
     color: var(--color-navy);
+    letter-spacing: 0.2px;
 }
 
 /* Headline */
 .hero-headline {
-    font-size: 2.5rem;
-    font-weight: 900;
-    line-height: 1.15;
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1.25;
     color: var(--color-navy);
-    margin-bottom: 1.5rem;
-    letter-spacing: -1px;
+    margin-bottom: 1.25rem;
+    letter-spacing: -0.5px;
 }
 
 @media (min-width: 768px) {
     .hero-headline {
-        font-size: 3.6rem;
-    }
-}
-
-.hide-mobile {
-    display: none;
-}
-@media (min-width: 768px) {
-    .hide-mobile {
-        display: inline;
+        font-size: 3rem;
     }
 }
 
 .hero-highlight-word {
+    color: var(--color-orange);
     position: relative;
     display: inline-block;
-    color: var(--color-orange);
-}
-
-.hero-underline-graphic {
-    position: absolute;
-    width: 105%;
-    height: 10px;
-    background-color: var(--color-yellow);
-    bottom: 2px;
-    left: -2%;
-    border: 2px solid var(--color-navy);
-    transform: rotate(-1.5deg);
-    z-index: -1;
 }
 
 /* Subtítulo */
 .hero-lead {
-    font-size: 1.1rem;
-    line-height: 1.6;
-    color: rgba(17, 34, 68, 0.85);
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: #334155;
     margin-bottom: 2rem;
-    max-width: 580px;
+    max-width: 560px;
+}
+
+.hero-lead strong {
+    color: var(--color-navy);
+    font-weight: 700;
 }
 
 /* Ações */
@@ -526,28 +239,29 @@ body {
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
-    margin-bottom: 2.5rem;
 }
 
 .btn-hero-primary {
     background-color: var(--color-orange);
-    color: var(--color-white);
-    padding: 1.1rem 2rem;
-    font-weight: 900;
-    font-size: 1.1rem;
-    border: 3px solid var(--color-navy);
-    box-shadow: 5px 5px 0px var(--color-navy);
+    color: #FFFFFF;
+    padding: 1rem 1.75rem;
+    font-weight: 800;
+    font-size: 1.02rem;
+    border: 2.5px solid var(--color-navy);
+    border-radius: 8px;
+    box-shadow: 4px 4px 0px var(--color-navy);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     cursor: pointer;
     transition: all 0.15s ease-in-out;
 }
 
 .btn-hero-primary:hover {
-    transform: translate(-3px, -3px);
-    box-shadow: 8px 8px 0px var(--color-navy);
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px var(--color-navy);
+    background-color: #FF881A;
 }
 
 .btn-hero-primary:active {
@@ -556,187 +270,113 @@ body {
 }
 
 .btn-hero-secondary {
-    background-color: var(--color-white);
+    background-color: #FFFFFF;
     color: var(--color-navy);
-    padding: 1.1rem 1.75rem;
+    padding: 1rem 1.6rem;
     font-weight: 800;
-    font-size: 1.05rem;
-    border: 3px solid var(--color-navy);
-    box-shadow: 5px 5px 0px var(--color-navy);
+    font-size: 1.02rem;
+    border: 2.5px solid var(--color-navy);
+    border-radius: 8px;
+    box-shadow: 4px 4px 0px var(--color-navy);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    cursor: pointer;
     transition: all 0.15s ease-in-out;
 }
 
 .btn-hero-secondary:hover {
-    transform: translate(-3px, -3px);
-    box-shadow: 8px 8px 0px var(--color-navy);
-    background-color: var(--color-gray-light);
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px var(--color-navy);
+    background-color: #F8F9FA;
 }
-
-/* Pills de Benefícios */
-.hero-pills-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-}
-
-.hero-pill {
-    background: var(--color-white);
-    border: 2px solid var(--color-navy);
-    box-shadow: 3px 3px 0px var(--color-navy);
-    padding: 5px 12px;
-    font-size: 0.8rem;
-    font-weight: 800;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.pill-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    border: 1.5px solid var(--color-navy);
-}
-.dot-orange { background-color: var(--color-orange); }
-.dot-navy { background-color: var(--color-navy); }
-.dot-cyan { background-color: var(--color-cyan); }
 
 /* ==========================================================================
-   COMPOSIÇÃO GRÁFICA MEMPHIS DA HERO COM A ESTUDANTE
+   MOLDURA NEOBRUTALISTA DA FOTOGRAFIA DA ESTUDANTE (HERO PORTRAIT CARD)
    ========================================================================== */
-.memphis-art-composition {
+.hero-portrait-card {
     position: relative;
-    width: 340px;
-    height: 420px;
+    background: #FFFFFF;
+    border: 3px solid var(--color-navy);
+    border-radius: 16px;
+    box-shadow: 7px 7px 0px var(--color-navy);
+    overflow: hidden;
     display: flex;
-    align-items: flex-end;
-    justify-content: center;
-}
-
-@media (min-width: 480px) {
-    .memphis-art-composition {
-        width: 420px;
-        height: 460px;
-    }
-}
-
-/* Fundo amarelo poligonal inclinado (fica atrás da menina) */
-.art-backdrop-polygon {
-    position: absolute;
-    width: 260px;
-    height: 320px;
-    background-color: var(--color-yellow);
-    border: 4px solid var(--color-navy);
-    box-shadow: 10px 10px 0px var(--color-navy);
-    transform: rotate(8deg);
-    top: 8%;
-    right: 5%;
-    z-index: 1;
-}
-
-/* Forma azul marinho angular */
-.art-poly-navy {
-    position: absolute;
-    top: 12%;
-    left: 4%;
-    width: 170px;
-    height: 180px;
-    background-color: var(--color-navy);
-    transform: rotate(-18deg);
-    z-index: 1;
-}
-
-/* Matriz de pontos decorativa */
-.art-dots-matrix {
-    position: absolute;
-    bottom: 2%;
-    right: 0%;
-    width: 130px;
-    height: 130px;
-    background-image: radial-gradient(var(--color-navy) 20%, transparent 20%);
-    background-size: 14px 14px;
-    z-index: 1;
-}
-
-/* Triângulo com borda */
-.art-triangle-deco {
-    position: absolute;
-    bottom: 10%;
-    left: 0%;
-    width: 0;
-    height: 0;
-    border-left: 35px solid transparent;
-    border-right: 35px solid transparent;
-    border-bottom: 60px solid var(--color-orange);
-    transform: rotate(-12deg);
-    filter: drop-shadow(5px 5px 0px var(--color-navy));
-    z-index: 1;
-}
-
-/* Cruzes e anéis flutuantes */
-.art-cross-1 {
-    position: absolute;
-    top: 6%;
-    right: 18%;
-    font-size: 2.2rem;
-    font-weight: 900;
-    color: var(--color-navy);
-    z-index: 1;
-}
-
-.art-cross-2 {
-    position: absolute;
-    bottom: 30%;
-    left: -4%;
-    font-size: 2.4rem;
-    font-weight: 900;
-    color: var(--color-orange);
-    z-index: 1;
-}
-
-.art-circle-ring {
-    position: absolute;
-    top: 2%;
-    left: 18%;
-    width: 36px;
-    height: 36px;
-    border: 4px solid var(--color-navy);
-    border-radius: 50%;
-    background-color: var(--color-white);
-    z-index: 1;
-}
-
-/* Wrapper da Estudante (z-index 10 para ficar à frente de todas as formas geométricas) */
-.art-student-wrapper {
-    position: relative;
-    z-index: 10;
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
+    flex-direction: column;
+    max-width: 360px;
     width: 100%;
-    height: 100%;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.art-student-img {
-    max-width: 100%;
-    max-height: 480px;
-    width: auto;
-    height: auto;
-    object-fit: contain;
+.hero-portrait-card:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 10px 10px 0px var(--color-navy);
+}
+
+.portrait-photo-frame {
+    width: 100%;
+    height: 360px;
+    background: linear-gradient(180deg, #FFFDE7 0%, #FFE082 100%);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    overflow: hidden;
     position: relative;
-    z-index: 10;
-    filter: drop-shadow(6px 8px 0px rgba(17, 34, 68, 0.25));
+    border-bottom: 2.5px solid var(--color-navy);
+}
+
+.portrait-student-img {
+    max-width: 90%;
+    max-height: 100%;
+    object-fit: contain;
+    object-position: bottom;
+    display: block;
     user-select: none;
     pointer-events: none;
-    transition: transform 0.25s ease-in-out;
+    filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.15));
+    transition: transform 0.25s ease;
 }
 
-.art-student-wrapper:hover .art-student-img {
+.hero-portrait-card:hover .portrait-student-img {
     transform: scale(1.02);
+}
+
+.portrait-badge {
+    background: #FFFFFF;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.portrait-badge-icon {
+    font-size: 1.5rem;
+    background: #FFF3E0;
+    border: 2px solid var(--color-navy);
+    border-radius: 8px;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.portrait-badge-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.portrait-badge-text strong {
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: var(--color-navy);
+}
+
+.portrait-badge-text small {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: #64748B;
 }
 
 /* ==========================================================================
@@ -746,7 +386,7 @@ body {
     max-width: 1200px;
     width: 100%;
     margin: 0 auto;
-    padding: 3rem 1.25rem 2rem 1.25rem;
+    padding: 2.5rem 1.25rem 2rem 1.25rem;
     position: relative;
     z-index: 10;
     flex: 1;
@@ -755,19 +395,20 @@ body {
 /* Header & Logo da Seção de Busca */
 .header-memphis {
     text-align: center;
-    margin-bottom: 3rem;
+    margin-bottom: 2.5rem;
 }
 
 .logo-box {
     display: inline-block;
     background-color: var(--color-navy);
     color: var(--color-white);
-    padding: 0.75rem 2.25rem;
-    font-size: 2.75rem;
+    padding: 0.65rem 2rem;
+    font-size: 2.35rem;
     font-weight: 900;
     border: 3px solid var(--color-navy);
-    box-shadow: 8px 8px 0px var(--color-orange);
-    transform: rotate(-2deg);
+    border-radius: 8px;
+    box-shadow: 6px 6px 0px var(--color-orange);
+    transform: rotate(-1.5deg);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     cursor: pointer;
     user-select: none;
@@ -775,31 +416,19 @@ body {
 
 .logo-box:hover {
     transform: rotate(0deg);
-    box-shadow: 10px 10px 0px var(--color-orange);
-}
-
-.tagline-badge {
-    margin-top: 1.25rem;
-    font-size: 1.15rem;
-    font-weight: 700;
-    background-color: var(--color-white);
-    display: inline-block;
-    padding: 0.35rem 1.25rem;
-    border: 3px solid var(--color-navy);
-    box-shadow: 4px 4px 0px var(--color-navy);
-    transform: rotate(1deg);
+    box-shadow: 8px 8px 0px var(--color-orange);
 }
 
 /* Barra de Busca */
 .busca-wrapper {
     max-width: 760px;
-    margin: 0 auto 2.5rem auto;
+    margin: 0 auto 1.75rem auto;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 10px;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 640px) {
     .busca-wrapper {
         flex-direction: row;
     }
@@ -807,33 +436,36 @@ body {
 
 .input-busca-memphis {
     flex: 1;
-    padding: 1rem 1.25rem;
-    font-size: 1.05rem;
-    font-weight: 600;
-    background-color: var(--color-white);
-    border: 3px solid var(--color-navy);
-    box-shadow: 6px 6px 0px var(--color-navy);
+    padding: 0.95rem 1.25rem;
+    font-size: 0.98rem;
+    font-weight: 500;
+    background-color: #FFFFFF;
+    border: 2.5px solid var(--color-navy);
+    border-radius: 8px;
+    box-shadow: 4px 4px 0px var(--color-navy);
     outline: none;
     transition: all 0.15s ease-in-out;
     color: var(--color-navy);
 }
 
 .input-busca-memphis:focus {
-    box-shadow: 8px 8px 0px var(--color-orange);
+    box-shadow: 6px 6px 0px var(--color-orange);
+    border-color: var(--color-navy);
 }
 
 .input-busca-memphis::placeholder {
-    color: rgba(17, 34, 68, 0.55);
+    color: #64748B;
 }
 
 .btn-busca-memphis {
     background-color: var(--color-orange);
-    color: var(--color-white);
-    padding: 1rem 2rem;
-    font-weight: 900;
-    font-size: 1.15rem;
-    border: 3px solid var(--color-navy);
-    box-shadow: 6px 6px 0px var(--color-navy);
+    color: #FFFFFF;
+    padding: 0.95rem 1.75rem;
+    font-weight: 800;
+    font-size: 1rem;
+    border: 2.5px solid var(--color-navy);
+    border-radius: 8px;
+    box-shadow: 4px 4px 0px var(--color-navy);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -843,105 +475,157 @@ body {
 }
 
 .btn-busca-memphis:hover {
-    transform: translate(-3px, -3px);
-    box-shadow: 9px 9px 0px var(--color-navy);
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px var(--color-navy);
+    background-color: #FF881A;
 }
 
 .btn-busca-memphis:active {
-    transform: translate(3px, 3px);
-    box-shadow: 3px 3px 0px var(--color-navy);
-}
-
-/* Botões de Filtros */
-.controles-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.85rem;
-    margin-bottom: 2rem;
-}
-
-@media (min-width: 768px) {
-    .controles-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 1rem;
-    }
-}
-
-.filtro-btn {
-    background-color: var(--color-white);
-    color: var(--color-navy);
-    border: 3px solid var(--color-navy);
-    padding: 0.9rem 0.75rem;
-    text-align: center;
-    font-weight: 800;
-    font-size: 0.95rem;
-    box-shadow: 5px 5px 0px var(--color-navy);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all 0.15s ease-in-out;
-}
-
-.filtro-btn i {
-    font-size: 1.25rem;
-}
-
-.filtro-btn:hover:not(.ativo) {
-    transform: translate(-3px, -3px);
-    box-shadow: 8px 8px 0px var(--color-navy);
-}
-
-.filtro-btn:active {
-    transform: translate(3px, 3px);
+    transform: translate(2px, 2px);
     box-shadow: 2px 2px 0px var(--color-navy);
 }
 
-.filtro-btn.ativo {
-    background-color: var(--color-orange);
-    color: var(--color-white);
-    box-shadow: 4px 4px 0px var(--color-navy);
-    transform: translate(2px, 2px);
+/* ==========================================================================
+   BARRA DE CATEGORIAS (SEGMENTED CATEGORY TABS)
+   ========================================================================== */
+.categoria-tabs-wrapper {
+    max-width: 1200px;
+    margin: 0 auto 1.25rem auto;
 }
 
-/* Checkbox Memphis */
-.filtros-adicionais-container {
+.categoria-tabs-scroll {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.tab-origem-btn {
+    background-color: #FFFFFF;
+    color: var(--color-navy);
+    border: 2px solid var(--color-navy);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    box-shadow: 3px 3px 0px var(--color-navy);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.15s ease;
+}
+
+.tab-origem-btn i {
+    font-size: 1.15rem;
+}
+
+.tab-origem-btn:hover:not(.ativo) {
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0px var(--color-navy);
+    background-color: #F8F9FA;
+}
+
+.tab-origem-btn:active {
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0px var(--color-navy);
+}
+
+.tab-origem-btn.ativo {
+    background-color: var(--color-navy);
+    color: #FFFFFF;
+    box-shadow: 2px 2px 0px var(--color-navy);
+    transform: translate(1px, 1px);
+}
+
+/* ==========================================================================
+   BARRA DE UTILITÁRIOS E FILTROS DO ESTUDANTE (STUDENT TOOLBAR)
+   ========================================================================== */
+.student-toolbar {
+    max-width: 1200px;
+    margin: 0 auto 2rem auto;
+    background: #FFFFFF;
+    border: 2.5px solid var(--color-navy);
+    border-radius: 10px;
+    box-shadow: 4px 4px 0px var(--color-navy);
+    padding: 10px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.student-toolbar-left {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-filtro-aluno {
+    background-color: #FFFDE7;
+    color: var(--color-navy);
+    border: 2px solid var(--color-navy);
+    border-radius: 6px;
+    padding: 7px 14px;
+    font-weight: 800;
+    font-size: 0.86rem;
+    box-shadow: 2.5px 2.5px 0px var(--color-navy);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+}
+
+.btn-filtro-aluno:hover:not(.ativo) {
+    transform: translate(-1px, -1px);
+    box-shadow: 3.5px 3.5px 0px var(--color-navy);
+    background-color: #FFF59D;
+}
+
+.btn-filtro-aluno.ativo {
+    background-color: var(--color-orange);
+    color: #FFFFFF;
+    box-shadow: 1.5px 1.5px 0px var(--color-navy);
+    transform: translate(1px, 1px);
+}
+
+.student-toolbar-right {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    margin-bottom: 2rem;
 }
 
-.checkbox-memphis-container {
+.toggle-vigentes-container {
     display: inline-flex;
     align-items: center;
     gap: 10px;
     cursor: pointer;
     user-select: none;
     font-weight: 700;
-    font-size: 0.95rem;
-    background: var(--color-white);
-    padding: 6px 14px;
-    border: 3px solid var(--color-navy);
-    box-shadow: 4px 4px 0px var(--color-navy);
+    font-size: 0.88rem;
+    color: var(--color-navy);
+    padding: 4px 6px;
 }
 
-.checkbox-memphis-container input {
+.toggle-vigentes-container input {
     width: 18px;
     height: 18px;
-    accent-color: var(--color-orange);
+    accent-color: #2E7D32;
     cursor: pointer;
 }
 
-/* Grid de Vagas */
+/* ==========================================================================
+   GRID DE OPORTUNIDADES & CARDS REESTRUTURADOS (ACESSIBILIDADE & HIERARQUIA)
+   ========================================================================== */
 .grid-vagas {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 1.75rem;
+    gap: 1.5rem;
 }
 
-@media (min-width: 700px) {
+@media (min-width: 680px) {
     .grid-vagas {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -954,10 +638,11 @@ body {
 }
 
 .card {
-    background: var(--color-white);
-    border: 3px solid var(--color-navy);
-    box-shadow: 6px 6px 0px var(--color-navy);
-    padding: 1.5rem;
+    background: #FFFFFF;
+    border: 2.5px solid var(--color-navy);
+    border-radius: 12px;
+    box-shadow: 5px 5px 0px var(--color-navy);
+    padding: 1.4rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -966,12 +651,12 @@ body {
 }
 
 .card:hover {
-    transform: translate(-3px, -3px);
-    box-shadow: 9px 9px 0px var(--color-navy);
+    transform: translate(-2px, -2px);
+    box-shadow: 8px 8px 0px var(--color-navy);
 }
 
 .card-topo {
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
 }
 
 .card-tags-row {
@@ -985,83 +670,92 @@ body {
 .card-categoria-tag {
     display: inline-block;
     padding: 4px 10px;
-    font-size: 0.75rem;
-    font-weight: 900;
-    color: var(--color-white);
-    background-color: var(--color-navy);
-    border: 2px solid var(--color-navy);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    font-size: 0.74rem;
+    font-weight: 800;
+    color: #FFFFFF;
+    border-radius: 4px;
+    border: 1.5px solid var(--color-navy);
+    letter-spacing: 0.2px;
 }
 
+/* Badges de Status com WCAG AA / AAA */
+.badge-status {
+    padding: 4px 10px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.badge-status-vigente {
+    background: #E8F5E9;
+    color: #1B5E20;
+    border: 1.5px solid #2E7D32;
+}
+
+.badge-status-encerrado {
+    background: #F1F3F5;
+    color: #495057;
+    border: 1.5px solid #6C757D;
+}
+
+.badge-status-neutro {
+    background: #E3F2FD;
+    color: #0D47A1;
+    border: 1.5px solid #1976D2;
+}
+
+/* Título em Caixa Mista, Leitura Confortável */
 .card-titulo {
-    font-size: 1.15rem;
-    font-weight: 900;
-    line-height: 1.35;
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1.42;
     color: var(--color-navy);
     margin-bottom: 0.75rem;
+    text-transform: none !important;
+    word-break: break-word;
 }
 
 .card:hover .card-titulo {
     color: var(--color-orange);
 }
 
-.card-fonte {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: rgba(17, 34, 68, 0.75);
-    margin-bottom: 1.25rem;
+.card-meta-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.84rem;
+    color: #475569;
+    margin-bottom: 1rem;
+    word-break: break-word;
 }
 
-.card-link-btn {
-    width: 100%;
-    background-color: var(--color-white);
+.meta-icone {
+    font-size: 1.1rem;
     color: var(--color-navy);
-    text-align: center;
-    padding: 0.75rem 1rem;
-    font-weight: 900;
-    font-size: 0.95rem;
-    text-decoration: none;
-    border: 3px solid var(--color-navy);
-    box-shadow: 4px 4px 0px var(--color-navy);
-    display: block;
-    transition: all 0.15s ease-in-out;
+    flex-shrink: 0;
+    margin-top: 2px;
 }
 
-.card-link-btn:hover {
-    background-color: var(--color-orange);
-    color: var(--color-white);
-    box-shadow: 6px 6px 0px var(--color-navy);
-    transform: translate(-2px, -2px);
+.meta-texto {
+    line-height: 1.4;
 }
 
-.card-link-btn:active {
-    transform: translate(2px, 2px);
-    box-shadow: 2px 2px 0px var(--color-navy);
-}
-
-/* Modificadores de Card */
-.card-verde {
-    border-color: var(--color-green);
-}
-.card-verde:hover .card-titulo {
-    color: var(--color-green);
-}
-.card-verde .card-categoria-tag {
-    background-color: var(--color-green);
-    border-color: var(--color-green);
-}
-.card-verde .card-link-btn:hover {
-    background-color: var(--color-green);
+.meta-link-oficial {
+    color: var(--color-navy);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
 }
 
 .card-vencido {
-    opacity: 0.6;
-    filter: grayscale(0.5);
+    opacity: 0.75;
 }
+
 .card-vencido:hover {
     opacity: 1;
-    filter: none;
 }
 
 /* Status Box */
@@ -1515,298 +1209,481 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    margin-top: 15px;
-    padding-top: 12px;
-    border-top: 2px dashed var(--color-navy);
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 2px dashed #CBD5E1;
 }
-.card-acoes-row .card-link-btn {
+
+.card-link-btn {
     flex: 1;
-    text-align: center;
-    margin-top: 0;
+    background-color: #FFFFFF;
+    color: var(--color-navy);
+    border: 2px solid var(--color-navy);
+    border-radius: 6px;
+    box-shadow: 3px 3px 0px var(--color-navy);
+    padding: 9px 12px;
+    font-weight: 800;
+    font-size: 0.88rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.15s ease-in-out;
 }
+
+.card-link-btn:hover {
+    background-color: var(--color-orange);
+    color: #FFFFFF;
+    transform: translate(-1.5px, -1.5px);
+    box-shadow: 4.5px 4.5px 0px var(--color-navy);
+}
+
+.card-link-btn:active {
+    transform: translate(1.5px, 1.5px);
+    box-shadow: 1.5px 1.5px 0px var(--color-navy);
+}
+
 .btn-favoritar-card {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    background: var(--color-white);
-    border: 3px solid var(--color-navy);
+    background: #FFFFFF;
+    border: 2px solid var(--color-navy);
+    border-radius: 6px;
     color: var(--color-navy);
-    padding: 10px 14px;
+    padding: 9px 12px;
     font-weight: 800;
-    font-size: 0.85rem;
+    font-size: 0.86rem;
     cursor: pointer;
-    box-shadow: 3px 3px 0 var(--color-navy);
+    box-shadow: 3px 3px 0px var(--color-navy);
     transition: all 0.15s ease;
 }
+
 .btn-favoritar-card:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 5px 5px 0 var(--color-navy);
+    transform: translate(-1.5px, -1.5px);
+    box-shadow: 4.5px 4.5px 0px var(--color-navy);
     background-color: #FFFDE7;
 }
+
 .btn-favoritar-card.favoritado {
-    background-color: var(--color-yellow);
-    color: var(--color-navy);
+    background-color: #FFF9C4;
+    color: #856404;
     border-color: var(--color-navy);
 }
+
 .btn-favoritar-card.favoritado:hover {
-    background-color: #FFE082;
+    background-color: #FFF59D;
 }
 
-/* 5. Modais Memphis Neobrutalistas */
+/* ==========================================================================
+   5. MODAIS: DESIGN REFINADO, ACESSÍVEL & CONFORME GESTALT (WCAG-COMPLIANT)
+   ========================================================================== */
+
+/* Backdrop com blur suave e opacidade equilibrada */
 .modal-backdrop {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(17, 34, 68, 0.65);
-    backdrop-filter: blur(4px);
+    background-color: rgba(17, 34, 68, 0.7);
+    backdrop-filter: blur(5px);
     z-index: 9999;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
-    animation: fadeInModal 0.2s ease-out;
+    padding: 24px 16px;
+    animation: fadeInModal 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 @keyframes fadeInModal {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
 }
 
+/* Janela do Modal: Hierarquia clara, sem peso claustrofóbico */
 .modal-memphis {
-    background: var(--color-white);
-    border: 4px solid var(--color-navy);
-    box-shadow: 10px 10px 0 var(--color-navy);
+    background: #FFFFFF;
+    border: 2.5px solid var(--color-navy);
+    border-radius: 12px;
+    box-shadow: 8px 8px 0 var(--color-navy);
     width: 100%;
-    max-width: 580px;
-    max-height: 90vh;
+    max-width: 540px;
+    max-height: 88vh;
     overflow-y: auto;
     position: relative;
     display: flex;
     flex-direction: column;
 }
 
+/* Barra Superior: Alto contraste (Navy sólido), tipografia limpa, sem text-shadow cartoon */
 .modal-header-memphis {
-    background: var(--color-orange);
-    border-bottom: 4px solid var(--color-navy);
-    padding: 12px 18px;
+    background: var(--color-navy);
+    color: #FFFFFF;
+    padding: 14px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    border-bottom: 2.5px solid var(--color-navy);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+.modal-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 .modal-dots {
     display: flex;
     gap: 6px;
+    align-items: center;
 }
 .dot {
-    width: 12px;
-    height: 12px;
+    width: 11px;
+    height: 11px;
     border-radius: 50%;
-    border: 2px solid var(--color-navy);
+    border: 1.5px solid rgba(0, 0, 0, 0.3);
 }
-.dot-red { background: var(--color-red); }
-.dot-yellow { background: var(--color-yellow); }
-.dot-green { background: var(--color-green); }
+.dot-red { background: #FF5F56; }
+.dot-yellow { background: #FFBD2E; }
+.dot-green { background: #27C93F; }
 
 .modal-title {
-    color: var(--color-white);
-    font-size: 1.1rem;
-    font-weight: 900;
-    letter-spacing: 0.5px;
-    text-shadow: 2px 2px 0 var(--color-navy);
+    color: #FFFFFF;
+    font-family: 'Lexend', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    margin: 0;
 }
 .modal-close-btn {
-    background: var(--color-white);
-    border: 2px solid var(--color-navy);
-    color: var(--color-navy);
-    font-size: 1rem;
-    font-weight: 900;
-    width: 28px;
-    height: 28px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    color: #FFFFFF;
+    font-size: 1.1rem;
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 2px 2px 0 var(--color-navy);
+    transition: all 0.15s ease;
 }
 .modal-close-btn:hover {
     background: var(--color-red);
-    color: var(--color-white);
+    border-color: var(--color-red);
+    color: #FFFFFF;
+    transform: scale(1.05);
 }
 
+/* Abas Segmentadas (Segmented Control): Affordance óbvia de alternância, sem competir com botões de submit */
+.auth-tabs-wrapper {
+    padding: 16px 24px 0 24px;
+    background: #FFFFFF;
+}
 .auth-tabs-row {
     display: flex;
-    border-bottom: 3px solid var(--color-navy);
-    background: var(--color-gray-light);
+    background: #F1F5F9;
+    border: 2px solid var(--color-navy);
+    border-radius: 8px;
+    padding: 4px;
+    gap: 4px;
 }
 .auth-tab-btn {
     flex: 1;
-    padding: 12px;
+    padding: 10px 16px;
     border: none;
     background: transparent;
-    font-weight: 800;
-    font-size: 0.95rem;
-    color: var(--color-navy);
+    border-radius: 6px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: #64748B;
     cursor: pointer;
     transition: all 0.15s ease;
-    border-right: 3px solid var(--color-navy);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
-.auth-tab-btn:last-child {
-    border-right: none;
+.auth-tab-btn:hover:not(.ativo) {
+    color: var(--color-navy);
+    background: rgba(255, 255, 255, 0.6);
 }
 .auth-tab-btn.ativo {
-    background: var(--color-yellow);
-    box-shadow: inset 0 -3px 0 var(--color-navy);
+    background: #FFFFFF;
+    color: var(--color-navy);
+    font-weight: 700;
+    box-shadow: 2px 2px 0 var(--color-navy);
+    border: 1.5px solid var(--color-navy);
 }
 
+/* Corpo do Modal: Espaço negativo generoso (Whitespace) */
 .modal-body-memphis {
-    padding: 22px;
+    padding: 20px 24px 28px 24px;
 }
 
+/* Lei da Proximidade: Rótulos colados aos campos correspondentes */
 .form-group-memphis {
-    margin-bottom: 16px;
+    margin-bottom: 18px;
+}
+.form-group-memphis:last-of-type {
+    margin-bottom: 22px;
 }
 .form-row-dupla {
     display: flex;
-    gap: 12px;
+    gap: 14px;
 }
 .form-row-dupla .form-group-memphis {
     flex: 1;
 }
 
 .label-memphis {
-    display: block;
-    font-weight: 800;
-    font-size: 0.88rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.84rem;
+    color: #1E293B;
+    margin-bottom: 5px;
+}
+.label-com-subtexto {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
     margin-bottom: 6px;
-    color: var(--color-navy);
+    flex-wrap: wrap;
+    gap: 4px;
 }
 .label-subtexto {
+    font-family: 'Inter', sans-serif;
     font-size: 0.75rem;
-    font-weight: 500;
-    color: #666;
+    font-weight: 400;
+    color: #64748B;
 }
 
+/* Inputs: Fundo branco limpo, borda firme, sem falso aspecto de autofill */
 .input-memphis {
     width: 100%;
     padding: 10px 14px;
-    border: 3px solid var(--color-navy);
-    font-size: 0.95rem;
-    font-weight: 600;
-    background: var(--color-white);
-    box-shadow: 3px 3px 0 var(--color-navy);
+    border: 2px solid #CBD5E1;
+    border-radius: 6px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: #0F172A;
+    background: #FFFFFF;
     outline: none;
+    transition: all 0.15s ease;
+}
+.input-memphis::placeholder {
+    color: #94A3B8;
+    font-weight: 400;
+}
+.input-memphis:hover {
+    border-color: #94A3B8;
 }
 .input-memphis:focus {
-    background: #FFFDE7;
-    box-shadow: 5px 5px 0 var(--color-navy);
+    border-color: var(--color-navy);
+    box-shadow: 0 0 0 3px rgba(17, 34, 68, 0.12);
+    background: #FFFFFF;
 }
 
-/* 6. Chips Selecionáveis de Cursos e Áreas */
+/* Seletores Múltiplos (Chips): Formato pílula distinto, sem caixa pontilhada claustrofóbica */
 .chips-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    max-height: 160px;
+    gap: 7px;
+    max-height: 150px;
     overflow-y: auto;
-    padding: 6px;
-    border: 2px dashed var(--color-navy);
-    background: var(--color-gray-light);
+    padding: 10px;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 8px;
+    background: #F8FAFC;
 }
 .chip-opcao {
-    background: var(--color-white);
-    border: 2px solid var(--color-navy);
-    color: var(--color-navy);
-    padding: 6px 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #FFFFFF;
+    border: 1.5px solid #CBD5E1;
+    border-radius: 20px;
+    color: #334155;
+    padding: 6px 13px;
+    font-family: 'Inter', sans-serif;
     font-size: 0.8rem;
-    font-weight: 700;
+    font-weight: 500;
     cursor: pointer;
-    box-shadow: 2px 2px 0 var(--color-navy);
-    transition: all 0.1s ease;
+    transition: all 0.12s ease;
+    user-select: none;
+    box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.05);
 }
 .chip-opcao:hover {
-    transform: translate(-1px, -1px);
-    box-shadow: 3px 3px 0 var(--color-navy);
+    border-color: var(--color-navy);
+    color: var(--color-navy);
+    background: #F1F5F9;
+}
+.chip-check {
+    display: none;
+    font-weight: 800;
+    font-size: 0.8rem;
 }
 .chip-opcao.chip-selecionado {
     background: var(--color-navy);
-    color: var(--color-yellow);
+    border-color: var(--color-navy);
+    color: #FFFFFF;
+    font-weight: 600;
     box-shadow: 2px 2px 0 var(--color-orange);
 }
+.chip-opcao.chip-selecionado .chip-check {
+    display: inline;
+    color: var(--color-yellow);
+}
 
-/* 7. Botões de Submit */
+/* Checkbox Acessível */
+.checkbox-memphis-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+    margin-top: 4px;
+}
+.checkbox-memphis-container input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--color-navy);
+    cursor: pointer;
+}
+.checkbox-memphis-container .label-texto {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #334155;
+}
+
+/* Botões de Ação Principal (CTAs) */
+.form-actions-memphis {
+    margin-top: 10px;
+}
 .btn-submit-memphis {
     width: 100%;
+    min-height: 46px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
     padding: 12px 20px;
-    border: 3px solid var(--color-navy);
-    font-size: 1rem;
-    font-weight: 900;
+    border: 2px solid var(--color-navy);
+    border-radius: 8px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
     cursor: pointer;
-    box-shadow: 5px 5px 0 var(--color-navy);
+    box-shadow: 4px 4px 0 var(--color-navy);
     transition: all 0.15s ease;
 }
 .btn-submit-memphis:hover {
     transform: translate(-2px, -2px);
-    box-shadow: 7px 7px 0 var(--color-navy);
+    box-shadow: 6px 6px 0 var(--color-navy);
 }
 .btn-submit-memphis:active {
     transform: translate(2px, 2px);
-    box-shadow: 2px 2px 0 var(--color-navy);
+    box-shadow: 1px 1px 0 var(--color-navy);
 }
-.btn-submit-amarelo {
+
+.btn-submit-primary {
     background: var(--color-yellow);
     color: var(--color-navy);
 }
-.btn-submit-verde {
-    background: var(--color-green);
-    color: var(--color-white);
+.btn-submit-primary:hover {
+    background: #FFD600;
 }
-.btn-submit-vermelho {
-    background: var(--color-red);
-    color: var(--color-white);
+.btn-submit-success {
+    background: var(--color-navy);
+    color: #FFFFFF;
 }
-
-/* 8. Mensagens e Alertas */
-.msg-erro-memphis {
-    background: #FFD2D2;
-    border: 2px solid var(--color-red);
+.btn-submit-success:hover {
+    background: #1B356B;
+}
+.btn-submit-danger {
+    background: #FFFFFF;
     color: var(--color-red);
-    padding: 8px 12px;
-    font-size: 0.85rem;
-    font-weight: 700;
-    margin-bottom: 12px;
+    border-color: var(--color-red);
+    box-shadow: 4px 4px 0 var(--color-red);
 }
-.msg-sucesso-memphis {
-    background: #E8F5E9;
-    border: 2px solid var(--color-green);
-    color: var(--color-green);
-    padding: 8px 12px;
-    font-size: 0.85rem;
-    font-weight: 700;
-    margin-bottom: 12px;
+.btn-submit-danger:hover {
+    background: #FFF1F2;
+    box-shadow: 6px 6px 0 var(--color-red);
 }
 
-.perfil-card-info {
-    background: var(--color-yellow);
-    border: 3px solid var(--color-navy);
-    padding: 12px;
-    margin-bottom: 16px;
-    box-shadow: 3px 3px 0 var(--color-navy);
-}
-.perfil-info-nome {
-    font-size: 1.1rem;
-    font-weight: 900;
-    color: var(--color-navy);
-}
-.perfil-info-email {
+/* Mensagens de Feedback */
+.msg-erro-memphis {
+    background: #FEF2F2;
+    border: 1.5px solid #F87171;
+    border-radius: 6px;
+    color: #B91C1C;
+    padding: 10px 14px;
     font-size: 0.85rem;
     font-weight: 600;
-    color: #333;
+    margin-bottom: 14px;
+}
+.msg-sucesso-memphis {
+    background: #F0FDF4;
+    border: 1.5px solid #4ADE80;
+    border-radius: 6px;
+    color: #15803D;
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 14px;
+}
+
+/* Card do Perfil do Aluno */
+.perfil-card-info {
+    background: #F8FAFC;
+    border: 2px solid var(--color-navy);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    box-shadow: 3px 3px 0 var(--color-navy);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.perfil-avatar-badge {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    background: var(--color-yellow);
+    border: 2px solid var(--color-navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    color: var(--color-navy);
+}
+.perfil-info-nome {
+    font-family: 'Lexend', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-navy);
+    margin-bottom: 2px;
+}
+.perfil-info-email {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #64748B;
+}
+.perfil-botoes-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
 }
 
 /* 9. Container e Itens de Toast */

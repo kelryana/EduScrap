@@ -13,60 +13,10 @@
     <!-- Ícones Phosphor -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
-    <link rel="stylesheet" href="style.css?v=8">
+    <link rel="stylesheet" href="style.css?v=10">
 </head>
 <body>
 
-    <!-- CONTAINER DE FORMAS GEOMÉTRICAS MEMPHIS COMPLETAS (BACKGROUND GLOBAL) -->
-    <div class="memphis-shapes-container">
-        <!-- Rosca Memphis Laranja -->
-        <div class="donut-orange shape-float shape-delay-1"></div>
-        
-        <!-- Linha Zigue-Zague Laranja -->
-        <div class="zigzag-line shape-float shape-delay-2"></div>
-        
-        <!-- Triângulo Laranja com Sombra Densa -->
-        <div class="triangle-orange shape-float shape-delay-1"></div>
-        
-        <!-- Círculo com Listras Diagonais -->
-        <div class="circle-stripes shape-float shape-delay-3"></div>
-        
-        <!-- Cruzes Memphis Gigantes -->
-        <div class="cross shape-float shape-delay-2" style="top: 14%; right: 8%;">+</div>
-        <div class="cross shape-float shape-delay-1" style="top: 68%; left: 3%; color: var(--color-orange);">+</div>
-
-        <!-- Círculo Pontilhado Azul -->
-        <div class="circulo-pontilhado shape-float shape-delay-3"></div>
-        
-        <!-- Triângulo Listrado Azul e Branco -->
-        <div class="triangulo-listrado shape-float shape-delay-2"></div>
-
-        <!-- Círculo Sólido Laranja Lateral -->
-        <div class="circulo-solido-centro shape-float shape-delay-1"></div>
-
-        <!-- Textura de Zigue-Zague Geométrica -->
-        <div class="textura-zigzag-centro shape-float shape-delay-3"></div>
-
-        <!-- Quadrado Rotacionado com Pontos -->
-        <div class="quadrado-rotacionado shape-float shape-delay-2"></div>
-
-        <!-- Barra Diagonal Colorida -->
-        <div class="barra-diagonal shape-float shape-delay-1"></div>
-
-        <!-- Arco Vazado Azul -->
-        <div class="arco-inferior shape-float shape-delay-2"></div>
-
-        <!-- Linhas Onduladas Tracejadas -->
-        <div class="linha-ondulada-1"></div>
-        <div class="linha-ondulada-2"></div>
-        
-        <!-- Grupo de Cruzes Tipográficas -->
-        <div class="cruzes-grupo">+++</div>
-    </div>
-
-    <!-- =========================================================================
-         1. LANDING PAGE HERO SECTION (INICIAL / APRESENTAÇÃO)
-         ========================================================================= -->
     <section id="landing-hero" class="landing-section">
         <!-- Barra de Navegação Superior da Landing -->
         <nav class="landing-navbar">
@@ -83,38 +33,32 @@
                 <a href="#area-oportunidades" onclick="carregarInspector()" class="nav-link">Infraestrutura</a>
             </div>
 
-            <div class="nav-actions-container" style="display: flex; align-items: center; gap: 10px;">
-                <!-- Área Dinâmica de Autenticação / Perfil do Aluno -->
+            <div class="nav-actions-container">
+                <!-- Área Dinâmica de Autenticação / Perfil do Aluno (Único CTA Primário do Header) -->
                 <div id="nav-auth-area">
                     <button class="btn-nav-auth" onclick="abrirModalAuth('login')">
-                        <i class="ph ph-user"></i> <span>Entrar / Cadastrar</span>
+                        <i class="ph-bold ph-user"></i> <span>Entrar / Cadastrar</span>
                     </button>
-                </div>
-
-                <div class="nav-cta">
-                    <a href="#area-oportunidades" class="btn-nav-action">
-                        Vagas <i class="ph ph-arrow-down"></i>
-                    </a>
                 </div>
             </div>
         </nav>
 
-        <!-- Card Principal da Hero (Estilo Instax / Memphis Neobrutalista) -->
+        <!-- Card Principal da Hero (Neobrutalismo Acadêmico Refinado) -->
         <div class="hero-card-container">
             <div class="hero-inner-grid"></div>
 
             <div class="hero-content-col">
+                <div class="hero-badge">
+                    <span class="hero-badge-dot"></span>
+                    <span class="hero-badge-text">Portal Universitário de Oportunidades</span>
+                </div>
+
                 <h1 class="hero-headline">
-                    Descubra editais e vagas em <br class="hide-mobile">
-                    <span class="hero-highlight-word">
-                        tempo real
-                        <span class="hero-underline-graphic"></span>
-                    </span>
-                    na universidade.
+                    Descubra editais e vagas em <span class="hero-highlight-word">tempo real</span> na universidade.
                 </h1>
 
                 <p class="hero-lead">
-                    O <strong>EduScrap</strong> monitora e unifica automaticamente as oportunidades da UERN, UFERSA, CIEE, PRAE e PROEX. Crie seu perfil universitário, salve seus editais favoritos e receba alertas de prazos.
+                    O <strong>EduScrap</strong> monitora e unifica as oportunidades da UERN, UFERSA, CIEE, PRAE e PROEX. Personalize seu perfil, salve seus editais favoritos e não perca nenhum prazo de inscrição.
                 </p>
 
                 <div class="hero-actions">
@@ -129,33 +73,30 @@
             </div>
 
             <div class="hero-visual-col">
-                <div class="memphis-art-composition">
-                    <div class="art-backdrop-polygon"></div>
-                    <div class="art-poly-navy"></div>
-                    <div class="art-dots-matrix"></div>
-                    <div class="art-triangle-deco"></div>
-                    <div class="art-cross-1">+</div>
-                    <div class="art-cross-2">+</div>
-                    <div class="art-circle-ring"></div>
-
-                    <div class="art-student-wrapper">
-                        <img src="assets/estudante.png" alt="Estudante EduScrap" class="art-student-img">
+                <div class="hero-portrait-card">
+                    <div class="portrait-photo-frame">
+                        <img src="assets/estudante.png" alt="Estudante universitária monitorando editais no EduScrap" class="portrait-student-img">
+                    </div>
+                    <div class="portrait-badge">
+                        <span class="portrait-badge-icon">🎓</span>
+                        <div class="portrait-badge-text">
+                            <strong>Perfil Universitário Ativo</strong>
+                            <small>Prazos e editais em tempo real</small>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- =========================================================================
-         2. ÁREA DO APLICATIVO / OPORTUNIDADES, BUSCA E FILTROS
-         ========================================================================= -->
+
     <div id="area-oportunidades" class="app-container">
         <!-- Header da Seção de Oportunidades -->
         <header class="header-memphis">
             <div class="logo-box">
                 EduScrap
             </div>
-            <!-- Banner de boas-vindas do aluno (se logado) -->
+           
             <div id="banner-usuario" class="banner-usuario-memphis" style="display: none;">
                 <span id="banner-usuario-texto">Olá, Estudante! Suas preferências estão ativas.</span>
                 <button class="btn-banner-ajustar" onclick="abrirModalPerfil()">
@@ -164,64 +105,67 @@
             </div>
         </header>
 
-        <!-- Barra de Busca Principal -->
+        <!-- Barra de Busca Ampla e Acessível -->
         <div class="busca-wrapper">
             <input type="text" id="input-busca" 
                 class="input-busca-memphis" 
-                placeholder="Pesquisar editais (ex: estágio, computação, medicina, bolsa, UERN)..." 
+                placeholder="Pesquisar editais (ex: estágio, computação, bolsa, UERN)..." 
                 onkeyup="if(event.key === 'Enter') realizarPesquisa()">
             <button id="btn-pesquisar" class="btn-busca-memphis" onclick="realizarPesquisa()">
-                <i class="ph ph-magnifying-glass"></i> Buscar
+                <i class="ph-bold ph-magnifying-glass"></i> Buscar
             </button>
         </div>
 
-        <!-- Botões de Filtragem Estilo Memphis -->
-        <div class="controles-grid">
-            <!-- Novos Botões de Personalização e Favoritos -->
-            <button id="btn-personalizado" class="filtro-btn filtro-destaque-personalizado" onclick="carregarFeedPersonalizado()">
-                <i class="ph-bold ph-sparkle"></i> Para Você (Perfil)
-            </button>
-            <button id="btn-favoritos" class="filtro-btn filtro-destaque-favoritos" onclick="carregarFavoritos()">
-                <i class="ph-bold ph-star"></i> Salvos (<span id="contador-favoritos">0</span>)
-            </button>
-
-            <!-- Filtros Tradicionais por Fonte/Tipo -->
-            <button id="btn-estagios" class="filtro-btn ativo" onclick="carregarDados('estagios')">
-                <i class="ph ph-student"></i> Estágios (PRAE)
-            </button>
-            <button id="btn-bolsas" class="filtro-btn" onclick="carregarDados('bolsas')">
-                <i class="ph ph-coins"></i> Bolsas (PROEX)
-            </button>
-            <button id="btn-ufersa" class="filtro-btn" onclick="carregarDados('ufersa')">
-                <i class="ph ph-buildings"></i> Editais (UFERSA)
-            </button>
-            <button id="btn-ciee" class="filtro-btn" onclick="carregarDados('ciee')">
-                <i class="ph ph-briefcase"></i> Vagas (CIEE)
-            </button>
-            <button id="btn-portal_uern" class="filtro-btn" onclick="carregarDados('portal_uern')">
-                <i class="ph ph-graduation-cap"></i> Portal UERN
-            </button>
-            <button id="btn-noticias" class="filtro-btn" onclick="carregarDados('noticias')">
-                <i class="ph ph-lightning"></i> Notícias Tech
-            </button>
-            <button id="btn-analises" class="filtro-btn" onclick="carregarEstatisticas()">
-                <i class="ph ph-chart-bar"></i> Indicadores
-            </button>
-            <button id="btn-inspector" class="filtro-btn" onclick="carregarInspector()">
-                <i class="ph ph-database"></i> Status Banco
-            </button>
+        <!-- BARRA DE CATEGORIAS (SEGMENTED CATEGORY TABS) -->
+        <div class="categoria-tabs-wrapper">
+            <div class="categoria-tabs-scroll" role="tablist">
+                <button id="btn-estagios" class="tab-origem-btn ativo" onclick="carregarDados('estagios')">
+                    <i class="ph-bold ph-student"></i> <span>Estágios (PRAE)</span>
+                </button>
+                <button id="btn-bolsas" class="tab-origem-btn" onclick="carregarDados('bolsas')">
+                    <i class="ph-bold ph-coins"></i> <span>Bolsas (PROEX)</span>
+                </button>
+                <button id="btn-ufersa" class="tab-origem-btn" onclick="carregarDados('ufersa')">
+                    <i class="ph-bold ph-buildings"></i> <span>UFERSA</span>
+                </button>
+                <button id="btn-ciee" class="tab-origem-btn" onclick="carregarDados('ciee')">
+                    <i class="ph-bold ph-briefcase"></i> <span>Vagas CIEE</span>
+                </button>
+                <button id="btn-portal_uern" class="tab-origem-btn" onclick="carregarDados('portal_uern')">
+                    <i class="ph-bold ph-graduation-cap"></i> <span>Portal UERN</span>
+                </button>
+                <button id="btn-noticias" class="tab-origem-btn" onclick="carregarDados('noticias')">
+                    <i class="ph-bold ph-lightning"></i> <span>Notícias Tech</span>
+                </button>
+                <button id="btn-analises" class="tab-origem-btn" onclick="carregarEstatisticas()">
+                    <i class="ph-bold ph-chart-bar"></i> <span>Indicadores</span>
+                </button>
+                <button id="btn-inspector" class="tab-origem-btn" onclick="carregarInspector()">
+                    <i class="ph-bold ph-database"></i> <span>Status Banco</span>
+                </button>
+            </div>
         </div>
 
-        <!-- Filtros Adicionais -->
-        <div class="filtros-adicionais-container">
-            <label class="checkbox-memphis-container">
-                <input type="checkbox" id="filtroVigentes" onchange="toggleFiltroVigentes()">
-                <span class="custom-checkbox"></span>
-                <span class="label-texto">Mostrar apenas editais vigentes</span>
-            </label>
+        <!-- BARRA DE UTILITÁRIOS E FILTROS DO ESTUDANTE -->
+        <div class="student-toolbar">
+            <div class="student-toolbar-left">
+                <button id="btn-personalizado" class="btn-filtro-aluno" onclick="carregarFeedPersonalizado()">
+                    <i class="ph-bold ph-sparkle"></i> <span>🎯 Para Você (Perfil)</span>
+                </button>
+                <button id="btn-favoritos" class="btn-filtro-aluno" onclick="carregarFavoritos()">
+                    <i class="ph-bold ph-star"></i> <span>⭐ Salvos (<strong id="contador-favoritos">0</strong>)</span>
+                </button>
+            </div>
+            
+            <div class="student-toolbar-right">
+                <label class="toggle-vigentes-container" for="filtroVigentes">
+                    <input type="checkbox" id="filtroVigentes" onchange="toggleFiltroVigentes()">
+                    <span class="custom-checkbox"></span>
+                    <span class="toggle-label">Mostrar apenas editais vigentes</span>
+                </label>
+            </div>
         </div>
-
-        <!-- Conteúdo Principal Dinâmico -->
+       
         <main>
             <div id="container-vagas" class="grid-vagas">
                 <div class="status-box">
@@ -234,170 +178,214 @@
     </div>
 
     <!-- =========================================================================
-         3. MODAL DE AUTENTICAÇÃO (LOGIN / CADASTRO)
+         3. MODAL DE AUTENTICAÇÃO (LOGIN / CADASTRO) - REESTRUTURADO
          ========================================================================= -->
-    <div id="modal-auth" class="modal-backdrop" style="display: none;">
-        <div class="modal-memphis">
-            <!-- Barra de Título Neobrutalista -->
+    <div id="modal-auth" class="modal-backdrop" style="display: none;" onclick="if(event.target === this) fecharModalAuth()">
+        <div class="modal-memphis" role="dialog" aria-modal="true" aria-labelledby="modal-auth-title">
+            <!-- Barra Superior com Alto Contraste e Fechamento Confortável -->
             <div class="modal-header-memphis">
-                <div class="modal-dots">
-                    <span class="dot dot-red"></span>
-                    <span class="dot dot-yellow"></span>
-                    <span class="dot dot-green"></span>
+                <div class="modal-header-left">
+                    <div class="modal-dots">
+                        <span class="dot dot-red"></span>
+                        <span class="dot dot-yellow"></span>
+                        <span class="dot dot-green"></span>
+                    </div>
+                    <h3 class="modal-title" id="modal-auth-title">Acesso ao EduScrap</h3>
                 </div>
-                <h3 class="modal-title" id="modal-auth-title">Acesso Estudante EduScrap</h3>
-                <button class="modal-close-btn" onclick="fecharModalAuth()">✖</button>
-            </div>
-
-            <!-- Abas de Alternância -->
-            <div class="auth-tabs-row">
-                <button id="tab-login" class="auth-tab-btn ativo" onclick="alternarAbaAuth('login')">
-                    <i class="ph ph-sign-in"></i> Já tenho conta (Entrar)
-                </button>
-                <button id="tab-register" class="auth-tab-btn" onclick="alternarAbaAuth('register')">
-                    <i class="ph ph-user-plus"></i> Novo Cadastro
+                <button class="modal-close-btn" onclick="fecharModalAuth()" title="Fechar janela" aria-label="Fechar">
+                    <i class="ph-bold ph-x"></i>
                 </button>
             </div>
 
-            <!-- Corpo do Formulário -->
+            <!-- Abas Segmentadas Modernas (Segmented Control) -->
+            <div class="auth-tabs-wrapper">
+                <div class="auth-tabs-row" role="tablist">
+                    <button id="tab-login" class="auth-tab-btn ativo" onclick="alternarAbaAuth('login')" role="tab" aria-selected="true">
+                        <i class="ph-bold ph-sign-in"></i> Já tenho conta
+                    </button>
+                    <button id="tab-register" class="auth-tab-btn" onclick="alternarAbaAuth('register')" role="tab" aria-selected="false">
+                        <i class="ph-bold ph-user-plus"></i> Novo Cadastro
+                    </button>
+                </div>
+            </div>
+
+            <!-- Corpo do Modal com Espaço Negativo Confortável -->
             <div class="modal-body-memphis">
                 <!-- FORMULÁRIO DE LOGIN -->
                 <form id="form-login" onsubmit="executarLogin(event)">
                     <div class="form-group-memphis">
-                        <label class="label-memphis"><i class="ph ph-envelope"></i> E-mail:</label>
-                        <input type="email" id="login-email" class="input-memphis" placeholder="aluno@uern.br" required>
+                        <label class="label-memphis" for="login-email">
+                            <i class="ph-bold ph-envelope-simple"></i> E-mail Institucional ou Pessoal:
+                        </label>
+                        <input type="email" id="login-email" class="input-memphis" placeholder="exemplo@uern.br" autocomplete="username" required>
                     </div>
 
                     <div class="form-group-memphis">
-                        <label class="label-memphis"><i class="ph ph-lock"></i> Senha:</label>
-                        <input type="password" id="login-senha" class="input-memphis" placeholder="Sua senha secreta" required>
+                        <label class="label-memphis" for="login-senha">
+                            <i class="ph-bold ph-lock-key"></i> Senha de Acesso:
+                        </label>
+                        <input type="password" id="login-senha" class="input-memphis" placeholder="Sua senha secreta" autocomplete="current-password" required>
                     </div>
 
                     <div id="login-erro" class="msg-erro-memphis" style="display: none;"></div>
 
-                    <button type="submit" class="btn-submit-memphis btn-submit-amarelo">
-                        <span>Acessar Minha Conta</span> <i class="ph-bold ph-arrow-right"></i>
-                    </button>
+                    <div class="form-actions-memphis">
+                        <button type="submit" class="btn-submit-memphis btn-submit-primary">
+                            <span>Entrar na Minha Conta</span>
+                            <i class="ph-bold ph-arrow-right"></i>
+                        </button>
+                    </div>
                 </form>
 
                 <!-- FORMULÁRIO DE CADASTRO -->
                 <form id="form-register" style="display: none;" onsubmit="executarCadastro(event)">
                     <div class="form-row-dupla">
                         <div class="form-group-memphis">
-                            <label class="label-memphis"><i class="ph ph-user"></i> Nome Completo:</label>
-                            <input type="text" id="reg-nome" class="input-memphis" placeholder="Ex: Ana Kelry" required>
+                            <label class="label-memphis" for="reg-nome">
+                                <i class="ph-bold ph-user"></i> Nome Completo:
+                            </label>
+                            <input type="text" id="reg-nome" class="input-memphis" placeholder="Nome do Aluno" autocomplete="name" required>
                         </div>
                         <div class="form-group-memphis">
-                            <label class="label-memphis"><i class="ph ph-identification-card"></i> Matrícula (opcional):</label>
-                            <input type="text" id="reg-matricula" class="input-memphis" placeholder="Ex: 202410123">
+                            <label class="label-memphis" for="reg-matricula">
+                                <i class="ph-bold ph-identification-badge"></i> Matrícula (opcional):
+                            </label>
+                            <input type="text" id="reg-matricula" class="input-memphis" placeholder="202410000">
                         </div>
                     </div>
 
                     <div class="form-row-dupla">
                         <div class="form-group-memphis">
-                            <label class="label-memphis"><i class="ph ph-envelope"></i> E-mail:</label>
-                            <input type="email" id="reg-email" class="input-memphis" placeholder="seuemail@uern.br" required>
+                            <label class="label-memphis" for="reg-email">
+                                <i class="ph-bold ph-envelope-simple"></i> E-mail:
+                            </label>
+                            <input type="email" id="reg-email" class="input-memphis" placeholder="aluno@uern.br" autocomplete="email" required>
                         </div>
                         <div class="form-group-memphis">
-                            <label class="label-memphis"><i class="ph ph-lock"></i> Senha (min. 6 dígitos):</label>
-                            <input type="password" id="reg-senha" class="input-memphis" placeholder="••••••••" minlength="6" required>
+                            <label class="label-memphis" for="reg-senha">
+                                <i class="ph-bold ph-lock-key"></i> Senha (mínimo 6 dígitos):
+                            </label>
+                            <input type="password" id="reg-senha" class="input-memphis" placeholder="••••••••" minlength="6" autocomplete="new-password" required>
                         </div>
                     </div>
 
-                    <!-- Seleção Dinâmica de Cursos (Chips Selecionáveis) -->
+                    <!-- Seção Cursos de Interesse: Pílulas com Checkmark Acessível -->
                     <div class="form-group-memphis">
-                        <label class="label-memphis">
-                            <i class="ph ph-graduation-cap"></i> Selecione seus Cursos de Interesse:
-                            <span class="label-subtexto">(clique para marcar quantos quiser)</span>
-                        </label>
+                        <div class="label-com-subtexto">
+                            <label class="label-memphis">
+                                <i class="ph-bold ph-graduation-cap"></i> Cursos de Interesse:
+                            </label>
+                            <span class="label-subtexto">Clique para selecionar múltiplos cursos</span>
+                        </div>
                         <div class="chips-container" id="reg-chips-cursos">
-                            <button type="button" class="chip-opcao chip-selecionado" data-valor="Ciência da Computação">💻 Ciência da Computação</button>
-                            <button type="button" class="chip-opcao" data-valor="Sistemas de Informação">🖥️ Sistemas de Informação</button>
-                            <button type="button" class="chip-opcao" data-valor="Medicina">🩺 Medicina</button>
-                            <button type="button" class="chip-opcao" data-valor="Enfermagem">💉 Enfermagem</button>
-                            <button type="button" class="chip-opcao" data-valor="Direito">⚖️ Direito</button>
-                            <button type="button" class="chip-opcao" data-valor="Administração">📊 Administração</button>
-                            <button type="button" class="chip-opcao" data-valor="Ciências Contábeis">📈 Ciências Contábeis</button>
-                            <button type="button" class="chip-opcao" data-valor="Educação Física">⚽ Educação Física</button>
-                            <button type="button" class="chip-opcao" data-valor="Letras">📚 Letras</button>
-                            <button type="button" class="chip-opcao" data-valor="História">🏺 História</button>
-                            <button type="button" class="chip-opcao" data-valor="Pedagogia">🎨 Pedagogia</button>
-                            <button type="button" class="chip-opcao" data-valor="Ciências Biológicas">🔬 Ciências Biológicas</button>
+                            <button type="button" class="chip-opcao chip-selecionado" data-valor="Ciência da Computação"><span class="chip-check">✓</span> Ciência da Computação</button>
+                            <button type="button" class="chip-opcao" data-valor="Sistemas de Informação"><span class="chip-check">✓</span> Sistemas de Informação</button>
+                            <button type="button" class="chip-opcao" data-valor="Medicina"><span class="chip-check">✓</span> Medicina</button>
+                            <button type="button" class="chip-opcao" data-valor="Enfermagem"><span class="chip-check">✓</span> Enfermagem</button>
+                            <button type="button" class="chip-opcao" data-valor="Direito"><span class="chip-check">✓</span> Direito</button>
+                            <button type="button" class="chip-opcao" data-valor="Administração"><span class="chip-check">✓</span> Administração</button>
+                            <button type="button" class="chip-opcao" data-valor="Ciências Contábeis"><span class="chip-check">✓</span> Ciências Contábeis</button>
+                            <button type="button" class="chip-opcao" data-valor="Educação Física"><span class="chip-check">✓</span> Educação Física</button>
+                            <button type="button" class="chip-opcao" data-valor="Letras"><span class="chip-check">✓</span> Letras</button>
+                            <button type="button" class="chip-opcao" data-valor="História"><span class="chip-check">✓</span> História</button>
+                            <button type="button" class="chip-opcao" data-valor="Pedagogia"><span class="chip-check">✓</span> Pedagogia</button>
+                            <button type="button" class="chip-opcao" data-valor="Ciências Biológicas"><span class="chip-check">✓</span> Ciências Biológicas</button>
                         </div>
                     </div>
 
-                    <!-- Seleção Dinâmica de Áreas de Conhecimento -->
+                    <!-- Seção Áreas de Interesse -->
                     <div class="form-group-memphis">
-                        <label class="label-memphis">
-                            <i class="ph ph-bookmarks"></i> Áreas de Interesse:
-                        </label>
+                        <div class="label-com-subtexto">
+                            <label class="label-memphis">
+                                <i class="ph-bold ph-bookmarks"></i> Áreas de Interesse:
+                            </label>
+                            <span class="label-subtexto">Filtre temas gerais além do curso</span>
+                        </div>
                         <div class="chips-container" id="reg-chips-areas">
-                            <button type="button" class="chip-opcao chip-selecionado" data-valor="Tecnologia">🚀 Tecnologia</button>
-                            <button type="button" class="chip-opcao" data-valor="Saúde">🏥 Saúde</button>
-                            <button type="button" class="chip-opcao" data-valor="Humanas">🏛️ Humanas</button>
-                            <button type="button" class="chip-opcao" data-valor="Exatas">📐 Exatas</button>
-                            <button type="button" class="chip-opcao chip-selecionado" data-valor="Extensão">🤝 Extensão Universitária</button>
-                            <button type="button" class="chip-opcao" data-valor="Pesquisa">🔍 Pesquisa & Inovação</button>
+                            <button type="button" class="chip-opcao chip-selecionado" data-valor="Tecnologia"><span class="chip-check">✓</span> Tecnologia</button>
+                            <button type="button" class="chip-opcao" data-valor="Saúde"><span class="chip-check">✓</span> Saúde</button>
+                            <button type="button" class="chip-opcao" data-valor="Humanas"><span class="chip-check">✓</span> Humanas</button>
+                            <button type="button" class="chip-opcao" data-valor="Exatas"><span class="chip-check">✓</span> Exatas</button>
+                            <button type="button" class="chip-opcao chip-selecionado" data-valor="Extensão"><span class="chip-check">✓</span> Extensão Universitária</button>
+                            <button type="button" class="chip-opcao" data-valor="Pesquisa"><span class="chip-check">✓</span> Pesquisa & Inovação</button>
                         </div>
                     </div>
 
-                    <!-- Opção de Receber Alertas por E-mail -->
+                    <!-- Notificações por E-mail -->
                     <div class="form-group-memphis">
                         <label class="checkbox-memphis-container">
                             <input type="checkbox" id="reg-receber-emails" checked>
                             <span class="custom-checkbox"></span>
-                            <span class="label-texto"><strong>Receber atualizações e avisos de prazos por e-mail</strong> 📬</span>
+                            <span class="label-texto">Receber notificações e alertas de prazos por e-mail</span>
                         </label>
                     </div>
 
                     <div id="register-erro" class="msg-erro-memphis" style="display: none;"></div>
 
-                    <button type="submit" class="btn-submit-memphis btn-submit-verde">
-                        <span>Concluir Cadastro & Personalizar Feed</span> <i class="ph-bold ph-check"></i>
-                    </button>
+                    <div class="form-actions-memphis">
+                        <button type="submit" class="btn-submit-memphis btn-submit-success">
+                            <span>Concluir Cadastro & Ativar Feed</span>
+                            <i class="ph-bold ph-check"></i>
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
 
     <!-- =========================================================================
-         4. MODAL DE PERFIL E PREFERÊNCIAS DO ALUNO
+         4. MODAL DE PERFIL & PREFERÊNCIAS DO ALUNO - REESTRUTURADO
          ========================================================================= -->
-    <div id="modal-perfil" class="modal-backdrop" style="display: none;">
-        <div class="modal-memphis">
+    <div id="modal-perfil" class="modal-backdrop" style="display: none;" onclick="if(event.target === this) fecharModalPerfil()">
+        <div class="modal-memphis" role="dialog" aria-modal="true" aria-labelledby="modal-perfil-title">
             <div class="modal-header-memphis">
-                <div class="modal-dots">
-                    <span class="dot dot-red"></span>
-                    <span class="dot dot-yellow"></span>
-                    <span class="dot dot-green"></span>
+                <div class="modal-header-left">
+                    <div class="modal-dots">
+                        <span class="dot dot-red"></span>
+                        <span class="dot dot-yellow"></span>
+                        <span class="dot dot-green"></span>
+                    </div>
+                    <h3 class="modal-title" id="modal-perfil-title">Meu Perfil & Preferências</h3>
                 </div>
-                <h3 class="modal-title">⚙️ Meu Perfil & Preferências</h3>
-                <button class="modal-close-btn" onclick="fecharModalPerfil()">✖</button>
+                <button class="modal-close-btn" onclick="fecharModalPerfil()" title="Fechar janela" aria-label="Fechar">
+                    <i class="ph-bold ph-x"></i>
+                </button>
             </div>
 
             <div class="modal-body-memphis">
+                <!-- Card de Perfil Limpo e Confortável -->
                 <div class="perfil-card-info">
-                    <h4 id="perfil-nome-display" class="perfil-info-nome">Nome do Aluno</h4>
-                    <p id="perfil-email-display" class="perfil-info-email">aluno@uern.br</p>
+                    <div class="perfil-avatar-badge">
+                        <i class="ph-bold ph-student"></i>
+                    </div>
+                    <div class="perfil-info-textos">
+                        <h4 id="perfil-nome-display" class="perfil-info-nome">Nome do Aluno</h4>
+                        <p id="perfil-email-display" class="perfil-info-email">aluno@uern.br</p>
+                    </div>
                 </div>
 
                 <form id="form-perfil-preferencias" onsubmit="salvarPreferenciasPerfil(event)">
                     <div class="form-group-memphis">
-                        <label class="label-memphis">
-                            <i class="ph ph-graduation-cap"></i> Cursos Selecionados:
-                            <span class="label-subtexto">(O feed 'Para Você' usará esses cursos)</span>
-                        </label>
+                        <div class="label-com-subtexto">
+                            <label class="label-memphis">
+                                <i class="ph-bold ph-graduation-cap"></i> Cursos de Interesse:
+                            </label>
+                            <span class="label-subtexto">O feed 'Para Você' exibirá editais dessas áreas</span>
+                        </div>
                         <div class="chips-container" id="perfil-chips-cursos">
-                            <!-- Injetado dinamicamente via JS -->
+                            <!-- Injetado dinamicamente via JS com chip-check -->
                         </div>
                     </div>
 
                     <div class="form-group-memphis">
-                        <label class="label-memphis">
-                            <i class="ph ph-bookmarks"></i> Áreas Selecionadas:
-                        </label>
+                        <div class="label-com-subtexto">
+                            <label class="label-memphis">
+                                <i class="ph-bold ph-bookmarks"></i> Áreas de Interesse:
+                            </label>
+                            <span class="label-subtexto">Categorias complementares</span>
+                        </div>
                         <div class="chips-container" id="perfil-chips-areas">
-                            <!-- Injetado dinamicamente via JS -->
+                            <!-- Injetado dinamicamente via JS com chip-check -->
                         </div>
                     </div>
 
@@ -405,18 +393,18 @@
                         <label class="checkbox-memphis-container">
                             <input type="checkbox" id="perfil-receber-emails">
                             <span class="custom-checkbox"></span>
-                            <span class="label-texto"><strong>Receber alertas por e-mail de novos editais</strong></span>
+                            <span class="label-texto">Receber alertas de prazos por e-mail</span>
                         </label>
                     </div>
 
                     <div id="perfil-feedback" class="msg-sucesso-memphis" style="display: none;"></div>
 
-                    <div style="display: flex; gap: 10px; margin-top: 15px;">
-                        <button type="submit" class="btn-submit-memphis btn-submit-amarelo" style="flex: 1;">
-                            <i class="ph-bold ph-floppy-disk"></i> Salvar Preferências
+                    <div class="perfil-botoes-row">
+                        <button type="submit" class="btn-submit-memphis btn-submit-primary" style="flex: 1;">
+                            <i class="ph-bold ph-floppy-disk"></i> Salvar Alterações
                         </button>
-                        <button type="button" class="btn-submit-memphis btn-submit-vermelho" onclick="fazerLogout()" style="width: auto;">
-                            <i class="ph ph-sign-out"></i> Sair
+                        <button type="button" class="btn-submit-memphis btn-submit-danger" onclick="fazerLogout()">
+                            <i class="ph-bold ph-sign-out"></i> Sair da Conta
                         </button>
                     </div>
                 </form>
@@ -424,10 +412,8 @@
         </div>
     </div>
 
-    <!-- Container Flutuante para Mensagens Toast -->
     <div id="toast-container" class="toast-container-memphis"></div>
 
-    <!-- Rodapé Memphis -->
     <footer class="footer-memphis">
         <div class="footer-content">
             <p class="footer-copy">© EduScrap | 2026</p>
@@ -436,7 +422,11 @@
                 <div class="footer-shape-diamond"></div>
                 <div class="footer-shape-square"></div>
             </div>
-            <p class="footer-tech">Construído com ❤️ e Design Memphis</p>
+        <div class="footer-links">
+            <a href="#">Política de Privacidade</a>
+            <a href="#">Termos de Uso</a>
+            <a href="#">Contato</a>
+        </div>
         </div>
     </footer>
 
