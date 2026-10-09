@@ -7,18 +7,18 @@
 
 <img width="2553" height="1016" alt="image" src="https://github.com/user-attachments/assets/aa3d2f29-01a5-4582-9549-beb21979cd74" />
    
-## 📖 Sobre o Projeto
+## Sobre o Projeto
 
 O **EduScrap** é uma plataforma completa de agregação de oportunidades acadêmicas e profissionais para estudantes da UERN (Universidade do Estado do Rio Grande do Norte) e região. O sistema realiza web scraping de diversos portais institucionais e disponibiliza as informações em uma API REST moderna com frontend intuitivo.
 
 ### Funcionalidades Principais
 
-- 🔍 **Web Scraping Automatizado**: Coleta dados de múltiplos portais (CIEE, UERN, UFERSA, etc.)
-- 📰 **Monitoramento de Notícias**: Atualização automática de editais e vagas
-- 🗄️ **Banco de Dados MongoDB**: Armazenamento otimizado com índices e validação de schema
-- 🚀 **API FastAPI**: Backend moderno e performático com CORS habilitado
-- 🎨 **Frontend Responsivo**: Dashboard interativo com design moderno
-- 📊 **Filtragem Inteligente**: Organização por área (Tecnologia, Saúde, Humanas, Exatas, Direito, Comunicação)
+- **Web Scraping Automatizado**: Coleta dados de múltiplos portais (CIEE, UERN, UFERSA, etc.)
+- **Monitoramento de Notícias**: Atualização automática de editais e vagas
+- **Banco de Dados MongoDB**: Armazenamento otimizado com índices e validação de schema
+- **API FastAPI**: Backend moderno e performático com CORS habilitado
+- **Frontend Responsivo**: Dashboard interativo com design moderno
+- **Filtragem Inteligente**: Organização por área (Tecnologia, Saúde, Humanas, Exatas, Direito, Comunicação)
 
 ---
 
@@ -52,7 +52,7 @@ EduScrap-UERN/
 
 ---
 
-## 🛠️ Pré-requisitos
+## Pré-requisitos
 
 Antes de começar, certifique-se de ter instalado:
 
@@ -67,7 +67,7 @@ Antes de começar, certifique-se de ter instalado:
 
 ---
 
-## 📦 Instalação e Configuração
+## Instalação e Configuração
 
 ### 1. Clonar o Repositório
 
@@ -78,7 +78,7 @@ cd EduScrap
 
 ---
 
-## ⚡ Inicialização Rápida Automatizada (Recomendado) 🚀
+## ⚡ Inicialização Rápida Automatizada (Recomendado) 
 
 Para subir todo o projeto (MongoDB, Backend FastAPI e Frontend) e abrir no navegador com apenas um comando:
 
@@ -105,7 +105,7 @@ Para subir todo o projeto (MongoDB, Backend FastAPI e Frontend) e abrir no naveg
 - **API FastAPI:** [http://localhost:8000](http://localhost:8000)
 - **Documentação Interativa (Swagger):** [http://localhost:8000/docs](http://localhost:8000/docs)
 
-### 📥 Coletar / Atualizar Oportunidades (Web Scraping Paralelo):
+### coletar / Atualizar Oportunidades (Web Scraping Paralelo):
 Para popular ou atualizar o banco com editais recentes de todos os portais:
 
 ```bash
@@ -117,7 +117,7 @@ python run_scrapers.py
 
 ---
 
-## 🪟️ Tutorial para Windows
+## Tutorial para Windows
 
 ### Passo 1: Instalar Python
 
@@ -234,7 +234,7 @@ start frontend\index.html
 
 ---
 
-## 🐧 Tutorial para Linux
+## Tutorial para Linux
 
 ### Passo 1: Instalar Python
 
@@ -421,7 +421,7 @@ curl http://localhost:8000/api/vagas?categoria=tecnologia
 
 ---
 
-## ⚙️ Comandos Úteis
+## Comandos Úteis
 
 ### Gerenciar o MongoDB
 
@@ -496,7 +496,7 @@ python run_scrapers.py --help
 
 > **Dica:** Os logs de cada fonte ficam salvos individualmente em `logs/<fonte>.log` (ex: `logs/prae.log`, `logs/portal_uern.log`), facilitando a depuração isolada.
 
-### 📋 Resumo de Comandos Rápidos
+### Resumo de Comandos Rápidos
 
 | Comando | Descrição |
 | :--- | :--- |
@@ -509,7 +509,7 @@ python run_scrapers.py --help
 
 ---
 
-## 🧪 Testes
+## Testes
 
 Para executar os testes automatizados:
 
@@ -527,7 +527,7 @@ python -m pytest
 
 ---
 
-## 🔧 Solução de Problemas
+## Solução de Problemas
 
 ### Erro: MongoDB não conecta
 
@@ -591,7 +591,7 @@ sudo dnf install chromedriver -y
 
 ---
 
-## 📝 Variáveis de Ambiente
+## Variáveis de Ambiente
 
 Crie um arquivo `.env` na pasta `backend` se necessário:
 
@@ -614,7 +614,7 @@ SECRET_KEY=sua_chave_secreta_aqui
 
 ---
 
-## 📄 Licença
+## Licença
 
 Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
