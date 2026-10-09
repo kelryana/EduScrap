@@ -90,58 +90,6 @@ body {
     margin-bottom: 2rem;
 }
 
-.nav-brand {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    user-select: none;
-    text-decoration: none;
-    cursor: pointer;
-    transition: opacity 0.15s ease;
-}
-
-.nav-brand:hover {
-    opacity: 0.9;
-}
-
-.nav-brand-img {
-    height: 42px !important;
-    max-height: 44px !important;
-    width: auto !important;
-    object-fit: contain;
-    display: block;
-    flex-shrink: 0;
-}
-
-.nav-brand-title {
-    font-size: 1.75rem;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    line-height: 1;
-    display: inline-flex;
-    align-items: center;
-}
-
-.brand-edu {
-    color: var(--color-navy, #0F172A) !important;
-}
-
-.brand-scrap {
-    color: #FF5C00 !important;
-}
-
-.nav-links {
-    display: none;
-    align-items: center;
-    gap: 1.75rem;
-}
-
-@media (min-width: 840px) {
-    .nav-links {
-        display: flex;
-    }
-}
-
 .nav-link {
     color: var(--color-navy);
     text-decoration: none;
@@ -157,10 +105,32 @@ body {
     background: rgba(255, 122, 0, 0.08);
 }
 
-.nav-actions-container {
-    display: flex;
+.btn-nav-auth {
+    background-color: #FACC15;
+    color: #0F172A;
+    padding: 0.75rem 1.5rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border: 2.5px solid var(--color-navy);
+    border-radius: 6px;
+    box-shadow: 4px 4px 0px var(--color-navy);
+    text-decoration: none;
+    display: inline-flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+}
+
+.btn-nav-auth:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px var(--color-navy);
+    background-color: #E0B900;
+}
+
+.btn-nav-auth:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px var(--color-navy);
 }
 
 /* Card Principal da Hero */
@@ -443,7 +413,7 @@ body {
     background-color: var(--color-navy);
     color: var(--color-white);
     padding: 0.65rem 2rem;
-    font-size: 2.35rem;
+    font-size: 3.0rem; /* Increased for prominence */
     font-weight: 900;
     border: 3px solid var(--color-navy);
     border-radius: 8px;
@@ -1142,31 +1112,6 @@ body {
 ::-webkit-scrollbar-thumb {
     background: var(--color-orange);
     border: 3px solid var(--color-navy);
-}
-
-.btn-nav-auth {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background-color: var(--color-yellow);
-    color: var(--color-navy);
-    font-weight: 800;
-    font-size: 1.05rem;
-    padding: 10px 20px;
-    border: 3px solid var(--color-navy);
-    box-shadow: 3px 3px 0 var(--color-navy);
-    cursor: pointer;
-    transition: all 0.15s ease;
-    text-decoration: none;
-}
-.btn-nav-auth:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 5px 5px 0 var(--color-navy);
-    background-color: #FFF033;
-}
-.btn-nav-auth:active {
-    transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0 var(--color-navy);
 }
 
 .nav-user-box {
