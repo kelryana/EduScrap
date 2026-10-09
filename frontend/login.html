@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduScrap - Acesso e Cadastro</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@600;700;800;900&family=Lexend:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script>
+      tailwind.config = {
+        corePlugins: { preflight: false },
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+              display: ['"Space Grotesk"', 'sans-serif'],
+            },
+            colors: {
+              brand: {
+                orange: '#FF5C00',
+                yellow: '#FACC15',
+                dark: '#0F172A',
+              }
+            }
+          }
+        }
+      }
+    </script>
+
+    <link rel="stylesheet" href="style.css?v=21">
+    <style>
+        .login-page-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 24px 20px 60px 20px;
+        }
+
+        .login-top-bar {
+            width: 100%;
+            max-width: 940px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .btn-voltar {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 22px;
+            background: #ffffff;
+            border: 2.5px solid #0F172A;
+            border-radius: 12px;
+            color: #0F172A;
+            font-weight: 800;
+            font-size: 1.05rem;
+            text-decoration: none;
+            box-shadow: 4px 4px 0px #0F172A;
+            transition: all 0.15s ease;
+        }
+
+        .btn-voltar:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px #0F172A;
+            background: #FACC15;
+        }
+
+        /* Área da Marca EduScrap Centralizada e Maior */
+        .login-brand-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .brand-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 16px;
+            text-decoration: none;
+            transition: transform 0.2s ease;
+        }
+
+        .brand-link:hover {
+            transform: scale(1.02);
+        }
+
+        .brand-logo-img {
+            height: 82px;
+            width: auto;
+            object-fit: contain;
+            filter: drop-shadow(4px 4px 0px rgba(15, 23, 42, 0.15));
+        }
+
+        .brand-title-text {
+            font-size: 3.2rem;
+            font-weight: 900;
+            line-height: 1;
+            font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+            letter-spacing: -1px;
+        }
+
+        .brand-subtitle {
+            margin-top: 8px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #475569;
+        }
+
+        /* Card de Login / Cadastro Maior */
+        .login-card {
+            width: 100%;
+            max-width: 940px;
+            background: #ffffff;
+            border: 3.5px solid #0F172A;
+            box-shadow: 10px 10px 0px #0F172A;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .login-card .modal-header-memphis {
+            padding: 18px 32px;
+            background: #0F172A;
+            color: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .login-card .modal-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin: 0;
+        }
+
+        .login-card .auth-tabs-wrapper {
+            padding: 20px 32px 0 32px;
+            background: #ffffff;
+        }
+
+        .login-card .auth-tabs-row {
+            display: flex;
+            gap: 12px;
+            background: #F1F5F9;
+            padding: 6px;
+            border: 2.5px solid #0F172A;
+            border-radius: 12px;
+        }
+
+        .login-card .auth-tab-btn {
+            flex: 1;
+            padding: 13px 20px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            background: transparent;
+            color: #475569;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.15s ease;
+        }
+
+        .login-card .auth-tab-btn.ativo {
+            background: #ffffff;
+            color: #0F172A;
+            border-color: #0F172A;
+            box-shadow: 3px 3px 0px #0F172A;
+        }
+
+        .login-card .modal-body-memphis {
+            padding: 32px 40px 44px 40px;
+        }
+
+        .login-card .label-memphis {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #0F172A;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .login-card .input-memphis {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: 1.05rem;
+            border: 2.5px solid #0F172A;
+            border-radius: 10px;
+            background: #FAFBFD;
+            font-family: inherit;
+            color: #0F172A;
+            outline: none;
+            transition: all 0.15s ease;
+            box-sizing: border-box;
+        }
+
+        .login-card .input-memphis:focus {
+            background: #ffffff;
+            border-color: #FF5C00;
+            box-shadow: 4px 4px 0px #0F172A;
+        }
+
+        .login-card .btn-submit-memphis {
+            padding: 16px 28px;
+            font-size: 1.15rem;
+            font-weight: 800;
+            border: 2.5px solid #0F172A;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 4px 4px 0px #0F172A;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.15s ease;
+        }
+
+        .login-card .btn-submit-memphis:hover:not(:disabled) {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px #0F172A;
+        }
+
+        .login-card .btn-submit-primary {
+            background: #FACC15;
+            color: #0F172A;
+        }
+
+        .login-card .btn-submit-success {
+            background: #22C55E;
+            color: #ffffff;
+        }
+
+        .login-card .chip-opcao {
+            padding: 9px 16px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border: 2px solid #0F172A;
+            border-radius: 9999px;
+            background: #ffffff;
+            color: #0F172A;
+            cursor: pointer;
+            box-shadow: 2px 2px 0px #0F172A;
+            transition: all 0.15s ease;
+        }
+
+        .login-card .chip-opcao:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 3px 3px 0px #0F172A;
+        }
+
+        .login-card .chip-opcao.chip-selecionado {
+            background: #0F172A;
+            color: #ffffff;
+            border-color: #FF5C00;
+        }
+
+        @media (max-width: 640px) {
+            .brand-logo-img { height: 60px; }
+            .brand-title-text { font-size: 2.4rem; }
+            .login-card .modal-body-memphis { padding: 20px 20px 32px 20px; }
+            .login-card .auth-tabs-wrapper { padding: 16px 20px 0 20px; }
+        }
+    </style>
+</head>
+<body class="bg-[#FAFBFD] text-brand-dark min-h-screen bg-grid-pattern font-sans antialiased selection:bg-brand-yellow selection:text-brand-dark">
+
+    <div class="login-page-wrapper">
+        
+        <!-- Botão Voltar ao Início -->
+        <div class="login-top-bar">
+            <a href="index.html" class="btn-voltar">
+                <i class="ph-bold ph-arrow-left"></i>
+                <span>Voltar ao Início</span>
+            </a>
+        </div>
+
+        <!-- EduScrap Centralizado e Maior em cima do Card -->
+        <header class="login-brand-center">
+            <a href="index.html" class="brand-link" title="Voltar ao início">
+                <img src="assets/logo.png" alt="EduScrap Logo" class="brand-logo-img">
+                <span class="brand-title-text">
+                    <span style="color: #0F172A;">Edu</span><span style="color: #FF5C00;">Scrap</span>
+                </span>
+            </a>
+            <p class="brand-subtitle">Portal Universitário de Vagas & Oportunidades</p>
+        </header>
+
+        <!-- Card de Login / Cadastro Ampliado -->
+        <main class="login-card">
+            <!-- Barra superior decorativa estilo Memphis -->
+            <div class="modal-header-memphis">
+                <div class="modal-header-left flex items-center gap-3">
+                    <div class="modal-dots flex items-center gap-1.5">
+                        <span class="dot dot-red"></span>
+                        <span class="dot dot-yellow"></span>
+                        <span class="dot dot-green"></span>
+                    </div>
+                    <h1 class="modal-title" id="page-auth-title">Portal do Estudante - EduScrap</h1>
+                </div>
+                <div class="flex items-center gap-1.5 text-slate-300 font-bold text-sm">
+                    <i class="ph-bold ph-lock-key"></i> <span>Acesso Seguro</span>
+                </div>
+            </div>
+
+            <!-- Seletor de Abas (Login / Cadastro) -->
+            <div class="auth-tabs-wrapper">
+                <div class="auth-tabs-row" role="tablist">
+                    <button id="tab-login" class="auth-tab-btn ativo" onclick="alternarAba('login')" role="tab">
+                        <i class="ph-bold ph-sign-in"></i> Já tenho conta
+                    </button>
+                    <button id="tab-register" class="auth-tab-btn" onclick="alternarAba('register')" role="tab">
+                        <i class="ph-bold ph-user-plus"></i> Novo Cadastro
+                    </button>
+                </div>
+            </div>
+
+            <div class="modal-body-memphis">
+                <!-- FORMULÁRIO DE LOGIN -->
+                <form id="form-login" onsubmit="executarLogin(event)">
+                    <div class="form-group-memphis mb-5">
+                        <label class="label-memphis" for="login-email">
+                            <i class="ph-bold ph-envelope-simple text-brand-orange"></i> E-mail Institucional ou Pessoal:
+                        </label>
+                        <input type="email" id="login-email" class="input-memphis" placeholder="exemplo@uern.br" autocomplete="username" required>
+                    </div>
+
+                    <div class="form-group-memphis mb-5">
+                        <label class="label-memphis" for="login-senha">
+                            <i class="ph-bold ph-lock-key text-brand-orange"></i> Senha de Acesso:
+                        </label>
+                        <input type="password" id="login-senha" class="input-memphis" placeholder="Sua senha secreta" autocomplete="current-password" required>
+                    </div>
+
+                    <div id="login-erro" class="msg-erro-memphis mb-4" style="display: none;"></div>
+
+                    <div class="form-actions-memphis mt-7">
+                        <button type="submit" id="btn-submit-login" class="btn-submit-memphis btn-submit-primary w-full">
+                            <span>Entrar na Minha Conta</span>
+                            <i class="ph-bold ph-arrow-right"></i>
+                        </button>
+                    </div>
+
+                    <p class="text-center mt-6 text-slate-600 font-semibold text-base">
+                        Não tem uma conta ainda? 
+                        <a href="javascript:void(0)" onclick="alternarAba('register')" class="text-brand-orange font-extrabold underline hover:text-orange-700">Cadastre-se gratuitamente</a>
+                    </p>
+                </form>
+
+                <!-- FORMULÁRIO DE CADASTRO -->
+                <form id="form-register" style="display: none;" onsubmit="executarCadastro(event)">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div class="form-group-memphis">
+                            <label class="label-memphis" for="reg-nome">
+                                <i class="ph-bold ph-user text-brand-orange"></i> Nome Completo:
+                            </label>
+                            <input type="text" id="reg-nome" class="input-memphis" placeholder="Nome do Aluno" autocomplete="name" required>
+                        </div>
+                        <div class="form-group-memphis">
+                            <label class="label-memphis" for="reg-matricula">
+                                <i class="ph-bold ph-identification-badge text-brand-orange"></i> Matrícula (opcional):
+                            </label>
+                            <input type="text" id="reg-matricula" class="input-memphis" placeholder="202410000">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+                        <div class="form-group-memphis">
+                            <label class="label-memphis" for="reg-email">
+                                <i class="ph-bold ph-envelope-simple text-brand-orange"></i> E-mail:
+                            </label>
+                            <input type="email" id="reg-email" class="input-memphis" placeholder="aluno@uern.br" autocomplete="email" required>
+                        </div>
+                        <div class="form-group-memphis">
+                            <label class="label-memphis" for="reg-senha">
+                                <i class="ph-bold ph-lock-key text-brand-orange"></i> Senha (mínimo 6 dígitos):
+                            </label>
+                            <input type="password" id="reg-senha" class="input-memphis" placeholder="••••••••" minlength="6" autocomplete="new-password" required>
+                        </div>
+                    </div>
+
+                    <!-- Seção Cursos de Interesse -->
+                    <div class="form-group-memphis mb-5">
+                        <div class="flex flex-col sm:flex-row sm:items-baseline justify-between mb-2">
+                            <label class="label-memphis mb-0">
+                                <i class="ph-bold ph-graduation-cap text-brand-orange"></i> Cursos de Interesse:
+                            </label>
+                            <span class="text-xs text-slate-500 font-bold">Selecione para personalizar seu feed de editais</span>
+                        </div>
+                        <div class="chips-container flex flex-wrap gap-2.5" id="reg-chips-cursos">
+                            <button type="button" class="chip-opcao chip-selecionado" data-valor="Ciência da Computação"><span class="chip-check">✓</span> Ciência da Computação</button>
+                            <button type="button" class="chip-opcao" data-valor="Sistemas de Informação"><span class="chip-check">✓</span> Sistemas de Informação</button>
+                            <button type="button" class="chip-opcao" data-valor="Medicina"><span class="chip-check">✓</span> Medicina</button>
+                            <button type="button" class="chip-opcao" data-valor="Enfermagem"><span class="chip-check">✓</span> Enfermagem</button>
+                            <button type="button" class="chip-opcao" data-valor="Direito"><span class="chip-check">✓</span> Direito</button>
+                            <button type="button" class="chip-opcao" data-valor="Administração"><span class="chip-check">✓</span> Administração</button>
+                            <button type="button" class="chip-opcao" data-valor="Ciências Contábeis"><span class="chip-check">✓</span> Ciências Contábeis</button>
+                            <button type="button" class="chip-opcao" data-valor="Educação Física"><span class="chip-check">✓</span> Educação Física</button>
+                            <button type="button" class="chip-opcao" data-valor="Letras"><span class="chip-check">✓</span> Letras</button>
+                            <button type="button" class="chip-opcao" data-valor="História"><span class="chip-check">✓</span> História</button>
+                            <button type="button" class="chip-opcao" data-valor="Pedagogia"><span class="chip-check">✓</span> Pedagogia</button>
+                            <button type="button" class="chip-opcao" data-valor="Ciências Biológicas"><span class="chip-check">✓</span> Ciências Biológicas</button>
+                        </div>
+                    </div>
+
+                    <!-- Seção Áreas de Interesse -->
+                    <div class="form-group-memphis mb-5">
+                        <div class="flex flex-col sm:flex-row sm:items-baseline justify-between mb-2">
+                            <label class="label-memphis mb-0">
+                                <i class="ph-bold ph-bookmarks text-brand-orange"></i> Áreas de Interesse:
+                            </label>
+                            <span class="text-xs text-slate-500 font-bold">Filtre temas gerais além do curso</span>
+                        </div>
+                        <div class="chips-container flex flex-wrap gap-2.5" id="reg-chips-areas">
+                            <button type="button" class="chip-opcao chip-selecionado" data-valor="Tecnologia"><span class="chip-check">✓</span> Tecnologia</button>
+                            <button type="button" class="chip-opcao" data-valor="Saúde"><span class="chip-check">✓</span> Saúde</button>
+                            <button type="button" class="chip-opcao" data-valor="Humanas"><span class="chip-check">✓</span> Humanas</button>
+                            <button type="button" class="chip-opcao" data-valor="Exatas"><span class="chip-check">✓</span> Exatas</button>
+                            <button type="button" class="chip-opcao chip-selecionado" data-valor="Extensão"><span class="chip-check">✓</span> Extensão Universitária</button>
+                            <button type="button" class="chip-opcao" data-valor="Pesquisa"><span class="chip-check">✓</span> Pesquisa & Inovação</button>
+                        </div>
+                    </div>
+
+                    <!-- Notificações por E-mail -->
+                    <div class="form-group-memphis mb-5">
+                        <label class="checkbox-memphis-container flex items-center gap-3 cursor-pointer select-none">
+                            <input type="checkbox" id="reg-receber-emails" checked class="w-5 h-5 accent-brand-orange cursor-pointer">
+                            <span class="label-texto font-bold text-sm text-slate-800">Receber notificações e alertas de prazos por e-mail</span>
+                        </label>
+                    </div>
+
+                    <div id="register-erro" class="msg-erro-memphis mb-4" style="display: none;"></div>
+
+                    <div class="form-actions-memphis mt-7">
+                        <button type="submit" id="btn-submit-reg" class="btn-submit-memphis btn-submit-success w-full">
+                            <span>Concluir Cadastro & Acessar Vagas</span>
+                            <i class="ph-bold ph-check"></i>
+                        </button>
+                    </div>
+
+                    <p class="text-center mt-6 text-slate-600 font-semibold text-base">
+                        Já possui cadastro? 
+                        <a href="javascript:void(0)" onclick="alternarAba('login')" class="text-brand-orange font-extrabold underline hover:text-orange-700">Fazer login</a>
+                    </p>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:8000/api";
+
+        window.addEventListener('DOMContentLoaded', () => {
+            configurarChipsClick();
+
+            // Detectar parâmetro na URL (ex: login.html?aba=register)
+            const urlParams = new URLSearchParams(window.location.search);
+            const aba = urlParams.get('aba') || urlParams.get('tab');
+            if (aba === 'register' || aba === 'cadastro') {
+                alternarAba('register');
+            } else {
+                alternarAba('login');
+            }
+        });
+
+        function alternarAba(aba) {
+            const tabLogin = document.getElementById('tab-login');
+            const tabReg = document.getElementById('tab-register');
+            const formLogin = document.getElementById('form-login');
+            const formReg = document.getElementById('form-register');
+            const pageTitle = document.getElementById('page-auth-title');
+
+            if (aba === 'login') {
+                tabLogin.classList.add('ativo');
+                tabReg.classList.remove('ativo');
+                formLogin.style.display = 'block';
+                formReg.style.display = 'none';
+                if (pageTitle) pageTitle.innerText = "Entrar no EduScrap";
+            } else {
+                tabLogin.classList.remove('ativo');
+                tabReg.classList.add('ativo');
+                formLogin.style.display = 'none';
+                formReg.style.display = 'block';
+                if (pageTitle) pageTitle.innerText = "Criar Perfil de Estudante";
+            }
+        }
+
+        function configurarChipsClick() {
+            document.querySelectorAll('.chip-opcao').forEach(btn => {
+                btn.onclick = function() {
+                    this.classList.toggle('chip-selecionado');
+                };
+            });
+        }
+
+        function obterChipsSelecionados(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return [];
+            const selecionados = [];
+            container.querySelectorAll('.chip-opcao.chip-selecionado').forEach(btn => {
+                selecionados.push(btn.getAttribute('data-valor'));
+            });
+            return selecionados;
+        }
+
+        async function executarLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const senha = document.getElementById('login-senha').value;
+            const erroDiv = document.getElementById('login-erro');
+            const btnSubmit = document.getElementById('btn-submit-login');
+
+            erroDiv.style.display = 'none';
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<span>Verificando credenciais...</span> <i class="ph-bold ph-spinner animate-spin"></i>';
+
+            try {
+                const resp = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, senha })
+                });
+
+                const data = await resp.json();
+                if (!resp.ok || !data.success) {
+                    throw new Error(data.error || data.detail || 'Email ou senha inválidos.');
+                }
+
+                // Salva a sessão no localStorage
+                localStorage.setItem('eduscrap_token', data.token);
+                localStorage.setItem('eduscrap_user', JSON.stringify(data.user));
+
+                btnSubmit.innerHTML = '<span>Sucesso! Redirecionando...</span> <i class="ph-bold ph-check"></i>';
+                
+                // Redireciona para a página principal
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 400);
+
+            } catch (err) {
+                erroDiv.innerText = err.message;
+                erroDiv.style.display = 'block';
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = '<span>Entrar na Minha Conta</span> <i class="ph-bold ph-arrow-right"></i>';
+            }
+        }
+
+        async function executarCadastro(e) {
+            e.preventDefault();
+            const nome = document.getElementById('reg-nome').value.trim();
+            const matricula = document.getElementById('reg-matricula').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const senha = document.getElementById('reg-senha').value;
+            const cursos = obterChipsSelecionados('reg-chips-cursos');
+            const areas = obterChipsSelecionados('reg-chips-areas');
+            const receber_emails = document.getElementById('reg-receber-emails').checked;
+            const erroDiv = document.getElementById('register-erro');
+            const btnSubmit = document.getElementById('btn-submit-reg');
+
+            erroDiv.style.display = 'none';
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<span>Criando perfil...</span> <i class="ph-bold ph-spinner animate-spin"></i>';
+
+            try {
+                const resp = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nome, matricula, email, senha,
+                        cursos, areas, receber_emails
+                    })
+                });
+
+                const data = await resp.json();
+                if (!resp.ok || !data.success) {
+                    throw new Error(data.error || data.detail || 'Falha ao cadastrar estudante.');
+                }
+
+                localStorage.setItem('eduscrap_token', data.token);
+                localStorage.setItem('eduscrap_user', JSON.stringify(data.user));
+
+                btnSubmit.innerHTML = '<span>Conta criada! Redirecionando...</span> <i class="ph-bold ph-check"></i>';
+
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 400);
+
+            } catch (err) {
+                erroDiv.innerText = err.message;
+                erroDiv.style.display = 'block';
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = '<span>Concluir Cadastro & Acessar Vagas</span> <i class="ph-bold ph-check"></i>';
+            }
+        }
+    </script>
+</body>
+</html>
