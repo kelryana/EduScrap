@@ -1,0 +1,24 @@
+@startuml Sequencia_Favoritar_Refinado
+autonumber
+actor "Estudante" as User
+boundary "Interface Web (SPA)" as UI
+control "API REST (FastAPI)" as API
+database "MongoDB" as DB
+
+User -> UI: Clica em "Salvar / Favoritar"
+activate UI
+
+UI -> API: PATCH /api/estudantes/me/favoritos\n{ "oportunidadeId": "edital-123" }
+activate API
+
+API -> DB: updateOne({ _id: userId }, { $addToSet: { favoritos: "edital-123" } })
+activate DB
+DB --> API: { acknowledged: true, modifiedCount: 1 }
+deactivate DB
+
+API --> UI: HTTP 200 OK (Item favoritado)
+deactivate API
+
+UI --> User: Exibe feedback visual (Ícone marcado)
+deactivate UI
+@enduml

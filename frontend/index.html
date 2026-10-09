@@ -3,46 +3,555 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TechHub UERN - Dashboard de Oportunidades</title>
-    <link rel="stylesheet" href="style.css">
+    <title>EduScrap - Portal Universitário de Oportunidades</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@600;700;800&family=Lexend:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <script>
+      tailwind.config = {
+        corePlugins: {
+          preflight: false,
+        },
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+              display: ['"Space Grotesk"', 'sans-serif'],
+            },
+            borderWidth: {
+              '2.5': '2.5px',
+              '3': '3px',
+            },
+            colors: {
+              brand: {
+                orange: '#FF5C00',
+                'orange-hover': '#E05000',
+                yellow: '#FACC15',
+                dark: '#0F172A',
+              }
+            },
+            boxShadow: {
+              'brutal-sm': '2px 2px 0px #0F172A',
+              'brutal': '4px 4px 0px #0F172A',
+              'brutal-lg': '6px 6px 0px #0F172A',
+              'brutal-xl': '8px 8px 0px #0F172A',
+            }
+          }
+        }
+      }
+    </script>
+    
+    <link rel="stylesheet" href="style.css?v=17">
 </head>
-<body>
-    <header style="position: relative;">
-        <button id="btn-buscar-tudo" onclick="acionarTodosOsRobos()">Buscar 🤖</button>
+<body class="bg-[#FAFBFD] text-brand-dark min-h-screen bg-grid-pattern font-sans antialiased selection:bg-brand-yellow selection:text-brand-dark">
 
-        <div class="logo">
-            <h1>TechHub <span>UERN</span></h1>
-        </div>
-        <p>Agregador de Oportunidades para Estudantes</p>
+    <section id="landing-hero" class="landing-section w-full max-w-[1360px] mx-auto px-4 sm:px-6">
+       
+        <nav class="landing-navbar">
+            <div class="nav-brand">
+                <span class="nav-brand-title">EduScrap</span>
+            </div>
 
-        <div class="busca-container" style="margin-top: 15px; padding-bottom: 20px;">
-            <input type="text" id="input-busca" placeholder="Pesquisar editais (ex: estágio, monitoria, TI)..." onkeyup="if(event.key === 'Enter') realizarPesquisa()" style="padding: 8px; width: 300px;">
-            <button id="btn-pesquisar" onclick="realizarPesquisa()" style="padding: 8px 15px;">Buscar 🔍</button>
-        </div>
-    </header>
+            <div class="nav-links">
+                <a href="#landing-hero" class="nav-link">Início</a>
+                <a href="#area-oportunidades" class="nav-link">Oportunidades</a>
+                <a href="#area-oportunidades" onclick="carregarFeedPersonalizado()" class="nav-link">Recomendados</a>
+                <a href="#area-oportunidades" onclick="carregarEstatisticas()" class="nav-link">Métricas</a>
+                <a href="#area-oportunidades" onclick="carregarInspector()" class="nav-link">Infraestrutura</a>
+            </div>
 
-    <main>
-        <div class="controles">
-            <button id="btn-estagios" class="ativo" onclick="carregarDados('estagios')">Ver Estágios (PRAE)</button>
-            <button id="btn-bolsas" onclick="carregarDados('bolsas')">Ver Bolsas (PROEX)</button>
-            <button id="btn-ufersa" onclick="carregarDados('ufersa')">Ver Editais (UFERSA)</button>
-            <button id="btn-ciee" onclick="carregarDados('ciee')">Ver Vagas (CIEE)</button>
+            <div class="nav-actions-container">
+               
+                <div id="nav-auth-area">
+                    <button class="btn-nav-auth" onclick="abrirModalAuth('login')">
+                        <i class="ph-bold ph-user"></i> <span>Entrar / Cadastrar</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="relative w-full max-w-7xl py-10 my-4 mx-auto">
+
+            <div class="hidden sm:flex absolute -top-5 left-4 sm:left-6 flex-row gap-2 select-none pointer-events-none text-slate-800 font-black text-xl tracking-widest z-0">
+              + + +
+            </div>
+
+            <div class="hidden sm:flex absolute top-14 -left-9 sm:-left-12 lg:-left-14 w-20 h-20 sm:w-24 sm:h-24 lg:w-26 lg:h-26 rounded-full bg-brand-orange border-3 border-brand-dark shadow-brutal items-center justify-center select-none pointer-events-none z-20">
+              <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-full bg-white border-3 border-brand-dark"></div>
+            </div>
+
+            <div class="hidden sm:block absolute top-60 -left-8 sm:-left-9 lg:-left-11 w-16 h-16 sm:w-18 sm:h-18 lg:w-20 lg:h-20 rounded-full border-3 border-brand-dark bg-slate-900 overflow-hidden shadow-brutal select-none pointer-events-none z-20">
+              <svg class="w-full h-full text-white p-1" viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="4.5">
+                <path d="M-10 15 L10 30 L30 15 L50 30 L70 15 L90 30" />
+                <path d="M-10 35 L10 50 L30 35 L50 50 L70 35 L90 50" />
+                <path d="M-10 55 L10 70 L30 55 L50 70 L70 55 L90 70" />
+              </svg>
+            </div>
+    
+            <div class="hidden sm:block absolute -bottom-5 left-6 select-none pointer-events-none z-0">
+              <span class="text-brand-orange text-2xl font-black">✦</span>
+            </div>
+
             
-            <button id="btn-portal_uern" onclick="carregarDados('portal_uern')" style="border-color: #008080;">Portal UERN 🎓</button>
+            <div class="hidden sm:block absolute -top-6 -right-6 lg:-right-8 w-20 h-20 lg:w-24 lg:h-24 rounded-full border-3 border-brand-dark bg-white shadow-brutal select-none pointer-events-none z-20 overflow-hidden">
+              <div class="w-full h-full bg-halftone"></div>
+            </div>
+           
+            <div class="hidden sm:block absolute top-36 -right-5 lg:-right-6 text-slate-900 text-3xl font-black select-none pointer-events-none z-0">
+              +
+            </div>
             
-            <button id="btn-noticias" onclick="carregarDados('noticias')" style="border-color: #2E8B57;">Notícias Tech ⚡</button>
-            <button id="btn-analises" onclick="carregarEstatisticas()" style="border-color: #F27A18;">Indicadores Globais 📊</button>
+            <div class="hidden sm:block absolute top-60 -right-6 lg:-right-8 w-16 h-16 lg:w-18 lg:h-18 border-3 border-brand-dark shadow-brutal rotate-12 select-none pointer-events-none z-20 overflow-hidden" 
+                 style="background: repeating-linear-gradient(-45deg, #FACC15, #FACC15 6px, #0F172A 6px, #0F172A 12px);">
+            </div>
+           
+            <div class="hidden sm:block absolute bottom-36 -right-7 lg:-right-9 select-none pointer-events-none z-20">
+              <svg width="65" height="22" viewBox="0 0 65 22" fill="none">
+                <path d="M2 11 Q 9 2, 16 11 T 30 11 T 44 11 T 58 11" stroke="#FF5C00" stroke-width="4.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+           
+            <div class="hidden sm:block absolute -bottom-8 -right-6 lg:-right-8 select-none pointer-events-none z-20">
+              <svg width="105" height="95" viewBox="0 0 100 90" class="drop-shadow-[4px_4px_0px_#0F172A]">
+                <polygon points="50,5 95,85 5,85" fill="#FF5C00" stroke="#0F172A" stroke-width="4" stroke-linejoin="round"/>
+                <polygon points="50,22 80,78 20,78" fill="#FACC15"/>
+              </svg>
+            </div>
+          
+            <div class="hidden sm:block absolute -bottom-4 left-[58%] select-none pointer-events-none z-20">
+              <svg width="36" height="36" viewBox="0 0 40 40">
+                <polygon points="20,2 38,36 2,36" fill="#FF5C00" stroke="#0F172A" stroke-width="3"/>
+              </svg>
+            </div>
+          
+            <div class="relative w-full bg-white border-3 border-brand-dark rounded-3xl shadow-brutal-xl overflow-hidden p-8 sm:p-12 lg:p-16 pl-8 sm:pl-16 lg:pl-20 z-10">
+              
+              <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center"> 
+            
+                <div class="lg:col-span-7 space-y-7 relative z-30">
+            
+                 
+                  <div class="inline-flex items-center gap-2 px-4.5 py-2 rounded-lg border-2 border-brand-dark bg-white font-display font-extrabold text-sm sm:text-base text-brand-dark shadow-brutal-sm">
+                    <span class="text-brand-orange text-base">✦</span>
+                    <span>Portal Universitário de Oportunidades</span>
+                  </div>
+
+                 
+                  <h1 class="font-display font-extrabold text-4xl sm:text-6xl lg:text-[3.85rem] text-brand-dark tracking-tight leading-[1.14]">
+                    Descubra editais e vagas em 
+                    <span class="relative inline-block text-brand-orange">
+                      tempo real
+                    
+                      <svg class="absolute -bottom-2 left-0 w-full h-3" viewBox="0 0 100 12" preserveAspectRatio="none" fill="none">
+                        <path d="M0 6 Q 12 0, 25 6 T 50 6 T 75 6 T 100 6" stroke="#FACC15" stroke-width="5" stroke-linecap="round"/>
+                      </svg>
+                    </span>
+                    na sua universidade.
+                  </h1>
+                 
+                  <p class="text-slate-600 text-lg sm:text-xl lg:text-[1.22rem] leading-relaxed max-w-2xl font-medium">
+                    O <strong>EduScrap</strong> monitora e unifica automaticamente as oportunidades da UERN, UFERSA, CIEE, PRAE e PROEX. Personalize seu perfil, salve seus editais favoritos e não perca nenhum prazo de inscrição.
+                  </p>
+                  
+                  <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
+                    <a href="#area-oportunidades" class="px-7 sm:px-8 py-4 sm:py-4.5 rounded-xl border-2.5 border-brand-dark bg-brand-orange hover:bg-brand-orange-hover text-white font-extrabold text-lg sm:text-xl shadow-brutal neo-btn inline-flex items-center justify-center gap-2.5 whitespace-nowrap">
+                      <span>Explorar Oportunidades</span>
+                      <span class="text-xl">→</span>
+                    </a>
+                    
+                    <button type="button" onclick="abrirModalAuth('register')" class="px-7 sm:px-8 py-4 sm:py-4.5 rounded-xl border-2.5 border-brand-dark bg-white hover:bg-slate-50 text-brand-dark font-extrabold text-lg sm:text-xl shadow-brutal neo-btn inline-flex items-center justify-center gap-2.5 whitespace-nowrap">
+                      <span>🎓 Criar Perfil de Aluno</span>
+                    </button>
+                  </div>
+
+                </div>
+               
+                <div class="lg:col-span-5 relative flex justify-center items-center pt-4 lg:pt-0">
+                  
+                  <div class="relative w-full max-w-[340px] sm:max-w-[400px] lg:max-w-[430px] flex items-center justify-center py-2">
+                    
+                   
+                    <div class="absolute -top-1 -right-2 text-brand-orange text-3xl font-black select-none z-20">
+                      ✦
+                    </div>
+
+                  
+                    <div class="relative z-10 w-[290px] sm:w-[350px] lg:w-[380px] h-[390px] sm:h-[450px] lg:h-[485px] rounded-2xl border-3 border-brand-dark bg-gradient-to-b from-[#FFFDE7] to-[#FFE082] overflow-hidden shadow-brutal-xl flex items-end justify-center">
+                      <img 
+                        src="assets/estudante.png" 
+                        alt="Estudante universitária"
+                        class="w-full h-full object-contain object-bottom select-none pointer-events-none"
+                      />
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+        </div>
+    </section>
+
+
+    <div id="area-oportunidades" class="app-container">
+        <!-- Header da Seção de Oportunidades -->
+        <header class="header-memphis">
+            <div class="logo-box">
+                Pesquisa
+            </div>
+           
+            <div id="banner-usuario" class="banner-usuario-memphis" style="display: none;">
+                <span id="banner-usuario-texto">Olá, Estudante! Suas preferências estão ativas.</span>
+                <button class="btn-banner-ajustar" onclick="abrirModalPerfil()">
+                    <i class="ph ph-sliders"></i> Ajustar Cursos & Áreas
+                </button>
+            </div>
+        </header>
+
+        <!-- Barra de Busca Ampla e Acessível -->
+        <div class="busca-wrapper">
+            <input type="text" id="input-busca" 
+                class="input-busca-memphis" 
+                placeholder="Pesquisar editais (ex: estágio, computação, bolsa, UERN)..." 
+                onkeyup="if(event.key === 'Enter') realizarPesquisa()">
+            <button id="btn-pesquisar" class="btn-busca-memphis" onclick="realizarPesquisa()">
+                <i class="ph-bold ph-magnifying-glass"></i> Buscar
+            </button>
         </div>
 
-        <div id="container-vagas" class="grid-vagas">
-            <p class="carregando">Carregando oportunidades do banco de dados...</p>
+        <!-- BARRA DE CATEGORIAS (SEGMENTED CATEGORY TABS) -->
+        <div class="categoria-tabs-wrapper">
+            <div class="categoria-tabs-scroll" role="tablist">
+                <button id="btn-estagios" class="tab-origem-btn ativo" onclick="carregarDados('estagios')">
+                    <i class="ph-bold ph-student"></i> <span>Estágios (PRAE)</span>
+                </button>
+                <button id="btn-bolsas" class="tab-origem-btn" onclick="carregarDados('bolsas')">
+                    <i class="ph-bold ph-coins"></i> <span>Bolsas (PROEX)</span>
+                </button>
+                <button id="btn-ufersa" class="tab-origem-btn" onclick="carregarDados('ufersa')">
+                    <i class="ph-bold ph-buildings"></i> <span>UFERSA</span>
+                </button>
+                <button id="btn-ciee" class="tab-origem-btn" onclick="carregarDados('ciee')">
+                    <i class="ph-bold ph-briefcase"></i> <span>Vagas CIEE</span>
+                </button>
+                <button id="btn-portal_uern" class="tab-origem-btn" onclick="carregarDados('portal_uern')">
+                    <i class="ph-bold ph-graduation-cap"></i> <span>Portal UERN</span>
+                </button>
+                <button id="btn-noticias" class="tab-origem-btn" onclick="carregarDados('noticias')">
+                    <i class="ph-bold ph-lightning"></i> <span>Notícias Tech</span>
+                </button>
+                <button id="btn-analises" class="tab-origem-btn" onclick="carregarEstatisticas()">
+                    <i class="ph-bold ph-chart-bar"></i> <span>Indicadores</span>
+                </button>
+                <button id="btn-inspector" class="tab-origem-btn" onclick="carregarInspector()">
+                    <i class="ph-bold ph-database"></i> <span>Status Banco</span>
+                </button>
+            </div>
         </div>
-    </main>
 
-    <footer style="margin-top: 50px; padding: 25px; text-align: center; border-top: 3px solid var(--azul-escuro); font-size: 0.85rem; color: #555;">
-        <p>© TechHub UERN Mossoró | 2026</p>
+        <!-- BARRA DE UTILITÁRIOS E FILTROS DO ESTUDANTE -->
+        <div class="student-toolbar">
+            <div class="student-toolbar-left">
+                <button id="btn-personalizado" class="btn-filtro-aluno" onclick="carregarFeedPersonalizado()">
+                    <i class="ph-bold ph-sparkle"></i> <span>🎯 Para Você (Perfil)</span>
+                </button>
+                <button id="btn-favoritos" class="btn-filtro-aluno" onclick="carregarFavoritos()">
+                    <i class="ph-bold ph-star"></i> <span>⭐ Salvos (<strong id="contador-favoritos">0</strong>)</span>
+                </button>
+            </div>
+            
+            <div class="student-toolbar-right">
+                <label class="toggle-vigentes-container" for="filtroVigentes">
+                    <input type="checkbox" id="filtroVigentes" onchange="toggleFiltroVigentes()">
+                    <span class="custom-checkbox"></span>
+                    <span class="toggle-label">Mostrar apenas editais vigentes</span>
+                </label>
+            </div>
+        </div>
+       
+        <main>
+            <div id="container-vagas" class="grid-vagas">
+                <div class="status-box">
+                    <div class="status-box-decor"></div>
+                    <h3 class="status-box-titulo">Carregando Dados ⏳</h3>
+                    <p class="status-box-texto">Buscando oportunidades no banco de dados...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- =========================================================================
+         3. MODAL DE AUTENTICAÇÃO (LOGIN / CADASTRO) - REESTRUTURADO
+         ========================================================================= -->
+    <div id="modal-auth" class="modal-backdrop" style="display: none;" onclick="if(event.target === this) fecharModalAuth()">
+        <div class="modal-memphis" role="dialog" aria-modal="true" aria-labelledby="modal-auth-title">
+            <!-- Barra Superior com Alto Contraste e Fechamento Confortável -->
+            <div class="modal-header-memphis">
+                <div class="modal-header-left">
+                    <div class="modal-dots">
+                        <span class="dot dot-red"></span>
+                        <span class="dot dot-yellow"></span>
+                        <span class="dot dot-green"></span>
+                    </div>
+                    <h3 class="modal-title" id="modal-auth-title">Acesso ao EduScrap</h3>
+                </div>
+                <button class="modal-close-btn" onclick="fecharModalAuth()" title="Fechar janela" aria-label="Fechar">
+                    <i class="ph-bold ph-x"></i>
+                </button>
+            </div>
+
+            <!-- Abas Segmentadas Modernas (Segmented Control) -->
+            <div class="auth-tabs-wrapper">
+                <div class="auth-tabs-row" role="tablist">
+                    <button id="tab-login" class="auth-tab-btn ativo" onclick="alternarAbaAuth('login')" role="tab" aria-selected="true">
+                        <i class="ph-bold ph-sign-in"></i> Já tenho conta
+                    </button>
+                    <button id="tab-register" class="auth-tab-btn" onclick="alternarAbaAuth('register')" role="tab" aria-selected="false">
+                        <i class="ph-bold ph-user-plus"></i> Novo Cadastro
+                    </button>
+                </div>
+            </div>
+
+            <!-- Corpo do Modal com Espaço Negativo Confortável -->
+            <div class="modal-body-memphis">
+                <!-- FORMULÁRIO DE LOGIN -->
+                <form id="form-login" onsubmit="executarLogin(event)">
+                    <div class="form-group-memphis">
+                        <label class="label-memphis" for="login-email">
+                            <i class="ph-bold ph-envelope-simple"></i> E-mail Institucional ou Pessoal:
+                        </label>
+                        <input type="email" id="login-email" class="input-memphis" placeholder="exemplo@uern.br" autocomplete="username" required>
+                    </div>
+
+                    <div class="form-group-memphis">
+                        <label class="label-memphis" for="login-senha">
+                            <i class="ph-bold ph-lock-key"></i> Senha de Acesso:
+                        </label>
+                        <input type="password" id="login-senha" class="input-memphis" placeholder="Sua senha secreta" autocomplete="current-password" required>
+                    </div>
+
+                    <div id="login-erro" class="msg-erro-memphis" style="display: none;"></div>
+
+                    <div class="form-actions-memphis">
+                        <button type="submit" class="btn-submit-memphis btn-submit-primary">
+                            <span>Entrar na Minha Conta</span>
+                            <i class="ph-bold ph-arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- FORMULÁRIO DE CADASTRO -->
+                <form id="form-register" style="display: none;" onsubmit="executarCadastro(event)">
+                    <div class="form-row-dupla">
+                        <div class="form-group-memphis">
+                            <label class="label-memphis" for="reg-nome">
+                                <i class="ph-bold ph-user"></i> Nome Completo:
+                            </label>
+                            <input type="text" id="reg-nome" class="input-memphis" placeholder="Nome do Aluno" autocomplete="name" required>
+                        </div>
+                        <div class="form-group-memphis">
+                            <label class="label-memphis" for="reg-matricula">
+                                <i class="ph-bold ph-identification-badge"></i> Matrícula (opcional):
+                            </label>
+                            <input type="text" id="reg-matricula" class="input-memphis" placeholder="202410000">
+                        </div>
+                    </div>
+
+                    <div class="form-row-dupla">
+                        <div class="form-group-memphis">
+                            <label class="label-memphis" for="reg-email">
+                                <i class="ph-bold ph-envelope-simple"></i> E-mail:
+                            </label>
+                            <input type="email" id="reg-email" class="input-memphis" placeholder="aluno@uern.br" autocomplete="email" required>
+                        </div>
+                        <div class="form-group-memphis">
+                            <label class="label-memphis" for="reg-senha">
+                                <i class="ph-bold ph-lock-key"></i> Senha (mínimo 6 dígitos):
+                            </label>
+                            <input type="password" id="reg-senha" class="input-memphis" placeholder="••••••••" minlength="6" autocomplete="new-password" required>
+                        </div>
+                    </div>
+
+                    <!-- Seção Cursos de Interesse: Pílulas com Checkmark Acessível -->
+                    <div class="form-group-memphis">
+                        <div class="label-com-subtexto">
+                            <label class="label-memphis">
+                                <i class="ph-bold ph-graduation-cap"></i> Cursos de Interesse:
+                            </label>
+                            <span class="label-subtexto">Clique para selecionar múltiplos cursos</span>
+                        </div>
+                        <div class="chips-container" id="reg-chips-cursos">
+                            <button type="button" class="chip-opcao chip-selecionado" data-valor="Ciência da Computação"><span class="chip-check">✓</span> Ciência da Computação</button>
+                            <button type="button" class="chip-opcao" data-valor="Sistemas de Informação"><span class="chip-check">✓</span> Sistemas de Informação</button>
+                            <button type="button" class="chip-opcao" data-valor="Medicina"><span class="chip-check">✓</span> Medicina</button>
+                            <button type="button" class="chip-opcao" data-valor="Enfermagem"><span class="chip-check">✓</span> Enfermagem</button>
+                            <button type="button" class="chip-opcao" data-valor="Direito"><span class="chip-check">✓</span> Direito</button>
+                            <button type="button" class="chip-opcao" data-valor="Administração"><span class="chip-check">✓</span> Administração</button>
+                            <button type="button" class="chip-opcao" data-valor="Ciências Contábeis"><span class="chip-check">✓</span> Ciências Contábeis</button>
+                            <button type="button" class="chip-opcao" data-valor="Educação Física"><span class="chip-check">✓</span> Educação Física</button>
+                            <button type="button" class="chip-opcao" data-valor="Letras"><span class="chip-check">✓</span> Letras</button>
+                            <button type="button" class="chip-opcao" data-valor="História"><span class="chip-check">✓</span> História</button>
+                            <button type="button" class="chip-opcao" data-valor="Pedagogia"><span class="chip-check">✓</span> Pedagogia</button>
+                            <button type="button" class="chip-opcao" data-valor="Ciências Biológicas"><span class="chip-check">✓</span> Ciências Biológicas</button>
+                        </div>
+                    </div>
+
+                    <!-- Seção Áreas de Interesse -->
+                    <div class="form-group-memphis">
+                        <div class="label-com-subtexto">
+                            <label class="label-memphis">
+                                <i class="ph-bold ph-bookmarks"></i> Áreas de Interesse:
+                            </label>
+                            <span class="label-subtexto">Filtre temas gerais além do curso</span>
+                        </div>
+                        <div class="chips-container" id="reg-chips-areas">
+                            <button type="button" class="chip-opcao chip-selecionado" data-valor="Tecnologia"><span class="chip-check">✓</span> Tecnologia</button>
+                            <button type="button" class="chip-opcao" data-valor="Saúde"><span class="chip-check">✓</span> Saúde</button>
+                            <button type="button" class="chip-opcao" data-valor="Humanas"><span class="chip-check">✓</span> Humanas</button>
+                            <button type="button" class="chip-opcao" data-valor="Exatas"><span class="chip-check">✓</span> Exatas</button>
+                            <button type="button" class="chip-opcao chip-selecionado" data-valor="Extensão"><span class="chip-check">✓</span> Extensão Universitária</button>
+                            <button type="button" class="chip-opcao" data-valor="Pesquisa"><span class="chip-check">✓</span> Pesquisa & Inovação</button>
+                        </div>
+                    </div>
+
+                    <!-- Notificações por E-mail -->
+                    <div class="form-group-memphis">
+                        <label class="checkbox-memphis-container">
+                            <input type="checkbox" id="reg-receber-emails" checked>
+                            <span class="custom-checkbox"></span>
+                            <span class="label-texto">Receber notificações e alertas de prazos por e-mail</span>
+                        </label>
+                    </div>
+
+                    <div id="register-erro" class="msg-erro-memphis" style="display: none;"></div>
+
+                    <div class="form-actions-memphis">
+                        <button type="submit" class="btn-submit-memphis btn-submit-success">
+                            <span>Concluir Cadastro & Ativar Feed</span>
+                            <i class="ph-bold ph-check"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================================
+         4. MODAL DE PERFIL & PREFERÊNCIAS DO ALUNO - REESTRUTURADO
+         ========================================================================= -->
+    <div id="modal-perfil" class="modal-backdrop" style="display: none;" onclick="if(event.target === this) fecharModalPerfil()">
+        <div class="modal-memphis" role="dialog" aria-modal="true" aria-labelledby="modal-perfil-title">
+            <div class="modal-header-memphis">
+                <div class="modal-header-left">
+                    <div class="modal-dots">
+                        <span class="dot dot-red"></span>
+                        <span class="dot dot-yellow"></span>
+                        <span class="dot dot-green"></span>
+                    </div>
+                    <h3 class="modal-title" id="modal-perfil-title">Meu Perfil & Preferências</h3>
+                </div>
+                <button class="modal-close-btn" onclick="fecharModalPerfil()" title="Fechar janela" aria-label="Fechar">
+                    <i class="ph-bold ph-x"></i>
+                </button>
+            </div>
+
+            <div class="modal-body-memphis">
+                <!-- Card de Perfil Limpo e Confortável -->
+                <div class="perfil-card-info">
+                    <div class="perfil-avatar-badge">
+                        <i class="ph-bold ph-student"></i>
+                    </div>
+                    <div class="perfil-info-textos">
+                        <h4 id="perfil-nome-display" class="perfil-info-nome">Nome do Aluno</h4>
+                        <p id="perfil-email-display" class="perfil-info-email">aluno@uern.br</p>
+                    </div>
+                </div>
+
+                <form id="form-perfil-preferencias" onsubmit="salvarPreferenciasPerfil(event)">
+                    <div class="form-group-memphis">
+                        <div class="label-com-subtexto">
+                            <label class="label-memphis">
+                                <i class="ph-bold ph-graduation-cap"></i> Cursos de Interesse:
+                            </label>
+                            <span class="label-subtexto">O feed 'Para Você' exibirá editais dessas áreas</span>
+                        </div>
+                        <div class="chips-container" id="perfil-chips-cursos">
+                            <!-- Injetado dinamicamente via JS com chip-check -->
+                        </div>
+                    </div>
+
+                    <div class="form-group-memphis">
+                        <div class="label-com-subtexto">
+                            <label class="label-memphis">
+                                <i class="ph-bold ph-bookmarks"></i> Áreas de Interesse:
+                            </label>
+                            <span class="label-subtexto">Categorias complementares</span>
+                        </div>
+                        <div class="chips-container" id="perfil-chips-areas">
+                            <!-- Injetado dinamicamente via JS com chip-check -->
+                        </div>
+                    </div>
+
+                    <div class="form-group-memphis">
+                        <label class="checkbox-memphis-container">
+                            <input type="checkbox" id="perfil-receber-emails">
+                            <span class="custom-checkbox"></span>
+                            <span class="label-texto">Receber alertas de prazos por e-mail</span>
+                        </label>
+                    </div>
+
+                    <div id="perfil-feedback" class="msg-sucesso-memphis" style="display: none;"></div>
+
+                    <div class="perfil-botoes-row">
+                        <button type="submit" class="btn-submit-memphis btn-submit-primary" style="flex: 1;">
+                            <i class="ph-bold ph-floppy-disk"></i> Salvar Alterações
+                        </button>
+                        <button type="button" class="btn-submit-memphis btn-submit-danger" onclick="fazerLogout()">
+                            <i class="ph-bold ph-sign-out"></i> Sair da Conta
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container-memphis"></div>
+
+    <footer class="footer-memphis">
+        <div class="footer-content">
+            <p class="footer-copy">© EduScrap | 2026</p>
+            <div class="footer-shapes">
+                <div class="footer-shape-circle"></div>
+                <div class="footer-shape-diamond"></div>
+                <div class="footer-shape-square"></div>
+            </div>
+        <div class="footer-links">
+            <a href="#">Política de Privacidade</a>
+            <a href="#">Termos de Uso</a>
+            <a href="#">Contato</a>
+        </div>
+        </div>
     </footer>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=9"></script>
+    <script>
+        function scrollParaBusca() {
+            const target = document.getElementById('area-oportunidades');
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth' });
+                const input = document.getElementById('input-busca');
+                if (input) setTimeout(() => input.focus(), 600);
+            }
+        }
+    </script>
 </body>
 </html>

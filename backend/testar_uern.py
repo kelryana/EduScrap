@@ -35,11 +35,11 @@ def criar_navegador_real():
     return webdriver.Chrome(options=opcoes)
 
 def minerar_profundo_noticias():
-    print("\n🕵️‍♂️ [DEEP MINING] Inicializando ambiente de mineração textual...")
+    print("\n[DEEP MINING] Inicializando ambiente de mineração textual...")
     driver = criar_navegador_real()
     
     try:
-        print("\n🌐 Passo 1: Capturando links de notícias no Portal da UERN...")
+        print("\nPasso 1: Capturando links de notícias no Portal da UERN...")
         driver.get("https://portal.uern.br/todas-as-noticias/")
         time.sleep(6) # Tempo para o servidor responder
         
@@ -53,12 +53,12 @@ def minerar_profundo_noticias():
             if "portal.uern.br/blog/" in url and url not in urls_noticias:
                 urls_noticias.append(url)
                 
-        print(f"🎯 Mapeamento concluído! {len(urls_noticias)} notícias prontas para análise profunda.")
+        print(f"Mapeamento concluído! {len(urls_noticias)} notícias prontas para análise profunda.")
         print("-" * 70)
         
         # Passo 2: O robô entra em cada notícia mapeada
         for i, url_interna in enumerate(urls_noticias[:5], start=1): # Limitado a 5 para o teste não ficar exaustivo
-            print(f"\n🚀 [{i}/{len(urls_noticias)}] Entrando na notícia: {url_interna}")
+            print(f"\n[{i}/{len(urls_noticias)}] Entrando na notícia: {url_interna}")
             
             driver.get(url_interna)
             time.sleep(4) # Espera carregar o corpo do texto da matéria
@@ -77,10 +77,10 @@ def minerar_profundo_noticias():
             resultado_analise = analisar_conteudo(texto_completo)
             
             if resultado_analise:
-                print(f"    🔥 OPORTUNIDADE DETECTADA INTERNAMENTE!")
-                print(f"    📝 Título: {titulo_real}")
-                print(f"    📊 Métricas encontradas: {resultado_analise}")
-                print(f"    📏 Volume de dados analisados: {len(texto_completo)} caracteres.")
+                print(f"    OPORTUNIDADE DETECTADA INTERNAMENTE!")
+                print(f"    Título: {titulo_real}")
+                print(f"    Métricas encontradas: {resultado_analise}")
+                print(f"    Volume de dados analisados: {len(texto_completo)} caracteres.")
             else:
                 print(f"    ❌ Notícia '{titulo_real}' lida por completo. Sem palavras-chave relevantes. Descartada.")
                 
@@ -88,9 +88,9 @@ def minerar_profundo_noticias():
         print(f"❌ Ocorreu um erro na mineração: {e}")
     finally:
         driver.quit()
-        print("\n🔒 Processo encerrado e navegador fechado com segurança.")
+        print("\nProcesso encerrado e navegador fechado com segurança.")
 
 if __name__ == "__main__":
-    print("🤖=== INICIANDO VARREDURA DE TEXT MINING NA UERN ===")
+    print("=== INICIANDO VARREDURA DE TEXT MINING NA UERN ===")
     minerar_profundo_noticias()
-    print("🤖=== PROTOCOLO FINALIZADO ===")
+    print("=== PROTOCOLO FINALIZADO ===")

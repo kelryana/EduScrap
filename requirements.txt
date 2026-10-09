@@ -1,13 +1,32 @@
-# Web Scraping (Páginas Estáticas)
-beautifulsoup4==4.12.3
-requests==2.31.0
+#requirements.txt
 
-# Web Scraping (Páginas Dinâmicas - Robô CIEE)
-selenium==4.21.0
-webdriver-manager==4.0.1
+# Web Scraping
 
-# Banco de Dados
-pymongo==4.6.3
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+selenium>=4.15.0
+webdriver-manager>=4.0.1
+pdfplumber>=0.10.0
+pdfminer.six>=20221105
+PyPDF2>=3.0.0
+lxml>=4.9.0
 
-# API (Back-end)
-fastapi[standard]==0.111.0
+# API e Framework Web
+
+fastapi>=0.109.1
+uvicorn>=0.20.0
+flask>=3.0.0
+flask-cors>=4.0.0
+pymongo>=4.5.0
+schedule>=1.2.0
+python-dotenv>=1.0.0
+
+# Testes e Qualidade
+
+pytest>=8.0.0
+mongomock>=4.1.2
+httpx>=0.27.0
+
+# Utilities
+
+logging>=0.4.9

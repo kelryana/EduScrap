@@ -1,0 +1,37 @@
+.modal {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  width: 640px; 
+  max-width: 90%;
+  margin: 50px auto;
+  overflow: hidden;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #fff9c4;
+  box-sizing: border-box;
+  height: 70px; 
+}
+
+.btn-primary {
+  display: block;
+  width: 100%;
+  padding: 24px; 
+  margin: 24px 24px 24px;
+  background-color: #FFD700;
+  color: #1a2a4a;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.3rem; 
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}

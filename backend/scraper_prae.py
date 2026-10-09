@@ -1,39 +1,76 @@
+##backend/scraper_prae.py
+
 import requests
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
+import re
+from datetime import datetime
+import logging
+import os
+
+from dotenv import load_dotenv
+from pdf_utils import extrair_data_vencimento_datetime
+# Carrega variáveis de ambiente do .env na raiz do projeto
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"))
+
+logging.basicConfig(
+    level=os.getenv("LOG_LEVEL", "INFO").upper(),
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+)
+logger = logging.getLogger(__name__)
+
+MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
+MONGODB_DB = os.getenv("MONGODB_DB", "hub_estudantes")
 
 def conectar_banco():
-    client = MongoClient("mongodb://localhost:27017/")
-    db = client["hub_estudantes"]
+    client = MongoClient(MONGODB_URI)
+    db = client[MONGODB_DB]
     return db["vagas_estagio"]
 
+def extrair_data_vencimento(texto):
+    if not texto:
+        return None
+
+    padroes = [
+        r"\b(\d{2})/(\d{2})/(\d{4})\b",
+        r"\b(\d{1,2})\s*[-/]\s*(\d{1,2})\s*[-/]\s*(\d{4})\b",
+    ]
+
+    for padrao in padroes:
+        match = re.search(padrao, texto)
+        if match:
+            try:
+                dia, mes, ano = int(match.group(1)), int(match.group(2)), int(match.group(3))
+                data = datetime(ano, mes, dia)
+                return data
+            except ValueError:
+                continue
+    return None
+
 def raspar_pagina_prae(url, colecao_bd):
-    print(f"Acessando a página específica: {url}")
+    logger.info(f"Acessando a página específica: {url}")
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
-    
+
     resposta = requests.get(url, headers=headers)
-    
+
     if resposta.status_code != 200:
-        print(f"Erro ao acessar a página. Código: {resposta.status_code}")
+        logger.error(f"Erro ao acessar a página. Código: {resposta.status_code}")
         return
 
     soup = BeautifulSoup(resposta.text, 'html.parser')
-    
-    # Pega todas as listas da página
+
     listas_editais = soup.find_all('ul')
     editais_inseridos = 0
 
     for ul in listas_editais:
-        # Se a lista estiver dentro de um menu de navegação, rodapé ou barra lateral, ignora totalmente
         if ul.find_parent(['nav', 'aside', 'footer', 'header']):
             continue
 
-        # Tenta achar o título da categoria (geralmente o parágrafo ou título acima da lista)
         elemento_categoria = ul.find_previous_sibling(['p', 'h2', 'h3', 'h4', 'strong'])
         categoria_texto = "Categoria Geral"
-        
+
         if elemento_categoria:
             categoria_texto = elemento_categoria.get_text(strip=True)
 
@@ -41,26 +78,29 @@ def raspar_pagina_prae(url, colecao_bd):
             tag_link = li.find('a')
             if not tag_link:
                 continue
-            
+
             texto_bruto = li.get_text(strip=True)
             link_pdf = tag_link.get('href')
-            
-            # ==========================================
-            # FILTRO CEGO E RIGOROSO
-            # Só aceita se o texto começar com a palavra "Edital"
-            # O .lower() garante que vai funcionar se estiver escrito "EDITAL", "Edital", "edital"
-            # ==========================================
+
             if not texto_bruto.lower().startswith("edital"):
                 continue
-                
+
             if link_pdf == "#" or not link_pdf.startswith("http"):
                 continue
-            # ==========================================
-            
-            # Limpeza do texto para ficar bonito no banco
+
             nome_edital = texto_bruto.replace("(Clique Aqui)", "").replace("(Clique aqui)", "").strip()
             if nome_edital.endswith("-"):
                 nome_edital = nome_edital[:-1].strip()
+
+            data_vencimento = extrair_data_vencimento(texto_bruto)
+
+            if not data_vencimento:
+                texto_completo = f"{nome_edital} {categoria_texto}"
+                data_vencimento = extrair_data_vencimento(texto_completo)
+
+            if not data_vencimento:
+                # Título raramente traz o prazo: lê o PDF do edital
+                data_vencimento = extrair_data_vencimento_datetime(texto_bruto, link_pdf)
 
             documento = {
                 "nome": nome_edital,
@@ -68,25 +108,36 @@ def raspar_pagina_prae(url, colecao_bd):
                 "categoria": categoria_texto,
                 "fonte": "PRAE/UERN"
             }
-            
-            colecao_bd.update_one(
+
+            if data_vencimento:
+                documento["data_vencimento"] = data_vencimento
+
+            # Update the record based on the link
+            result = colecao_bd.update_one(
                 {"link": link_pdf},
                 {"$set": documento},
                 upsert=True
             )
-            editais_inseridos += 1
+            if result.upserted_id or result.modified_count > 0:
+                editais_inseridos += 1
 
-    print(f"Sucesso! {editais_inseridos} editais oficiais processados nesta página.\n")
+    logger.info(f"Sucesso! {editais_inseridos} editais oficiais processados nesta página.\n")
 
 if __name__ == "__main__":
     colecao = conectar_banco()
-    
+
     # A lista onde você coloca as páginas específicas que quer ler
     paginas_alvo = [
-        "https://portal.uern.br/prae/2026-2/"
+        "https://portal.uern.br/prae/2026-2/",
+        "https://portal.uern.br/prae/",
+        "https://portal.uern.br/prae/2026/",
+        "https://portal.uern.br/prae/editais/"
     ]
-    
+
     for pagina in paginas_alvo:
-        raspar_pagina_prae(pagina, colecao)
-        
-    print("Finalizado! Verifique o MongoDB Compass.")
+        try:
+            raspar_pagina_prae(pagina, colecao)
+        except Exception as e:
+            logger.error(f"Erro ao processar a página {pagina}: {e}")
+
+    logger.info("Finalizado! Verifique o MongoDB Compass.")

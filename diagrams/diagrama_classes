@@ -1,0 +1,67 @@
+@startuml DiagramaClasses_EduScrap_Refinado
+skinparam classAttributeIconSize 0
+
+abstract class Usuario {
+    # id: String
+    # nome: String
+    # email: String
+    # senhaHash: String
+}
+
+class Estudante {
+    - matricula: String
+    - cursosInteresse: List<String>
+    - areasInteresse: List<String>
+    - favoritos: List<String>
+    + atualizarPreferencias(cursos: List<String>, areas: List<String>): void
+    + alternarFavorito(idOportunidade: String): void
+    + consultarFeed(): List<Oportunidade>
+}
+
+class Administrador {
+    - setor: String
+    + gerenciarFontes(): void
+    + monitorarScraping(): void
+}
+
+abstract class Oportunidade {
+    # id: String
+    # titulo: String
+    # link: String
+    # dataPublicacao: Date
+    # statusVigencia: String
+    # fonte: String
+    + verificarStatus(): boolean
+}
+
+class Edital {
+    - dataLimite: Date
+    - numeroEdital: String
+}
+
+class VagaEstagio {
+    - empresa: String
+    - remuneracao: Float
+}
+
+class Noticia {
+    - categoria: String
+}
+
+class Fonte {
+    - nome: String
+    - tipo: String
+    - urlBase: String
+}
+
+' Relacionamentos
+Usuario <|-- Estudante
+Usuario <|-- Administrador
+
+Oportunidade <|-- Edital
+Oportunidade <|-- VagaEstagio
+Oportunidade <|-- Noticia
+
+Administrador "1" --> "0..*" Fonte : gerencia
+Estudante "0..*" ..> "0..*" Oportunidade : consulta / favorita
+@enduml

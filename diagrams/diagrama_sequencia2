@@ -1,0 +1,32 @@
+@startuml Sequencia_Alertas_Refinado
+autonumber
+participant "Engine de Coleta" as Scraper
+participant "Normalizador" as Norm
+database "MongoDB" as DB
+participant "Serviço de Alertas\n[Python/SMTP]" as Alerta
+actor "Estudante" as User
+
+Scraper -> Norm: Envia dados brutos extraídos (HTML/PDF)
+activate Norm
+
+Norm -> Norm: Valida prazo com Regex e define status="Aberto"
+Norm -> DB: Persiste nova oportunidade
+activate DB
+DB --> Norm: Ack (Gravado)
+deactivate DB
+
+Norm -> Alerta: Notifica detecção de nova oportunidade (tags, curso)
+deactivate Norm
+activate Alerta
+
+Alerta -> DB: find({ cursosInteresse: { $in: oportunidade.cursos } })
+activate DB
+DB --> Alerta: Lista de e-mails dos estudantes
+deactivate DB
+
+loop Para cada estudante encontrado
+    Alerta -> User: Envia notificação por e-mail (SMTP)
+end
+
+deactivate Alerta
+@enduml
