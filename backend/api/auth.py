@@ -19,19 +19,19 @@ serializer = URLSafeTimedSerializer(SECRET_KEY, salt=AUTH_SALT)
 
 
 def hash_password(password: str) -> str:
-    """Gera hash seguro da senha usando werkzeug.security (pbkdf2/scrypt)"""
+   
     return generate_password_hash(password)
 
 
 def verify_password(password: str, hashed_password: str) -> bool:
-    """Verifica se a senha em texto plano confere com o hash armazenado"""
+    
     if not password or not hashed_password:
         return False
     return check_password_hash(hashed_password, password)
 
 
 def generate_auth_token(user_id: str, email: str) -> str:
-    """Gera um token seguro assinado para o usuário autenticado"""
+   
     payload = {
         "user_id": str(user_id),
         "email": email.strip().lower()
@@ -40,7 +40,7 @@ def generate_auth_token(user_id: str, email: str) -> str:
 
 
 def decode_auth_token(token: str, max_age: int = TOKEN_MAX_AGE) -> Optional[Dict[str, Any]]:
-    """Decodifica e valida a assinatura e expiração do token"""
+  
     try:
         data = serializer.loads(token, max_age=max_age)
         return data
@@ -56,7 +56,7 @@ def decode_auth_token(token: str, max_age: int = TOKEN_MAX_AGE) -> Optional[Dict
 
 
 def get_token_from_request() -> Optional[str]:
-    """Extrai token do header Authorization (Bearer <token>) ou X-Access-Token"""
+   
     auth_header = request.headers.get("Authorization")
     if auth_header:
         parts = auth_header.split()
@@ -74,10 +74,7 @@ def get_token_from_request() -> Optional[str]:
 
 
 def token_required(f):
-    """
-    Decorator que protege rotas exigindo autenticação válida.
-    Injeta o usuário logado em `request.current_user`.
-    """
+    
     @wraps(f)
     def decorated(*args, **kwargs):
         token = get_token_from_request()
@@ -120,10 +117,7 @@ def token_required(f):
 
 
 def token_optional(f):
-    """
-    Decorator opcional: se o token existir e for válido, injeta `request.current_user`.
-    Se não, `request.current_user` será None sem abortar a requisição.
-    """
+   
     @wraps(f)
     def decorated(*args, **kwargs):
         request.current_user = None

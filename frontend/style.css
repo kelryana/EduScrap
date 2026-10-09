@@ -71,9 +71,6 @@ body {
     border-color: #0F172A !important;
 }
 
-/* ==========================================================================
-   LANDING HERO SECTION (NEOBRUTALISMO ACADÊMICO REFINADO)
-   ========================================================================== */
 .landing-section {
     position: relative;
     z-index: 10;
@@ -416,9 +413,6 @@ body {
     color: #64748B;
 }
 
-/* ==========================================================================
-   APP CONTAINER (ÁREA DE PESQUISA, FILTROS E VAGAS)
-   ========================================================================== */
 .app-container {
     max-width: 1360px;
     width: 100%;
@@ -523,9 +517,6 @@ body {
     box-shadow: 2px 2px 0px var(--color-navy);
 }
 
-/* ==========================================================================
-   BARRA DE CATEGORIAS (SEGMENTED CATEGORY TABS)
-   ========================================================================== */
 .categoria-tabs-wrapper {
     max-width: 1360px;
     margin: 0 auto 1.4rem auto;
@@ -576,9 +567,6 @@ body {
     transform: translate(1px, 1px);
 }
 
-/* ==========================================================================
-   BARRA DE UTILITÁRIOS E FILTROS DO ESTUDANTE (STUDENT TOOLBAR)
-   ========================================================================== */
 .student-toolbar {
     max-width: 1360px;
     margin: 0 auto 2.25rem auto;
@@ -654,9 +642,6 @@ body {
     cursor: pointer;
 }
 
-/* ==========================================================================
-   GRID DE OPORTUNIDADES & CARDS REESTRUTURADOS (ACESSIBILIDADE & HIERARQUIA)
-   ========================================================================== */
 .grid-vagas {
     display: grid;
     grid-template-columns: 1fr;
@@ -1150,12 +1135,6 @@ body {
     border: 3px solid var(--color-navy);
 }
 
-
-/* ==========================================================================
-   ESTILOS ADICIONAIS: AUTENTICAÇÃO, FAVORITOS, PERFIL & MODAIS MEMPHIS
-   ========================================================================== */
-
-/* 1. Botões e Elementos da Navbar */
 .btn-nav-auth {
     display: inline-flex;
     align-items: center;
@@ -1347,12 +1326,6 @@ body {
 .btn-favoritar-card.favoritado:hover {
     background-color: #FFF59D;
 }
-
-/* ==========================================================================
-   5. MODAIS: DESIGN REFINADO, ACESSÍVEL & CONFORME GESTALT (WCAG-COMPLIANT)
-   ========================================================================== */
-
-/* Backdrop com blur suave e opacidade equilibrada */
 .modal-backdrop {
     position: fixed;
     top: 0;

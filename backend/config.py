@@ -5,7 +5,6 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-# Raiz do projeto (um nivel acima de backend/)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -13,8 +12,7 @@ load_dotenv(BASE_DIR / ".env")
 
 
 class Settings:
-    """Objeto unico de configuracao do projeto."""
-
+   
     MONGODB_URI: str = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
     MONGODB_DB: str = os.getenv("MONGODB_DB", "hub_estudantes")
 

@@ -28,10 +28,6 @@ window.addEventListener('DOMContentLoaded', () => {
     carregarDados('estagios');
 });
 
-// ==========================================
-// 1. GESTÃO DE SESSÃO E AUTENTICAÇÃO
-// ==========================================
-
 function getAuthToken() {
     return localStorage.getItem('eduscrap_token') || null;
 }
@@ -144,10 +140,6 @@ function fazerLogout() {
     carregarDados('estagios');
 }
 
-// ==========================================
-// 2. MODAIS E CHIPS DE CURSO/ÁREA
-// ==========================================
-
 function abrirModalAuth(aba = 'login') {
     const modal = document.getElementById('modal-auth');
     if (modal) {
@@ -248,10 +240,6 @@ function obterChipsSelecionados(containerId) {
     });
     return selecionados;
 }
-
-// ==========================================
-// 3. AÇÕES DE AUTENTICAÇÃO (LOGIN / REGISTRO)
-// ==========================================
 
 async function executarLogin(e) {
     e.preventDefault();
@@ -360,10 +348,6 @@ async function salvarPreferenciasPerfil(e) {
         feedback.style.backgroundColor = '#FFD2D2';
     }
 }
-
-// ==========================================
-// 4. FAVORITOS & FEED PERSONALIZADO
-// ==========================================
 
 async function toggleFavorito(idOportunidade, event) {
     if (event) {
@@ -526,10 +510,6 @@ async function carregarFeedPersonalizado() {
         container.innerHTML = `<p class="carregando" style="color: red;">Erro ao gerar feed personalizado: ${err.message}</p>`;
     }
 }
-
-// ==========================================
-// 5. CARREGAMENTO GERAL E RENDERIZAÇÃO
-// ==========================================
 
 function destacarBotaoAtivo(idBotao) {
     document.querySelectorAll('.tab-origem-btn, .btn-filtro-aluno').forEach(btn => btn.classList.remove('ativo'));
@@ -1050,10 +1030,6 @@ async function carregarInspector() {
         container.innerHTML = `<p class="carregando" style="color: red;">Não foi possível ler os metadados: ${erro.message}</p>`;
     }
 }
-
-// ==========================================
-// 6. TOAST NOTIFICATIONS (MENSAGENS RÁPIDAS)
-// ==========================================
 
 function mostrarToast(mensagem, tipo = 'info') {
     const container = document.getElementById('toast-container');

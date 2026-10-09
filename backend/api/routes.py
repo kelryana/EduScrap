@@ -1,7 +1,4 @@
 # backend/api/routes.py
-
-# API Routes - Rotas da API RESTful EduScrap
-
 from flask import Blueprint, jsonify, request
 from datetime import datetime
 import logging
@@ -25,7 +22,7 @@ api_routes = Blueprint('api', __name__, url_prefix='/api')
 db_handler = None
 
 def get_db_handler():
-    """Retorna instância do MongoDBHandler (lazy loading)"""
+   
     global db_handler
     if db_handler is None:
         try:
@@ -34,11 +31,6 @@ def get_db_handler():
             logger.error(f"Erro ao inicializar MongoDB: {str(e)}")
             return None
     return db_handler
-
-
-# ==========================================
-# ROTAS PÚBLICAS DE OPORTUNIDADES
-# ==========================================
 
 @api_routes.route('/oportunidades', methods=['GET'])
 @token_optional
@@ -84,7 +76,7 @@ def get_oportunidades():
 @api_routes.route('/editais', methods=['GET'])
 @token_optional
 def get_editais():
-    """Endpoint para listar editais com filtros"""
+   
     db = get_db_handler()
 
     if db is None:
@@ -123,7 +115,7 @@ def get_editais():
 @api_routes.route('/vagas', methods=['GET'])
 @token_optional
 def get_vagas():
-    """Endpoint para listar vagas com filtros"""
+  
     db = get_db_handler()
 
     if db is None:
@@ -161,7 +153,7 @@ def get_vagas():
 
 @api_routes.route('/noticias', methods=['GET'])
 def get_noticias():
-    """Endpoint para listar notícias com filtros"""
+   
     db = get_db_handler()
 
     if db is None:
@@ -194,7 +186,7 @@ def get_noticias():
 @api_routes.route('/oportunidades/<int:id>', methods=['GET'])
 @token_optional
 def get_oportunidade_by_id(id):
-    """Endpoint para buscar oportunidade por ID"""
+   
     db = get_db_handler()
 
     if db is None:
@@ -227,17 +219,9 @@ def get_oportunidade_by_id(id):
             'error': str(e)
         }), 500
 
-
-# ==========================================
-# ROTAS DE AUTENTICAÇÃO E PERFIL DO ALUNO
-# ==========================================
-
 @api_routes.route('/auth/register', methods=['POST'])
 def register():
-    """
-    Cadastra um novo estudante no sistema.
-    Payload: { nome, email, senha, matricula?, cursos?, areas?, receber_emails? }
-    """
+  
     db = get_db_handler()
     if db is None:
         return jsonify({'success': False, 'error': 'MongoDB não disponível'}), 503
@@ -302,10 +286,7 @@ def register():
 
 @api_routes.route('/auth/login', methods=['POST'])
 def login():
-    """
-    Realiza login com email e senha.
-    Payload: { email, senha }
-    """
+   
     db = get_db_handler()
     if db is None:
         return jsonify({'success': False, 'error': 'MongoDB não disponível'}), 503
@@ -341,7 +322,7 @@ def login():
 @api_routes.route('/auth/me', methods=['GET'])
 @token_required
 def get_current_user_profile():
-    """Retorna os dados do estudante autenticado"""
+   
     return jsonify({
         'success': True,
         'user': request.current_user
@@ -351,10 +332,7 @@ def get_current_user_profile():
 @api_routes.route('/auth/preferencias', methods=['PUT'])
 @token_required
 def update_preferences():
-    """
-    Atualiza as preferências de cursos, áreas de interesse e notificações por e-mail.
-    Payload: { cursos: [...], areas: [...], receber_emails: bool }
-    """
+   
     db = get_db_handler()
     if db is None:
         return jsonify({'success': False, 'error': 'MongoDB não disponível'}), 503
@@ -385,10 +363,7 @@ def update_preferences():
 @api_routes.route('/auth/perfil', methods=['PUT'])
 @token_required
 def update_profile():
-    """
-    Atualiza dados cadastrais (nome, matrícula).
-    Payload: { nome, matricula }
-    """
+    
     db = get_db_handler()
     if db is None:
         return jsonify({'success': False, 'error': 'MongoDB não disponível'}), 503
@@ -407,15 +382,10 @@ def update_profile():
         'user': updated_user
     })
 
-
-# ==========================================
-# ROTAS DE FAVORITOS
-# ==========================================
-
 @api_routes.route('/favoritos', methods=['GET'])
 @token_required
 def list_favoritos():
-    """Retorna lista de oportunidades favoritadas pelo aluno logado"""
+  
     db = get_db_handler()
     if db is None:
         return jsonify({'success': False, 'error': 'MongoDB não disponível'}), 503
@@ -433,7 +403,7 @@ def list_favoritos():
 @api_routes.route('/favoritos/<string:id>', methods=['POST'])
 @token_required
 def add_favorito_route(id):
-    """Adiciona uma oportunidade aos favoritos do aluno"""
+    
     db = get_db_handler()
     if db is None:
         return jsonify({'success': False, 'error': 'MongoDB não disponível'}), 503
@@ -454,7 +424,7 @@ def add_favorito_route(id):
 @api_routes.route('/favoritos/<string:id>', methods=['DELETE'])
 @token_required
 def remove_favorito_route(id):
-    """Remove uma oportunidade dos favoritos do aluno"""
+   
     db = get_db_handler()
     if db is None:
         return jsonify({'success': False, 'error': 'MongoDB não disponível'}), 503
@@ -471,17 +441,10 @@ def remove_favorito_route(id):
         'oportunidade_id': id
     })
 
-
-# ==========================================
-# FEED PERSONALIZADO (PERFIL DO ALUNO)
-# ==========================================
-
 @api_routes.route('/feed/personalizado', methods=['GET'])
 @token_required
 def get_feed_personalizado_route():
-    """
-    Retorna o feed customizado de acordo com os cursos e áreas de interesse do aluno.
-    """
+    
     db = get_db_handler()
     if db is None:
         return jsonify({'success': False, 'error': 'MongoDB não disponível'}), 503
@@ -497,11 +460,6 @@ def get_feed_personalizado_route():
         'preferencias': request.current_user.get('preferencias', {}),
         'data': oportunidades
     })
-
-
-# ==========================================
-# TRATAMENTO DE ERROS
-# ==========================================
 
 @api_routes.errorhandler(404)
 def not_found(error):

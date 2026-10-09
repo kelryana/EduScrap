@@ -2,7 +2,7 @@
   background: white;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  width: 640px; /* Increased width */
+  width: 640px; 
   max-width: 90%;
   margin: 50px auto;
   overflow: hidden;
@@ -16,19 +16,19 @@
   font-size: 1rem;
   background-color: #fff9c4;
   box-sizing: border-box;
-  height: 70px; /* Increased height */
+  height: 70px; 
 }
 
 .btn-primary {
   display: block;
   width: 100%;
-  padding: 24px; /* Increased padding */
+  padding: 24px; 
   margin: 24px 24px 24px;
   background-color: #FFD700;
   color: #1a2a4a;
   border: none;
   border-radius: 8px;
-  font-size: 1.3rem; /* Increased font size */
+  font-size: 1.3rem; 
   font-weight: 600;
   cursor: pointer;
   text-align: center;

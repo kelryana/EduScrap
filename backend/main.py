@@ -734,11 +734,6 @@ def remover_favorito(id: str, usuario: dict = Depends(obter_usuario_logado)):
     )
     return {"success": True, "message": "Oportunidade removida dos favoritos!", "oportunidade_id": id}
 
-
-# ==========================================
-# FEED PERSONALIZADO (RECOMENDAÇÕES)
-# ==========================================
-
 @app.get("/api/feed/personalizado")
 def feed_personalizado(usuario: dict = Depends(obter_usuario_logado), limite: int = Query(50, ge=1)):
     prefs = usuario.get("preferencias", {})

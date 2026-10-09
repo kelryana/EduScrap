@@ -48,8 +48,5 @@ class TestPDFScraper:
     def test_scraper_initialization(self, scraper):
         assert scraper.extracted_text == []
 
-    # Teste de integração com arquivo PDF real seria adicionado aqui
-    # Por enquanto, testa apenas a inicialização e estrutura
-
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

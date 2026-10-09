@@ -265,7 +265,7 @@ def minerar_portal_uern():
                         documento["data_vencimento"] = data_vencimento
                         print(f"   ✅ Prazo de inscrição detectado: {data_vencimento.strftime('%d/%m/%Y')}")
                     else:
-                        print(f"   ℹ️ Oportunidade sem prazo específico detectado")
+                        print(f"   ℹOportunidade sem prazo específico detectado")
 
                     noticias_validas.append(documento)
                 else:
@@ -299,7 +299,7 @@ def minerar_portal_uern():
 
     except Exception as e:
         print(f"\n❌ ERRO CRÍTICO NA MINERAÇÃO: {str(e)}")
-        print("💡 Verifique se o ChromeDriver está instalado e acessível.")
+        print("Verifique se o ChromeDriver está instalado e acessível.")
         return 0
 
     finally:

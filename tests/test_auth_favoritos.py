@@ -40,11 +40,6 @@ def app(db_handler):
 def client(app):
     return app.test_client()
 
-
-# ==========================================
-# TESTES DE AUTENTICAÇÃO E HASH
-# ==========================================
-
 def test_password_hashing():
     pwd = "minhasenha123"
     hashed = hash_password(pwd)
@@ -66,11 +61,6 @@ def test_auth_token_generation_and_decoding():
 
 def test_auth_token_invalid():
     assert decode_auth_token("token_invalido_qualquer") is None
-
-
-# ==========================================
-# TESTES DOS MÉTODOS DE BANCO DE DADOS
-# ==========================================
 
 def test_database_user_crud(db_handler):
     user_payload = {
@@ -142,11 +132,6 @@ def test_database_favoritos(db_handler):
     assert db_handler.remove_favorito(user_id, edital_id) is True
     favs_after = db_handler.get_user_favoritos(user_id)
     assert len(favs_after) == 0
-
-
-# ==========================================
-# TESTES DOS ENDPOINTS DA API REST
-# ==========================================
 
 def test_api_register_and_login_flow(client, db_handler):
     # 1. Registro

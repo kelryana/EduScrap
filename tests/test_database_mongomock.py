@@ -6,21 +6,19 @@ from src.normalizer.database import MongoDBHandler
 
 @pytest.fixture
 def mock_mongo_client():
-    """Create a mock MongoDB client using mongomock"""
+  
     return mongomock.MongoClient()
 
 @pytest.fixture
 def db_handler(mock_mongo_client):
-    """Create a MongoDBHandler instance with mocked client"""
-    # Create a MongoDBHandler instance with the mocked client
+    
     handler = MongoDBHandler()
     handler.client = mock_mongo_client
     handler.db = mock_mongo_client['eduscrap_test']
     return handler
 
 def test_upsert_new_document(db_handler):
-    """Test upsert functionality with a new document"""
-    # Create a sample document to insert
+   
     doc = {
         'titulo': 'Test Opportunity',
         'descricao': 'Test Description',
@@ -40,8 +38,7 @@ def test_upsert_new_document(db_handler):
     assert stored_doc['titulo'] == 'Test Opportunity'
 
 def test_upsert_duplicate_document(db_handler):
-    """Test upsert functionality with a duplicate document (should update, not create duplicate)"""
-    # Insert a document first
+   
     doc1 = {
         'titulo': 'Original Title',
         'descricao': 'Original Description',
@@ -52,7 +49,7 @@ def test_upsert_duplicate_document(db_handler):
     
     result1 = db_handler.upsert_documento(doc1, 'test_collection', 'link')
     
-    # Try to insert another document with same link (identifier)
+   
     doc2 = {
         'titulo': 'Updated Title',
         'descricao': 'Updated Description',
@@ -63,21 +60,18 @@ def test_upsert_duplicate_document(db_handler):
     
     result2 = db_handler.upsert_documento(doc2, 'test_collection', 'link')
     
-    # Count documents with the same link
     collection = db_handler.db['test_collection']
     count = collection.count_documents({'link': 'https://example.com/test'})
     
-    # Should only have 1 document (the upsert should have updated, not duplicated)
+   
     assert count == 1
     
-    # Get the updated document
     stored_doc = collection.find_one({'link': 'https://example.com/test'})
     assert stored_doc['titulo'] == 'Updated Title'
     assert stored_doc['descricao'] == 'Updated Description'
 
 def test_deduplication_same_content_different_links(db_handler):
-    """Test that documents with same content but different links are not deduplicated"""
-    # Insert first document
+   
     doc1 = {
         'titulo': 'Same Title',
         'descricao': 'Same Description',
@@ -86,7 +80,6 @@ def test_deduplication_same_content_different_links(db_handler):
         'timestamp': '2023-01-01T00:00:00Z'
     }
     
-    # Insert second document with same content but different link
     doc2 = {
         'titulo': 'Same Title',
         'descricao': 'Same Description',
@@ -98,14 +91,12 @@ def test_deduplication_same_content_different_links(db_handler):
     db_handler.upsert_documento(doc1, 'test_collection', 'link')
     db_handler.upsert_documento(doc2, 'test_collection', 'link')
     
-    # Both documents should exist since they have different links
     collection = db_handler.db['test_collection']
     count = collection.count_documents({'titulo': 'Same Title'})
     assert count == 2
 
 def test_deduplication_different_content_same_link(db_handler):
-    """Test that documents with different content but same link are properly updated"""
-    # Insert first document
+    
     doc1 = {
         'titulo': 'Original Title',
         'descricao': 'Original Description',
@@ -116,7 +107,6 @@ def test_deduplication_different_content_same_link(db_handler):
     
     db_handler.upsert_documento(doc1, 'test_collection', 'link')
     
-    # Update with different content but same link
     doc2 = {
         'titulo': 'New Title',
         'descricao': 'New Description',
@@ -127,7 +117,6 @@ def test_deduplication_different_content_same_link(db_handler):
     
     db_handler.upsert_documento(doc2, 'test_collection', 'link')
     
-    # Should have only 1 document with updated content
     collection = db_handler.db['test_collection']
     count = collection.count_documents({'link': 'https://example.com/same-link'})
     assert count == 1
@@ -137,7 +126,7 @@ def test_deduplication_different_content_same_link(db_handler):
     assert stored_doc['descricao'] == 'New Description'
 
 def test_upsert_multiple_collections(db_handler):
-    """Test upsert functionality across multiple collections"""
+   
     doc1 = {
         'titulo': 'Editais Doc',
         'fonte': 'ciee',
@@ -152,11 +141,9 @@ def test_upsert_multiple_collections(db_handler):
         'timestamp': '2023-01-01T00:00:00Z'
     }
     
-    # Insert into different collections
     db_handler.upsert_documento(doc1, 'editais', 'link')
     db_handler.upsert_documento(doc2, 'vagas', 'link')
     
-    # Verify both collections have their respective documents
     editais_count = db_handler.db['editais'].count_documents({})
     vagas_count = db_handler.db['vagas'].count_documents({})
     
@@ -164,7 +151,7 @@ def test_upsert_multiple_collections(db_handler):
     assert vagas_count == 1
 
 def test_upsert_with_custom_identifier_field(db_handler):
-    """Test upsert functionality with custom identifier field"""
+   
     doc1 = {
         'titulo': 'Custom ID Test',
         'descricao': 'Document with custom ID field',

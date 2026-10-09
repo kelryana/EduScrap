@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-"""
-Orquestrador Paralelo de Scrapers - EduScrap UERN
-Executa todas as fontes em paralelo para máxima velocidade,
-com isolamento total de processos e logs individuais para cada fonte.
-"""
-
 import sys
 import os
 import time
@@ -14,13 +7,11 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
 
-# Raiz do projeto e diretório backend
 PROJECT_ROOT = Path(__file__).resolve().parent
 BACKEND_DIR = PROJECT_ROOT / "backend"
 LOGS_DIR = PROJECT_ROOT / "logs"
 LOGS_DIR.mkdir(exist_ok=True)
 
-# Definição das fontes de scraping disponíveis
 SCRAPERS = {
     "prae": {
         "nome": "PRAE/UERN (Estágios e Auxílios)",

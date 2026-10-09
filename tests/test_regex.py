@@ -1,12 +1,7 @@
 #tests/test_regex.py 
 
 import pytest
-# Path insertion now handled by conftest.py
-# import sys
-# from pathlib import Path
-# 
-# # Adiciona src ao path
-# sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
+
 
 from backend.src.normalizer.regex_engine import RegexEngine
 from backend.src.normalizer.validator import DataValidator
@@ -19,8 +14,7 @@ class TestRegexEngine:
     def test_extract_edital_number(self, engine):
         texto = "Publicado no Diário Oficial: Edital n° 025/2026"
         result = engine.extract_edital_number(texto)
-        # The regex pattern might not match exactly due to variations in the pattern
-        # Let's check if it extracts any edital-like pattern
+ 
         if result is not None:
             assert "025" in result or "2026" in result
         # If no match is found, that's also acceptable based on the current implementation
@@ -61,7 +55,6 @@ class TestRegexEngine:
 
 
 class TestDataValidator:
-    """Testes unitários para DataValidator"""
 
     @pytest.fixture
     def validator(self):

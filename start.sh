@@ -1,19 +1,14 @@
 #!/usr/bin/env bash
 
-# ==============================================================================
-# Script de Inicialização Automatizada - EduScrap UERN
-# ==============================================================================
-
 set -e
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$PROJECT_ROOT"
 
 echo "============================================================"
-echo "          🚀 INICIALIZANDO PROJETO EDUSCRAP UERN            "
+echo "          INICIALIZANDO PROJETO EDUSCRAP UERN            "
 echo "============================================================"
 
-# Função para matar processos em uma porta específica
 kill_port_processes() {
     local port=$1
     echo "  -> Verificando processos na porta $port..."
@@ -21,11 +16,10 @@ kill_port_processes() {
     if [ ! -z "$pids" ]; then
         echo "  -> Matando processos na porta $port (PID: $pids)..."
         kill -9 $pids 2>/dev/null || true
-        sleep 2  # Aguarda um pouco para liberar a porta
+        sleep 2  
     fi
 }
 
-# 1. Verificar ambiente virtual
 if [ -d "venv" ]; then
     echo "[1/4] Ativando ambiente virtual (venv)..."
     source venv/bin/activate
@@ -36,7 +30,6 @@ else
     echo "Recomendado criar com: python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt"
 fi
 
-# 2. Verificar MongoDB
 echo "[2/4] Verificando status do MongoDB (porta 27017)..."
 if command -v nc >/dev/null 2>&1 && nc -z 127.0.0.1 27017 2>/dev/null; then
     echo "  -> MongoDB já está em execução!"
@@ -52,7 +45,7 @@ else
 
     # Se ainda não estiver rodando, tenta iniciar processo local do mongod
     if ! python3 -c "import pymongo; pymongo.MongoClient('mongodb://localhost:27017/', serverSelectionTimeoutMS=1000).server_info()" 2>/dev/null; then
-        echo "  ℹ️ Iniciando instância local do mongod em segundo plano..."
+        echo "  ℹIniciando instância local do mongod em segundo plano..."
         mkdir -p /tmp/mongodb_eduscrap_data
         mongod --dbpath /tmp/mongodb_eduscrap_data --nounixsocket --logpath /tmp/mongodb_eduscrap_data/mongod.log --fork 2>/dev/null || true
     fi
@@ -60,7 +53,7 @@ fi
 
 # 3. Inicializar coleções e índices do banco
 echo "[3/4] Garantindo índices e coleções no MongoDB..."
-python3 backend/database_setup.py || echo "⚠️ Aviso: Configuração de banco falhou (verifique se o MongoDB está rodando)."
+python3 backend/database_setup.py || echo "Aviso: Configuração de banco falhou (verifique se o MongoDB está rodando)."
 
 # Kill any existing processes on our target ports
 echo "[3.5/4] Liberando portas 8000 (Backend) e 3000 (Frontend)..."
@@ -70,7 +63,7 @@ kill_port_processes 3000
 # Trap para encerrar todos os processos ao pressionar Ctrl+C
 cleanup() {
     echo ""
-    echo "🛑 Encerrando servidores..."
+    echo "Encerrando servidores..."
     if [ -n "$BACKEND_PID" ]; then
         kill "$BACKEND_PID" 2>/dev/null || true
     fi
@@ -80,7 +73,7 @@ cleanup() {
     # Certificar-se de que nenhuma instância permanece
     kill_port_processes 8000
     kill_port_processes 3000
-    echo "✔️ Todos os serviços foram finalizados. Até a próxima!"
+    echo "Todos os serviços foram finalizados. Até a próxima!"
     exit 0
 }
 trap cleanup SIGINT SIGTERM EXIT
@@ -104,11 +97,11 @@ sleep 1
 
 echo ""
 echo "============================================================"
-echo "          🎉 EDUSCRAP RODANDO COM SUCESSO!                 "
+echo "          EDUSCRAP RODANDO COM SUCESSO!                 "
 echo "============================================================"
-echo "  🌐 Frontend:          http://localhost:3000"
-echo "  🚀 API Backend:       http://localhost:8000"
-echo "  📚 Documentação (API): http://localhost:8000/docs"
+echo "   Frontend:          http://localhost:3000"
+echo "   API Backend:       http://localhost:8000"
+echo "   Documentação (API): http://localhost:8000/docs"
 echo "============================================================"
 echo "Pressione [Ctrl + C] a qualquer momento para parar tudo."
 echo ""
