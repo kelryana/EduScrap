@@ -353,14 +353,6 @@ body::before {
     background: var(--laranja);
     color: var(--branco);
 }
-.busca-container-memphis #btn-buscar-tudo {
-    background: #DC143C;
-    color: var(--branco);
-    border-radius: 6px;
-    font-size: 1rem;
-    transition: 0.2s;
-    margin-left: 6px;
-}
 
 header {
     display: none;
