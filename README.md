@@ -454,19 +454,32 @@ venv\Scripts\Activate.ps1
 deactivate
 ```
 
-### Rodar Scrapers Manualmente
+### Rodar Scrapers (Coleta de Oportunidades)
 
+**1. Modo Automatizado e Rápido (Executa todos em paralelo concorrente):**
 ```bash
-cd backend
-
-# Executar scraper específico
-python scraper_ciee.py
-python scraper_uern.py
-python scraper_noticias.py
-
-# Ou via Makefile na raiz:
+# Executa todas as fontes ao mesmo tempo com logs isolados
+python run_scrapers.py
+# ou via Makefile:
 make scrape
 ```
+
+**2. Executar Fontes Específicas Individualmente:**
+```bash
+# Roda apenas fontes selecionadas (ex: PRAE e UFERSA):
+python run_scrapers.py prae ufersa
+
+# Ou rodando diretamente o script de uma fonte:
+cd backend
+python scraper_prae.py
+python scraper_proex.py
+python scraper_ufersa.py
+python scraper_portal_uern.py
+python scraper_ciee.py
+python scraper_noticias.py
+```
+
+> **Dica:** Os logs de cada fonte ficam salvos individualmente em `logs/<fonte>.log` (ex: `logs/prae.log`, `logs/portal_uern.log`).
 
 ---
 

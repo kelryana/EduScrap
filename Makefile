@@ -14,7 +14,8 @@ test:
 	./venv/bin/pytest tests/
 
 scrape:
-	./venv/bin/python backend/scraper_noticias.py
+	./venv/bin/python run_scrapers.py $(fontes)
 
 setup:
 	./venv/bin/python backend/database_setup.py
+
