@@ -305,9 +305,6 @@ body {
     background-color: #F8F9FA;
 }
 
-/* ==========================================================================
-   MOLDURA NEOBRUTALISTA DA FOTOGRAFIA DA ESTUDANTE (HERO PORTRAIT CARD)
-   ========================================================================== */
 .hero-portrait-card {
     position: relative;
     background: #FFFFFF;
@@ -1419,12 +1416,10 @@ body {
     border: 1.5px solid var(--color-navy);
 }
 
-/* Corpo do Modal: Espaço negativo generoso (Whitespace) */
 .modal-body-memphis {
     padding: 24px 28px 32px 28px;
 }
 
-/* Lei da Proximidade: Rótulos colados aos campos correspondentes */
 .form-group-memphis {
     margin-bottom: 20px;
 }
@@ -1464,7 +1459,6 @@ body {
     color: #64748B;
 }
 
-/* Inputs: Fundo branco limpo, borda firme, sem falso aspecto de autofill */
 .input-memphis {
     width: 100%;
     padding: 12px 16px;
