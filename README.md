@@ -5,7 +5,7 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green)
 ![MongoDB](https://img.shields.io/badge/MongoDB-4.4+-brightgreen)
 
-<img width="2553" height="1016" alt="image" src="https://github.com/user-attachments/assets/aa3d2f29-01a5-4582-9549-beb21979cd74" />
+<img width="1513" height="979" alt="image" src="https://github.com/user-attachments/assets/19b74131-1666-46ec-b56f-ffd2038b51b8" />
    
 ## Sobre o Projeto
 
