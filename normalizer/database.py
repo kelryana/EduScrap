@@ -4,37 +4,28 @@ from pymongo import MongoClient, ASCENDING, TEXT
 from pymongo.errors import ConnectionFailure, DuplicateKeyError
 from typing import Dict, List, Optional, Any
 from datetime import datetime
-from pathlib import Path
 import logging
 import os
+import re
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class MongoDBHandler:
     def __init__(self, uri: str = None, db_name: str = "hub_estudantes", client=None):
-        
-        try:
-            from dotenv import load_dotenv
-            load_dotenv(Path(__file__).resolve().parents[3] / ".env")
-        except ImportError:
-            pass
-
+      
         self.uri = uri or os.getenv('MONGODB_URI', 'mongodb://localhost:27017/')
         self.db_name = db_name
-        self.client = None
+        self.client = client
         self.db = None
-
-        if client is not None:
-            # Injeção de dependência (ex.: mongomock em testes)
-            self.client = client
+        if self.client is not None:
             self.db = self.client[self.db_name]
             logger.info(f"MongoDBHandler usando cliente injetado: {self.db_name}")
         else:
             self._connect()
 
     def _connect(self) -> None:
-       
+        """Estabelece conexão com MongoDB"""
         try:
             self.client = MongoClient(
                 self.uri,
@@ -62,22 +53,29 @@ class MongoDBHandler:
             editais.create_index([("status", ASCENDING), ("areas", ASCENDING)],
                                name="idx_status_areas_composto")
 
+            # Coleção de vagas
             vagas = self.db['vagas']
             vagas.create_index([("area", ASCENDING)], name="idx_area")
             vagas.create_index([("fonte", ASCENDING)], name="idx_fonte")
             vagas.create_index([("titulo", TEXT)], name="idx_busca_titulo_vaga")
 
+            # Coleção de notícias
             noticias = self.db['noticias']
             noticias.create_index([("categoria", ASCENDING)], name="idx_categoria")
             noticias.create_index([("data_publicacao", ASCENDING)], name="idx_data_pub")
             noticias.create_index([("titulo", TEXT)], name="idx_busca_titulo_noticia")
+
+            # Coleção de usuários
+            usuarios = self.db['usuarios']
+            usuarios.create_index([("email", ASCENDING)], unique=True, name="idx_usuario_email")
+            usuarios.create_index([("matricula", ASCENDING)], sparse=True, name="idx_usuario_matricula")
 
             logger.info("Índices criados com sucesso")
         except Exception as e:
             logger.error(f"Erro ao criar índices: {str(e)}")
 
     def insert_edital(self, edital_data: Dict[str, Any]) -> Optional[str]:
-
+    
         try:
             edital_data['atualizado_em'] = datetime.now().isoformat()
             result = self.db['editais'].insert_one(edital_data)
@@ -91,7 +89,7 @@ class MongoDBHandler:
             return None
 
     def insert_vaga(self, vaga_data: Dict[str, Any]) -> Optional[str]:
-
+     
         try:
             vaga_data['atualizado_em'] = datetime.now().isoformat()
             result = self.db['vagas'].insert_one(vaga_data)
@@ -102,7 +100,7 @@ class MongoDBHandler:
             return None
 
     def insert_noticia(self, noticia_data: Dict[str, Any]) -> Optional[str]:
-
+     
         try:
             noticia_data['atualizado_em'] = datetime.now().isoformat()
             result = self.db['noticias'].insert_one(noticia_data)
@@ -315,6 +313,277 @@ class MongoDBHandler:
         except Exception as e:
             logger.error(f"Erro ao atualizar status: {str(e)}")
             return 0
+
+    # ==========================================
+    # MÉTODOS DE USUÁRIOS, PREFERÊNCIAS E FAVORITOS
+    # ==========================================
+
+    def create_user(self, user_data: Dict[str, Any]) -> Optional[str]:
+        """
+        Cria um novo usuário na coleção 'usuarios'.
+        """
+        try:
+            # Normaliza email
+            if 'email' in user_data:
+                user_data['email'] = user_data['email'].strip().lower()
+
+            # Verifica se já existe usuário com esse email
+            if self.db['usuarios'].find_one({'email': user_data['email']}):
+                logger.warning(f"Usuário com email {user_data['email']} já existe")
+                return None
+
+            user_data.setdefault('matricula', '')
+            user_data.setdefault('preferencias', {
+                'cursos': [],
+                'areas': [],
+                'receber_emails': True
+            })
+            user_data.setdefault('favoritos', [])
+            user_data['criado_em'] = datetime.now().isoformat()
+            user_data['atualizado_em'] = datetime.now().isoformat()
+
+            result = self.db['usuarios'].insert_one(user_data)
+            logger.info(f"Usuário criado com ID: {result.inserted_id}")
+            return str(result.inserted_id)
+        except Exception as e:
+            logger.error(f"Erro ao criar usuário: {str(e)}")
+            return None
+
+    def find_user_by_email(self, email: str) -> Optional[Dict[str, Any]]:
+        """Busca usuário por email"""
+        try:
+            if not email:
+                return None
+            user = self.db['usuarios'].find_one({'email': email.strip().lower()})
+            if user:
+                user['_id'] = str(user['_id'])
+            return user
+        except Exception as e:
+            logger.error(f"Erro ao buscar usuário por email: {str(e)}")
+            return None
+
+    def find_user_by_id(self, user_id: str, include_password: bool = False) -> Optional[Dict[str, Any]]:
+        """Busca usuário por ID (remove senha_hash se include_password for False)"""
+        try:
+            from bson import ObjectId
+            try:
+                oid = ObjectId(user_id)
+            except Exception:
+                oid = user_id
+
+            user = self.db['usuarios'].find_one({'_id': oid})
+            if user:
+                user['_id'] = str(user['_id'])
+                if not include_password and 'senha_hash' in user:
+                    del user['senha_hash']
+            return user
+        except Exception as e:
+            logger.error(f"Erro ao buscar usuário por ID: {str(e)}")
+            return None
+
+    def update_user_preferences(self, user_id: str, preferencias: Dict[str, Any]) -> bool:
+        """Atualiza preferências de cursos, áreas e notificações de e-mail"""
+        try:
+            from bson import ObjectId
+            try:
+                oid = ObjectId(user_id)
+            except Exception:
+                oid = user_id
+
+            update_data = {}
+            if 'cursos' in preferencias:
+                update_data['preferencias.cursos'] = preferencias['cursos']
+            if 'areas' in preferencias:
+                update_data['preferencias.areas'] = preferencias['areas']
+            if 'receber_emails' in preferencias:
+                update_data['preferencias.receber_emails'] = bool(preferencias['receber_emails'])
+
+            update_data['atualizado_em'] = datetime.now().isoformat()
+
+            result = self.db['usuarios'].update_one(
+                {'_id': oid},
+                {'$set': update_data}
+            )
+            return result.modified_count > 0 or result.matched_count > 0
+        except Exception as e:
+            logger.error(f"Erro ao atualizar preferências do usuário: {str(e)}")
+            return False
+
+    def update_user_profile(self, user_id: str, profile_data: Dict[str, Any]) -> bool:
+        """Atualiza dados do perfil (nome, matricula)"""
+        try:
+            from bson import ObjectId
+            try:
+                oid = ObjectId(user_id)
+            except Exception:
+                oid = user_id
+
+            allowed_fields = ['nome', 'matricula']
+            update_data = {k: v for k, v in profile_data.items() if k in allowed_fields}
+            update_data['atualizado_em'] = datetime.now().isoformat()
+
+            result = self.db['usuarios'].update_one(
+                {'_id': oid},
+                {'$set': update_data}
+            )
+            return result.modified_count > 0 or result.matched_count > 0
+        except Exception as e:
+            logger.error(f"Erro ao atualizar perfil do usuário: {str(e)}")
+            return False
+
+    def add_favorito(self, user_id: str, oportunidade_id: str) -> bool:
+        """Adiciona uma oportunidade aos favoritos do usuário"""
+        try:
+            from bson import ObjectId
+            try:
+                oid = ObjectId(user_id)
+            except Exception:
+                oid = user_id
+
+            result = self.db['usuarios'].update_one(
+                {'_id': oid},
+                {
+                    '$addToSet': {'favoritos': str(oportunidade_id)},
+                    '$set': {'atualizado_em': datetime.now().isoformat()}
+                }
+            )
+            return result.matched_count > 0
+        except Exception as e:
+            logger.error(f"Erro ao adicionar favorito: {str(e)}")
+            return False
+
+    def remove_favorito(self, user_id: str, oportunidade_id: str) -> bool:
+        """Remove uma oportunidade dos favoritos do usuário"""
+        try:
+            from bson import ObjectId
+            try:
+                oid = ObjectId(user_id)
+            except Exception:
+                oid = user_id
+
+            result = self.db['usuarios'].update_one(
+                {'_id': oid},
+                {
+                    '$pull': {'favoritos': str(oportunidade_id)},
+                    '$set': {'atualizado_em': datetime.now().isoformat()}
+                }
+            )
+            return result.matched_count > 0
+        except Exception as e:
+            logger.error(f"Erro ao remover favorito: {str(e)}")
+            return False
+
+    def get_user_favoritos(self, user_id: str) -> List[Dict[str, Any]]:
+        """Retorna todas as oportunidades favoritadas pelo usuário"""
+        try:
+            user = self.find_user_by_id(user_id)
+            if not user or not user.get('favoritos'):
+                return []
+
+            fav_ids = user.get('favoritos', [])
+            favoritos = []
+
+            for fav_id in fav_ids:
+                # Busca em editais e vagas
+                item = self.get_by_id(fav_id, collection='editais')
+                if item:
+                    item['tipo_documento'] = 'edital'
+                    item['favorito'] = True
+                    favoritos.append(item)
+                    continue
+
+                item = self.get_by_id(fav_id, collection='vagas')
+                if item:
+                    item['tipo_documento'] = 'vaga'
+                    item['favorito'] = True
+                    favoritos.append(item)
+                    continue
+
+                item = self.get_by_id(fav_id, collection='noticias')
+                if item:
+                    item['tipo_documento'] = 'noticia'
+                    item['favorito'] = True
+                    favoritos.append(item)
+
+            return favoritos
+        except Exception as e:
+            logger.error(f"Erro ao buscar favoritos do usuário: {str(e)}")
+            return []
+
+    def get_feed_personalizado(self, user_id: str, limit: int = 50) -> List[Dict[str, Any]]:
+        """
+        Retorna oportunidades recomendadas com base nas preferências (cursos/áreas) do aluno.
+        """
+        try:
+            user = self.find_user_by_id(user_id)
+            if not user:
+                return self.get_oportunidades(limit=limit)
+
+            preferencias = user.get('preferencias', {})
+            cursos = preferencias.get('cursos', [])
+            areas = preferencias.get('areas', [])
+            user_favoritos = set(user.get('favoritos', []))
+
+            # Se não houver cursos ou áreas selecionados, retorna oportunidades gerais vigentes
+            if not cursos and not areas:
+                todas = self.get_oportunidades(status="Aberto", limit=limit)
+                for item in todas:
+                    item['favorito'] = item.get('_id') in user_favoritos
+                return todas
+
+            # Monta critérios regex OR para cursos e áreas
+            termos = [re.escape(c) for c in cursos if c] + [re.escape(a) for a in areas if a]
+            if not termos:
+                todas = self.get_oportunidades(status="Aberto", limit=limit)
+                for item in todas:
+                    item['favorito'] = item.get('_id') in user_favoritos
+                return todas
+
+            padrao_regex = '|'.join(termos)
+            resultados = []
+
+            # Busca editais
+            query_editais = {
+                'status': 'Aberto',
+                '$or': [
+                    {'areas': {'$regex': padrao_regex, '$options': 'i'}},
+                    {'titulo': {'$regex': padrao_regex, '$options': 'i'}}
+                ]
+            }
+            editais = list(self.db['editais'].find(query_editais).limit(limit))
+            for edital in editais:
+                edital['_id'] = str(edital['_id'])
+                edital['tipo_documento'] = 'edital'
+                edital['favorito'] = edital['_id'] in user_favoritos
+                resultados.append(edital)
+
+            # Busca vagas
+            query_vagas = {
+                '$or': [
+                    {'area': {'$regex': padrao_regex, '$options': 'i'}},
+                    {'titulo': {'$regex': padrao_regex, '$options': 'i'}}
+                ]
+            }
+            vagas = list(self.db['vagas'].find(query_vagas).limit(limit))
+            for vaga in vagas:
+                vaga['_id'] = str(vaga['_id'])
+                vaga['tipo_documento'] = 'vaga'
+                vaga['favorito'] = vaga['_id'] in user_favoritos
+                resultados.append(vaga)
+
+            # Se o filtro específico retornar poucos resultados, complementa com oportunidades gerais
+            if len(resultados) < 5:
+                gerais = self.get_oportunidades(status="Aberto", limit=limit - len(resultados))
+                ids_existentes = {r['_id'] for r in resultados}
+                for item in gerais:
+                    if item.get('_id') not in ids_existentes:
+                        item['favorito'] = item.get('_id') in user_favoritos
+                        resultados.append(item)
+
+            return resultados
+        except Exception as e:
+            logger.error(f"Erro ao buscar feed personalizado: {str(e)}")
+            return self.get_oportunidades(limit=limit)
 
     def close(self) -> None:
         """Fecha a conexão com MongoDB"""

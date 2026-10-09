@@ -45,6 +45,12 @@ def create_app():
                 'editais': '/api/editais',
                 'vagas': '/api/vagas',
                 'noticias': '/api/noticias',
+                'auth_register': '/api/auth/register',
+                'auth_login': '/api/auth/login',
+                'auth_me': '/api/auth/me',
+                'auth_preferencias': '/api/auth/preferencias',
+                'favoritos': '/api/favoritos',
+                'feed_personalizado': '/api/feed/personalizado',
                 'health': '/health'
             }
         })

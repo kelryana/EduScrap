@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1375.1750499999996 753.9" width="1375.1750499999996" height="753.9" style="--bg:#FFFFFF;--fg:#3B3B3B;--line:#3B3B3B;--accent:#005FB8;--muted:#3B3B3BCC;--surface:#F8F8F8;--border:#3B3B3B;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<g class="subgraph" data-id="Frontend" data-label="Front-end (HTML / JS / CSS)">
+  <rect x="222.83367499999986" y="265.20000000000005" width="845.478" height="96.9" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="222.83367499999986" y="265.20000000000005" width="845.478" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="234.83367499999986" y="279.20000000000005" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">Front-end (HTML / JS / CSS)</text>
+</g>
+<g class="subgraph" data-id="API" data-label="Backend API (Flask)">
+  <rect x="51.039999999999985" y="422.1" width="1122.6119999999996" height="96.9" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="51.039999999999985" y="422.1" width="1122.6119999999996" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="63.039999999999985" y="436.1" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">Backend API (Flask)</text>
+</g>
+<g class="subgraph" data-id="Background" data-label="Serviços em Background">
+  <rect x="886.7240499999996" y="40" width="448.45099999999996" height="96.9" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="886.7240499999996" y="40" width="448.45099999999996" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="898.7240499999996" y="54" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">Serviços em Background</text>
+</g>
+<g class="subgraph" data-id="DB" data-label="MongoDB">
+  <rect x="196.35127499999987" y="603" width="283.20799999999997" height="110.9" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="196.35127499999987" y="603" width="283.20799999999997" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="208.35127499999987" y="617" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">MongoDB</text>
+</g>
+<polyline class="edge" data-from="UI_Auth" data-to="AuthRoutes" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="747.2376749999999,346.1 747.2376749999999,404.1 759.2119999999998,404.1 759.2119999999998,466.1" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="UI_Perfil" data-to="UserRoutes" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="525.0121749999998,346.1 525.0121749999998,404.1 499.5659999999998,404.1 499.5659999999998,466.1" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="UI_Fav" data-to="FavRoutes" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="319.45917499999985,346.1 319.45917499999985,404.1 209.90949999999987,404.1 209.90949999999987,466.1" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="UI_Feed" data-to="FeedRoutes" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="962.4236749999998,346.1 962.4236749999998,404.1 1028.8614999999998,404.1 1028.8614999999995,466.1" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="AuthRoutes" data-to="ColUsuarios" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="759.2119999999998,503 759.2119999999998,575 260.0022749999999,575 260.0022749999999,647" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="UserRoutes" data-to="ColUsuarios" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="499.56599999999986,503 499.56599999999986,575 260.0022749999999,575 260.0022749999999,647" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="FavRoutes" data-to="ColUsuarios" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="209.90949999999995,503 209.90949999999995,575 260.0022749999999,575 260.0022749999999,647" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="FeedRoutes" data-to="ColOportunidades" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1028.8614999999995,503 1028.8614999999995,575 399.60627499999987,575 399.60627499999987,647" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ScraperEngine" data-to="ColOportunidades" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1249.2940499999997,120.9 1249.2940499999997,575 399.60627499999987,575 399.60627499999987,647" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="AlertService" data-to="ColOportunidades" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1027.0685499999995,120.9 1027.0685499999995,575 399.60627499999987,575 399.60627499999987,647" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="AlertService" data-to="ColUsuarios" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1027.0685499999995,120.9 1027.0685499999995,575 260.0022749999999,575 260.0022749999999,647" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="AlertService" data-to="UI_Feed" data-style="dotted" data-arrow-start="false" data-arrow-end="true" data-label="Dispara e-mails" points="1027.0685499999997,120.9 1027.0685499999995,178.9 962.4236749999999,178.9 962.423675,309.20000000000005" fill="none" stroke="var(--_line)" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="AlertService" data-to="UI_Feed" data-label="Dispara e-mails">
+  <rect x="916.9236749999999" y="185.9" width="90.11800000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="961.9826749999999" y="201.05" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">Dispara e-mails</text>
+</g>
+<g class="node" data-id="UI_Feed" data-label="Feed de Oportunidades" data-shape="rectangle">
+  <rect x="872.5356749999999" y="309.20000000000005" width="179.77599999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="962.4236749999999" y="327.65000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Feed de Oportunidades</text>
+</g>
+<g class="node" data-id="UI_Auth" data-label="Modal de Login / Cadastro" data-shape="rectangle">
+  <rect x="649.9396749999999" y="309.20000000000005" width="194.59599999999995" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="747.2376749999999" y="327.65000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Modal de Login / Cadastro</text>
+</g>
+<g class="node" data-id="UI_Perfil" data-label="Perfil &amp; Filtros Avançados" data-shape="rectangle">
+  <rect x="428.08467499999983" y="309.20000000000005" width="193.855" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="525.0121749999998" y="327.65000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Perfil &amp; Filtros Avançados</text>
+</g>
+<g class="node" data-id="UI_Fav" data-label="Aba Meus Favoritos" data-shape="rectangle">
+  <rect x="238.83367499999986" y="309.20000000000005" width="161.251" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="319.45917499999985" y="327.65000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Aba Meus Favoritos</text>
+</g>
+<g class="node" data-id="AuthRoutes" data-label="/api/auth (Login, Registro, JWT)" data-shape="rectangle">
+  <rect x="646.3529999999998" y="466.1" width="225.71799999999996" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="759.2119999999998" y="484.55" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">/api/auth (Login, Registro, JWT)</text>
+</g>
+<g class="node" data-id="UserRoutes" data-label="/api/usuario (Perfil, Preferências)" data-shape="rectangle">
+  <rect x="380.7789999999999" y="466.1" width="237.57399999999998" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="499.56599999999986" y="484.55" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">/api/usuario (Perfil, Preferências)</text>
+</g>
+<g class="node" data-id="FavRoutes" data-label="/api/favoritos (Adicionar, Listar, Remover)" data-shape="rectangle">
+  <rect x="67.03999999999999" y="466.1" width="285.7389999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="209.90949999999995" y="484.55" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">/api/favoritos (Adicionar, Listar, Remover)</text>
+</g>
+<g class="node" data-id="FeedRoutes" data-label="/api/oportunidades (Filtros por Perfil)" data-shape="rectangle">
+  <rect x="900.0709999999997" y="466.1" width="257.5809999999999" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1028.8614999999995" y="484.55" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">/api/oportunidades (Filtros por Perfil)</text>
+</g>
+<g class="node" data-id="ScraperEngine" data-label="Engine de Coleta" data-shape="rectangle">
+  <rect x="1179.4130499999997" y="84" width="139.762" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1249.2940499999997" y="102.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Engine de Coleta</text>
+</g>
+<g class="node" data-id="AlertService" data-label="Serviço de Alertas (Python / SMTP)" data-shape="rectangle">
+  <rect x="902.7240499999996" y="84" width="248.68899999999996" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1027.0685499999995" y="102.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">Serviço de Alertas (Python / SMTP)</text>
+</g>
+<g class="node" data-id="ColOportunidades" data-label="oportunidades" data-shape="cylinder">
+  <rect x="335.6532749999999" y="654" width="127.906" height="36.900000000000006" fill="var(--_node-fill)" stroke="none" />
+  <line x1="335.6532749999999" y1="654" x2="335.6532749999999" y2="690.9" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <line x1="463.5592749999999" y1="654" x2="463.5592749999999" y2="690.9" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <ellipse cx="399.60627499999987" cy="690.9" rx="63.953" ry="7" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <ellipse cx="399.60627499999987" cy="654" rx="63.953" ry="7" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="399.60627499999987" y="672.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">oportunidades</text>
+</g>
+<g class="node" data-id="ColUsuarios" data-label="usuarios" data-shape="cylinder">
+  <rect x="212.35127499999987" y="654" width="95.30199999999999" height="36.900000000000006" fill="var(--_node-fill)" stroke="none" />
+  <line x1="212.35127499999987" y1="654" x2="212.35127499999987" y2="690.9" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <line x1="307.6532749999999" y1="654" x2="307.6532749999999" y2="690.9" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <ellipse cx="260.0022749999999" cy="690.9" rx="47.650999999999996" ry="7" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <ellipse cx="260.0022749999999" cy="654" rx="47.650999999999996" ry="7" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="260.0022749999999" y="672.45" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">usuarios</text>
+</g>
+</svg>

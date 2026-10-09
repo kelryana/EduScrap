@@ -1,47 +1,24 @@
-@startuml
-skinparam backgroundColor white
-skinparam shadowing false
-skinparam sequenceMessageAlign center
+@startuml Sequencia_Favoritar_Refinado
+autonumber
+actor "Estudante" as User
+boundary "Interface Web (SPA)" as UI
+control "API REST (FastAPI)" as API
+database "MongoDB" as DB
 
-title Sequência: Coleta Assíncrona e Consulta do Usuário
+User -> UI: Clica em "Salvar / Favoritar"
+activate UI
 
-participant "Agendador\n(Cron)" as Cron
-participant "Engine de\nColeta" as Scraper
-participant "Normalizador" as Norm
-participant "MongoDB" as DB
-participant "Estudante" as Stud
-participant "API\nREST" as API
+UI -> API: PATCH /api/estudantes/me/favoritos\n{ "oportunidadeId": "edital-123" }
+activate API
 
-== Fase 1: Coleta em Segundo Plano (Assíncrono) ==
+API -> DB: updateOne({ _id: userId }, { $addToSet: { favoritos: "edital-123" } })
+activate DB
+DB --> API: { acknowledged: true, modifiedCount: 1 }
+deactivate DB
 
-Cron -> Scraper: Dispara Job 
-Cron -->> Scraper: Job Enfileirado
+API --> UI: HTTP 200 OK (Item favoritado)
+deactivate API
 
-Scraper -> Scraper: Baixa HTML/PDF dos Portais
-Scraper -> Norm: Envia Dados Brutos (Texto)
-
-note right of Scraper
-  "Fire and Forget"
-  O Scraper não espera
-  processamento terminar.
-end note
-
-Scraper -->> Scraper: Pronto para próxima tarefa
-
-Norm -> Norm: Aplica Regex e Valida Datas\n(isola Vagas "Vigentes")
-Norm -> DB: Persiste Documentos Normalizados
-DB -->> Norm: Ack (Confirmação de Escrita)
-
-== Fase 2: Consulta do Usuário (Tempo Real) ==
-
-Stud -> API: Seleciona Curso "Informática"
-API -> DB: Query Filtrada (Curso + Status="Aberto")
-DB -->> API: Retorna Lista JSON (Dados Normalizados)
-API -->> Stud: Exibe Feed Instantâneo (< 2s)
-
-note right of API
-  O usuário NÃO espera o scraping.
-  Os dados já estão prontos no BD.
-end note
-
+UI --> User: Exibe feedback visual (Ícone marcado)
+deactivate UI
 @enduml

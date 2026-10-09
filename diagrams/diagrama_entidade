@@ -1,0 +1,55 @@
+@startuml DER_EduScrap
+skinparam linetype ortho
+skinparam monochrome false
+
+entity "Estudante" as est {
+  * id_estudante : ObjectId <<PK>>
+  --
+  * nome : String
+  * email : String
+  * senha_hash : String
+  * matricula : String
+  data_cadastro : DateTime
+}
+
+entity "AreaCursoInteresse" as curso {
+  * id_interesse : ObjectId <<PK>>
+  --
+  * nome_curso_area : String
+  * categoria : String
+}
+
+entity "Oportunidade" as op {
+  * id_oportunidade : ObjectId <<PK>>
+  --
+  * titulo : String
+  * link_original : String
+  * data_publicacao : Date
+  * status_vigencia : String
+  * data_limite : Date
+}
+
+entity "Fonte" as fonte {
+  * id_fonte : ObjectId <<PK>>
+  --
+  * nome : String
+  * url_base : String
+  * tipo_extracao : String
+}
+
+entity "Administrador" as adm {
+  * id_admin : ObjectId <<PK>>
+  --
+  * nome : String
+  * email : String
+  * setor : String
+}
+
+' Relacionamentos
+est }|..|{ curso : "possui interesse (0,n : 1,n)"
+est }o..o{ op : "favorita / salva (0,n : 0,n)"
+op }o..|| curso : "vinculada a (0,n : 1,n)"
+op }o..|| fonte : "extraída de (0,n : 1,1)"
+adm ||..o{ fonte : "gerencia regras (1,1 : 0,n)"
+
+@enduml

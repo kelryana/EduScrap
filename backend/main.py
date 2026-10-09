@@ -18,8 +18,14 @@ logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
 )
 logger = logging.getLogger("api.main")
-
+from bson import ObjectId
 from scraper_noticias import atualizar_noticias_agora
+from api.auth import (
+    hash_password,
+    verify_password,
+    generate_auth_token,
+    decode_auth_token
+)
 
 app = FastAPI(title="API TechHub UERN")
 
@@ -51,6 +57,47 @@ MONGODB_DB = os.getenv("MONGODB_DB", "hub_estudantes")
 
 client = MongoClient(MONGODB_URI)
 db = client[MONGODB_DB]
+
+def obter_usuario_logado(authorization: str = Header(default=None)):
+    """Dependência FastAPI que extrai e valida o token JWT do header Authorization."""
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Token de autorização não fornecido")
+    parts = authorization.split()
+    token = parts[1] if len(parts) == 2 else parts[0]
+    payload = decode_auth_token(token)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Token inválido ou expirado")
+    try:
+        user = db["usuarios"].find_one({"_id": ObjectId(payload["user_id"])})
+    except Exception:
+        user = db["usuarios"].find_one({"_id": payload["user_id"]})
+    if not user:
+        raise HTTPException(status_code=401, detail="Usuário não encontrado")
+    user["_id"] = str(user["_id"])
+    user.pop("senha_hash", None)
+    return user
+
+def obter_usuario_opcional(authorization: str = Header(default=None)):
+    """Dependência FastAPI que recupera o usuário se o token for enviado, sem abortar se anônimo."""
+    if not authorization:
+        return None
+    try:
+        parts = authorization.split()
+        token = parts[1] if len(parts) == 2 else parts[0]
+        payload = decode_auth_token(token)
+        if not payload:
+            return None
+        try:
+            user = db["usuarios"].find_one({"_id": ObjectId(payload["user_id"])})
+        except Exception:
+            user = db["usuarios"].find_one({"_id": payload["user_id"]})
+        if not user:
+            return None
+        user["_id"] = str(user["_id"])
+        user.pop("senha_hash", None)
+        return user
+    except Exception:
+        return None
 def garantir_metadados_fontes():
     try:
         colecao = db["fontes_provedores"]
@@ -170,13 +217,32 @@ def extrair_e_converter_data(texto: str) -> datetime:
     return None
 
 
+def enriquecer_doc(documento: dict, usuario: dict = None):
+    if not documento:
+        return documento
+    documento = enriquecer_prazo(documento)
+    documento = resolver_vinculo_fonte(documento)
+    if usuario and "favoritos" in usuario:
+        fav_set = set(usuario.get("favoritos", []))
+        documento["favorito"] = str(documento.get("_id")) in fav_set
+    else:
+        documento["favorito"] = False
+    return documento
+
+
 # Rota de teste
 @app.get("/")
 def raiz():
     return {"mensagem": "A API do TechHub está online! Acesse /docs para testar."}
 
 @app.get("/api/estagios")
-def listar_estagios(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), apenas_vigentes: bool = False):
+def listar_estagios(
+    pagina: int = Query(1, ge=1),
+    limite: int = Query(6, ge=1),
+    apenas_vigentes: bool = False,
+    authorization: str = Header(default=None)
+):
+    usuario = obter_usuario_opcional(authorization)
     colecao = db["vagas_estagio"]
     pulo = (pagina - 1) * limite
 
@@ -187,9 +253,7 @@ def listar_estagios(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), 
     lista_vagas = []
     for vaga in colecao.find(filtro).skip(pulo).limit(limite):
         vaga["_id"] = str(vaga["_id"])
-        vaga = enriquecer_prazo(vaga)
-
-        vaga = resolver_vinculo_fonte(vaga)
+        vaga = enriquecer_doc(vaga, usuario)
         lista_vagas.append(vaga)
 
     return {
@@ -200,7 +264,13 @@ def listar_estagios(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), 
     }
 
 @app.get("/api/bolsas")
-def listar_bolsas(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), apenas_vigentes: bool = False):
+def listar_bolsas(
+    pagina: int = Query(1, ge=1),
+    limite: int = Query(6, ge=1),
+    apenas_vigentes: bool = False,
+    authorization: str = Header(default=None)
+):
+    usuario = obter_usuario_opcional(authorization)
     colecao = db["vagas_bolsa"]
     pulo = (pagina - 1) * limite
 
@@ -211,9 +281,7 @@ def listar_bolsas(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), ap
     lista_bolsas = []
     for bolsa in colecao.find(filtro).skip(pulo).limit(limite):
         bolsa["_id"] = str(bolsa["_id"])
-        bolsa = enriquecer_prazo(bolsa)
-
-        bolsa = resolver_vinculo_fonte(bolsa)
+        bolsa = enriquecer_doc(bolsa, usuario)
         lista_bolsas.append(bolsa)
 
     return {
@@ -224,7 +292,13 @@ def listar_bolsas(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), ap
     }
 
 @app.get("/api/ufersa")
-def listar_ufersa(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), apenas_vigentes: bool = False):
+def listar_ufersa(
+    pagina: int = Query(1, ge=1),
+    limite: int = Query(6, ge=1),
+    apenas_vigentes: bool = False,
+    authorization: str = Header(default=None)
+):
+    usuario = obter_usuario_opcional(authorization)
     colecao = db["vagas_ufersa"]
     pulo = (pagina - 1) * limite
 
@@ -235,9 +309,7 @@ def listar_ufersa(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), ap
     lista_ufersa = []
     for edital in colecao.find(filtro).skip(pulo).limit(limite):
         edital["_id"] = str(edital["_id"])
-        edital = enriquecer_prazo(edital)
-
-        edital = resolver_vinculo_fonte(edital)
+        edital = enriquecer_doc(edital, usuario)
         lista_ufersa.append(edital)
 
     return {
@@ -248,7 +320,13 @@ def listar_ufersa(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), ap
     }
 
 @app.get("/api/ciee")
-def listar_ciee(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), apenas_vigentes: bool = False):
+def listar_ciee(
+    pagina: int = Query(1, ge=1),
+    limite: int = Query(6, ge=1),
+    apenas_vigentes: bool = False,
+    authorization: str = Header(default=None)
+):
+    usuario = obter_usuario_opcional(authorization)
     colecao = db["vagas_ciee"]
     pulo = (pagina - 1) * limite
 
@@ -259,12 +337,8 @@ def listar_ciee(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), apen
     lista_ciee = []
     for vaga in colecao.find(filtro).skip(pulo).limit(limite):
         vaga["_id"] = str(vaga["_id"])
-
         vaga["nome"] = vaga.get("nome_completo") or vaga.get("titulo") or "Vaga CIEE"
-
-        vaga = enriquecer_prazo(vaga)
-
-        vaga = resolver_vinculo_fonte(vaga)
+        vaga = enriquecer_doc(vaga, usuario)
         lista_ciee.append(vaga)
 
     return {
@@ -275,7 +349,13 @@ def listar_ciee(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), apen
     }
 
 @app.get("/api/portal_uern")
-def listar_portal_uern(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), apenas_vigentes: bool = False):
+def listar_portal_uern(
+    pagina: int = Query(1, ge=1),
+    limite: int = Query(6, ge=1),
+    apenas_vigentes: bool = False,
+    authorization: str = Header(default=None)
+):
+    usuario = obter_usuario_opcional(authorization)
     colecao = db["vagas_portal_uern"]
     pulo = (pagina - 1) * limite
 
@@ -286,9 +366,7 @@ def listar_portal_uern(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1
     lista_portal = []
     for edital in colecao.find(filtro).skip(pulo).limit(limite):
         edital["_id"] = str(edital["_id"])
-        edital = enriquecer_prazo(edital)
-
-        edital = resolver_vinculo_fonte(edital)
+        edital = enriquecer_doc(edital, usuario)
         lista_portal.append(edital)
 
     return {
@@ -300,7 +378,13 @@ def listar_portal_uern(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1
 
 
 @app.get("/api/noticias")
-def listar_noticias(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), apenas_vigentes: bool = False):
+def listar_noticias(
+    pagina: int = Query(1, ge=1),
+    limite: int = Query(6, ge=1),
+    apenas_vigentes: bool = False,
+    authorization: str = Header(default=None)
+):
+    usuario = obter_usuario_opcional(authorization)
     colecao_cache = db["controle_cache"]
     ultimo_registro = colecao_cache.find_one({"tipo": "noticias"})
 
@@ -328,7 +412,7 @@ def listar_noticias(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), 
     lista_noticias = []
     for noticia in colecao.find(filtro).skip(pulo).limit(limite):
         noticia["_id"] = str(noticia["_id"])
-        noticia = enriquecer_prazo(noticia)
+        noticia = enriquecer_doc(noticia, usuario)
         lista_noticias.append(noticia)
 
     return {
@@ -339,7 +423,11 @@ def listar_noticias(pagina: int = Query(1, ge=1), limite: int = Query(6, ge=1), 
     }
 
 @app.get("/api/pesquisar")
-def pesquisar_unificado(termo: str = Query(..., min_length=2)):
+def pesquisar_unificado(
+    termo: str = Query(..., min_length=2),
+    authorization: str = Header(default=None)
+):
+    usuario = obter_usuario_opcional(authorization)
     colecoes = ["vagas_estagio", "vagas_bolsa", "vagas_ufersa", "vagas_ciee", "vagas_portal_uern"]
     resultados = []
     for col_name in db.list_collection_names():
@@ -348,13 +436,13 @@ def pesquisar_unificado(termo: str = Query(..., min_length=2)):
                 cursor = db[col_name].find({"$text": {"$search": termo}})
                 for doc in cursor:
                     doc["_id"] = str(doc["_id"])
-                    doc = enriquecer_prazo(resolver_vinculo_fonte(doc))
+                    doc = enriquecer_doc(doc, usuario)
                     resultados.append(doc)
             except Exception:
                 cursor = db[col_name].find({"nome": {"$regex": termo, "$options": "i"}})
                 for doc in cursor:
                     doc["_id"] = str(doc["_id"])
-                    doc = enriquecer_prazo(resolver_vinculo_fonte(doc))
+                    doc = enriquecer_doc(doc, usuario)
                     resultados.append(doc)
     return resultados
 
@@ -441,6 +529,267 @@ def obter_status_do_banco():
         "host": "MongoDB Local (localhost:27017)",
         "colecoes": status_colecoes
     }
+
+
+# ==========================================
+# ROTAS DE AUTENTICAÇÃO E PERFIL DO ALUNO
+# ==========================================
+
+@app.post("/api/auth/register")
+def register_usuario(payload: dict):
+    nome = payload.get("nome", "").strip()
+    email = payload.get("email", "").strip().lower()
+    senha = payload.get("senha", "")
+    matricula = payload.get("matricula", "").strip()
+    cursos = payload.get("cursos", [])
+    areas = payload.get("areas", [])
+    receber_emails = payload.get("receber_emails", True)
+
+    if not nome:
+        raise HTTPException(status_code=400, detail="Nome é obrigatório")
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="Email válido é obrigatório")
+    if not senha or len(senha) < 6:
+        raise HTTPException(status_code=400, detail="Senha deve ter no mínimo 6 caracteres")
+
+    if db["usuarios"].find_one({"email": email}):
+        raise HTTPException(status_code=409, detail="Já existe uma conta cadastrada com este email.")
+
+    novo_usuario = {
+        "nome": nome,
+        "email": email,
+        "senha_hash": hash_password(senha),
+        "matricula": matricula,
+        "preferencias": {
+            "cursos": cursos if isinstance(cursos, list) else [cursos],
+            "areas": areas if isinstance(areas, list) else [areas],
+            "receber_emails": bool(receber_emails)
+        },
+        "favoritos": [],
+        "criado_em": datetime.now().isoformat(),
+        "atualizado_em": datetime.now().isoformat()
+    }
+
+    res = db["usuarios"].insert_one(novo_usuario)
+    user_id = str(res.inserted_id)
+    token = generate_auth_token(user_id, email)
+
+    novo_usuario["_id"] = user_id
+    novo_usuario.pop("senha_hash", None)
+
+    return {
+        "success": True,
+        "message": "Conta criada com sucesso!",
+        "token": token,
+        "user": novo_usuario
+    }
+
+
+@app.post("/api/auth/login")
+def login_usuario(payload: dict):
+    email = payload.get("email", "").strip().lower()
+    senha = payload.get("senha", "")
+
+    if not email or not senha:
+        raise HTTPException(status_code=400, detail="Email e senha são obrigatórios")
+
+    user = db["usuarios"].find_one({"email": email})
+    if not user:
+        raise HTTPException(status_code=401, detail="Email ou senha incorretos")
+
+    if not verify_password(senha, user.get("senha_hash", "")):
+        raise HTTPException(status_code=401, detail="Email ou senha incorretos")
+
+    user_id = str(user["_id"])
+    token = generate_auth_token(user_id, email)
+
+    user["_id"] = user_id
+    user.pop("senha_hash", None)
+
+    return {
+        "success": True,
+        "message": "Login realizado com sucesso!",
+        "token": token,
+        "user": user
+    }
+
+
+@app.get("/api/auth/me")
+def get_perfil_atual(usuario: dict = Depends(obter_usuario_logado)):
+    return {"success": True, "user": usuario}
+
+
+@app.put("/api/auth/preferencias")
+def atualizar_preferencias(payload: dict, usuario: dict = Depends(obter_usuario_logado)):
+    update_data = {}
+    if "cursos" in payload:
+        update_data["preferencias.cursos"] = payload["cursos"] if isinstance(payload["cursos"], list) else [payload["cursos"]]
+    if "areas" in payload:
+        update_data["preferencias.areas"] = payload["areas"] if isinstance(payload["areas"], list) else [payload["areas"]]
+    if "receber_emails" in payload:
+        update_data["preferencias.receber_emails"] = bool(payload["receber_emails"])
+    update_data["atualizado_em"] = datetime.now().isoformat()
+
+    try:
+        oid = ObjectId(usuario["_id"])
+    except Exception:
+        oid = usuario["_id"]
+
+    db["usuarios"].update_one({"_id": oid}, {"$set": update_data})
+    user_atualizado = db["usuarios"].find_one({"_id": oid})
+    user_atualizado["_id"] = str(user_atualizado["_id"])
+    user_atualizado.pop("senha_hash", None)
+
+    return {
+        "success": True,
+        "message": "Preferências salvas com sucesso!",
+        "user": user_atualizado
+    }
+
+
+@app.put("/api/auth/perfil")
+def atualizar_perfil(payload: dict, usuario: dict = Depends(obter_usuario_logado)):
+    update_data = {}
+    if "nome" in payload and payload["nome"].strip():
+        update_data["nome"] = payload["nome"].strip()
+    if "matricula" in payload:
+        update_data["matricula"] = payload["matricula"].strip()
+    update_data["atualizado_em"] = datetime.now().isoformat()
+
+    try:
+        oid = ObjectId(usuario["_id"])
+    except Exception:
+        oid = usuario["_id"]
+
+    db["usuarios"].update_one({"_id": oid}, {"$set": update_data})
+    user_atualizado = db["usuarios"].find_one({"_id": oid})
+    user_atualizado["_id"] = str(user_atualizado["_id"])
+    user_atualizado.pop("senha_hash", None)
+
+    return {
+        "success": True,
+        "message": "Perfil atualizado com sucesso!",
+        "user": user_atualizado
+    }
+
+
+# ==========================================
+# ROTAS DE FAVORITOS
+# ==========================================
+
+@app.get("/api/favoritos")
+def listar_favoritos(usuario: dict = Depends(obter_usuario_logado)):
+    fav_ids = usuario.get("favoritos", [])
+    colecoes = ["vagas_estagio", "vagas_bolsa", "vagas_ufersa", "vagas_ciee", "vagas_portal_uern", "vagas_noticias"]
+    favoritos = []
+
+    for fid in fav_ids:
+        for cname in colecoes:
+            doc = None
+            try:
+                doc = db[cname].find_one({"_id": ObjectId(fid)})
+            except Exception:
+                pass
+            if not doc:
+                doc = db[cname].find_one({"_id": fid})
+            if doc:
+                doc["_id"] = str(doc["_id"])
+                doc = enriquecer_prazo(doc)
+                doc = resolver_vinculo_fonte(doc)
+                doc["favorito"] = True
+                favoritos.append(doc)
+                break
+
+    return {
+        "success": True,
+        "count": len(favoritos),
+        "data": favoritos
+    }
+
+
+@app.post("/api/favoritos/{id}")
+def adicionar_favorito(id: str, usuario: dict = Depends(obter_usuario_logado)):
+    try:
+        oid = ObjectId(usuario["_id"])
+    except Exception:
+        oid = usuario["_id"]
+
+    db["usuarios"].update_one(
+        {"_id": oid},
+        {"$addToSet": {"favoritos": str(id)}}
+    )
+    return {"success": True, "message": "Oportunidade adicionada aos favoritos!", "oportunidade_id": id}
+
+
+@app.delete("/api/favoritos/{id}")
+def remover_favorito(id: str, usuario: dict = Depends(obter_usuario_logado)):
+    try:
+        oid = ObjectId(usuario["_id"])
+    except Exception:
+        oid = usuario["_id"]
+
+    db["usuarios"].update_one(
+        {"_id": oid},
+        {"$pull": {"favoritos": str(id)}}
+    )
+    return {"success": True, "message": "Oportunidade removida dos favoritos!", "oportunidade_id": id}
+
+
+# ==========================================
+# FEED PERSONALIZADO (RECOMENDAÇÕES)
+# ==========================================
+
+@app.get("/api/feed/personalizado")
+def feed_personalizado(usuario: dict = Depends(obter_usuario_logado), limite: int = Query(50, ge=1)):
+    prefs = usuario.get("preferencias", {})
+    cursos = prefs.get("cursos", [])
+    areas = prefs.get("areas", [])
+    fav_set = set(usuario.get("favoritos", []))
+
+    termos = [re.escape(c) for c in cursos if c] + [re.escape(a) for a in areas if a]
+    filtro = {}
+    if termos:
+        regex_termo = "|".join(termos)
+        filtro = {
+            "$or": [
+                {"nome": {"$regex": regex_termo, "$options": "i"}},
+                {"categoria": {"$regex": regex_termo, "$options": "i"}}
+            ]
+        }
+
+    colecoes = ["vagas_estagio", "vagas_bolsa", "vagas_ufersa", "vagas_ciee", "vagas_portal_uern"]
+    resultados = []
+
+    for cname in colecoes:
+        for doc in db[cname].find(filtro).limit(limite):
+            doc["_id"] = str(doc["_id"])
+            doc = enriquecer_prazo(doc)
+            doc = resolver_vinculo_fonte(doc)
+            doc["favorito"] = doc["_id"] in fav_set
+            resultados.append(doc)
+            if len(resultados) >= limite:
+                break
+        if len(resultados) >= limite:
+            break
+
+    # Se poucos resultados pelo filtro específico, complementa com oportunidades gerais
+    if len(resultados) < 6:
+        ids_vistos = {r["_id"] for r in resultados}
+        for doc in db["vagas_estagio"].find().limit(6):
+            doc["_id"] = str(doc["_id"])
+            if doc["_id"] not in ids_vistos:
+                doc = enriquecer_prazo(doc)
+                doc = resolver_vinculo_fonte(doc)
+                doc["favorito"] = doc["_id"] in fav_set
+                resultados.append(doc)
+
+    return {
+        "success": True,
+        "count": len(resultados),
+        "preferencias": prefs,
+        "data": resultados
+    }
+
 @app.get("/api/buscar-tudo", dependencies=[Depends(verificar_api_key)])
 def acionar_todos_os_robos():
     logger.info("[SISTEMA] Iniciando a Varredura Global de Infraestrutura...")

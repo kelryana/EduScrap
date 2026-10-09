@@ -1,0 +1,89 @@
+@startuml Implantacao_EduScrap_Refatorado
+skinparam node {
+    borderColor #333333
+    backgroundColor #FAFAFA
+}
+skinparam rectangle {
+    borderColor #555555
+    backgroundColor #F0F4F8
+}
+
+actor "Estudante" as User
+
+node "Dispositivo do Usuário" as ClientDevice {
+    artifact "Navegador Web\n[SPA React]" as WebBrowser
+    artifact "Cliente de E-mail\n[Webmail / App]" as MailApp
+}
+
+node "Nuvem / VPS (Linux)" as AppServer {
+    
+    node "Docker Network (Bridge Privada)" {
+        
+        rectangle "container: nginx" as c_nginx {
+            component "Nginx [Reverse Proxy / SSL]" as Nginx
+        }
+        
+        rectangle "container: api" as c_api {
+            component "FastAPI / Uvicorn" as BackendAPI
+        }
+        
+        rectangle "container: redis" as c_redis {
+            component "Redis [Cache & Task Queue]" as Redis
+        }
+        
+        rectangle "container: scraper-worker" as c_scraper {
+            component "Engine de Coleta\n[Selenium / Requests]" as ScraperWorker
+        }
+
+        rectangle "container: parser-worker" as c_parser {
+            component "Normalizador\n[pdfplumber + Regex]" as ParserWorker
+        }
+        
+        rectangle "container: alert-worker" as c_alerts {
+            component "Serviço de Alertas\n[SMTP Worker]" as AlertWorker
+        }
+        
+        rectangle "container: scheduler" as c_scheduler {
+            component "Scheduler / Cron\n[Celery Beat / Ofélia]" as Scheduler
+        }
+    }
+}
+
+node "Servidor de Banco de Dados" as DBServer {
+    database "MongoDB\n[usuarios, oportunidades]" as MongoCluster
+}
+
+cloud "Sistemas Externos" as ExternalSystems {
+    component "Portais UERN / UFERSA" as UernSites
+    component "Diários Oficiais (JOUERN)" as Jouern
+    component "API CIEE & Vagas" as Ciee
+    component "Servidor SMTP Externo" as SmtpServer
+}
+
+' Fluxo do Usuário
+User --> WebBrowser : Interage via UI
+User --> MailApp : Lê notificações
+WebBrowser --> Nginx : HTTPS (443)
+Nginx --> BackendAPI : Proxy HTTP / ASGI
+
+' Fluxo da API e Cache
+BackendAPI --> Redis : Get/Set Cache
+BackendAPI --> MongoCluster : Consultas (Motor / Porta 27017)
+
+' Fluxo Assíncrono dos Workers (via Redis Queue)
+Scheduler --> Redis : Enfileira jobs agendados
+Redis --> ScraperWorker : Consome tarefas de coleta
+ScraperWorker --> UernSites : Scraping HTML
+ScraperWorker --> Jouern : Download PDF
+ScraperWorker --> Ciee : Requisição REST
+ScraperWorker --> Redis : Enfileira dados brutos
+
+Redis --> ParserWorker : Consome dados brutos
+ParserWorker --> MongoCluster : Persiste vagas estruturadas
+ParserWorker --> Redis : Enfileira evento de nova vaga
+
+Redis --> AlertWorker : Dispara alertas pendentes
+AlertWorker --> MongoCluster : Filtra usuários interessados
+AlertWorker --> SmtpServer : SMTP TLS (587)
+SmtpServer --> MailApp : Entrega e-mail
+@enduml

@@ -1,0 +1,34 @@
+@startuml CasoDeUso_EduScrap_Refinado
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Estudante" as est
+actor "Administrador" as adm
+
+rectangle "Plataforma EduScrap" {
+    usecase "Cadastrar / Autenticar-se" as UC_Auth
+    usecase "Gerenciar Preferências\n(Cursos e Áreas)" as UC_Pref
+    usecase "Consultar Feed de Oportunidades" as UC_Feed
+    usecase "Favoritar Oportunidade" as UC_Fav
+    usecase "Configurar Alertas por E-mail" as UC_AlertConfig
+    usecase "Visualizar Indicador de Vigência" as UC_Vigencia
+    
+    usecase "Gerenciar Fontes e Regras" as UC_Fontes
+    usecase "Monitorar Execuções de Coleta" as UC_Monitor
+}
+
+' Relações Estudante
+est --> UC_Auth
+est --> UC_Pref
+est --> UC_Feed
+est --> UC_Fav
+est --> UC_AlertConfig
+
+' Extensões do Feed
+UC_Vigencia .> UC_Feed : <<extend>>
+UC_Fav .> UC_Feed : <<extend>>
+
+' Relações Administrador
+adm --> UC_Fontes
+adm --> UC_Monitor
+@enduml
