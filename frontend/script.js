@@ -26,7 +26,7 @@ async function carregarDados(tipo, novaPagina = 1) {
     container.style.display = 'grid';
     container.innerHTML = '<p class="carregando">Buscando dados no banco...</p>';
 
-    document.querySelectorAll('.controles button').forEach(botao => {
+    document.querySelectorAll('.filtro-btn').forEach(botao => {
         botao.classList.remove('ativo');
     });
 
@@ -137,10 +137,10 @@ async function realizarPesquisa() {
         
         const dados = await resposta.json();
         renderizarCards(dados);
-        document.querySelectorAll('.controles button').forEach(b => b.classList.remove('ativo'));
+        document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('ativo'));
     } catch (e) {
         console.error("Erro na pesquisa:", e);
-        container.innerHTML = `<p class="carregando" style="color: red;">Erro na pesquisa: ${e.message}</p>`;
+        container.innerHTML = `<div class="status-box" style="border-color: var(--color-red);"><h3 class="status-box-titulo" style="color: var(--color-red);">Erro na Pesquisa</h3><p class="status-box-texto">${e.message}</p></div>`;
     }
 }
 async function carregarEstatisticas() {
@@ -151,7 +151,7 @@ async function carregarEstatisticas() {
     container.style.display = 'block';
     container.innerHTML = '<p class="carregando">Gerando painel visual...</p>';
 
-    document.querySelectorAll('.controles button').forEach(botao => {
+    document.querySelectorAll('.filtro-btn').forEach(botao => {
         botao.classList.remove('ativo');
     });
     document.getElementById('btn-analises').classList.add('ativo');
@@ -263,18 +263,37 @@ function renderizarCards(listaDeVagas) {
     container.innerHTML = '';
 
     if (!listaDeVagas || listaDeVagas.length === 0) {
-        container.innerHTML = '<p class="carregando">Nenhuma oportunidade encontrada no banco.</p>';
+        container.innerHTML = `
+            <div class="status-box">
+                <div class="status-box-decor"></div>
+                <h3 class="status-box-titulo">Nenhum Resultado Encontrado</h3>
+                <p class="status-box-texto">Não foram localizadas oportunidades para o filtro ou termo pesquisado.</p>
+            </div>
+        `;
         return;
     }
 
+    // Mapa de cores para tags Memphis
+    const corCategoriaMap = {
+        "Estágios (PRAE)": "var(--color-navy)",
+        "Bolsas (PROEX)": "var(--color-orange)",
+        "UFERSA": "var(--color-purple)",
+        "Vagas CIEE": "var(--color-navy)",
+        "Portal UERN": "var(--color-orange)",
+        "Notícia Tech": "var(--color-green)"
+    };
+
     listaDeVagas.forEach(vaga => {
-        const temaVerde = vaga.categoria === "Notícia Tech" ? "card-verde" : "";
-
-        // Badge dinâmica de prazo: apenas quando houver data de vencimento válida e não for notícia tech
-        let badgeDataHTML = "";
-        const estiloBadgeBase = "border: 2px solid var(--azul-escuro); padding: 4px 8px; font-size: 0.75rem; font-weight: 800; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 10px; box-shadow: 2px 2px 0 var(--azul-escuro);";
-
         const ehNoticia = vaga.categoria === "Notícia Tech" || tipoAtual === "noticias";
+        const temaVerde = ehNoticia ? "card-verde" : "";
+
+        // Cor da tag
+        const corTag = corCategoriaMap[vaga.categoria] || "var(--color-navy)";
+
+        // Badge dinâmica de prazo
+        let badgeDataHTML = "";
+        const estiloBadgeBase = "border: 2px solid var(--color-navy); padding: 3px 8px; font-size: 0.75rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; box-shadow: 2px 2px 0 var(--color-navy);";
+
         let status = vaga.status_prazo || "";
 
         if (!ehNoticia && vaga.data_vencimento_formatada) {
@@ -289,15 +308,15 @@ function renderizarCards(listaDeVagas) {
             if (status === "vencido") {
                 const decorridos = Math.abs(dias);
                 badgeDataHTML = `
-                    <div style="background: #EDEDED; color: #555; ${estiloBadgeBase}">
-                        ⛔ Encerrado em ${vaga.data_vencimento_formatada} (há ${decorridos} dia${decorridos === 1 ? '' : 's'})
+                    <div style="background: #EAEAEA; color: #555; ${estiloBadgeBase}">
+                        ⛔ Encerrado em ${vaga.data_vencimento_formatada} (há ${decorridos} d)
                     </div>
                 `;
             } else {
-                const complemento = dias === 0 ? " (último dia!)" : ` (${dias} dia${dias === 1 ? '' : 's'})`;
+                const complemento = dias === 0 ? " (último dia!)" : ` (${dias} d)`;
                 badgeDataHTML = `
-                    <div style="background: #FFF5F5; color: #DC143C; ${estiloBadgeBase}">
-                        🔥 Inscrições até ${vaga.data_vencimento_formatada}${complemento}
+                    <div style="background: #FFF5F5; color: var(--color-red); ${estiloBadgeBase}">
+                        🔥 Até ${vaga.data_vencimento_formatada}${complemento}
                     </div>
                 `;
             }
@@ -305,13 +324,13 @@ function renderizarCards(listaDeVagas) {
 
         const classeVencido = status === "vencido" ? "card-vencido" : "";
 
-        // Resolução Parcial Dinâmica dos Metadados das Fontes Normalizadas
+        // Metadados das Fontes Normalizadas
         let linkFonteHTML = `Fonte: ${vaga.fonte || 'Não Especificada'}`;
         if (vaga.meta_fonte) {
             linkFonteHTML = `
                 <a href="${vaga.meta_fonte.url_oficial}" target="_blank"
                    title="Portal Mestre: ${vaga.meta_fonte.nome_oficial} &#10;Ciclo do Robô: ${vaga.meta_fonte.frequencia}"
-                   style="color: var(--azul-escuro); text-decoration: underline; font-weight: bold; cursor: pointer;">
+                   style="color: var(--color-navy); text-decoration: underline; font-weight: 800; cursor: pointer;">
                     📍 ${vaga.meta_fonte.nome_oficial.split(" - ")[0]} ℹ️
                 </a>
             `;
@@ -319,15 +338,19 @@ function renderizarCards(listaDeVagas) {
 
         const cardHTML = `
             <div class="card ${temaVerde} ${classeVencido}">
-                <div>
-                    <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                        <span class="card-categoria">${vaga.categoria || 'Geral'}</span>
+                <div class="card-topo">
+                    <div class="card-tags-row">
+                        <span class="card-categoria-tag" style="background-color: ${corTag};">
+                            ${vaga.categoria || 'Geral'}
+                        </span>
                         ${badgeDataHTML}
                     </div>
                     <h3 class="card-titulo">${vaga.nome}</h3>
-                    <p class="card-fonte" style="margin-bottom: 15px;">${linkFonteHTML}</p>
+                    <p class="card-fonte">${linkFonteHTML}</p>
                 </div>
-                <a href="${vaga.link}" target="_blank" class="card-link">Acessar Edital</a>
+                <a href="${vaga.link}" target="_blank" class="card-link-btn">
+                    Ver Detalhes →
+                </a>
             </div>
         `;
         container.innerHTML += cardHTML;
@@ -341,7 +364,9 @@ async function carregarInspector() {
     container.style.display = 'block';
     container.innerHTML = '<p class="carregando">Lendo integridade dos nós e volumes de armazenamento...</p>';
 
-    document.querySelectorAll('.controles button').forEach(b => b.classList.remove('ativo'));
+    document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('ativo'));
+    const btnInsp = document.getElementById('btn-inspector');
+    if(btnInsp) btnInsp.classList.add('ativo');
 
     try {
         const res = await fetch(`${API_URL}/db-status`, {

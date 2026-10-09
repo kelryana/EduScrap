@@ -3,87 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TechHub UERN - Dashboard de Oportunidades</title>
-    <link rel="stylesheet" href="style.css?v=3">
-    <!-- ADICIONE ISSO PARA OS ÍCONES -->
+    <title>EduScrap - Portal Universitário de Oportunidades</title>
+    
+    <!-- Google Fonts: Lexend & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Ícones Phosphor -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
 
+    <!-- CONTAINER DE FORMAS GEOMÉTRICAS MEMPHIS COMPLETAS (BACKGROUND GLOBAL) -->
     <div class="memphis-shapes-container">
-        <!-- Rosca Laranja (Topo Esquerdo) -->
-        <div class="donut-orange"></div>
+        <!-- Rosca Memphis Laranja -->
+        <div class="donut-orange shape-float shape-delay-1"></div>
         
-        <!-- Zigue-zague Laranja (Meio Esquerdo) -->
-        <div class="zigzag-line"></div>
+        <!-- Linha Zigue-Zague Laranja -->
+        <div class="zigzag-line shape-float shape-delay-2"></div>
         
-      
-        <div class="triangle-orange"></div>
+        <!-- Triângulo Laranja com Sombra Densa -->
+        <div class="triangle-orange shape-float shape-delay-1"></div>
         
-        <div class="circle-stripes"></div>
+        <!-- Círculo com Listras Diagonais -->
+        <div class="circle-stripes shape-float shape-delay-3"></div>
         
-        <div class="cross" style="top: 15%; right: 10%;">+</div>
-        <div class="cross" style="top: 65%; /*! right: 30%; */ color: var(--laranja);">+</div>
+        <!-- Cruzes Memphis Gigantes -->
+        <div class="cross shape-float shape-delay-2" style="top: 14%; right: 8%;">+</div>
+        <div class="cross shape-float shape-delay-1" style="top: 68%; left: 3%; color: var(--color-orange);">+</div>
 
-        <div class="circulo-pontilhado"></div>
+        <!-- Círculo Pontilhado Azul -->
+        <div class="circulo-pontilhado shape-float shape-delay-3"></div>
         
-        <div class="triangulo-listrado"></div>
+        <!-- Triângulo Listrado Azul e Branco -->
+        <div class="triangulo-listrado shape-float shape-delay-2"></div>
 
-        <div class="circulo-solido-centro"></div>
-        <div class="textura-zigzag-centro"></div>
+        <!-- Círculo Sólido Laranja Lateral -->
+        <div class="circulo-solido-centro shape-float shape-delay-1"></div>
 
-        <div class="quadrado-rotacionado"></div>
-        <div class="barra-diagonal"></div>
-        <div class="arco-inferior"></div>
+        <!-- Textura de Zigue-Zague Geométrica -->
+        <div class="textura-zigzag-centro shape-float shape-delay-3"></div>
 
+        <!-- Quadrado Rotacionado com Pontos -->
+        <div class="quadrado-rotacionado shape-float shape-delay-2"></div>
+
+        <!-- Barra Diagonal Colorida -->
+        <div class="barra-diagonal shape-float shape-delay-1"></div>
+
+        <!-- Arco Vazado Azul -->
+        <div class="arco-inferior shape-float shape-delay-2"></div>
+
+        <!-- Linhas Onduladas Tracejadas -->
         <div class="linha-ondulada-1"></div>
         <div class="linha-ondulada-2"></div>
+        
+        <!-- Grupo de Cruzes Tipográficas -->
         <div class="cruzes-grupo">+++</div>
     </div>
 
-    <header class="memphis-header">
-        <!-- Padrão quadriculado de fundo -->
-        <div class="memphis-grid-bg"></div>
+    <!-- =========================================================================
+         1. LANDING PAGE HERO SECTION (INICIAL / APRESENTAÇÃO)
+         ========================================================================= -->
+    <section id="landing-hero" class="landing-section">
+        <!-- Barra de Navegação Superior da Landing -->
+        <nav class="landing-navbar">
+            <div class="nav-brand">
+                <div class="nav-logo-badge">E</div>
+                <span class="nav-brand-title">EduScrap</span>
+            </div>
 
-        <div class="header-container">
-            <div class="logo">
-                <span>EduScrap</span>
+            <div class="nav-links">
+                <a href="#landing-hero" class="nav-link">Início</a>
+                <a href="#area-oportunidades" class="nav-link">Oportunidades</a>
+                <a href="#area-oportunidades" onclick="carregarEstatisticas()" class="nav-link">Métricas</a>
+                <a href="#area-oportunidades" onclick="carregarInspector()" class="nav-link">Infraestrutura</a>
+            </div>
+
+            <div class="nav-cta">
+                <a href="#area-oportunidades" class="btn-nav-action">
+                    Acessar Vagas <i class="ph ph-arrow-down"></i>
+                </a>
+            </div>
+        </nav>
+
+        <!-- Card Principal da Hero (Estilo Instax / Memphis Neobrutalista) -->
+        <div class="hero-card-container">
+            <!-- Grid de fundo interno -->
+            <div class="hero-inner-grid"></div>
+
+            <div class="hero-content-col">
+                <!-- Título Hero com Destaque Gráfico Sublinhado -->
+                <h1 class="hero-headline">
+                    Descubra editais e vagas em <br class="hide-mobile">
+                    <span class="hero-highlight-word">
+                        tempo real
+                        <span class="hero-underline-graphic"></span>
+                    </span>
+                    na universidade.
+                </h1>
+
+                <!-- Subtítulo -->
+                <p class="hero-lead">
+                    O <strong>EduScrap</strong> monitora e unifica automaticamente as oportunidades da UERN, UFERSA, CIEE, PRAE e PROEX. Encontre estágios, bolsas de pesquisa e extensão sem perder prazos.
+                </p>
+
+                <!-- Botões de Ação Hero -->
+                <div class="hero-actions">
+                    <a href="#area-oportunidades" class="btn-hero-primary" onclick="scrollParaBusca()">
+                        <span>Explorar Oportunidades</span>
+                        <i class="ph-bold ph-arrow-right"></i>
+                    </a>
+                    <a href="#area-oportunidades" class="btn-hero-secondary" onclick="carregarEstatisticas()">
+                        <i class="ph ph-chart-bar"></i> Ver Indicadores
+                    </a>
+                </div>
+            </div>
+
+            <!-- Coluna Visual / Composição Memphis Inspirada na Instax -->
+            <div class="hero-visual-col">
+                <div class="memphis-art-composition">
+                    <!-- Fundo Geométrico Amarelo com Borda Preta Inclinada -->
+                    <div class="art-backdrop-polygon"></div>
+                    <!-- Forma Azul Marinho Angular -->
+                    <div class="art-poly-navy"></div>
+                    <!-- Padrão Pontilhado Decorativo -->
+                    <div class="art-dots-matrix"></div>
+                    <!-- Triângulo Laranja Inclinado -->
+                    <div class="art-triangle-deco"></div>
+                    <!-- Mini cruzes e círculos flutuantes -->
+                    <div class="art-cross-1">+</div>
+                    <div class="art-cross-2">+</div>
+                    <div class="art-circle-ring"></div>
+
+                    <!-- Imagem Central da Estudante com Efeito Memphis -->
+                    <div class="art-student-wrapper">
+                        <img src="assets/estudante.png" alt="Estudante EduScrap" class="art-student-img">
+                    </div>
+                </div>
             </div>
         </div>
-        
-        <div class="busca-container-memphis">
-            <input type="text" id="input-busca" placeholder="Pesquisar editais (ex: estágio, monitoria, TI)..." onkeyup="if(event.key === 'Enter') realizarPesquisa()">
-            <button id="btn-pesquisar" onclick="realizarPesquisa()">
+    </section>
+
+    <!-- =========================================================================
+         2. ÁREA DO APLICATIVO / OPORTUNIDADES, BUSCA E FILTROS
+         ========================================================================= -->
+    <div id="area-oportunidades" class="app-container">
+        <!-- Header da Seção de Oportunidades -->
+        <header class="header-memphis">
+            <div class="logo-box">
+                EduScrap
+            </div>
+            <p class="tagline-badge">
+                Conectando Oportunidades 🚀
+            </p>
+        </header>
+
+        <!-- Barra de Busca Principal -->
+        <div class="busca-wrapper">
+            <input type="text" id="input-busca" 
+                class="input-busca-memphis" 
+                placeholder="Pesquisar editais (ex: estágio, monitoria, TI, bolsa)..." 
+                onkeyup="if(event.key === 'Enter') realizarPesquisa()">
+            <button id="btn-pesquisar" class="btn-busca-memphis" onclick="realizarPesquisa()">
                 <i class="ph ph-magnifying-glass"></i> Buscar
             </button>
         </div>
-    </header>
 
-    <main>
-        <div class="controles">
-            <button id="btn-estagios" class="ativo" onclick="carregarDados('estagios')"><i class="ph ph-student"></i> Estágios (PRAE)</button>
-            <button id="btn-bolsas" onclick="carregarDados('bolsas')"><i class="ph ph-coins"></i> Bolsas (PROEX)</button>
-            <button id="btn-ufersa" onclick="carregarDados('ufersa')"><i class="ph ph-buildings"></i> Editais (UFERSA)</button>
-            <button id="btn-ciee" onclick="carregarDados('ciee')"><i class="ph ph-briefcase"></i> Vagas (CIEE)</button>
-            <button id="btn-portal_uern" onclick="carregarDados('portal_uern')"><i class="ph ph-graduation-cap"></i> Portal UERN</button>
-            <button id="btn-noticias" onclick="carregarDados('noticias')"><i class="ph ph-lightning"></i> Notícias Tech</button>
-            <button id="btn-analises" onclick="carregarEstatisticas()"><i class="ph ph-chart-bar"></i> Indicadores</button>
+        <!-- Botões de Filtragem Estilo Memphis -->
+        <div class="controles-grid">
+            <button id="btn-estagios" class="filtro-btn ativo" onclick="carregarDados('estagios')">
+                <i class="ph ph-student"></i> Estágios (PRAE)
+            </button>
+            <button id="btn-bolsas" class="filtro-btn" onclick="carregarDados('bolsas')">
+                <i class="ph ph-coins"></i> Bolsas (PROEX)
+            </button>
+            <button id="btn-ufersa" class="filtro-btn" onclick="carregarDados('ufersa')">
+                <i class="ph ph-buildings"></i> Editais (UFERSA)
+            </button>
+            <button id="btn-ciee" class="filtro-btn" onclick="carregarDados('ciee')">
+                <i class="ph ph-briefcase"></i> Vagas (CIEE)
+            </button>
+            <button id="btn-portal_uern" class="filtro-btn" onclick="carregarDados('portal_uern')">
+                <i class="ph ph-graduation-cap"></i> Portal UERN
+            </button>
+            <button id="btn-noticias" class="filtro-btn" onclick="carregarDados('noticias')">
+                <i class="ph ph-lightning"></i> Notícias Tech
+            </button>
+            <button id="btn-analises" class="filtro-btn" onclick="carregarEstatisticas()">
+                <i class="ph ph-chart-bar"></i> Indicadores
+            </button>
+            <button id="btn-inspector" class="filtro-btn" onclick="carregarInspector()">
+                <i class="ph ph-database"></i> Status Banco
+            </button>
         </div>
 
-        <div class="filtros-adicionais">
-            <input type="checkbox" id="filtroVigentes" onchange="toggleFiltroVigentes()">
-            <label for="filtroVigentes">Mostrar apenas vigentes</label>
+        <!-- Filtros Adicionais -->
+        <div class="filtros-adicionais-container">
+            <label class="checkbox-memphis-container">
+                <input type="checkbox" id="filtroVigentes" onchange="toggleFiltroVigentes()">
+                <span class="custom-checkbox"></span>
+                <span class="label-texto">Mostrar apenas editais vigentes</span>
+            </label>
         </div>
 
-        <div id="container-vagas" class="grid-vagas">
-            <p class="carregando">Carregando oportunidades do banco de dados...</p>
-        </div>
-    </main>
+        <!-- Conteúdo Principal Dinâmico -->
+        <main>
+            <div id="container-vagas" class="grid-vagas">
+                <div class="status-box">
+                    <div class="status-box-decor"></div>
+                    <h3 class="status-box-titulo">Carregando Dados ⏳</h3>
+                    <p class="status-box-texto">Buscando oportunidades no banco de dados...</p>
+                </div>
+            </div>
+        </main>
+    </div>
 
-    <footer>
-        <p>© EduScrap | 2026 <span class="footer-lines"></span></p>
+    <!-- Rodapé Memphis -->
+    <footer class="footer-memphis">
+        <div class="footer-content">
+            <p class="footer-copy">© EduScrap | 2026</p>
+            <div class="footer-shapes">
+                <div class="footer-shape-circle"></div>
+                <div class="footer-shape-diamond"></div>
+                <div class="footer-shape-square"></div>
+            </div>
+            <p class="footer-tech">Construído com ❤️ e Design Memphis</p>
+        </div>
     </footer>
 
-    <script src="script.js?v=4"></script>
+    <script src="script.js?v=7"></script>
+    <script>
+        function scrollParaBusca() {
+            const target = document.getElementById('area-oportunidades');
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth' });
+                const input = document.getElementById('input-busca');
+                if (input) setTimeout(() => input.focus(), 600);
+            }
+        }
+    </script>
 </body>
 </html>

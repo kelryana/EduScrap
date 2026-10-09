@@ -1,176 +1,64 @@
 :root {
-    --azul-escuro: #09184D;
-    --azul-claro: #79D3E6;
-    --laranja: #F27A18;
-    --fundo: #FFFFFF;
-    --branco: #FFFFFF;
-    --verde-forte: #2E8B57;
-    --purpura: #9C27B0;
+    --color-white: #FFFFFF;
+    --color-navy: #112244;
+    --color-orange: #FF7A00;
+    --color-yellow: #FFE600;
+    --color-gray: #EAEAEA;
+    --color-gray-light: #F7F7F8;
+    --color-cyan: #79D3E6;
+    --color-green: #2E8B57;
+    --color-purple: #9C27B0;
+    --color-red: #DC143C;
 }
 
 * {
     margin: 0;
     padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-sizing: border-box;
+    font-family: 'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+html {
+    scroll-behavior: smooth;
 }
 
 body {
-    background-color: var(--branco);
-    color: var(--azul-escuro);
-    flex-direction: column;
+    background-color: var(--color-white);
+    background-image: 
+        linear-gradient(var(--color-gray) 2px, transparent 2px),
+        linear-gradient(90deg, var(--color-gray) 2px, transparent 2px);
+    background-size: 30px 30px;
+    color: var(--color-navy);
     min-height: 100vh;
-    position: relative;
     overflow-x: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
-body::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: linear-gradient(to right, rgba(0, 0, 0, 0.11) 1px, #0000 1px), linear-gradient(to bottom, rgba(9, 24, 77, 0.17) 1px, #0000 1px);
-    z-index: -1;
-    pointer-events: none;
+/* --- UTILITÁRIOS MEMPHIS --- */
+.memphis-border {
+    border: 3px solid var(--color-navy);
 }
 
-/* Memphis Design Background Container */
-.memphis-background {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    pointer-events: none; /* Allows interaction with content above */
+.memphis-shadow {
+    box-shadow: 6px 6px 0px var(--color-navy);
+    transition: all 0.15s ease-in-out;
 }
 
-.forma, .detalhe {
-    position: absolute;
+.memphis-shadow-hover:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 9px 9px 0px var(--color-navy);
 }
 
-.circulo-pontilhado {
-  position: absolute;
-  top: -39px;
-  left: 1646px;
-  width: 222px;
-  height: 209px;
-  background-color: var(--azul-escuro);
-  border-radius: 54%;
-  background-image: radial-gradient(var(--branco) 15%, transparent 16%);
-  background-size: 14px 14px;
+.memphis-shadow-active:active {
+    transform: translate(3px, 3px) !important;
+    box-shadow: 3px 3px 0px var(--color-navy) !important;
 }
 
-/* 2. Triângulo com Listras Diagonais (Superior Direito) */
-.triangulo-listrado {
-  position: absolute;
-  top: 219px;
-  right: -30px;
-  width: 250px;
-  height: 200px;
-  background: repeating-linear-gradient( -45deg, var(--azul-escuro), var(--azul-escuro) 8px, var(--branco) 8px, var(--branco) 16px );
-  clip-path: polygon(100% 0, 0 40%, 100% 100%);
-}
-
-.circulo-solido-centro {
-  position: absolute;
-  top: 16%;
-  left: 5%;
-  transform: translate(-50%, -50%);
-  width: 180px;
-  height: 180px;
-  background-color: var(--laranja);
-  border-radius: 50%;
-  z-index: 2;
-}
-
-/* 4. Textura de Zigue-Zague Sobreposta ao Centro */
-.textura-zigzag-centro {
-  position: absolute;
-  top: 31%;
-  left: 7%;
-  transform: translate(-50%, -50%);
-  width: 160px;
-  height: 160px;
-  z-index: 1;
-  background: linear-gradient(135deg, var(--azul-escuro) 25%, transparent 25%) -20px 0, linear-gradient(225deg, var(--azul-escuro) 25%, transparent 25%) -20px 0, linear-gradient(45deg, var(--azul-escuro) 25%, transparent 25%), linear-gradient(315deg, var(--azul-escuro) 25%, var(--branco) 25%);
-  background-size: 40px 40px;
-  border-radius: 50%;
-}
-
-/* 5. Quadrado Rotacionado com Pontos (Inferior Direito) */
-.quadrado-rotacionado {
-  position: absolute;
-  bottom: 146px;
-  right: 1888px;
-  width: 130px;
-  height: 130px;
-  background-color: var(--azul-escuro);
-  transform: rotate(25deg);
-  background-image: radial-gradient(var(--laranja) 20%, transparent 21%);
-  background-size: 20px 20px;
-}
-
-/* 6. Barra Diagonal Colorida (Inferior Esquerda) */
-.barra-diagonal {
-  position: absolute;
-  bottom: 40px;
-  left: 310px;
-  width: 200px;
-  height: 45px;
-  background-color: var(--laranja);
-  transform: rotate(-35deg);
-  border: 4px solid var(--azul-escuro);
-}
-
-/* 7. Arco Vazado (Inferior Centro) */
-.arco-inferior {
-  position: absolute;
-  bottom: 260px;
-  left: 75%;
-  width: 140px;
-  height: 140px;
-  border: 20px solid var(--azul-escuro);
-  border-radius: 50%;
-  border-bottom-color: transparent;
-  border-left-color: transparent;
-  transform: rotate(45deg);
-}
-
-/* 8. Elementos de Detalhes Textuais e Linhas */
-.cruzes-grupo {
-  position: absolute;
-  top: 35px;
-  left: 93%;
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 32px;
-  font-weight: bold;
-  color: var(--azul-escuro);
-  letter-spacing: 5px;
-}
-
-/* Linhas onduladas feitas com bordas tracejadas simuladas */
-.linha-ondulada-1 {
-  position: absolute;
-  bottom: 80px;
-  left: 83%;
-  width: 100px;
-  height: 20px;
-  border-bottom: 5px dashed var(--laranja);
-  transform: skewX(-30deg);
-}
-
-.linha-ondulada-2 {
-  position: absolute;
-  top: 45%;
-  right: 89%;
-  width: 100px;
-  height: 20px;
-  border-bottom: 5px dashed var(--azul-escuro);
-  transform: skewX(30deg);
-}
-
+/* ==========================================================================
+   FORMAS GEOMÉTRICAS MEMPHIS COMPLETAS (BACKGROUND ART)
+   ========================================================================== */
 .memphis-shapes-container {
     position: fixed;
     top: 0;
@@ -178,519 +66,1321 @@ body::before {
     width: 100vw;
     height: 100vh;
     z-index: 0;
-    pointer-events: none; /* Permite clicar através das formas */
+    pointer-events: none;
     overflow: hidden;
 }
 
-/* Rosca Laranja (Topo Esquerdo, atrás do menu) */
-.donut-orange {
-  position: absolute;
-  top: 276px;
-  left: 367px;
-  width: 160px;
-  height: 160px;
-  background-color: var(--laranja);
-  border: 6px solid var(--azul-escuro);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 8px 8px 0px var(--azul-escuro);
-  z-index: 0;
+/* Formas geométricas agora são estáticas (sem movimento/idle) */
+.shape-float {
+    /* Sem animação flutuante */
 }
 
+/* 1. Rosca Memphis Laranja */
+.donut-orange {
+    position: absolute;
+    top: 15%;
+    left: -40px;
+    width: 150px;
+    height: 150px;
+    background-color: var(--color-orange);
+    border: 5px solid var(--color-navy);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 8px 8px 0px var(--color-navy);
+    opacity: 0.85;
+}
 .donut-orange::after {
     content: '';
-    width: 70px;
-    height: 70px;
-    background-color: var(--branco);
-    border: 6px solid var(--azul-escuro);
+    width: 60px;
+    height: 60px;
+    background-color: var(--color-white);
+    border: 5px solid var(--color-navy);
     border-radius: 50%;
 }
 
-/* Linha Zigue-Zague (Meio Esquerdo) */
+/* 2. Linha Zigue-Zague Laranja */
 .zigzag-line {
-  position: absolute;
-  top: 45%;
-  left: 1723px;
-  width: 250px;
-  height: 40px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' width='100%25' height='100%25'%3E%3Cpath d='M0,60 L50,20 L100,60 L150,20 L200,60 L250,20 L300,60 L350,20 L400,60 L450,20 L500,60 L550,20 L600,60' fill='none' stroke='%23F27A18' stroke-width='25' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: repeat-x;
-  background-size: contain;
-  z-index: 0;
+    position: absolute;
+    top: 48%;
+    right: 2%;
+    width: 220px;
+    height: 36px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' width='100%25' height='100%25'%3E%3Cpath d='M0,60 L50,20 L100,60 L150,20 L200,60 L250,20 L300,60 L350,20 L400,60 L450,20 L500,60 L550,20 L600,60' fill='none' stroke='%23FF7A00' stroke-width='25' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: repeat-x;
+    background-size: contain;
+    opacity: 0.9;
 }
 
-/* Triângulo Laranja (Canto Inferior Direito) */
+/* 3. Triângulo Laranja com Sombra Densa */
 .triangle-orange {
-  position: absolute;
-  bottom: 122px;
-  right: 30px;
-  width: 0;
-  height: 0;
-  border-left: 100px solid transparent;
-  border-right: 100px solid transparent;
-  border-bottom: 160px solid var(--laranja);
-  filter: drop-shadow(8px 4px 0px var(--azul-escuro));
-  z-index: 0;
+    position: absolute;
+    bottom: 12%;
+    right: 4%;
+    width: 0;
+    height: 0;
+    border-left: 70px solid transparent;
+    border-right: 70px solid transparent;
+    border-bottom: 120px solid var(--color-orange);
+    filter: drop-shadow(7px 5px 0px var(--color-navy));
+    opacity: 0.85;
 }
 
-/* Círculo com Listras (Canto Inferior Esquerdo) */
+/* 4. Círculo com Listras Diagonais */
 .circle-stripes {
-  position: absolute;
-  bottom: 184px;
-  left: 1981px;
-  width: 108px;
-  height: 110px;
-  border: 6px solid var(--azul-escuro);
-  border-radius: 50%;
-  z-index: 0;
-  background: repeating-linear-gradient( 45deg, var(--laranja), var(--laranja) 6px, var(--azul-escuro) 6px, var(--azul-escuro) 12px );
-  box-shadow: -6px 6px 0px var(--branco), -6px 6px 0px 6px var(--azul-escuro);
+    position: absolute;
+    bottom: 15%;
+    left: 3%;
+    width: 100px;
+    height: 100px;
+    border: 5px solid var(--color-navy);
+    border-radius: 50%;
+    background: repeating-linear-gradient(45deg, var(--color-orange), var(--color-orange) 6px, var(--color-navy) 6px, var(--color-navy) 12px);
+    box-shadow: 6px 6px 0px var(--color-navy);
+    opacity: 0.9;
 }
 
-/* Pequenas Cruzes de Detalhe (Espalhadas) */
+/* 5. Cruzes Tipográficas */
 .cross {
-  position: absolute;
-  font-size: 103px;
-  font-weight: 900;
-  color: var(--azul-escuro);
-  user-select: none;
-  z-index: 0;
+    position: absolute;
+    font-size: 80px;
+    font-weight: 900;
+    color: var(--color-navy);
+    user-select: none;
+    line-height: 1;
+    opacity: 0.85;
 }
 
-.memphis-header {
+/* 6. Círculo Pontilhado */
+.circulo-pontilhado {
+    position: absolute;
+    top: 2%;
+    right: 12%;
+    width: 150px;
+    height: 150px;
+    background-color: var(--color-navy);
+    border-radius: 50%;
+    background-image: radial-gradient(var(--color-white) 16%, transparent 17%);
+    background-size: 14px 14px;
+    opacity: 0.75;
+    box-shadow: 6px 6px 0px var(--color-orange);
+}
+
+/* 7. Triângulo Listrado Azul e Branco */
+.triangulo-listrado {
+    position: absolute;
+    top: 28%;
+    right: -20px;
+    width: 180px;
+    height: 160px;
+    background: repeating-linear-gradient(-45deg, var(--color-navy), var(--color-navy) 8px, var(--color-white) 8px, var(--color-white) 16px);
+    clip-path: polygon(100% 0, 0 40%, 100% 100%);
+    opacity: 0.85;
+}
+
+/* 8. Círculo Sólido Lateral */
+.circulo-solido-centro {
+    position: absolute;
+    top: 36%;
+    left: -40px;
+    width: 130px;
+    height: 130px;
+    background-color: var(--color-orange);
+    border: 4px solid var(--color-navy);
+    border-radius: 50%;
+    box-shadow: 5px 5px 0px var(--color-navy);
+    opacity: 0.85;
+}
+
+/* 9. Textura de Zigue-Zague Central */
+.textura-zigzag-centro {
+    position: absolute;
+    top: 50%;
+    left: 2%;
+    width: 110px;
+    height: 110px;
+    background: linear-gradient(135deg, var(--color-navy) 25%, transparent 25%) -20px 0, 
+                linear-gradient(225deg, var(--color-navy) 25%, transparent 25%) -20px 0, 
+                linear-gradient(45deg, var(--color-navy) 25%, transparent 25%), 
+                linear-gradient(315deg, var(--color-navy) 25%, var(--color-white) 25%);
+    background-size: 32px 32px;
+    border: 4px solid var(--color-navy);
+    border-radius: 50%;
+    box-shadow: 5px 5px 0px var(--color-orange);
+    opacity: 0.85;
+}
+
+/* 10. Quadrado Rotacionado com Pontos */
+.quadrado-rotacionado {
+    position: absolute;
+    bottom: 28%;
+    right: 8%;
+    width: 100px;
+    height: 100px;
+    background-color: var(--color-navy);
+    transform: rotate(25deg);
+    border: 3px solid var(--color-navy);
+    background-image: radial-gradient(var(--color-orange) 20%, transparent 21%);
+    background-size: 16px 16px;
+    box-shadow: 6px 6px 0px var(--color-orange);
+    opacity: 0.85;
+}
+
+/* 11. Barra Diagonal Colorida */
+.barra-diagonal {
+    position: absolute;
+    bottom: 5%;
+    left: 18%;
+    width: 160px;
+    height: 36px;
+    background-color: var(--color-orange);
+    transform: rotate(-35deg);
+    border: 4px solid var(--color-navy);
+    box-shadow: 5px 5px 0px var(--color-navy);
+    opacity: 0.85;
+}
+
+/* 12. Arco Vazado */
+.arco-inferior {
+    position: absolute;
+    bottom: 8%;
+    left: 55%;
+    width: 110px;
+    height: 110px;
+    border: 16px solid var(--color-navy);
+    border-radius: 50%;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+    transform: rotate(45deg);
+    opacity: 0.8;
+}
+
+/* 13. Cruzes em Grupo */
+.cruzes-grupo {
+    position: absolute;
+    top: 25px;
+    left: 6%;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 34px;
+    font-weight: 900;
+    color: var(--color-navy);
+    letter-spacing: 6px;
+    opacity: 0.8;
+}
+
+/* 14. Linhas Onduladas Tracejadas */
+.linha-ondulada-1 {
+    position: absolute;
+    bottom: 60px;
+    right: 28%;
+    width: 120px;
+    height: 20px;
+    border-bottom: 5px dashed var(--color-orange);
+    transform: skewX(-30deg);
+}
+
+.linha-ondulada-2 {
+    position: absolute;
+    top: 22%;
+    left: 18%;
+    width: 110px;
+    height: 20px;
+    border-bottom: 5px dashed var(--color-navy);
+    transform: skewX(30deg);
+}
+
+/* ==========================================================================
+   LANDING HERO SECTION (DESIGN INSTAX + NEOBRUTALISMO MEMPHIS)
+   ========================================================================== */
+.landing-section {
     position: relative;
+    z-index: 10;
+    max-width: 1280px;
     width: 100%;
-    height: 236px;
-    background-color: var(--branco);
-    border-bottom: 2px solid var(--azul-escuro);
-    margin-bottom: 20px;
-    padding-bottom: 10px;
+    margin: 0 auto;
+    padding: 1.5rem 1.25rem 3rem 1.25rem;
+}
+
+/* Navigation Bar */
+.landing-navbar {
     display: flex;
     align-items: center;
-    overflow: hidden;
-    font-family: 'Arial Black', sans-serif;
-    z-index: 10; /* Fica acima das formas de fundo */
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    background: var(--color-white);
+    border: 3px solid var(--color-navy);
+    box-shadow: 6px 6px 0px var(--color-navy);
+    margin-bottom: 2rem;
 }
 
-/* Fundo Quadriculado Sutil do Header */
-.memphis-grid-bg {
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-logo-badge {
+    width: 36px;
+    height: 36px;
+    background: var(--color-orange);
+    color: var(--color-white);
+    border: 2px solid var(--color-navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 1.25rem;
+    box-shadow: 2px 2px 0px var(--color-navy);
+}
+
+.nav-brand-title {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--color-navy);
+    letter-spacing: -0.5px;
+}
+
+.nav-links {
+    display: none;
+    align-items: center;
+    gap: 2rem;
+}
+
+@media (min-width: 820px) {
+    .nav-links {
+        display: flex;
+    }
+}
+
+.nav-link {
+    color: var(--color-navy);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    transition: color 0.15s ease;
+}
+
+.nav-link:hover {
+    color: var(--color-orange);
+}
+
+.btn-nav-action {
+    background-color: var(--color-orange);
+    color: var(--color-white);
+    border: 2px solid var(--color-navy);
+    padding: 0.55rem 1.25rem;
+    font-weight: 800;
+    font-size: 0.9rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 3px 3px 0px var(--color-navy);
+    transition: all 0.15s ease;
+}
+
+.btn-nav-action:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0px var(--color-navy);
+}
+
+/* Card Principal da Hero */
+.hero-card-container {
+    background: var(--color-white);
+    border: 4px solid var(--color-navy);
+    box-shadow: 12px 12px 0px var(--color-navy);
+    padding: 3rem 2rem;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+}
+
+@media (min-width: 960px) {
+    .hero-card-container {
+        flex-direction: row;
+        align-items: center;
+        padding: 4rem 3.5rem;
+    }
+}
+
+.hero-inner-grid {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: linear-gradient(to right, rgba(0, 0, 0, 0.11) 1px, #0000 1px), linear-gradient(to bottom, rgba(9, 24, 77, 0.17) 1px, #0000 1px);
-    background-size: 20px 20px;
+    background-image: radial-gradient(rgba(17, 34, 68, 0.08) 2px, transparent 2px);
+    background-size: 24px 24px;
+    pointer-events: none;
     z-index: 1;
 }
 
-/* Container do Conteúdo do Header */
-.header-container {
+.hero-content-col {
+    flex: 1.15;
     position: relative;
-    z-index: 10;
-    width: 90%;
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
+    z-index: 2;
 }
 
-.logo {
-    background-color: var(--azul-escuro);
-    color: var(--branco);
-    padding: 10px 20px;
-    border: 4px solid var(--laranja);
-    box-shadow: 6px 6px 0px var(--azul-escuro);
-    position: absolute;
-    right: 420px; 
-    top: -91px; 
-    transform: rotate(-1deg);
-}
-
-.logo span {
-    font-size: 2.6rem;
-    letter-spacing: 2px;
-}
-
-/* Barra de busca Memphis */
-.busca-container-memphis {
-    position: absolute;
-    bottom: 29px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    background: var(--branco);
-    border: 3px solid var(--azul-escuro);
-    box-shadow: 5px 5px 0px var(--laranja);
-    padding: 6px;
-    border-radius: 4px;
-    z-index: 11;
-    width: 700px;
-}
-.busca-container-memphis input {
-    flex: 1;
-    border: none;
-    outline: none;
-    padding: 10px 14px;
-    font-size: 0.9rem;
-    background: transparent;
-    color: var(--azul-escuro);
-    font-weight: 600;
-    min-width: 500px;
-}
-.busca-container-memphis button {
-    border: 3px solid var(--azul-escuro);
-    padding: 8px 14px;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.9rem;
-    background: var(--laranja);
-    color: var(--branco);
-}
-
-header {
-    display: none;
-}
-
-/* --- MAIN --- */
-main {
-    flex: 1;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2.5rem 1.5rem;
-    background-color: var(--fundo);
+.hero-visual-col {
+    flex: 0.85;
     position: relative;
-    z-index: 10; /* Garante que o conteúdo fique acima das formas de fundo */
-}
-
-/* BOTÕES DE CONTROLE */
-.controles {
+    z-index: 2;
     display: flex;
     justify-content: center;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 2rem;
+    align-items: center;
 }
-.controles button {
-    background: var(--branco);
-    border: 4px solid var(--azul-escuro);
-    color: var(--azul-escuro);
-    padding: 14px 22px;
-    font-weight: 800;
-    font-size: 1rem;
+
+/* Hero Badge */
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--color-white);
+    border: 2.5px solid var(--color-navy);
+    box-shadow: 4px 4px 0px var(--color-navy);
+    padding: 6px 14px;
+    margin-bottom: 1.5rem;
+}
+
+.hero-badge-icon {
+    font-size: 1.25rem;
+}
+
+.hero-badge-texts {
     display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.hero-badge-tag {
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: #777;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.hero-badge-title {
+    font-size: 0.85rem;
+    font-weight: 900;
+    color: var(--color-navy);
+}
+
+/* Headline */
+.hero-headline {
+    font-size: 2.5rem;
+    font-weight: 900;
+    line-height: 1.15;
+    color: var(--color-navy);
+    margin-bottom: 1.5rem;
+    letter-spacing: -1px;
+}
+
+@media (min-width: 768px) {
+    .hero-headline {
+        font-size: 3.6rem;
+    }
+}
+
+.hide-mobile {
+    display: none;
+}
+@media (min-width: 768px) {
+    .hide-mobile {
+        display: inline;
+    }
+}
+
+.hero-highlight-word {
+    position: relative;
+    display: inline-block;
+    color: var(--color-orange);
+}
+
+.hero-underline-graphic {
+    position: absolute;
+    width: 105%;
+    height: 10px;
+    background-color: var(--color-yellow);
+    bottom: 2px;
+    left: -2%;
+    border: 2px solid var(--color-navy);
+    transform: rotate(-1.5deg);
+    z-index: -1;
+}
+
+/* Subtítulo */
+.hero-lead {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: rgba(17, 34, 68, 0.85);
+    margin-bottom: 2rem;
+    max-width: 580px;
+}
+
+/* Ações */
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+}
+
+.btn-hero-primary {
+    background-color: var(--color-orange);
+    color: var(--color-white);
+    padding: 1.1rem 2rem;
+    font-weight: 900;
+    font-size: 1.1rem;
+    border: 3px solid var(--color-navy);
+    box-shadow: 5px 5px 0px var(--color-navy);
+    text-decoration: none;
+    display: inline-flex;
     align-items: center;
     gap: 10px;
     cursor: pointer;
-    transition: 0.2s;
-    box-shadow: 5px 5px 0 var(--azul-escuro);
-}
-.controles button i {
-    font-size: 1.4rem;
-}
-.controles button.ativo {
-    background: var(--laranja);
-    color: var(--branco);
-    transform: translate(3px, 3px);
-    box-shadow: 3px 3px 0 var(--azul-escuro);
-}
-.controles button:hover:not(.ativo) {
-    transform: translate(-3px, -3px);
-    box-shadow: 7px 7px 0 var(--azul-escuro);
+    transition: all 0.15s ease-in-out;
 }
 
-.filtros-adicionais {
-    display: flex;
+.btn-hero-primary:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 8px 8px 0px var(--color-navy);
+}
+
+.btn-hero-primary:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px var(--color-navy);
+}
+
+.btn-hero-secondary {
+    background-color: var(--color-white);
+    color: var(--color-navy);
+    padding: 1.1rem 1.75rem;
+    font-weight: 800;
+    font-size: 1.05rem;
+    border: 3px solid var(--color-navy);
+    box-shadow: 5px 5px 0px var(--color-navy);
+    text-decoration: none;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 2rem;
-    font-weight: 700;
-    color: var(--azul-escuro);
-}
-.filtros-adicionais input {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-    accent-color: var(--laranja);
+    transition: all 0.15s ease-in-out;
 }
 
-/* --- CARDS DE VAGAS --- */
+.btn-hero-secondary:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 8px 8px 0px var(--color-navy);
+    background-color: var(--color-gray-light);
+}
+
+/* Pills de Benefícios */
+.hero-pills-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.hero-pill {
+    background: var(--color-white);
+    border: 2px solid var(--color-navy);
+    box-shadow: 3px 3px 0px var(--color-navy);
+    padding: 5px 12px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pill-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-navy);
+}
+.dot-orange { background-color: var(--color-orange); }
+.dot-navy { background-color: var(--color-navy); }
+.dot-cyan { background-color: var(--color-cyan); }
+
+/* ==========================================================================
+   COMPOSIÇÃO GRÁFICA MEMPHIS DA HERO COM A ESTUDANTE
+   ========================================================================== */
+.memphis-art-composition {
+    position: relative;
+    width: 340px;
+    height: 420px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+@media (min-width: 480px) {
+    .memphis-art-composition {
+        width: 420px;
+        height: 460px;
+    }
+}
+
+/* Fundo amarelo poligonal inclinado (fica atrás da menina) */
+.art-backdrop-polygon {
+    position: absolute;
+    width: 260px;
+    height: 320px;
+    background-color: var(--color-yellow);
+    border: 4px solid var(--color-navy);
+    box-shadow: 10px 10px 0px var(--color-navy);
+    transform: rotate(8deg);
+    top: 8%;
+    right: 5%;
+    z-index: 1;
+}
+
+/* Forma azul marinho angular */
+.art-poly-navy {
+    position: absolute;
+    top: 12%;
+    left: 4%;
+    width: 170px;
+    height: 180px;
+    background-color: var(--color-navy);
+    transform: rotate(-18deg);
+    z-index: 1;
+}
+
+/* Matriz de pontos decorativa */
+.art-dots-matrix {
+    position: absolute;
+    bottom: 2%;
+    right: 0%;
+    width: 130px;
+    height: 130px;
+    background-image: radial-gradient(var(--color-navy) 20%, transparent 20%);
+    background-size: 14px 14px;
+    z-index: 1;
+}
+
+/* Triângulo com borda */
+.art-triangle-deco {
+    position: absolute;
+    bottom: 10%;
+    left: 0%;
+    width: 0;
+    height: 0;
+    border-left: 35px solid transparent;
+    border-right: 35px solid transparent;
+    border-bottom: 60px solid var(--color-orange);
+    transform: rotate(-12deg);
+    filter: drop-shadow(5px 5px 0px var(--color-navy));
+    z-index: 1;
+}
+
+/* Cruzes e anéis flutuantes */
+.art-cross-1 {
+    position: absolute;
+    top: 6%;
+    right: 18%;
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: var(--color-navy);
+    z-index: 1;
+}
+
+.art-cross-2 {
+    position: absolute;
+    bottom: 30%;
+    left: -4%;
+    font-size: 2.4rem;
+    font-weight: 900;
+    color: var(--color-orange);
+    z-index: 1;
+}
+
+.art-circle-ring {
+    position: absolute;
+    top: 2%;
+    left: 18%;
+    width: 36px;
+    height: 36px;
+    border: 4px solid var(--color-navy);
+    border-radius: 50%;
+    background-color: var(--color-white);
+    z-index: 1;
+}
+
+/* Wrapper da Estudante (z-index 10 para ficar à frente de todas as formas geométricas) */
+.art-student-wrapper {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    width: 100%;
+    height: 100%;
+}
+
+.art-student-img {
+    max-width: 100%;
+    max-height: 480px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    position: relative;
+    z-index: 10;
+    filter: drop-shadow(6px 8px 0px rgba(17, 34, 68, 0.25));
+    user-select: none;
+    pointer-events: none;
+    transition: transform 0.25s ease-in-out;
+}
+
+.art-student-wrapper:hover .art-student-img {
+    transform: scale(1.02);
+}
+
+/* ==========================================================================
+   APP CONTAINER (ÁREA DE PESQUISA, FILTROS E VAGAS)
+   ========================================================================== */
+.app-container {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 3rem 1.25rem 2rem 1.25rem;
+    position: relative;
+    z-index: 10;
+    flex: 1;
+}
+
+/* Header & Logo da Seção de Busca */
+.header-memphis {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.logo-box {
+    display: inline-block;
+    background-color: var(--color-navy);
+    color: var(--color-white);
+    padding: 0.75rem 2.25rem;
+    font-size: 2.75rem;
+    font-weight: 900;
+    border: 3px solid var(--color-navy);
+    box-shadow: 8px 8px 0px var(--color-orange);
+    transform: rotate(-2deg);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    user-select: none;
+}
+
+.logo-box:hover {
+    transform: rotate(0deg);
+    box-shadow: 10px 10px 0px var(--color-orange);
+}
+
+.tagline-badge {
+    margin-top: 1.25rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+    background-color: var(--color-white);
+    display: inline-block;
+    padding: 0.35rem 1.25rem;
+    border: 3px solid var(--color-navy);
+    box-shadow: 4px 4px 0px var(--color-navy);
+    transform: rotate(1deg);
+}
+
+/* Barra de Busca */
+.busca-wrapper {
+    max-width: 760px;
+    margin: 0 auto 2.5rem auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+@media (min-width: 768px) {
+    .busca-wrapper {
+        flex-direction: row;
+    }
+}
+
+.input-busca-memphis {
+    flex: 1;
+    padding: 1rem 1.25rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    background-color: var(--color-white);
+    border: 3px solid var(--color-navy);
+    box-shadow: 6px 6px 0px var(--color-navy);
+    outline: none;
+    transition: all 0.15s ease-in-out;
+    color: var(--color-navy);
+}
+
+.input-busca-memphis:focus {
+    box-shadow: 8px 8px 0px var(--color-orange);
+}
+
+.input-busca-memphis::placeholder {
+    color: rgba(17, 34, 68, 0.55);
+}
+
+.btn-busca-memphis {
+    background-color: var(--color-orange);
+    color: var(--color-white);
+    padding: 1rem 2rem;
+    font-weight: 900;
+    font-size: 1.15rem;
+    border: 3px solid var(--color-navy);
+    box-shadow: 6px 6px 0px var(--color-navy);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.15s ease-in-out;
+}
+
+.btn-busca-memphis:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 9px 9px 0px var(--color-navy);
+}
+
+.btn-busca-memphis:active {
+    transform: translate(3px, 3px);
+    box-shadow: 3px 3px 0px var(--color-navy);
+}
+
+/* Botões de Filtros */
+.controles-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.85rem;
+    margin-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+    .controles-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+    }
+}
+
+.filtro-btn {
+    background-color: var(--color-white);
+    color: var(--color-navy);
+    border: 3px solid var(--color-navy);
+    padding: 0.9rem 0.75rem;
+    text-align: center;
+    font-weight: 800;
+    font-size: 0.95rem;
+    box-shadow: 5px 5px 0px var(--color-navy);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.15s ease-in-out;
+}
+
+.filtro-btn i {
+    font-size: 1.25rem;
+}
+
+.filtro-btn:hover:not(.ativo) {
+    transform: translate(-3px, -3px);
+    box-shadow: 8px 8px 0px var(--color-navy);
+}
+
+.filtro-btn:active {
+    transform: translate(3px, 3px);
+    box-shadow: 2px 2px 0px var(--color-navy);
+}
+
+.filtro-btn.ativo {
+    background-color: var(--color-orange);
+    color: var(--color-white);
+    box-shadow: 4px 4px 0px var(--color-navy);
+    transform: translate(2px, 2px);
+}
+
+/* Checkbox Memphis */
+.filtros-adicionais-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-bottom: 2rem;
+}
+
+.checkbox-memphis-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    background: var(--color-white);
+    padding: 6px 14px;
+    border: 3px solid var(--color-navy);
+    box-shadow: 4px 4px 0px var(--color-navy);
+}
+
+.checkbox-memphis-container input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--color-orange);
+    cursor: pointer;
+}
+
+/* Grid de Vagas */
 .grid-vagas {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 2rem;
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+}
+
+@media (min-width: 700px) {
+    .grid-vagas {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1040px) {
+    .grid-vagas {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
 .card {
-    background: var(--branco);
-    border: 3px solid var(--azul-escuro);
+    background: var(--color-white);
+    border: 3px solid var(--color-navy);
+    box-shadow: 6px 6px 0px var(--color-navy);
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    transition: all 0.15s ease-in-out;
     position: relative;
-    box-shadow: 8px 8px 0px rgba(9, 24, 77, 0.1);
-    transition: none;
-}
-
-.card::after {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    right: -10px;
-    width: 100%;
-    height: 100%;
-    background: var(--laranja);
-    z-index: -1;
-    border: 3px solid var(--azul-escuro);
-    transition: none;
 }
 
 .card:hover {
-    transform: none;
+    transform: translate(-3px, -3px);
+    box-shadow: 9px 9px 0px var(--color-navy);
 }
 
-.card:hover::after {
-    transform: translate(4px, 4px);
+.card-topo {
+    margin-bottom: 1.25rem;
 }
 
-.card-categoria {
-    background: var(--azul-claro);
-    color: var(--azul-escuro);
-    font-size: 0.7rem;
-    font-weight: 800;
-    padding: 4px 8px;
-    border: 2px solid var(--azul-escuro);
+.card-tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 0.85rem;
+}
+
+.card-categoria-tag {
     display: inline-block;
-    margin-bottom: 15px;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    font-weight: 900;
+    color: var(--color-white);
+    background-color: var(--color-navy);
+    border: 2px solid var(--color-navy);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
+
 .card-titulo {
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 10px;
-    line-height: 1.4;
-    color: var(--azul-escuro);
+    font-size: 1.15rem;
+    font-weight: 900;
+    line-height: 1.35;
+    color: var(--color-navy);
+    margin-bottom: 0.75rem;
 }
+
+.card:hover .card-titulo {
+    color: var(--color-orange);
+}
+
 .card-fonte {
-    font-size: 0.8rem;
-    color: #555;
-    margin-bottom: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgba(17, 34, 68, 0.75);
+    margin-bottom: 1.25rem;
 }
 
-.card-link {
-    background: var(--azul-escuro);
-    color: var(--branco);
+.card-link-btn {
+    width: 100%;
+    background-color: var(--color-white);
+    color: var(--color-navy);
     text-align: center;
-    padding: 10px;
-    font-weight: 700;
+    padding: 0.75rem 1rem;
+    font-weight: 900;
+    font-size: 0.95rem;
     text-decoration: none;
-    border: 2px solid var(--azul-escuro);
-    transition: 0.2s;
-    box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
-}
-.card-link:hover {
-    background: var(--laranja);
-    border-color: var(--azul-escuro);
-    box-shadow: 3px 3px 0 var(--azul-escuro);
+    border: 3px solid var(--color-navy);
+    box-shadow: 4px 4px 0px var(--color-navy);
+    display: block;
+    transition: all 0.15s ease-in-out;
 }
 
-/* MODIFICADOR DE NOTÍCIA (VERDE) */
+.card-link-btn:hover {
+    background-color: var(--color-orange);
+    color: var(--color-white);
+    box-shadow: 6px 6px 0px var(--color-navy);
+    transform: translate(-2px, -2px);
+}
+
+.card-link-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px var(--color-navy);
+}
+
+/* Modificadores de Card */
 .card-verde {
-    border-color: var(--verde-forte);
-    background: var(--branco) !important;
+    border-color: var(--color-green);
 }
-.card-verde::after {
-    background: var(--verde-forte);
-    border-color: var(--verde-forte);
+.card-verde:hover .card-titulo {
+    color: var(--color-green);
 }
-
-.card-verde .card-categoria {
-    background: #C8E6C9;
-    color: #1B5E20;
+.card-verde .card-categoria-tag {
+    background-color: var(--color-green);
+    border-color: var(--color-green);
 }
-.card-verde .card-link {
-    background: var(--verde-forte);
+.card-verde .card-link-btn:hover {
+    background-color: var(--color-green);
 }
 
-/* MODIFICADOR DE EDITAL ENCERRADO (prazo vencido) */
 .card-vencido {
-    opacity: 0.65;
-    filter: grayscale(0.6);
+    opacity: 0.6;
+    filter: grayscale(0.5);
 }
 .card-vencido:hover {
     opacity: 1;
     filter: none;
 }
 
-.card:active,
-.card:focus {
-    background: var(--branco);
-}
-
-.carregando {
-    grid-column: 1/-1;
+/* Status Box */
+.status-box {
+    grid-column: 1 / -1;
+    background: var(--color-white);
+    border: 4px dashed var(--color-orange);
+    padding: 2.5rem 1.5rem;
     text-align: center;
-    font-weight: bold;
-    color: var(--laranja);
-    padding: 3rem;
-    font-size: 1.2rem;
+    max-width: 650px;
+    margin: 2rem auto;
+    box-shadow: 6px 6px 0px var(--color-navy);
+    position: relative;
+    overflow: hidden;
 }
 
-/* --- DASHBOARD --- */
-.dashboard-container {
-    border: 4px solid var(--azul-escuro);
-    padding: 2rem;
-    background: var(--branco);
-    box-shadow: 8px 8px 0px var(--azul-claro);
+.status-box-decor {
+    position: absolute;
+    top: -12px;
+    right: -12px;
+    width: 36px;
+    height: 36px;
+    background-color: var(--color-navy);
+    transform: rotate(45deg);
 }
-.dashboard-titulo {
-    font-size: 2.5rem;
+
+.status-box-titulo {
+    color: var(--color-orange);
+    font-size: 1.5rem;
     font-weight: 900;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    border-bottom: 3px dashed var(--azul-escuro);
-    padding-bottom: 10px;
-    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.75rem;
 }
-.dashboard-titulo span {
-    font-size: 0.7rem;
-    background: var(--azul-escuro);
-    color: var(--branco);
-    padding: 4px 10px;
+
+.status-box-texto {
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.6;
+    color: var(--color-navy);
 }
-.dashboard-subtitulo {
-    font-size: 0.9rem;
-    color: #555;
+
+/* Dashboard / Indicadores */
+.dashboard-container {
+    border: 4px solid var(--color-navy);
+    padding: 2rem;
+    background: var(--color-white);
+    box-shadow: 8px 8px 0px var(--color-navy);
     margin-bottom: 2rem;
+}
+
+.dashboard-header {
+    border-bottom: 3px dashed var(--color-navy);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+}
+
+.dashboard-titulo {
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: var(--color-navy);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-titulo span {
+    font-size: 0.8rem;
+    background: var(--color-orange);
+    color: var(--color-white);
+    padding: 4px 10px;
+    border: 2px solid var(--color-navy);
+    box-shadow: 2px 2px 0px var(--color-navy);
+}
+
+.dashboard-subtitulo {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: rgba(17, 34, 68, 0.7);
 }
 
 .dash-grid-contadores {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.25rem;
     margin-bottom: 2.5rem;
 }
+
 .dash-card-contador {
-    background: var(--branco);
-    border: 3px solid var(--azul-escuro);
-    padding: 1.5rem;
+    background: var(--color-white);
+    border: 3px solid var(--color-navy);
+    padding: 1.25rem;
     text-align: center;
+    box-shadow: 5px 5px 0px var(--color-navy);
     display: flex;
     flex-direction: column;
     align-items: center;
-    border-radius: 4px;
+    transition: transform 0.15s ease;
 }
-.dash-card-contador i {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
-    color: var(--azul-escuro);
+
+.dash-card-contador:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 7px 7px 0px var(--color-navy);
 }
+
+.contador-icone {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
 .contador-label {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     font-weight: 800;
     text-transform: uppercase;
-    color: #555;
-    letter-spacing: 1px;
+    color: rgba(17, 34, 68, 0.75);
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
 }
+
 .contador-numero {
-    font-size: 3.5rem;
+    font-size: 2.75rem;
     font-weight: 900;
     line-height: 1;
-    margin-top: 4px;
+    color: var(--color-navy);
 }
 
-.contador-prae { border-color: var(--laranja); box-shadow: 5px 5px 0 var(--laranja); }
-.contador-proex { border-color: var(--azul-claro); box-shadow: 5px 5px 0 var(--azul-claro); }
-.contador-ufersa { border-color: var(--purpura); box-shadow: 5px 5px 0 var(--purpura); }
-.contador-noticias { border-color: var(--verde-forte); box-shadow: 5px 5px 0 var(--verde-forte); }
+.contador-prae { border-top: 8px solid var(--color-orange); }
+.contador-proex { border-top: 8px solid var(--color-cyan); }
+.contador-ufersa { border-top: 8px solid var(--color-purple); }
+.contador-noticias { border-top: 8px solid var(--color-green); }
 
 .dash-secao-grafico {
-    padding-top: 1rem;
+    border-top: 3px solid var(--color-navy);
+    padding-top: 1.5rem;
 }
+
 .grafico-titulo {
-    font-weight: 800;
-    font-size: 1.2rem;
-    color: var(--azul-escuro);
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    font-weight: 900;
+    font-size: 1.3rem;
+    color: var(--color-navy);
+    margin-bottom: 0.25rem;
 }
+
 .grafico-metadado {
-    color: var(--purpura);
-    font-weight: bold;
-    font-size: 0.75rem;
+    color: var(--color-orange);
+    font-weight: 700;
+    font-size: 0.8rem;
     display: block;
     margin-bottom: 1.5rem;
 }
 
 .grafico-item-barra {
-    margin-bottom: 1.2rem;
+    margin-bottom: 1rem;
 }
+
 .barra-legenda {
     display: flex;
     justify-content: space-between;
     font-weight: 800;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     margin-bottom: 4px;
 }
+
 .barra-legenda .legenda-valor {
-    background: var(--azul-escuro);
-    color: var(--branco);
-    padding: 2px 10px;
+    background: var(--color-navy);
+    color: var(--color-white);
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    border: 2px solid var(--color-navy);
 }
+
 .barra-estrutura {
-    background: #e0e0e0;
-    height: 20px;
+    background: var(--color-gray);
+    height: 22px;
     width: 100%;
-    border: 2px solid var(--azul-escuro);
+    border: 3px solid var(--color-navy);
     position: relative;
 }
+
 .barra-preenchimento {
-    background: var(--laranja);
+    background: var(--color-orange);
     height: 100%;
-    width: 0%;
-    transition: width 1s ease;
+    transition: width 0.8s ease;
 }
 
-/* --- PAGINAÇÃO --- */
-#bloco-paginacao button {
-    background: var(--branco);
-    border: 3px solid var(--azul-escuro);
-    padding: 8px 16px;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 4px 4px 0 var(--azul-escuro);
-}
-#bloco-paginacao button:disabled {
-    opacity: 0.5;
-    box-shadow: none;
-    transform: translate(2px,2px);
-}
-
-/* --- FOOTER --- */
-footer {
-    text-align: center;
+/* Banco Inspector */
+.db-inspector-container {
+    background: var(--color-white);
+    border: 4px solid var(--color-navy);
+    box-shadow: 8px 8px 0px var(--color-navy);
     padding: 2rem;
-    border-top: 3px solid var(--azul-escuro);
-    font-weight: bold;
-    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+.db-inspector-card {
+    background: var(--color-white);
+    border: 3px solid var(--color-navy);
+    box-shadow: 5px 5px 0px var(--color-navy);
+    padding: 1.25rem;
+}
+
+.badge-index {
+    display: inline-block;
+    background: var(--color-gray);
+    border: 2px solid var(--color-navy);
+    padding: 2px 6px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    margin-right: 4px;
+    margin-bottom: 4px;
+}
+
+/* Paginação */
+#bloco-paginacao {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 40px;
+}
+
+#bloco-paginacao button {
+    background: var(--color-white);
+    color: var(--color-navy);
+    border: 3px solid var(--color-navy);
+    box-shadow: 4px 4px 0px var(--color-navy);
+    padding: 8px 18px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+}
+
+#bloco-paginacao button:hover:not(:disabled) {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px var(--color-navy);
+    background-color: var(--color-orange);
+    color: var(--color-white);
+}
+
+#bloco-paginacao button:active:not(:disabled) {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px var(--color-navy);
+}
+
+#bloco-paginacao button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Rodapé */
+.footer-memphis {
+    border-top: 4px solid var(--color-navy);
+    background-color: var(--color-white);
+    padding: 2.5rem 1.25rem;
     position: relative;
     z-index: 10;
+    margin-top: 5rem;
 }
-footer .footer-lines {
-    display: inline-block;
-    width: 50px;
-    height: 2px;
-    background: var(--laranja);
-    margin-left: 10px;
-    vertical-align: middle;
+
+.footer-content {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    font-weight: 800;
+    font-size: 0.95rem;
+}
+
+@media (min-width: 768px) {
+    .footer-content {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+}
+
+.footer-shapes {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.footer-shape-circle {
+    width: 16px;
+    height: 16px;
+    background-color: var(--color-orange);
+    border-radius: 50%;
+    border: 2px solid var(--color-navy);
+}
+
+.footer-shape-diamond {
+    width: 16px;
+    height: 16px;
+    background-color: var(--color-navy);
+    transform: rotate(45deg);
+    border: 2px solid var(--color-navy);
+}
+
+.footer-shape-square {
+    width: 16px;
+    height: 16px;
+    background-color: var(--color-white);
+    border: 2px solid var(--color-navy);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 12px;
+}
+::-webkit-scrollbar-track {
+    background: var(--color-white);
+    border-left: 3px solid var(--color-navy);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--color-orange);
+    border: 3px solid var(--color-navy);
 }

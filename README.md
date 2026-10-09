@@ -38,8 +38,10 @@ EduScrap-UERN/
 ├── config/
 │   ├── course_mapping.json  # Mapeamento de cursos por área
 │   └── patterns.json        # Padrões de busca
+├── logs/                 # Logs de execução isolados de cada robô
 ├── diagrams/             # Diagramas do sistema
 ├── tests/                # Testes automatizados
+├── run_scrapers.py       # Orquestrador concorrente de coleta de dados (paralelo)
 ├── start.sh              # Script de inicialização completa automatizada
 ├── Makefile              # Comandos rápidos (make run, test, scrape, setup)
 ├── requirements.txt      # Dependências Python
@@ -100,6 +102,16 @@ Para subir todo o projeto (MongoDB, Backend FastAPI e Frontend) e abrir no naveg
 - **Frontend Dashboard:** [http://localhost:3000](http://localhost:3000)
 - **API FastAPI:** [http://localhost:8000](http://localhost:8000)
 - **Documentação Interativa (Swagger):** [http://localhost:8000/docs](http://localhost:8000/docs)
+
+### 📥 Coletar / Atualizar Oportunidades (Web Scraping Paralelo):
+Para popular ou atualizar o banco com editais recentes de todos os portais:
+
+```bash
+make scrape
+# ou diretamente:
+python run_scrapers.py
+```
+> O comando executa todos os robôs simultaneamente em paralelo, salvando logs individuais na pasta `logs/`.
 
 ---
 
