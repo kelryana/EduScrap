@@ -470,28 +470,40 @@ deactivate
 
 **1. Modo Automatizado e Rápido (Executa todos em paralelo concorrente):**
 ```bash
-# Executa todas as fontes ao mesmo tempo com logs isolados
+# Executa todas as 6 fontes ao mesmo tempo com logs isolados
 python run_scrapers.py
-# ou via Makefile:
+
+# Ou pelo Makefile:
 make scrape
 ```
 
 **2. Executar Fontes Específicas Individualmente:**
 ```bash
-# Roda apenas fontes selecionadas (ex: PRAE e UFERSA):
+# Roda apenas fontes selecionadas (ex: PRAE e UFERSA simultaneamente):
 python run_scrapers.py prae ufersa
 
-# Ou rodando diretamente o script de uma fonte:
-cd backend
-python scraper_prae.py
-python scraper_proex.py
-python scraper_ufersa.py
-python scraper_portal_uern.py
-python scraper_ciee.py
-python scraper_noticias.py
+# Roda apenas o Portal UERN:
+python run_scrapers.py portal_uern
+
+# Modo sequencial tradicional (um por vez):
+python run_scrapers.py --serial
+
+# Ver todas as opções e fontes disponíveis:
+python run_scrapers.py --help
 ```
 
-> **Dica:** Os logs de cada fonte ficam salvos individualmente em `logs/<fonte>.log` (ex: `logs/prae.log`, `logs/portal_uern.log`).
+> **Dica:** Os logs de cada fonte ficam salvos individualmente em `logs/<fonte>.log` (ex: `logs/prae.log`, `logs/portal_uern.log`), facilitando a depuração isolada.
+
+### 📋 Resumo de Comandos Rápidos
+
+| Comando | Descrição |
+| :--- | :--- |
+| `make run` ou `./start.sh` | Sobe todo o ambiente (MongoDB, Backend, Frontend e abre navegador) |
+| `make scrape` ou `python run_scrapers.py` | Executa todos os scrapers em paralelo concorrente (rápido e isolado) |
+| `python run_scrapers.py prae ufersa` | Executa apenas as fontes selecionadas |
+| `python run_scrapers.py --serial` | Executa os scrapers sequencialmente |
+| `make test` ou `pytest tests/` | Executa os testes automatizados com Pytest |
+| `make setup` | Cria e configura índices e validação de schema no MongoDB |
 
 ---
 
