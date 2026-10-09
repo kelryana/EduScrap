@@ -5,6 +5,8 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green)
 ![MongoDB](https://img.shields.io/badge/MongoDB-4.4+-brightgreen)
 
+<img width="2553" height="1016" alt="image" src="https://github.com/user-attachments/assets/aa3d2f29-01a5-4582-9549-beb21979cd74" />
+   
 ## 📖 Sobre o Projeto
 
 O **EduScrap** é uma plataforma completa de agregação de oportunidades acadêmicas e profissionais para estudantes da UERN (Universidade do Estado do Rio Grande do Norte) e região. O sistema realiza web scraping de diversos portais institucionais e disponibiliza as informações em uma API REST moderna com frontend intuitivo.
