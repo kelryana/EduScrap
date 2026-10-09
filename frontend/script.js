@@ -81,6 +81,11 @@ function renderizarControlesPaginacao(atual, total, limite) {
     const antigo = document.getElementById('bloco-paginacao');
     if(antigo) antigo.remove();
 
+    const totalPaginas = Math.max(1, Math.ceil((total || 0) / (limite || 6)));
+
+    // Se houver apenas 1 página e poucos itens, não precisa exibir os botões
+    if (totalPaginas <= 1 && total <= limite) return;
+
     const mainContainer = document.querySelector('main');
     const blocoPaginacao = document.createElement('div');
     blocoPaginacao.id = 'bloco-paginacao';
