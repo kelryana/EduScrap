@@ -72,9 +72,9 @@
             <div class="nav-actions-container">
                
                 <div id="nav-auth-area">
-                    <button class="btn-nav-auth" onclick="abrirModalAuth('login')">
+                    <a href="login.html" class="btn-nav-auth" style="text-decoration: none;">
                         <i class="ph-bold ph-user"></i> <span>Entrar / Cadastrar</span>
-                    </button>
+                    </a>
                 </div>
             </div>
         </nav>
@@ -168,9 +168,9 @@
                       <span class="text-xl">→</span>
                     </a>
                     
-                    <button type="button" onclick="abrirModalAuth('register')" class="px-7 sm:px-8 py-4 sm:py-4.5 rounded-xl border-2.5 border-brand-dark bg-white hover:bg-slate-50 text-brand-dark font-extrabold text-lg sm:text-xl shadow-brutal neo-btn inline-flex items-center justify-center gap-2.5 whitespace-nowrap">
+                    <a href="login.html?aba=register" class="px-7 sm:px-8 py-4 sm:py-4.5 rounded-xl border-2.5 border-brand-dark bg-white hover:bg-slate-50 text-brand-dark font-extrabold text-lg sm:text-xl shadow-brutal neo-btn inline-flex items-center justify-center gap-2.5 whitespace-nowrap" style="text-decoration: none;">
                       <span>🎓 Criar Perfil de Aluno</span>
-                    </button>
+                    </a>
                   </div>
 
                 </div>
@@ -292,161 +292,7 @@
         </main>
     </div>
 
-    <!-- =========================================================================
-         3. MODAL DE AUTENTICAÇÃO (LOGIN / CADASTRO) - REESTRUTURADO
-         ========================================================================= -->
-    <div id="modal-auth" class="modal-backdrop" style="display: none;" onclick="if(event.target === this) fecharModalAuth()">
-        <div class="modal-memphis" role="dialog" aria-modal="true" aria-labelledby="modal-auth-title">
-            <!-- Barra Superior com Alto Contraste e Fechamento Confortável -->
-            <div class="modal-header-memphis">
-                <div class="modal-header-left">
-                    <div class="modal-dots">
-                        <span class="dot dot-red"></span>
-                        <span class="dot dot-yellow"></span>
-                        <span class="dot dot-green"></span>
-                    </div>
-                    <h3 class="modal-title" id="modal-auth-title">Acesso ao EduScrap</h3>
-                </div>
-                <button class="modal-close-btn" onclick="fecharModalAuth()" title="Fechar janela" aria-label="Fechar">
-                    <i class="ph-bold ph-x"></i>
-                </button>
-            </div>
 
-            <!-- Abas Segmentadas Modernas (Segmented Control) -->
-            <div class="auth-tabs-wrapper">
-                <div class="auth-tabs-row" role="tablist">
-                    <button id="tab-login" class="auth-tab-btn ativo" onclick="alternarAbaAuth('login')" role="tab" aria-selected="true">
-                        <i class="ph-bold ph-sign-in"></i> Já tenho conta
-                    </button>
-                    <button id="tab-register" class="auth-tab-btn" onclick="alternarAbaAuth('register')" role="tab" aria-selected="false">
-                        <i class="ph-bold ph-user-plus"></i> Novo Cadastro
-                    </button>
-                </div>
-            </div>
-
-            <!-- Corpo do Modal com Espaço Negativo Confortável -->
-            <div class="modal-body-memphis">
-                <!-- FORMULÁRIO DE LOGIN -->
-                <form id="form-login" onsubmit="executarLogin(event)">
-                    <div class="form-group-memphis">
-                        <label class="label-memphis" for="login-email">
-                            <i class="ph-bold ph-envelope-simple"></i> E-mail Institucional ou Pessoal:
-                        </label>
-                        <input type="email" id="login-email" class="input-memphis" placeholder="exemplo@uern.br" autocomplete="username" required>
-                    </div>
-
-                    <div class="form-group-memphis">
-                        <label class="label-memphis" for="login-senha">
-                            <i class="ph-bold ph-lock-key"></i> Senha de Acesso:
-                        </label>
-                        <input type="password" id="login-senha" class="input-memphis" placeholder="Sua senha secreta" autocomplete="current-password" required>
-                    </div>
-
-                    <div id="login-erro" class="msg-erro-memphis" style="display: none;"></div>
-
-                    <div class="form-actions-memphis">
-                        <button type="submit" class="btn-submit-memphis btn-submit-primary">
-                            <span>Entrar na Minha Conta</span>
-                            <i class="ph-bold ph-arrow-right"></i>
-                        </button>
-                    </div>
-                </form>
-
-                <!-- FORMULÁRIO DE CADASTRO -->
-                <form id="form-register" style="display: none;" onsubmit="executarCadastro(event)">
-                    <div class="form-row-dupla">
-                        <div class="form-group-memphis">
-                            <label class="label-memphis" for="reg-nome">
-                                <i class="ph-bold ph-user"></i> Nome Completo:
-                            </label>
-                            <input type="text" id="reg-nome" class="input-memphis" placeholder="Nome do Aluno" autocomplete="name" required>
-                        </div>
-                        <div class="form-group-memphis">
-                            <label class="label-memphis" for="reg-matricula">
-                                <i class="ph-bold ph-identification-badge"></i> Matrícula (opcional):
-                            </label>
-                            <input type="text" id="reg-matricula" class="input-memphis" placeholder="202410000">
-                        </div>
-                    </div>
-
-                    <div class="form-row-dupla">
-                        <div class="form-group-memphis">
-                            <label class="label-memphis" for="reg-email">
-                                <i class="ph-bold ph-envelope-simple"></i> E-mail:
-                            </label>
-                            <input type="email" id="reg-email" class="input-memphis" placeholder="aluno@uern.br" autocomplete="email" required>
-                        </div>
-                        <div class="form-group-memphis">
-                            <label class="label-memphis" for="reg-senha">
-                                <i class="ph-bold ph-lock-key"></i> Senha (mínimo 6 dígitos):
-                            </label>
-                            <input type="password" id="reg-senha" class="input-memphis" placeholder="••••••••" minlength="6" autocomplete="new-password" required>
-                        </div>
-                    </div>
-
-                    <!-- Seção Cursos de Interesse: Pílulas com Checkmark Acessível -->
-                    <div class="form-group-memphis">
-                        <div class="label-com-subtexto">
-                            <label class="label-memphis">
-                                <i class="ph-bold ph-graduation-cap"></i> Cursos de Interesse:
-                            </label>
-                            <span class="label-subtexto">Clique para selecionar múltiplos cursos</span>
-                        </div>
-                        <div class="chips-container" id="reg-chips-cursos">
-                            <button type="button" class="chip-opcao chip-selecionado" data-valor="Ciência da Computação"><span class="chip-check">✓</span> Ciência da Computação</button>
-                            <button type="button" class="chip-opcao" data-valor="Sistemas de Informação"><span class="chip-check">✓</span> Sistemas de Informação</button>
-                            <button type="button" class="chip-opcao" data-valor="Medicina"><span class="chip-check">✓</span> Medicina</button>
-                            <button type="button" class="chip-opcao" data-valor="Enfermagem"><span class="chip-check">✓</span> Enfermagem</button>
-                            <button type="button" class="chip-opcao" data-valor="Direito"><span class="chip-check">✓</span> Direito</button>
-                            <button type="button" class="chip-opcao" data-valor="Administração"><span class="chip-check">✓</span> Administração</button>
-                            <button type="button" class="chip-opcao" data-valor="Ciências Contábeis"><span class="chip-check">✓</span> Ciências Contábeis</button>
-                            <button type="button" class="chip-opcao" data-valor="Educação Física"><span class="chip-check">✓</span> Educação Física</button>
-                            <button type="button" class="chip-opcao" data-valor="Letras"><span class="chip-check">✓</span> Letras</button>
-                            <button type="button" class="chip-opcao" data-valor="História"><span class="chip-check">✓</span> História</button>
-                            <button type="button" class="chip-opcao" data-valor="Pedagogia"><span class="chip-check">✓</span> Pedagogia</button>
-                            <button type="button" class="chip-opcao" data-valor="Ciências Biológicas"><span class="chip-check">✓</span> Ciências Biológicas</button>
-                        </div>
-                    </div>
-
-                    <!-- Seção Áreas de Interesse -->
-                    <div class="form-group-memphis">
-                        <div class="label-com-subtexto">
-                            <label class="label-memphis">
-                                <i class="ph-bold ph-bookmarks"></i> Áreas de Interesse:
-                            </label>
-                            <span class="label-subtexto">Filtre temas gerais além do curso</span>
-                        </div>
-                        <div class="chips-container" id="reg-chips-areas">
-                            <button type="button" class="chip-opcao chip-selecionado" data-valor="Tecnologia"><span class="chip-check">✓</span> Tecnologia</button>
-                            <button type="button" class="chip-opcao" data-valor="Saúde"><span class="chip-check">✓</span> Saúde</button>
-                            <button type="button" class="chip-opcao" data-valor="Humanas"><span class="chip-check">✓</span> Humanas</button>
-                            <button type="button" class="chip-opcao" data-valor="Exatas"><span class="chip-check">✓</span> Exatas</button>
-                            <button type="button" class="chip-opcao chip-selecionado" data-valor="Extensão"><span class="chip-check">✓</span> Extensão Universitária</button>
-                            <button type="button" class="chip-opcao" data-valor="Pesquisa"><span class="chip-check">✓</span> Pesquisa & Inovação</button>
-                        </div>
-                    </div>
-
-                    <!-- Notificações por E-mail -->
-                    <div class="form-group-memphis">
-                        <label class="checkbox-memphis-container">
-                            <input type="checkbox" id="reg-receber-emails" checked>
-                            <span class="custom-checkbox"></span>
-                            <span class="label-texto">Receber notificações e alertas de prazos por e-mail</span>
-                        </label>
-                    </div>
-
-                    <div id="register-erro" class="msg-erro-memphis" style="display: none;"></div>
-
-                    <div class="form-actions-memphis">
-                        <button type="submit" class="btn-submit-memphis btn-submit-success">
-                            <span>Concluir Cadastro & Ativar Feed</span>
-                            <i class="ph-bold ph-check"></i>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 
     <!-- =========================================================================
          4. MODAL DE PERFIL & PREFERÊNCIAS DO ALUNO - REESTRUTURADO

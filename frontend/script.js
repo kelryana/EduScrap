@@ -102,11 +102,8 @@ function atualizarInterfaceUsuario() {
         const primeiroNome = usuarioAtual.nome ? usuarioAtual.nome.split(' ')[0] : 'Estudante';
         navAuth.innerHTML = `
             <div class="nav-user-box">
-                <span class="nav-user-badge" onclick="abrirModalPerfil()" title="Ver Perfil">
+                <button class="nav-user-badge" onclick="abrirModalPerfil()" title="Meu Perfil e Preferências de Cursos">
                     🎓 Olá, <strong>${primeiroNome}</strong>
-                </span>
-                <button class="btn-nav-mini" onclick="abrirModalPerfil()" title="Ajustar Cursos e Notificações">
-                    <i class="ph-bold ph-sliders"></i>
                 </button>
                 <button class="btn-nav-mini btn-nav-logout" onclick="fazerLogout()" title="Sair da Conta">
                     <i class="ph-bold ph-sign-out"></i>
@@ -122,9 +119,9 @@ function atualizarInterfaceUsuario() {
         }
     } else {
         navAuth.innerHTML = `
-            <button class="btn-nav-auth" onclick="abrirModalAuth('login')">
+            <a href="login.html" class="btn-nav-auth" style="text-decoration: none;">
                 <i class="ph ph-user"></i> <span>Entrar / Cadastrar</span>
-            </button>
+            </a>
         `;
         if (bannerUsuario) bannerUsuario.style.display = 'none';
     }
@@ -138,11 +135,7 @@ function fazerLogout() {
 }
 
 function abrirModalAuth(aba = 'login') {
-    const modal = document.getElementById('modal-auth');
-    if (modal) {
-        modal.style.display = 'flex';
-        alternarAbaAuth(aba);
-    }
+    window.location.href = `login.html?aba=${aba}`;
 }
 
 function fecharModalAuth() {
@@ -756,21 +749,6 @@ function renderizarCards(listaDeVagas) {
                         <span>Até ${vaga.data_vencimento_formatada}${complemento}</span>
                     </div>
                 `;
-            }
-        } else if (ehNoticia) {
-            badgeStatusHTML = `
-                <div class="badge-status badge-status-neutro">
-                    <i class="ph-bold ph-newspaper"></i>
-                    <span>Atualização Tech</span>
-                </div>
-            `;
-        } else {
-            badgeStatusHTML = `
-                <div class="badge-status badge-status-neutro">
-                    <i class="ph-bold ph-info"></i>
-                    <span>Fluxo Contínuo</span>
-                </div>
-            `;
         }
 
         const classeVencido = status === "vencido" ? "card-vencido" : "";

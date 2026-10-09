@@ -1123,14 +1123,18 @@ body {
     padding: 6px 12px;
     font-size: 0.85rem;
     font-weight: 800;
+    font-family: inherit;
     box-shadow: 3px 3px 0 var(--color-navy);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    transition: all 0.15s ease;
 }
 .nav-user-badge:hover {
     background-color: var(--color-yellow);
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 var(--color-navy);
 }
 .btn-nav-mini {
     background: var(--color-white);
