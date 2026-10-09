@@ -52,50 +52,51 @@ MONGODB_DB = os.getenv("MONGODB_DB", "hub_estudantes")
 client = MongoClient(MONGODB_URI)
 db = client[MONGODB_DB]
 def garantir_metadados_fontes():
-    
-    colecao = db["fontes_provedores"]
+    try:
+        colecao = db["fontes_provedores"]
 
-    fontes_mestre = [
-        {
-            "_id": "prae_uern",
-            "nome_oficial": "Pró-Reitoria de Assuntos Estudantis - UERN",
-            "url_oficial": "https://prae.uern.br",
-            "frequencia_monitoramento": "Diário",
-            "foco_vagas": "Estágios Acadêmicos, Residência e Auxílios Financeiros"
-        },
-        {
-            "_id": "proex_uern",
-            "nome_oficial": "Pró-Reitoria de Extensão - UERN",
-            "url_oficial": "https://proex.uern.br",
-            "frequencia_monitoramento": "Diário",
-            "foco_vagas": "Bolsas de Extensão, Cultura e Projetos de Pesquisa"
-        },
-        {
-            "_id": "ufersa_oficial",
-            "nome_oficial": "Portal de Editais - UFERSA",
-            "url_oficial": "https://ufersa.edu.br",
-            "frequencia_monitoramento": "A cada 12 hours",
-            "foco_vagas": "Editais de Concursos, Estágios e Assistência Estudantil"
-        },
-        {
-            "_id": "ciee_agente",
-            "nome_oficial": "Centro de Integração Empresa-Escola (CIEE)",
-            "url_oficial": "https://web.ciee.org.br",
-            "frequencia_monitoramento": "A cada 6 hours",
-            "foco_vagas": "Vagas de Estágio Comercial e Jovem Aprendiz Técnico"
-        },
-        
-        {
-            "_id": "portal_uern_oficial",
-            "nome_oficial": "Portal UERN - Text Mining",
-            "url_oficial": "https://portal.uern.br",
-            "frequencia_monitoramento": "Diário",
-            "foco_vagas": "Editais Internos Filtrados por Inteligência de Mineração"
-        }
-    ]
+        fontes_mestre = [
+            {
+                "_id": "prae_uern",
+                "nome_oficial": "Pró-Reitoria de Assuntos Estudantis - UERN",
+                "url_oficial": "https://prae.uern.br",
+                "frequencia_monitoramento": "Diário",
+                "foco_vagas": "Estágios Acadêmicos, Residência e Auxílios Financeiros"
+            },
+            {
+                "_id": "proex_uern",
+                "nome_oficial": "Pró-Reitoria de Extensão - UERN",
+                "url_oficial": "https://proex.uern.br",
+                "frequencia_monitoramento": "Diário",
+                "foco_vagas": "Bolsas de Extensão, Cultura e Projetos de Pesquisa"
+            },
+            {
+                "_id": "ufersa_oficial",
+                "nome_oficial": "Portal de Editais - UFERSA",
+                "url_oficial": "https://ufersa.edu.br",
+                "frequencia_monitoramento": "A cada 12 hours",
+                "foco_vagas": "Editais de Concursos, Estágios e Assistência Estudantil"
+            },
+            {
+                "_id": "ciee_agente",
+                "nome_oficial": "Centro de Integração Empresa-Escola (CIEE)",
+                "url_oficial": "https://web.ciee.org.br",
+                "frequencia_monitoramento": "A cada 6 hours",
+                "foco_vagas": "Vagas de Estágio Comercial e Jovem Aprendiz Técnico"
+            },
+            {
+                "_id": "portal_uern_oficial",
+                "nome_oficial": "Portal UERN - Text Mining",
+                "url_oficial": "https://portal.uern.br",
+                "frequencia_monitoramento": "Diário",
+                "foco_vagas": "Editais Internos Filtrados por Inteligência de Mineração"
+            }
+        ]
 
-    for fonte in fontes_mestre:
-        colecao.update_one({"_id": fonte["_id"]}, {"$set": fonte}, upsert=True)
+        for fonte in fontes_mestre:
+            colecao.update_one({"_id": fonte["_id"]}, {"$set": fonte}, upsert=True)
+    except Exception as e:
+        logger.warning(f"Não foi possível sincronizar metadados das fontes no MongoDB: {e}")
 
 garantir_metadados_fontes()
 
@@ -455,18 +456,23 @@ def acionar_todos_os_robos():
     status_final = "Sucesso"
     detalhe_erro = None
 
+    backend_dir = os.path.dirname(os.path.abspath(__file__))
+
     try:
         logger.info("-> A raspar PRAE...")
-        subprocess.run([python_exe, "scraper_prae.py"])
+        subprocess.run([python_exe, os.path.join(backend_dir, "scraper_prae.py")], cwd=backend_dir, check=False)
 
         logger.info("-> A raspar PROEX...")
-        subprocess.run([python_exe, "scraper_proex.py"])
+        subprocess.run([python_exe, os.path.join(backend_dir, "scraper_proex.py")], cwd=backend_dir, check=False)
 
         logger.info("-> A raspar UFERSA...")
-        subprocess.run([python_exe, "scraper_ufersa.py"])
+        subprocess.run([python_exe, os.path.join(backend_dir, "scraper_ufersa.py")], cwd=backend_dir, check=False)
 
         logger.info("-> A raspar CIEE...")
-        subprocess.run([python_exe, "scraper_ciee.py"])
+        subprocess.run([python_exe, os.path.join(backend_dir, "scraper_ciee.py")], cwd=backend_dir, check=False)
+
+        logger.info("-> A raspar Portal UERN...")
+        subprocess.run([python_exe, os.path.join(backend_dir, "scraper_portal_uern.py")], cwd=backend_dir, check=False)
 
         logger.info("-> A raspar Notícias...")
         atualizar_noticias_agora()

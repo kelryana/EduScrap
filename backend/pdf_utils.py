@@ -68,12 +68,12 @@ def baixar_pdf(url: str, timeout: int = 15, usar_cache: bool = True) -> Optional
         if resposta.status_code == 200:
            
             content_type = resposta.headers.get('Content-Type', '').lower()
-            if 'application/pdf' in content_type or url.lower().endswith('.pdf'):
+            primeiros_bytes = resposta.content[:10]
+            if 'application/pdf' in content_type or url.lower().endswith('.pdf') or b'%PDF' in primeiros_bytes:
                 conteudo = BytesIO(resposta.content)
 
-                
                 if usar_cache:
-                    _cache_pdf(url, BytesIO(resposta.content))  # Salva uma cópia
+                    _cache_pdf(url, BytesIO(resposta.content))
 
                 logger.info(f"PDF baixado com sucesso ({len(resposta.content)} bytes)")
                 return conteudo
@@ -93,46 +93,49 @@ def baixar_pdf(url: str, timeout: int = 15, usar_cache: bool = True) -> Optional
     except Exception as e:
         logger.error(f"Erro inesperado ao baixar PDF: {e}", exc_info=True)
         return None
+
+
 def extrair_texto_pdf(arquivo_pdf_bytes: BytesIO, max_paginas: int = 10) -> str:
-
-    if not PDFMINER_AVAILABLE:
-        logger.warning("pdfminer.six não disponível; extração de texto pulada")
+    """Extrai texto de um PDF usando pdfminer com fallback para pypdf/PyPDF2."""
+    if not arquivo_pdf_bytes:
         return ""
 
+    arquivo_pdf_bytes.seek(0)
+    texto = ""
+
+    # Método 1: pdfminer.high_level.extract_text
+    if PDFMINER_AVAILABLE:
+        try:
+            page_numbers = list(range(max_paginas)) if max_paginas > 0 else None
+            texto = extract_text(arquivo_pdf_bytes, page_numbers=page_numbers)
+            if texto and len(texto.strip()) > 10:
+                logger.info(f"Texto extraído via pdfminer: {len(texto)} caracteres")
+                return texto
+        except Exception as e:
+            logger.warning(f"pdfminer falhou ({e}); tentando leitor alternativo...")
+
+    # Método 2: pypdf / PyPDF2
     try:
-        
-        texto = extract_text(arquivo_pdf_bytes)
-
-        if max_paginas > 0:
-            
-            from pdfminer.pdfpage import PDFPage
-            from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
-            from pdfminer.converter import TextConverter
-            from pdfminer.layout import LAParams
-
-            arquivo_pdf_bytes.seek(0)
-            resource_manager = PDFResourceManager()
-            output = BytesIO()
-            converter = TextConverter(resource_manager, output, laparams=LAParams())
-            interpreter = PDFPageInterpreter(resource_manager, converter)
-
-            texto_limitado = ""
-            for page_num, page in enumerate(PDFPage.get_pages(arquivo_pdf_bytes, caching=True)):
-                if page_num >= max_paginas:
-                    break
-                interpreter.process_page(page)
-                texto_limitado += output.getvalue().decode('utf-8', errors='ignore')
-                output.truncate(0)
-                output.seek(0)
-
-            converter.close()
-            texto = texto_limitado if texto_limitado else texto
-
-        logger.info(f"Texto extraído: {len(texto)} caracteres")
-        return texto
+        arquivo_pdf_bytes.seek(0)
+        try:
+            from pypdf import PdfReader
+        except ImportError:
+            from PyPDF2 import PdfReader
+        reader = PdfReader(arquivo_pdf_bytes)
+        paginas_total = len(reader.pages)
+        limite = min(paginas_total, max_paginas) if max_paginas > 0 else paginas_total
+        partes = []
+        for i in range(limite):
+            txt = reader.pages[i].extract_text() or ""
+            partes.append(txt)
+        texto = "\n".join(partes)
+        if texto and len(texto.strip()) > 10:
+            logger.info(f"Texto extraído via PdfReader: {len(texto)} caracteres")
+            return texto
     except Exception as e:
-        logger.error(f"Erro ao extrair texto do PDF: {e}", exc_info=True)
-        return ""
+        logger.error(f"Erro ao extrair texto do PDF via PdfReader: {e}")
+
+    return texto
 
 def extrair_data_de_texto(texto: str) -> Optional[str]:
 

@@ -171,25 +171,28 @@ def minerar_portal_uern():
         # Parse do HTML
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        # Extrai todos os links de notícias
+        # Extrai links de notícias priorizando a área principal de conteúdo (ordem cronológica)
         print("\n🔗 Passo 2: Mapeando links de notícias...")
-        links_ancora = soup.find_all("a", href=True)
+        conteudo_principal = soup.find('main') or soup.find(id='content') or soup.find(id='primary') or soup
+        links_ancora = conteudo_principal.find_all("a", href=True)
 
-        urls_noticias = set()
+        urls_noticias = []
         for ancora in links_ancora:
             url = ancora.get("href", "")
             # Filtra apenas URLs válidas do blog da UERN
             if "portal.uern.br/blog/" in url and "/blog/" in url:
-                # Normaliza URL (remove parâmetros desnecessários)
-                url_limpa = url.split("?")[0]
-                urls_noticias.add(url_limpa)
+                url_limpa = url.split("?")[0].rstrip("/")
+                # Ignora links de paginação, categorias, tags e autores
+                if any(ignorar in url_limpa for ignorar in ["/category/", "/categoria/", "/tag/", "/author/", "/page/"]):
+                    continue
+                if url_limpa not in urls_noticias:
+                    urls_noticias.append(url_limpa)
 
-        urls_noticias = list(urls_noticias)
         print(f"✅ {len(urls_noticias)} notícias encontradas na página principal")
 
-        # Limita às 15 mais recentes para não sobrecarregar
+        # Pega as mais recentes da página principal
         urls_para_analisar = urls_noticias[:15]
-        print(f"Selecionadas {len(urls_para_analisar)} notícias para análise profunda")
+        print(f"Selecionadas as {len(urls_para_analisar)} notícias mais recentes para análise profunda")
 
         # Mineração profunda em cada notícia
         noticias_validas = []
@@ -238,41 +241,33 @@ def minerar_portal_uern():
                     data_str = extrair_data_de_texto(f"{titulo} {texto_completo}")
                     data_vencimento = datetime.strptime(data_str, "%Y-%m-%d") if data_str else None
 
-                    # Se não encontrar data no conteúdo, tenta extrair do título ou corpo
-                    if not data_vencimento:
-                        # Procura por datas em formatos comuns
-                        data_from_content = extrair_data_do_texto(f"{titulo} {texto_completo}")
-                        if data_from_content:
-                            data_vencimento = data_from_content
+                    # Determina categoria baseada nas palavras-chave
+                    categoria = "Notícia Geral"
+                    if any(p in palavras_chave for p in ["estágio", "vaga", "seleção"]):
+                        categoria = "Seleção de Estágio"
+                    elif any(p in palavras_chave for p in ["bolsa", "bolsas", "extensão", "pesquisa"]):
+                        categoria = "Bolsas e Editais"
+                    elif any(p in palavras_chave for p in ["curso", "inscrição", "matrícula"]):
+                        categoria = "Cursos e Inscrições"
 
-                    # SÓ adiciona o documento se encontrar uma data válida
+                    # Cria documento
+                    documento = {
+                        "nome": titulo,
+                        "link": url_noticia,
+                        "categoria": categoria,
+                        "fonte_id": "portal_uern_oficial",
+                        "palavras_chave": palavras_chave,
+                        "resumo": resumo[:200] if resumo else texto_completo[:200],
+                        "data_mineracao": datetime.now()
+                    }
+
                     if data_vencimento:
-                        print(f"   ✅ Data encontrada: {data_vencimento.strftime('%Y-%m-%d')}")
-
-                        # Determina categoria baseada nas palavras-chave
-                        categoria = "Notícia Geral"
-                        if any(p in palavras_chave for p in ["estágio", "vaga", "seleção"]):
-                            categoria = "Seleção de Estágio"
-                        elif any(p in palavras_chave for p in ["bolsa", "bolsas", "extensão", "pesquisa"]):
-                            categoria = "Bolsas e Editais"
-                        elif any(p in palavras_chave for p in ["curso", "inscrição", "matrícula"]):
-                            categoria = "Cursos e Inscrições"
-
-                        # Cria documento
-                        documento = {
-                            "nome": titulo,
-                            "link": url_noticia,
-                            "categoria": categoria,
-                            "fonte_id": "portal_uern_oficial",
-                            "data_vencimento": data_vencimento,
-                            "palavras_chave": palavras_chave,
-                            "resumo": resumo[:200] if resumo else texto_completo[:200],
-                            "data_mineracao": datetime.now()
-                        }
-
-                        noticias_validas.append(documento)
+                        documento["data_vencimento"] = data_vencimento
+                        print(f"   ✅ Prazo de inscrição detectado: {data_vencimento.strftime('%d/%m/%Y')}")
                     else:
-                        print(f"   ❌ Nenhuma data encontrada - ignorando esta entrada")
+                        print(f"   ℹ️ Oportunidade sem prazo específico detectado")
+
+                    noticias_validas.append(documento)
                 else:
                     print(f"   ❌ Não relevante - descartada")
 

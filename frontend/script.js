@@ -265,56 +265,34 @@ function renderizarCards(listaDeVagas) {
     listaDeVagas.forEach(vaga => {
         const temaVerde = vaga.categoria === "Notícia Tech" ? "card-verde" : "";
 
-        // Badge dinâmica de prazo: diferencia editais vigentes de encerrados
+        // Badge dinâmica de prazo: apenas quando houver data de vencimento válida e não for notícia tech
         let badgeDataHTML = "";
         const estiloBadgeBase = "border: 2px solid var(--azul-escuro); padding: 4px 8px; font-size: 0.75rem; font-weight: 800; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 10px; box-shadow: 2px 2px 0 var(--azul-escuro);";
 
-        // Verifica se é um tipo de conteúdo que não tem prazo por natureza (como notícias técnicas)
-        const naoTemPrazoPorNatureza = vaga.status_prazo === "sem_prazo_aplicavel";
-        
-        // Verifica se é do CIEE ou Portal UERN sem data de vencimento
-        const ehCIEE = vaga.fonte && vaga.fonte.includes("CIEE");
-        const ehPortalUERN = vaga.fonte_id && vaga.fonte_id.includes("portal_uern");
-        
-        // Se for notícia tech, CIEE ou Portal UERN sem prazo, não mostramos badge de prazo
-        if (naoTemPrazoPorNatureza) {
-            // Para notícias técnicas e outros conteúdos sem prazo por natureza, não mostramos badge alguma
-            badgeDataHTML = ``;
-        } else if (ehPortalUERN && !vaga.data_vencimento_formatada) {
-            // Para entradas do Portal UERN sem data de vencimento, também não mostramos badge
-            badgeDataHTML = ``;
-        } else if (ehCIEE && !vaga.data_vencimento_formatada) {
-            // Para entradas do CIEE sem data de vencimento, também não mostramos badge
-            badgeDataHTML = ``;
-        } else {
-            // Garante o cálculo mesmo se a API ainda não enviar status_prazo/dias_restantes
+        const ehNoticia = vaga.categoria === "Notícia Tech" || tipoAtual === "noticias";
+        let status = vaga.status_prazo || "";
+
+        if (!ehNoticia && vaga.data_vencimento_formatada) {
             let dias = vaga.dias_restantes;
-            let status = vaga.status_prazo;
-            if (vaga.data_vencimento_formatada && typeof dias !== "number") {
+            if (typeof dias !== "number") {
                 const [d, m, a] = vaga.data_vencimento_formatada.split("/").map(Number);
                 const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
                 dias = Math.round((new Date(a, m - 1, d) - hoje) / 86400000);
                 status = dias >= 0 ? "vigente" : "vencido";
             }
 
-            if (vaga.data_vencimento_formatada && status === "vencido") {
+            if (status === "vencido") {
                 const decorridos = Math.abs(dias);
                 badgeDataHTML = `
                     <div style="background: #EDEDED; color: #555; ${estiloBadgeBase}">
                         ⛔ Encerrado em ${vaga.data_vencimento_formatada} (há ${decorridos} dia${decorridos === 1 ? '' : 's'})
                     </div>
                 `;
-            } else if (vaga.data_vencimento_formatada) {
+            } else {
                 const complemento = dias === 0 ? " (último dia!)" : ` (${dias} dia${dias === 1 ? '' : 's'})`;
                 badgeDataHTML = `
                     <div style="background: #FFF5F5; color: #DC143C; ${estiloBadgeBase}">
                         🔥 Inscrições até ${vaga.data_vencimento_formatada}${complemento}
-                    </div>
-                `;
-            } else {
-                badgeDataHTML = `
-                    <div style="background: #FFFBEA; color: #8A6D00; ${estiloBadgeBase}">
-                        ❔ Prazo não identificado — confira no edital
                     </div>
                 `;
             }
