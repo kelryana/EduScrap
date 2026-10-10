@@ -48,6 +48,24 @@ SCRAPERS = {
         "script": "scraper_ciee.py",
         "colecao": "vagas_ciee",
         "icone": "💼"
+    },
+    "cpps_ufersa": {
+        "nome": "UFERSA (CPPS Processos Seletivos)",
+        "script": "scraper_cpps_ufersa.py",
+        "colecao": "editais",
+        "icone": "📝"
+    },
+    "assecom_ufersa": {
+        "nome": "UFERSA (ASSECOM Notícias e Editais)",
+        "script": "scraper_assecom_ufersa.py",
+        "colecao": "noticias",
+        "icone": "📢"
+    },
+    "mprn": {
+        "nome": "MPRN (Processos Seletivos e Residências)",
+        "script": "scraper_mprn.py",
+        "colecao": "vagas",
+        "icone": "⚖️"
     }
 }
 

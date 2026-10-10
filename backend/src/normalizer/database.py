@@ -25,7 +25,7 @@ class MongoDBHandler:
             self._connect()
 
     def _connect(self) -> None:
-        """Estabelece conexão com MongoDB"""
+       
         try:
             self.client = MongoClient(
                 self.uri,
@@ -42,7 +42,7 @@ class MongoDBHandler:
             raise
 
     def create_indexes(self) -> None:
-        """Cria índices otimizados para consultas frequentes"""
+       
         try:
             # Coleção de editais
             editais = self.db['editais']
@@ -111,17 +111,7 @@ class MongoDBHandler:
             return None
 
     def upsert_documento(self, doc: Dict[str, Any], collection_name: str, identifier_field: str) -> Optional[str]:
-        """
-        Realiza upsert (update se existir, insert se não existir) de um documento.
-        
-        Args:
-            doc: Documento a ser inserido/atualizado
-            collection_name: Nome da coleção onde salvar
-            identifier_field: Campo usado para identificar documentos duplicados
-            
-        Returns:
-            ID do documento inserido/atualizado ou None em caso de erro
-        """
+    
         try:
             # Adiciona timestamp de atualização
             doc['atualizado_em'] = datetime.now().isoformat()
@@ -279,12 +269,7 @@ class MongoDBHandler:
             return None
 
     def update_status(self) -> int:
-        """
-        Atualiza o status de todos os editais baseado na data limite
-
-        Returns:
-            Número de documentos atualizados
-        """
+     
         from datetime import datetime
         hoje = datetime.now()
 
@@ -314,14 +299,8 @@ class MongoDBHandler:
             logger.error(f"Erro ao atualizar status: {str(e)}")
             return 0
 
-    # ==========================================
-    # MÉTODOS DE USUÁRIOS, PREFERÊNCIAS E FAVORITOS
-    # ==========================================
-
     def create_user(self, user_data: Dict[str, Any]) -> Optional[str]:
-        """
-        Cria um novo usuário na coleção 'usuarios'.
-        """
+       
         try:
             # Normaliza email
             if 'email' in user_data:
@@ -350,7 +329,7 @@ class MongoDBHandler:
             return None
 
     def find_user_by_email(self, email: str) -> Optional[Dict[str, Any]]:
-        """Busca usuário por email"""
+        
         try:
             if not email:
                 return None
@@ -363,7 +342,7 @@ class MongoDBHandler:
             return None
 
     def find_user_by_id(self, user_id: str, include_password: bool = False) -> Optional[Dict[str, Any]]:
-        """Busca usuário por ID (remove senha_hash se include_password for False)"""
+       
         try:
             from bson import ObjectId
             try:
@@ -382,7 +361,7 @@ class MongoDBHandler:
             return None
 
     def update_user_preferences(self, user_id: str, preferencias: Dict[str, Any]) -> bool:
-        """Atualiza preferências de cursos, áreas e notificações de e-mail"""
+       
         try:
             from bson import ObjectId
             try:
@@ -410,7 +389,7 @@ class MongoDBHandler:
             return False
 
     def update_user_profile(self, user_id: str, profile_data: Dict[str, Any]) -> bool:
-        """Atualiza dados do perfil (nome, matricula)"""
+      
         try:
             from bson import ObjectId
             try:
@@ -432,7 +411,7 @@ class MongoDBHandler:
             return False
 
     def add_favorito(self, user_id: str, oportunidade_id: str) -> bool:
-        """Adiciona uma oportunidade aos favoritos do usuário"""
+       
         try:
             from bson import ObjectId
             try:
@@ -453,7 +432,7 @@ class MongoDBHandler:
             return False
 
     def remove_favorito(self, user_id: str, oportunidade_id: str) -> bool:
-        """Remove uma oportunidade dos favoritos do usuário"""
+        
         try:
             from bson import ObjectId
             try:
@@ -474,7 +453,7 @@ class MongoDBHandler:
             return False
 
     def get_user_favoritos(self, user_id: str) -> List[Dict[str, Any]]:
-        """Retorna todas as oportunidades favoritadas pelo usuário"""
+       
         try:
             user = self.find_user_by_id(user_id)
             if not user or not user.get('favoritos'):
@@ -511,9 +490,7 @@ class MongoDBHandler:
             return []
 
     def get_feed_personalizado(self, user_id: str, limit: int = 50) -> List[Dict[str, Any]]:
-        """
-        Retorna oportunidades recomendadas com base nas preferências (cursos/áreas) do aluno.
-        """
+       
         try:
             user = self.find_user_by_id(user_id)
             if not user:
@@ -531,62 +508,110 @@ class MongoDBHandler:
                     item['favorito'] = item.get('_id') in user_favoritos
                 return todas
 
-            # Monta critérios regex OR para cursos e áreas
-            termos = [re.escape(c) for c in cursos if c] + [re.escape(a) for a in areas if a]
-            if not termos:
+            # Monta critérios de busca inteligente
+            criterios_or = []
+
+            if cursos:
+                criterios_or.append({'cursos': {'$in': cursos}})
+                for c in cursos:
+                    criterios_or.append({'titulo': {'$regex': re.escape(c), '$options': 'i'}})
+                    criterios_or.append({'descricao': {'$regex': re.escape(c), '$options': 'i'}})
+
+            if areas:
+                criterios_or.append({'areas': {'$in': areas}})
+                for a in areas:
+                    criterios_or.append({'areas': {'$regex': re.escape(a), '$options': 'i'}})
+                    criterios_or.append({'area': {'$regex': re.escape(a), '$options': 'i'}})
+                    criterios_or.append({'titulo': {'$regex': re.escape(a), '$options': 'i'}})
+
+            if not criterios_or:
                 todas = self.get_oportunidades(status="Aberto", limit=limit)
                 for item in todas:
                     item['favorito'] = item.get('_id') in user_favoritos
                 return todas
 
-            padrao_regex = '|'.join(termos)
+            query_filtro = {'$or': criterios_or}
             resultados = []
+            ids_vistos = set()
 
-            # Busca editais
-            query_editais = {
-                'status': 'Aberto',
-                '$or': [
-                    {'areas': {'$regex': padrao_regex, '$options': 'i'}},
-                    {'titulo': {'$regex': padrao_regex, '$options': 'i'}}
-                ]
-            }
-            editais = list(self.db['editais'].find(query_editais).limit(limit))
-            for edital in editais:
-                edital['_id'] = str(edital['_id'])
-                edital['tipo_documento'] = 'edital'
-                edital['favorito'] = edital['_id'] in user_favoritos
-                resultados.append(edital)
+            # 1. Busca em Editais (CPPS, PRAE, PROEX, UERN, etc.)
+            try:
+                editais = list(self.db['editais'].find(query_filtro).limit(limit))
+                for edital in editais:
+                    ed_id = str(edital['_id'])
+                    if ed_id not in ids_vistos:
+                        ids_vistos.add(ed_id)
+                        edital['_id'] = ed_id
+                        edital['tipo_documento'] = 'edital'
+                        edital['favorito'] = ed_id in user_favoritos
+                        resultados.append(edital)
+            except Exception as e_ed:
+                logger.warning(f"Erro ao buscar editais personalizados: {e_ed}")
 
-            # Busca vagas
-            query_vagas = {
-                '$or': [
-                    {'area': {'$regex': padrao_regex, '$options': 'i'}},
-                    {'titulo': {'$regex': padrao_regex, '$options': 'i'}}
-                ]
-            }
-            vagas = list(self.db['vagas'].find(query_vagas).limit(limit))
-            for vaga in vagas:
-                vaga['_id'] = str(vaga['_id'])
-                vaga['tipo_documento'] = 'vaga'
-                vaga['favorito'] = vaga['_id'] in user_favoritos
-                resultados.append(vaga)
+            # 2. Busca em Vagas (MPRN, CIEE, Estágios)
+            try:
+                vagas = list(self.db['vagas'].find(query_filtro).limit(limit))
+                for vaga in vagas:
+                    vg_id = str(vaga['_id'])
+                    if vg_id not in ids_vistos:
+                        ids_vistos.add(vg_id)
+                        vaga['_id'] = vg_id
+                        vaga['tipo_documento'] = 'vaga'
+                        vaga['favorito'] = vg_id in user_favoritos
+                        resultados.append(vaga)
+            except Exception as e_vg:
+                logger.warning(f"Erro ao buscar vagas personalizadas: {e_vg}")
 
-            # Se o filtro específico retornar poucos resultados, complementa com oportunidades gerais
-            if len(resultados) < 5:
-                gerais = self.get_oportunidades(status="Aberto", limit=limit - len(resultados))
-                ids_existentes = {r['_id'] for r in resultados}
-                for item in gerais:
-                    if item.get('_id') not in ids_existentes:
-                        item['favorito'] = item.get('_id') in user_favoritos
-                        resultados.append(item)
+            # 3. Busca em Notícias Acadêmicas (ASSECOM UFERSA, Comunicados)
+            try:
+                noticias = list(self.db['noticias'].find(query_filtro).limit(limit))
+                for notic in noticias:
+                    nt_id = str(notic['_id'])
+                    if nt_id not in ids_vistos:
+                        ids_vistos.add(nt_id)
+                        notic['_id'] = nt_id
+                        notic['tipo_documento'] = 'noticia'
+                        notic['favorito'] = nt_id in user_favoritos
+                        resultados.append(notic)
+            except Exception as e_nt:
+                logger.warning(f"Erro ao buscar notícias personalizadas: {e_nt}")
 
-            return resultados
+            # Ordena com base no grau de relevância (se bate curso primeiro, depois área)
+            def score_relevancia(item):
+                score = 0
+                item_cursos = item.get('cursos', []) or []
+                item_areas = item.get('areas', []) or []
+                item_titulo = item.get('titulo', '')
+
+                # Bate curso específico selecionado
+                for c in cursos:
+                    if c in item_cursos or re.search(re.escape(c), item_titulo, re.IGNORECASE):
+                        score += 10
+
+                # Bate área selecionada
+                for a in areas:
+                    if a in item_areas or re.search(re.escape(a), item_titulo, re.IGNORECASE):
+                        score += 4
+
+                return score
+
+            resultados.sort(key=score_relevancia, reverse=True)
+
+            # Se encontrou resultados relevantes, retorna a lista enriquecida
+            if resultados:
+                return resultados[:limit]
+
+            # Fallback seguro apenas se não encontrar absolutamente nada
+            gerais = self.get_oportunidades(status="Aberto", limit=limit)
+            for item in gerais:
+                item['favorito'] = item.get('_id') in user_favoritos
+            return gerais
         except Exception as e:
             logger.error(f"Erro ao buscar feed personalizado: {str(e)}")
             return self.get_oportunidades(limit=limit)
 
     def close(self) -> None:
-        """Fecha a conexão com MongoDB"""
+       
         if self.client:
             self.client.close()
             logger.info("Conexão com MongoDB fechada")

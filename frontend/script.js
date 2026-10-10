@@ -623,14 +623,16 @@ function normalizarCategoriaTag(categoria, tipoContexto) {
             'estagios': 'Estágios (PRAE)',
             'bolsas': 'Bolsas (PROEX)',
             'ufersa': 'Editais UFERSA',
+            'mprn': 'Estágios MPRN',
             'ciee': 'Vagas CIEE',
             'portal_uern': 'Portal UERN',
-            'noticias': 'Notícia Tech'
+            'noticias': 'Notícia'
         };
         return mapaFallback[tipoContexto] || 'Oportunidade';
     }
 
     const cLower = categoria.toLowerCase();
+    if (cLower.includes('mprn') || cLower.includes('residência') || cLower.includes('residencia')) return 'Estágios MPRN';
     if (cLower.includes('inclusão digital') || cLower.includes('inclusao digital')) return 'Inclusão Digital';
     if (cLower.includes('moradia')) return 'Auxílio Moradia';
     if (cLower.includes('creche')) return 'Auxílio Creche';
@@ -810,7 +812,9 @@ function renderizarCards(listaDeVagas) {
         }
 
         const classeVencido = status === "vencido" ? "card-vencido" : "";
-        const infoEdital = sintetizarTituloEdital(vaga.nome);
+        const tituloBruto = vaga.titulo || vaga.nome || vaga.nome_completo || 'Oportunidade';
+        const infoEdital = sintetizarTituloEdital(tituloBruto);
+        const tituloFinal = infoEdital.tituloLimpo || tituloBruto;
 
         const numeroEditalHTML = infoEdital.numeroEdital ? `
             <div class="card-edital-numero">
@@ -831,6 +835,8 @@ function renderizarCards(listaDeVagas) {
             `;
         }
 
+        const linkDestino = vaga.link || vaga.url || '#';
+
         const cardHTML = `
             <div class="card ${classeVencido}">
                 <div class="card-topo">
@@ -843,7 +849,7 @@ function renderizarCards(listaDeVagas) {
 
                     ${numeroEditalHTML}
 
-                    <h3 class="card-titulo" title="${vaga.nome}">${infoEdital.tituloLimpo}</h3>
+                    <h3 class="card-titulo" title="${tituloBruto}">${tituloFinal}</h3>
 
                     <div class="card-meta-box">
                         <i class="ph-bold ph-buildings meta-icone"></i>
@@ -852,7 +858,7 @@ function renderizarCards(listaDeVagas) {
                 </div>
 
                 <div class="card-acoes-row">
-                    <a href="${vaga.link}" target="_blank" rel="noopener noreferrer" class="card-link-btn">
+                    <a href="${linkDestino}" target="_blank" rel="noopener noreferrer" class="card-link-btn">
                         <span>Ver Edital Oficial</span>
                         <i class="ph-bold ph-arrow-up-right"></i>
                     </a>
