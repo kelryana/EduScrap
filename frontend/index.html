@@ -271,115 +271,120 @@
             </div>
         </div>
 
-        <!-- BARRA DE UTILITÁRIOS E FILTROS DO ESTUDANTE -->
-        <div class="student-toolbar">
-            <div class="student-toolbar-left">
-                <button id="btn-abrir-sidebar-filtros" class="btn-filtro-aluno" onclick="alternarSidebarPerfil()">
-                    <i class="ph-bold ph-sliders-horizontal"></i>
-                    <span>⚙️ Cursos & Preferências</span>
-                </button>
-                <button id="btn-personalizado" class="btn-filtro-aluno" onclick="carregarFeedPersonalizado()">
-                    <i class="ph-bold ph-sparkle"></i> <span>🎯 Para Você (Perfil)</span>
-                </button>
-                <button id="btn-favoritos" class="btn-filtro-aluno" onclick="carregarFavoritos()">
-                    <i class="ph-bold ph-star"></i> <span>⭐ Salvos (<strong id="contador-favoritos">0</strong>)</span>
-                </button>
-            </div>
-
-            <div class="student-toolbar-right">
-                <label class="toggle-vigentes-container" for="filtroVigentes">
-                    <input type="checkbox" id="filtroVigentes" onchange="toggleFiltroVigentes()">
-                    <span class="custom-checkbox"></span>
-                    <span class="toggle-label">Mostrar apenas editais vigentes</span>
-                </label>
-            </div>
-        </div>
-
         <main>
-            <!-- TRILHO DE CONTEÚDO: gaveta de filtros + grade de cards lado a lado.
-                 Ao abrir a gaveta, os cards são empurrados para a direita. -->
+            <!-- TRILHO DE CONTEÚDO:
+                 Sidebar à esquerda e coluna principal (toolbar de filtros + cards) à direita.
+                 Ao abrir o sidebar, ele ganha largura para a esquerda e a coluna inteira (filtros + cards)
+                 se ajusta suavemente sem empurrar a página para fora da tela. -->
             <div id="trilho-conteudo" class="trilho-conteudo">
 
                 <aside id="sidebar-perfil" class="sidebar-perfil" aria-label="Cursos e preferências">
-        <div class="sidebar-header">
-            <div class="modal-dots">
-                <span class="dot dot-red"></span>
-                <span class="dot dot-yellow"></span>
-                <span class="dot dot-green"></span>
-            </div>
-            <h3 class="sidebar-title">Meu Perfil & Preferências</h3>
-            <button class="sidebar-close-btn" onclick="fecharSidebarPerfil()" title="Fechar janela" aria-label="Fechar">
-                <i class="ph-bold ph-x"></i> <span>Voltar</span>
-            </button>
-        </div>
-
-        <div class="sidebar-body">
-            <!-- Card de Perfil Limpo e Confortável -->
-            <div class="perfil-card-info">
-                <div class="perfil-avatar-badge">
-                    <i class="ph-bold ph-student"></i>
-                </div>
-                <div class="perfil-info-textos">
-                    <h4 id="perfil-nome-display-sidebar" class="perfil-info-nome">Nome do Aluno</h4>
-                    <p id="perfil-email-display-sidebar" class="perfil-info-email">aluno@uern.br</p>
-                </div>
-            </div>
-
-            <form id="form-perfil-preferencias-sidebar" onsubmit="salvarPreferenciasPerfil(event)">
-                <div class="form-group-memphis">
-                    <div class="label-com-subtexto">
-                        <label class="label-memphis">
-                            <i class="ph-bold ph-graduation-cap"></i> Cursos de Interesse:
-                        </label>
-                        <span class="label-subtexto">O feed 'Para Você' exibirá editais dessas áreas</span>
-                    </div>
-                    <div class="chips-container" id="perfil-chips-cursos-sidebar">
-                        <!-- Injetado dinamicamente via JS com chip-check -->
-                    </div>
-                </div>
-
-                <div class="form-group-memphis">
-                    <div class="label-com-subtexto">
-                        <label class="label-memphis">
-                            <i class="ph-bold ph-bookmarks"></i> Áreas de Interesse:
-                        </label>
-                        <span class="label-subtexto">Categorias complementares</span>
-                    </div>
-                    <div class="chips-container" id="perfil-chips-areas-sidebar">
-                        <!-- Injetado dinamicamente via JS com chip-check -->
-                    </div>
-                </div>
-
-                <div class="form-group-memphis">
-                    <label class="checkbox-memphis-container">
-                        <input type="checkbox" id="perfil-receber-emails-sidebar">
-                        <span class="custom-checkbox"></span>
-                        <span class="label-texto">Receber alertas de prazos por e-mail</span>
-                    </label>
-                </div>
-
-                <div id="perfil-feedback-sidebar" class="msg-sucesso-memphis" style="display: none;"></div>
-
-                <div class="perfil-botoes-row">
-                        <button type="submit" class="btn-submit-memphis btn-submit-primary" style="flex: 1;">
-                            <i class="ph-bold ph-floppy-disk"></i> Salvar Alterações
-                        </button>
-                        <button type="button" class="btn-submit-memphis btn-submit-danger" onclick="fazerLogout()">
-                            <i class="ph-bold ph-sign-out"></i> Sair da Conta
+                    <div class="sidebar-header">
+                        <div class="modal-dots">
+                            <span class="dot dot-red"></span>
+                            <span class="dot dot-yellow"></span>
+                            <span class="dot dot-green"></span>
+                        </div>
+                        <h3 class="sidebar-title">Meu Perfil & Preferências</h3>
+                        <button class="sidebar-close-btn" onclick="fecharSidebarPerfil()" title="Fechar janela" aria-label="Fechar">
+                            <i class="ph-bold ph-x"></i> <span>Voltar</span>
                         </button>
                     </div>
-                </form>
-            </div>
-        </aside>
 
-        <!-- GRADE DE CARDS (empurrada para a direita quando a gaveta abre) -->
-        <div id="container-vagas" class="grid-vagas">
-            <div class="status-box">
-                <div class="status-box-decor"></div>
-                <h3 class="status-box-titulo">Carregando Dados ⏳</h3>
-                <p class="status-box-texto">Buscando oportunidades no banco de dados...</p>
-            </div>
-        </div>
+                    <div class="sidebar-body">
+                        <!-- Card de Perfil Limpo e Confortável -->
+                        <div class="perfil-card-info">
+                            <div class="perfil-avatar-badge">
+                                <i class="ph-bold ph-student"></i>
+                            </div>
+                            <div class="perfil-info-textos">
+                                <h4 id="perfil-nome-display-sidebar" class="perfil-info-nome">Nome do Aluno</h4>
+                                <p id="perfil-email-display-sidebar" class="perfil-info-email">aluno@uern.br</p>
+                            </div>
+                        </div>
+
+                        <form id="form-perfil-preferencias-sidebar" onsubmit="salvarPreferenciasPerfil(event)">
+                            <div class="form-group-memphis">
+                                <div class="label-com-subtexto">
+                                    <label class="label-memphis">
+                                        <i class="ph-bold ph-graduation-cap"></i> Cursos de Interesse:
+                                    </label>
+                                    <span class="label-subtexto">O feed 'Para Você' exibirá editais dessas áreas</span>
+                                </div>
+                                <div class="chips-container" id="perfil-chips-cursos-sidebar">
+                                    <!-- Injetado dinamicamente via JS com chip-check -->
+                                </div>
+                            </div>
+
+                            <div class="form-group-memphis">
+                                <div class="label-com-subtexto">
+                                    <label class="label-memphis">
+                                        <i class="ph-bold ph-bookmarks"></i> Áreas de Interesse:
+                                    </label>
+                                    <span class="label-subtexto">Categorias complementares</span>
+                                </div>
+                                <div class="chips-container" id="perfil-chips-areas-sidebar">
+                                    <!-- Injetado dinamicamente via JS com chip-check -->
+                                </div>
+                            </div>
+
+                            <div class="form-group-memphis">
+                                <label class="checkbox-memphis-container">
+                                    <input type="checkbox" id="perfil-receber-emails-sidebar">
+                                    <span class="custom-checkbox"></span>
+                                    <span class="label-texto">Receber alertas de prazos por e-mail</span>
+                                </label>
+                            </div>
+
+                            <div id="perfil-feedback-sidebar" class="msg-sucesso-memphis" style="display: none;"></div>
+
+                            <div class="perfil-botoes-row">
+                                <button type="submit" class="btn-submit-memphis btn-submit-primary" style="flex: 1;">
+                                    <i class="ph-bold ph-floppy-disk"></i> Salvar Alterações
+                                </button>
+                                <button type="button" class="btn-submit-memphis btn-submit-danger" onclick="fazerLogout()">
+                                    <i class="ph-bold ph-sign-out"></i> Sair da Conta
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </aside>
+
+                <!-- COLUNA PRINCIPAL DE CONTEÚDO (Toolbar de Filtros + Grid de Oportunidades) -->
+                <div class="conteudo-principal-coluna">
+                    <!-- BARRA DE UTILITÁRIOS E FILTROS DO ESTUDANTE -->
+                    <div class="student-toolbar">
+                        <div class="student-toolbar-left">
+                            <button id="btn-abrir-sidebar-filtros" class="btn-filtro-aluno" onclick="alternarSidebarPerfil()">
+                                <i class="ph-bold ph-sliders-horizontal"></i>
+                                <span>⚙️ Cursos & Preferências</span>
+                            </button>
+                            <button id="btn-personalizado" class="btn-filtro-aluno" onclick="carregarFeedPersonalizado()">
+                                <i class="ph-bold ph-sparkle"></i> <span>🎯 Para Você (Perfil)</span>
+                            </button>
+                            <button id="btn-favoritos" class="btn-filtro-aluno" onclick="carregarFavoritos()">
+                                <i class="ph-bold ph-star"></i> <span>⭐ Salvos (<strong id="contador-favoritos">0</strong>)</span>
+                            </button>
+                        </div>
+
+                        <div class="student-toolbar-right">
+                            <label class="toggle-vigentes-container" for="filtroVigentes">
+                                <input type="checkbox" id="filtroVigentes" onchange="toggleFiltroVigentes()">
+                                <span class="custom-checkbox"></span>
+                                <span class="toggle-label">Mostrar apenas editais vigentes</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- GRADE DE CARDS -->
+                    <div id="container-vagas" class="grid-vagas">
+                        <div class="status-box">
+                            <div class="status-box-decor"></div>
+                            <h3 class="status-box-titulo">Carregando Dados ⏳</h3>
+                            <p class="status-box-texto">Buscando oportunidades no banco de dados...</p>
+                        </div>
+                    </div>
+                </div><!-- /.conteudo-principal-coluna -->
 
             </div><!-- /#trilho-conteudo -->
         </main>

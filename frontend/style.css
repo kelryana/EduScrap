@@ -390,10 +390,10 @@ body {
 }
 
 .app-container {
-    max-width: 1360px;
+    max-width: 1520px;
     width: 100%;
     margin: 0 auto;
-    padding: 2.5rem 1.5rem 2rem 1.5rem;
+    padding: 2.8rem 2rem 2.5rem 2rem;
     position: relative;
     z-index: 10;
     flex: 1;
@@ -409,32 +409,32 @@ body {
     display: inline-block;
     background-color: var(--color-navy);
     color: var(--color-white);
-    padding: 0.65rem 2rem;
-    font-size: 2.7rem;
+    padding: 0.5rem 1.5rem;
+    font-size: 2rem;
     font-weight: 900;
-    border: 3px solid var(--color-navy);
+    border: 2.5px solid var(--color-navy);
     border-radius: 8px;
-    box-shadow: 6px 6px 0px var(--color-orange);
+    box-shadow: 5px 5px 0px var(--color-orange);
     transform: none;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     cursor: default;
     user-select: none;
-    margin-top: -2rem;
-    margin-bottom: 2.5rem;
+    margin-top: -1.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .logo-box:hover {
     transform: none;
-    box-shadow: 8px 8px 0px var(--color-orange);
+    box-shadow: 7px 7px 0px var(--color-orange);
 }
 
 /* Barra de Busca */
 .busca-wrapper {
-    max-width: 860px;
-    margin: 0 auto 1.85rem auto;
+    max-width: 980px;
+    margin: 0 auto 2.2rem auto;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
 }
 
 @media (min-width: 640px) {
@@ -445,20 +445,20 @@ body {
 
 .input-busca-memphis {
     flex: 1;
-    padding: 1.05rem 1.4rem;
-    font-size: 1.05rem;
-    font-weight: 500;
+    padding: 1.25rem 1.6rem;
+    font-size: 1.18rem;
+    font-weight: 600;
     background-color: #FFFFFF;
-    border: 2.5px solid var(--color-navy);
-    border-radius: 9px;
-    box-shadow: 4px 4px 0px var(--color-navy);
+    border: 3px solid var(--color-navy);
+    border-radius: 12px;
+    box-shadow: 5px 5px 0px var(--color-navy);
     outline: none;
     transition: all 0.15s ease-in-out;
     color: var(--color-navy);
 }
 
 .input-busca-memphis:focus {
-    box-shadow: 6px 6px 0px var(--color-orange);
+    box-shadow: 7px 7px 0px var(--color-orange);
     border-color: var(--color-navy);
 }
 
@@ -469,23 +469,23 @@ body {
 .btn-busca-memphis {
     background-color: var(--color-orange);
     color: #FFFFFF;
-    padding: 1.05rem 2rem;
+    padding: 1.25rem 2.4rem;
     font-weight: 800;
-    font-size: 1.05rem;
-    border: 2.5px solid var(--color-navy);
-    border-radius: 9px;
-    box-shadow: 4px 4px 0px var(--color-navy);
+    font-size: 1.18rem;
+    border: 3px solid var(--color-navy);
+    border-radius: 12px;
+    box-shadow: 5px 5px 0px var(--color-navy);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
     transition: all 0.15s ease-in-out;
 }
 
 .btn-busca-memphis:hover {
     transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0px var(--color-navy);
+    box-shadow: 7px 7px 0px var(--color-navy);
     background-color: #FF881A;
 }
 
@@ -495,40 +495,40 @@ body {
 }
 
 .categoria-tabs-wrapper {
-    max-width: 1440px;
-    margin: 0 auto 1.6rem auto;
+    max-width: 1520px;
+    margin: 0 auto 1.8rem auto;
 }
 
 .categoria-tabs-scroll {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 14px;
     justify-content: center;
 }
 
 .tab-origem-btn {
     background-color: #FFFFFF;
     color: var(--color-navy);
-    border: 2.5px solid var(--color-navy);
-    border-radius: 12px;
-    padding: 12px 22px;
+    border: 3px solid var(--color-navy);
+    border-radius: 14px;
+    padding: 14px 26px;
     font-weight: 800;
-    font-size: 1.05rem;
-    box-shadow: 3.5px 3.5px 0px var(--color-navy);
+    font-size: 1.12rem;
+    box-shadow: 4px 4px 0px var(--color-navy);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     transition: all 0.15s ease;
 }
 
 .tab-origem-btn i {
-    font-size: 1.45rem;
+    font-size: 1.6rem;
 }
 
 .tab-origem-btn:hover:not(.ativo) {
     transform: translate(-2px, -2px);
-    box-shadow: 5.5px 5.5px 0px var(--color-navy);
+    box-shadow: 6px 6px 0px var(--color-navy);
     background-color: #F8FAFC;
 }
 
@@ -540,55 +540,56 @@ body {
 .tab-origem-btn.ativo {
     background-color: var(--color-navy);
     color: #FFFFFF;
-    box-shadow: 2.5px 2.5px 0px var(--color-navy);
+    box-shadow: 3px 3px 0px var(--color-navy);
     transform: translate(1px, 1px);
 }
 
 .student-toolbar {
-    max-width: 1440px;
-    margin: 0 auto 2.5rem auto;
+    width: 100%;
+    margin: 0 0 2rem 0;
     background: #FFFFFF;
     border: 3px solid var(--color-navy);
-    border-radius: 14px;
-    box-shadow: 5px 5px 0px var(--color-navy);
-    padding: 16px 26px;
+    border-radius: 16px;
+    box-shadow: 6px 6px 0px var(--color-navy);
+    padding: 18px 30px;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    gap: 18px;
+    box-sizing: border-box;
 }
 
 .student-toolbar-left {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 14px;
+    gap: 16px;
 }
 
 .btn-filtro-aluno {
     background-color: #FFFDE7;
     color: var(--color-navy);
     border: 2.5px solid var(--color-navy);
-    border-radius: 10px;
-    padding: 12px 22px;
+    border-radius: 12px;
+    padding: 14px 24px;
     font-weight: 800;
-    font-size: 1.05rem;
-    box-shadow: 3.5px 3.5px 0px var(--color-navy);
+    font-size: 1.12rem;
+    box-shadow: 4px 4px 0px var(--color-navy);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     transition: all 0.15s ease;
 }
 
 .btn-filtro-aluno i {
-    font-size: 1.35rem;
+    font-size: 1.5rem;
 }
 
 .btn-filtro-aluno:hover:not(.ativo) {
     transform: translate(-1px, -1px);
-    box-shadow: 4.5px 4.5px 0px var(--color-navy);
+    box-shadow: 5.5px 5.5px 0px var(--color-navy);
     background-color: #FFF59D;
 }
 
@@ -607,19 +608,19 @@ body {
 .toggle-vigentes-container {
     display: inline-flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     cursor: pointer;
     user-select: none;
     font-weight: 800;
-    font-size: 1.02rem;
+    font-size: 1.12rem;
     color: var(--color-navy);
-    padding: 6px 8px;
+    padding: 8px 10px;
     position: relative;
 }
 
 .toggle-vigentes-container .custom-checkbox {
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
 }
 
 .toggle-vigentes-container input {
@@ -633,10 +634,10 @@ body {
 
 .grid-vagas {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 2rem;
     align-content: flex-start;
-    min-height: 480px;
+    min-height: 520px;
 }
 
 @media (max-width: 679px) {
@@ -647,10 +648,10 @@ body {
 
 .card {
     background: #FFFFFF;
-    border: 2.5px solid var(--color-navy);
-    border-radius: 14px;
-    box-shadow: 6px 6px 0px var(--color-navy);
-    padding: 1.65rem;
+    border: 3px solid var(--color-navy);
+    border-radius: 16px;
+    box-shadow: 7px 7px 0px var(--color-navy);
+    padding: 2rem 1.85rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -659,96 +660,96 @@ body {
 }
 
 .card:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 9px 9px 0px var(--color-navy);
+    transform: translate(-3px, -3px);
+    box-shadow: 10px 10px 0px var(--color-navy);
 }
 
 .card-topo {
-    margin-bottom: 1.15rem;
+    margin-bottom: 1.25rem;
 }
 
 .card-tags-row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 0.95rem;
+    gap: 10px;
+    margin-bottom: 1.1rem;
 }
 
 .card-categoria-tag {
     display: inline-block;
-    max-width: 250px;
+    max-width: 270px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     vertical-align: middle;
-    padding: 5px 12px;
-    font-size: 0.80rem;
+    padding: 6px 14px;
+    font-size: 0.90rem;
     font-weight: 800;
     color: #FFFFFF;
-    border-radius: 5px;
-    border: 1.5px solid var(--color-navy);
+    border-radius: 6px;
+    border: 2px solid var(--color-navy);
     letter-spacing: 0.2px;
 }
 
 /* Badges de Status com WCAG AA / AAA */
 .badge-status {
-    padding: 5px 12px;
-    font-size: 0.80rem;
+    padding: 6px 14px;
+    font-size: 0.90rem;
     font-weight: 700;
-    border-radius: 5px;
+    border-radius: 6px;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 7px;
 }
 
 .badge-status-vigente {
     background: #E8F5E9;
     color: #1B5E20;
-    border: 1.5px solid #2E7D32;
+    border: 2px solid #2E7D32;
 }
 
 .badge-status-encerrado {
     background: #F1F3F5;
     color: #495057;
-    border: 1.5px solid #6C757D;
+    border: 2px solid #6C757D;
 }
 
 .badge-status-neutro {
     background: #E3F2FD;
     color: #0D47A1;
-    border: 1.5px solid #1976D2;
+    border: 2px solid #1976D2;
 }
 
 /* Badge destacado para o número oficial do edital */
 .card-edital-numero {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 7px;
     background: #F1F5F9;
     color: #0F172A;
-    border: 1.5px solid #CBD5E1;
-    border-radius: 5px;
-    padding: 4px 10px;
-    font-size: 0.84rem;
+    border: 2px solid #CBD5E1;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 0.92rem;
     font-weight: 800;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.9rem;
     letter-spacing: 0.2px;
-    box-shadow: 1px 1px 0px rgba(15, 23, 42, 0.2);
+    box-shadow: 1.5px 1.5px 0px rgba(15, 23, 42, 0.2);
 }
 
 .card-edital-numero i {
     color: var(--color-orange);
-    font-size: 0.95rem;
+    font-size: 1.05rem;
 }
 
 /* Título em Caixa Mista, Leitura Confortável com Altura Homogênea */
 .card-titulo {
-    font-size: 1.15rem;
-    font-weight: 700;
-    line-height: 1.44;
+    font-size: 1.26rem;
+    font-weight: 800;
+    line-height: 1.45;
     color: var(--color-navy);
-    margin-bottom: 0.85rem;
+    margin-bottom: 1rem;
     text-transform: none !important;
     word-break: break-word;
     display: -webkit-box;
@@ -766,22 +767,22 @@ body {
 .card-meta-box {
     display: flex;
     align-items: flex-start;
-    gap: 8px;
-    font-size: 0.84rem;
+    gap: 10px;
+    font-size: 0.95rem;
     color: #475569;
-    margin-bottom: 1rem;
+    margin-bottom: 1.15rem;
     word-break: break-word;
 }
 
 .meta-icone {
-    font-size: 1.1rem;
+    font-size: 1.25rem;
     color: var(--color-navy);
     flex-shrink: 0;
     margin-top: 2px;
 }
 
 .meta-texto {
-    line-height: 1.4;
+    line-height: 1.45;
 }
 
 .meta-link-oficial {
@@ -1221,27 +1222,27 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
+    gap: 12px;
     margin-top: auto;
-    padding-top: 14px;
-    border-top: 2px dashed #CBD5E1;
+    padding-top: 16px;
+    border-top: 2.5px dashed #CBD5E1;
 }
 
 .card-link-btn {
     flex: 1;
     background-color: #FFFFFF;
     color: var(--color-navy);
-    border: 2px solid var(--color-navy);
-    border-radius: 8px;
-    box-shadow: 3px 3px 0px var(--color-navy);
-    padding: 11px 16px;
+    border: 2.5px solid var(--color-navy);
+    border-radius: 10px;
+    box-shadow: 3.5px 3.5px 0px var(--color-navy);
+    padding: 13px 18px;
     font-weight: 800;
-    font-size: 0.94rem;
+    font-size: 1.05rem;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 9px;
     transition: all 0.15s ease-in-out;
 }
 
@@ -1249,7 +1250,7 @@ body {
     background-color: var(--color-orange);
     color: #FFFFFF;
     transform: translate(-1.5px, -1.5px);
-    box-shadow: 4.5px 4.5px 0px var(--color-navy);
+    box-shadow: 5px 5px 0px var(--color-navy);
 }
 
 .card-link-btn:active {
@@ -1261,22 +1262,22 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 9px;
     background: #FFFFFF;
-    border: 2px solid var(--color-navy);
-    border-radius: 8px;
+    border: 2.5px solid var(--color-navy);
+    border-radius: 10px;
     color: var(--color-navy);
-    padding: 11px 16px;
+    padding: 13px 18px;
     font-weight: 800;
-    font-size: 0.92rem;
+    font-size: 1.02rem;
     cursor: pointer;
-    box-shadow: 3px 3px 0px var(--color-navy);
+    box-shadow: 3.5px 3.5px 0px var(--color-navy);
     transition: all 0.15s ease;
 }
 
 .btn-favoritar-card:hover {
     transform: translate(-1.5px, -1.5px);
-    box-shadow: 4.5px 4.5px 0px var(--color-navy);
+    box-shadow: 5px 5px 0px var(--color-navy);
     background-color: #FFFDE7;
 }
 
@@ -1757,33 +1758,41 @@ body {
     display: flex;
     align-items: flex-start;
     gap: 0;
+    width: 100%;
+    position: relative;
 }
 
-/* Coluna dos cards: ocupa o espaço restante e desliza suavemente */
-.trilho-conteudo > .grid-vagas {
+/* Coluna principal que engloba a toolbar de filtros e o grid de cards */
+.conteudo-principal-coluna {
     flex: 1 1 0%;
     min-width: 0;
-    transition: margin-left 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* NOVA SIDEBAR STYLES — Gaveta local (apenas na região dos cards)
-   Fechada = largura 0 (some do fluxo); Aberta = largura total e empurra os cards. */
+.conteudo-principal-coluna > .grid-vagas {
+    width: 100%;
+}
+
+/* SIDEBAR STYLES — Gaveta local que expande lateralmente à esquerda de toda a seção
+   Fechada = largura 0 (não ocupa nada no fluxo); Aberta = largura confortável sem empurrar para além da tela. */
 .sidebar-perfil {
     flex: 0 0 auto;
-    width: 0;               /* fechado: não ocupa nada, cards ficam intactos */
-    max-width: 520px;
+    width: 0;               /* fechado: não ocupa espaço */
+    max-width: 620px;
     min-width: 0;
     opacity: 0;
     visibility: hidden;
-    overflow: hidden;       /* conteúdo escondido enquanto a gaveta se fecha */
+    overflow: hidden;       /* conteúdo escondido enquanto fecha */
     background: #FFFFFF;
     border: 0 solid var(--color-navy);
-    border-radius: 16px;
-    box-shadow: 7px 7px 0px var(--color-navy);
+    border-radius: 18px;
+    box-shadow: 8px 8px 0px var(--color-navy);
     display: flex;
     flex-direction: column;
-    align-self: flex-start; /* alinha ao topo, sem esticar artificialmente além dos cards */
-    position: sticky;       /* acompanha o scroll sem cobrir header/landing */
+    align-self: flex-start;
+    position: sticky;       /* acompanha a rolagem da página suavemente */
     top: 1.5rem;
     max-height: calc(100vh - 3rem);
     z-index: 12;
@@ -1796,16 +1805,16 @@ body {
 }
 
 .sidebar-perfil.aberto {
-    width: 490px;
-    max-width: 100%;
+    width: 560px;
+    max-width: calc(100vw - 3rem);
     opacity: 1;
     visibility: visible;
-    border-width: 3.5px;    /* moldura Memphis aparece junto com a gaveta */
-    margin-right: 1.75rem;  /* aqui os cards são empurrados p/ direita */
+    border-width: 3.5px;
+    margin-right: 2rem;
 }
 
 /* Quando a sidebar está aberta, os cards ganham respiro e nunca ficam espremidos */
-.sidebar-perfil.aberto + .grid-vagas {
+.sidebar-perfil.aberto ~ .conteudo-principal-coluna .grid-vagas {
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
 }
 
@@ -1823,20 +1832,20 @@ body {
 }
 
 .sidebar-header {
-    padding: 16px 20px;
+    padding: 18px 24px;
     background: #0F172A;
     color: #ffffff;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     flex-shrink: 0;
     box-sizing: border-box;
     width: 100%;
 }
 
 .sidebar-title {
-    font-size: 1.15rem;
+    font-size: 1.25rem;
     font-weight: 800;
     color: #ffffff;
     margin: 0;
@@ -1851,14 +1860,14 @@ body {
     background: none;
     border: none;
     color: #ffffff;
-    font-size: 0.96rem;
+    font-size: 1.05rem;
     font-weight: 800;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 5px 10px;
-    border-radius: 8px;
+    gap: 7px;
+    padding: 6px 12px;
+    border-radius: 9px;
     white-space: nowrap;
     flex-shrink: 0;
     transition: background-color 0.2s ease;
@@ -1870,14 +1879,14 @@ body {
 
 .modal-dots {
     display: flex;
-    gap: 6px;
+    gap: 7px;
     align-items: center;
     flex-shrink: 0;
 }
 
 .dot {
-    width: 13px;
-    height: 13px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
     border: 2px solid #0F172A;
 }
@@ -1887,7 +1896,7 @@ body {
 .dot-green { background-color: #22C55E; }
 
 .sidebar-body {
-    padding: 22px 24px 26px 24px;
+    padding: 26px 28px 30px 28px;
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
@@ -1896,7 +1905,7 @@ body {
 }
 
 .sidebar-body::-webkit-scrollbar {
-    width: 7px;
+    width: 8px;
 }
 .sidebar-body::-webkit-scrollbar-track {
     background: transparent;
@@ -1938,26 +1947,26 @@ body {
 .perfil-card-info {
     display: flex;
     align-items: center;
-    gap: 15px;
-    padding: 15px 18px;
+    gap: 18px;
+    padding: 18px 22px;
     background: #F8FAFC;
     border: 2.5px solid #E2E8F0;
-    border-radius: 14px;
-    margin-bottom: 20px;
+    border-radius: 16px;
+    margin-bottom: 24px;
 }
 
 .perfil-avatar-badge {
-    width: 52px;
-    height: 52px;
+    width: 60px;
+    height: 60px;
     border: 2.5px solid var(--color-navy);
-    border-radius: 12px;
+    border-radius: 14px;
     background: #FACC15;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.55rem;
+    font-size: 1.8rem;
     color: var(--color-navy);
-    box-shadow: 2.5px 2.5px 0px var(--color-navy);
+    box-shadow: 3px 3px 0px var(--color-navy);
     flex-shrink: 0;
 }
 
@@ -1967,17 +1976,17 @@ body {
 }
 
 .perfil-info-nome {
-    font-size: 1.18rem;
+    font-size: 1.3rem;
     font-weight: 800;
     color: var(--color-navy);
-    margin-bottom: 3px;
+    margin-bottom: 4px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .perfil-info-email {
-    font-size: 0.92rem;
+    font-size: 1rem;
     color: #64748B;
     margin: 0;
     white-space: nowrap;
@@ -1986,29 +1995,29 @@ body {
 }
 
 .form-group-memphis {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
 }
 
 .label-memphis {
-    font-size: 1.05rem;
+    font-size: 1.15rem;
     font-weight: 800;
     color: #0F172A;
-    margin-bottom: 6px;
+    margin-bottom: 7px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 9px;
 }
 
 .label-memphis i {
-    font-size: 1.25rem;
+    font-size: 1.4rem;
 }
 
 .label-com-subtexto {
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 .label-subtexto {
-    font-size: 0.84rem;
+    font-size: 0.92rem;
     color: #64748B;
     font-weight: 600;
 }
@@ -2016,28 +2025,28 @@ body {
 .chips-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 12px;
 }
 
 .chip-opcao {
-    padding: 8px 16px;
-    font-size: 0.95rem;
+    padding: 10px 18px;
+    font-size: 1.05rem;
     font-weight: 700;
     border: 2.5px solid #0F172A;
     border-radius: 9999px;
     background: #ffffff;
     color: #0F172A;
     cursor: pointer;
-    box-shadow: 2.5px 2.5px 0px #0F172A;
+    box-shadow: 3px 3px 0px #0F172A;
     transition: all 0.15s ease;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
 
 .chip-opcao:hover {
-    transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0px #0F172A;
+    transform: translate(-1.5px, -1.5px);
+    box-shadow: 4.5px 4.5px 0px #0F172A;
 }
 
 .chip-opcao.chip-selecionado {
@@ -2049,11 +2058,11 @@ body {
 .checkbox-memphis-container {
     display: inline-flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     cursor: pointer;
     user-select: none;
     position: relative;
-    padding: 4px 0;
+    padding: 6px 0;
 }
 
 /* Oculta o input padrão nativo mas mantém foco e acessibilidade */
@@ -2068,11 +2077,11 @@ body {
 
 .custom-checkbox {
     position: relative;
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
     background: #FFFFFF;
     border: 2.5px solid #0F172A;
-    border-radius: 6px;
+    border-radius: 7px;
     box-shadow: 2.5px 2.5px 0px #0F172A;
     display: inline-flex;
     align-items: center;
@@ -2097,7 +2106,7 @@ body {
 .toggle-vigentes-container input[type="checkbox"]:checked + .custom-checkbox::after {
     content: "✓";
     color: #FACC15;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 900;
     line-height: 1;
 }
@@ -2111,41 +2120,41 @@ body {
 .label-texto {
     font-weight: 800;
     color: #0F172A;
-    font-size: 0.98rem;
+    font-size: 1.05rem;
 }
 
 .msg-sucesso-memphis {
-    padding: 12px 16px;
+    padding: 14px 18px;
     background: #D1FAE5;
     border: 2.5px solid #10B981;
-    border-radius: 10px;
+    border-radius: 12px;
     color: #065F46;
     font-weight: 700;
-    font-size: 0.95rem;
-    margin-bottom: 16px;
+    font-size: 1.02rem;
+    margin-bottom: 18px;
     text-align: center;
 }
 
 .perfil-botoes-row {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-top: 18px;
+    gap: 14px;
+    margin-top: 20px;
 }
 
 .btn-submit-memphis {
-    min-height: 48px;
-    padding: 13px 20px;
-    font-size: 1.05rem;
+    min-height: 52px;
+    padding: 15px 22px;
+    font-size: 1.15rem;
     font-weight: 800;
     border: 3px solid #0F172A;
-    border-radius: 12px;
+    border-radius: 14px;
     cursor: pointer;
     box-shadow: 4px 4px 0px #0F172A;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 12px;
     transition: all 0.15s ease;
     text-align: center;
 }
