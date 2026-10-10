@@ -617,40 +617,55 @@ function formatarTituloEdital(texto) {
 }
 
 // Normaliza categorias gigantescas para tags compactas e legíveis
-function normalizarCategoriaTag(categoria, tipoContexto) {
-    if (!categoria) {
-        const mapaFallback = {
-            'estagios': 'Estágios (PRAE)',
-            'bolsas': 'Bolsas (PROEX)',
-            'ufersa': 'Editais UFERSA',
-            'mprn': 'Estágios MPRN',
-            'ifrn': 'Editais IFRN',
-            'iel': 'Estágios IEL/RN',
-            'dom': 'DOM Mossoró',
-            'ciee': 'Vagas CIEE',
-            'portal_uern': 'Portal UERN',
-            'noticias': 'Notícia'
-        };
-        return mapaFallback[tipoContexto] || 'Oportunidade';
+function normalizarCategoriaTag(categoria, tipoContexto, vaga) {
+    const fonte = ((vaga && vaga.fonte) || '').toLowerCase();
+    const titulo = ((vaga && (vaga.titulo || vaga.nome)) || '').toLowerCase();
+    const cLower = (categoria || '').toLowerCase();
+
+    // 1. Prioridade por Fonte / Instituição Real
+    if (fonte.includes('ifrn') || titulo.includes('[ifrn') || tipoContexto === 'ifrn') return 'Editais IFRN';
+    if (fonte.includes('iel') || titulo.includes('[iel') || tipoContexto === 'iel') return 'Estágios IEL/RN';
+    if (fonte.includes('mprn') || titulo.includes('[mprn') || tipoContexto === 'mprn' || cLower.includes('mprn')) return 'Estágios MPRN';
+    if (fonte.includes('prefeitura de mossoró') || titulo.includes('[dom/mossoró') || tipoContexto === 'dom') return 'DOM Mossoró';
+    if (fonte.includes('ufersa') || titulo.includes('[cpps') || tipoContexto === 'ufersa') return 'Editais UFERSA';
+    if (fonte.includes('ciee') || tipoContexto === 'ciee') return 'Vagas CIEE';
+    if (fonte.includes('estudar fora') || fonte.includes('fundação estudar')) return 'Bolsa de Estudos';
+    if (fonte.includes('dio') || fonte.includes('microsoft') || fonte.includes('trabalho')) return 'Capacitação & Cursos';
+
+    // 2. Se a origem for o Portal UERN (Blog institucional/AGECOM)
+    if (fonte.includes('portal uern') || tipoContexto === 'portal_uern' || (vaga && vaga.fonte_id === 'portal_uern_oficial')) {
+        if (titulo.includes('solidariedade') || titulo.includes('nota de') || titulo.includes('luto') || titulo.includes('pesar')) {
+            return 'Comunicado Oficial';
+        }
+        if (titulo.includes('conselho') || titulo.includes('consepe') || titulo.includes('consuni') || titulo.includes('vagas iniciais') || titulo.includes('sisu')) {
+            return 'Acadêmico UERN';
+        }
+        if (titulo.includes('estágio') || titulo.includes('estagio')) {
+            return 'Estágio UERN';
+        }
+        if (titulo.includes('bolsa') || titulo.includes('auxílio') || titulo.includes('auxilio')) {
+            return 'Bolsas UERN';
+        }
+        if (titulo.includes('proficiência') || titulo.includes('mobilidade') || titulo.includes('abruem') || titulo.includes('curso')) {
+            return 'Intercâmbio & Cursos';
+        }
+        return 'Notícia UERN';
     }
 
-    const cLower = categoria.toLowerCase();
-    if (cLower.includes('dom') || cLower.includes('mossoró') || cLower.includes('mossoro')) return 'DOM Mossoró';
-    if (cLower.includes('ifrn')) return 'Editais IFRN';
-    if (cLower.includes('iel')) return 'Estágios IEL/RN';
-    if (cLower.includes('mprn') || cLower.includes('residência') || cLower.includes('residencia')) return 'Estágios MPRN';
+    // 3. Editais de Assistência e Extensão da UERN (vindos de coleções específicas da PRAE/PROEX)
     if (cLower.includes('inclusão digital') || cLower.includes('inclusao digital')) return 'Inclusão Digital';
     if (cLower.includes('moradia')) return 'Auxílio Moradia';
     if (cLower.includes('creche')) return 'Auxílio Creche';
     if (cLower.includes('transporte')) return 'Auxílio Transporte';
     if (cLower.includes('alimentação') || cLower.includes('alimentacao')) return 'Auxílio Alimentação';
     if (cLower.includes('permanência') || cLower.includes('permanencia')) return 'Permanência Estudantil';
-    if (cLower.includes('estágio') || cLower.includes('estagio') || cLower.includes('prae')) return 'Estágios (PRAE)';
-    if (cLower.includes('bolsa') || cLower.includes('proex')) return 'Bolsas (PROEX)';
-    if (cLower.includes('ufersa')) return 'Editais UFERSA';
-    if (cLower.includes('ciee')) return 'Vagas CIEE';
-    if (cLower.includes('notícia') || cLower.includes('tech')) return 'Notícia Tech';
-    if (cLower.includes('portal uern')) return 'Portal UERN';
+    if (tipoContexto === 'estagios' || fonte.includes('prae')) return 'Estágios (PRAE)';
+    if (tipoContexto === 'bolsas' || fonte.includes('proex')) return 'Bolsas (PROEX)';
+    if (cLower.includes('notícia tech') || (tipoContexto === 'noticias' && (fonte.includes('g1') || fonte.includes('canaltech')))) return 'Notícia Tech';
+
+    if (!categoria) {
+        return 'Oportunidade';
+    }
 
     if (categoria.length <= 26) {
         return formatarTituloEdital(categoria);
@@ -772,10 +787,23 @@ function renderizarCards(listaDeVagas) {
     const corCategoriaMap = {
         "Estágios (PRAE)": "#112244",
         "Bolsas (PROEX)": "#FF7A00",
+        "Editais UFERSA": "#6B21A8",
         "UFERSA": "#6B21A8",
+        "Estágios MPRN": "#1E3A8A",
+        "Editais IFRN": "#15803D",
+        "Estágios IEL/RN": "#B45309",
+        "DOM Mossoró": "#4338CA",
         "Vagas CIEE": "#0F4C81",
         "Portal UERN": "#C2410C",
-        "Notícia Tech": "#1E7E34"
+        "Comunicado Oficial": "#475569",
+        "Acadêmico UERN": "#0284C7",
+        "Estágio UERN": "#1E3A8A",
+        "Bolsas UERN": "#EA580C",
+        "Intercâmbio & Cursos": "#0D9488",
+        "Notícia UERN": "#047857",
+        "Notícia Tech": "#1E7E34",
+        "Bolsa de Estudos": "#0D9488",
+        "Capacitação & Cursos": "#7C3AED"
     };
 
     const favSet = (usuarioAtual && usuarioAtual.favoritos) ? new Set(usuarioAtual.favoritos.map(String)) : new Set();
@@ -784,7 +812,7 @@ function renderizarCards(listaDeVagas) {
         const idStr = String(vaga._id);
         const ehFavorito = vaga.favorito === true || favSet.has(idStr);
         const ehNoticia = vaga.categoria === "Notícia Tech" || tipoAtual === "noticias";
-        const categoriaFormatada = normalizarCategoriaTag(vaga.categoria, tipoAtual);
+        const categoriaFormatada = normalizarCategoriaTag(vaga.categoria, tipoAtual, vaga);
         const corTag = corCategoriaMap[vaga.categoria] || corCategoriaMap[categoriaFormatada] || "#112244";
 
         let badgeStatusHTML = "";
