@@ -25,7 +25,7 @@ class MongoDBHandler:
             self._connect()
 
     def _connect(self) -> None:
-        """Estabelece conexão com MongoDB"""
+       
         try:
             self.client = MongoClient(
                 self.uri,
@@ -111,22 +111,12 @@ class MongoDBHandler:
             return None
 
     def upsert_documento(self, doc: Dict[str, Any], collection_name: str, identifier_field: str) -> Optional[str]:
-        """
-        Realiza upsert (update se existir, insert se não existir) de um documento.
-        
-        Args:
-            doc: Documento a ser inserido/atualizado
-            collection_name: Nome da coleção onde salvar
-            identifier_field: Campo usado para identificar documentos duplicados
-            
-        Returns:
-            ID do documento inserido/atualizado ou None em caso de erro
-        """
+       
         try:
             # Adiciona timestamp de atualização
             doc['atualizado_em'] = datetime.now().isoformat()
             
-            # Define o filtro para encontrar documento existente
+           
             filter_criteria = {identifier_field: doc[identifier_field]}
             
             # Realiza upsert
@@ -141,14 +131,14 @@ class MongoDBHandler:
                 logger.info(f"Documento inserido com ID: {result.upserted_id}")
                 return str(result.upserted_id)
             else:
-                # Se foi um update, precisamos buscar o ID do documento
+               
                 found_doc = self.db[collection_name].find_one(filter_criteria)
                 if found_doc:
                     doc_id = str(found_doc['_id'])
                     logger.info(f"Documento atualizado com ID: {doc_id}")
                     return doc_id
                 else:
-                    # Caso raro: documento não encontrado após replace_one
+                    
                     logger.warning(f"Documento não encontrado após upsert: {filter_criteria}")
                     return None
                     
@@ -166,7 +156,6 @@ class MongoDBHandler:
    
         resultados = []
 
-        # Query para editais
         query_editais = {}
         if status:
             query_editais['status'] = status.capitalize()
@@ -279,12 +268,7 @@ class MongoDBHandler:
             return None
 
     def update_status(self) -> int:
-        """
-        Atualiza o status de todos os editais baseado na data limite
-
-        Returns:
-            Número de documentos atualizados
-        """
+       
         from datetime import datetime
         hoje = datetime.now()
 
@@ -313,10 +297,6 @@ class MongoDBHandler:
         except Exception as e:
             logger.error(f"Erro ao atualizar status: {str(e)}")
             return 0
-
-    # ==========================================
-    # MÉTODOS DE USUÁRIOS, PREFERÊNCIAS E FAVORITOS
-    # ==========================================
 
     def create_user(self, user_data: Dict[str, Any]) -> Optional[str]:
         """
@@ -350,7 +330,7 @@ class MongoDBHandler:
             return None
 
     def find_user_by_email(self, email: str) -> Optional[Dict[str, Any]]:
-        """Busca usuário por email"""
+       
         try:
             if not email:
                 return None
@@ -363,7 +343,7 @@ class MongoDBHandler:
             return None
 
     def find_user_by_id(self, user_id: str, include_password: bool = False) -> Optional[Dict[str, Any]]:
-        """Busca usuário por ID (remove senha_hash se include_password for False)"""
+       
         try:
             from bson import ObjectId
             try:
@@ -382,7 +362,7 @@ class MongoDBHandler:
             return None
 
     def update_user_preferences(self, user_id: str, preferencias: Dict[str, Any]) -> bool:
-        """Atualiza preferências de cursos, áreas e notificações de e-mail"""
+       
         try:
             from bson import ObjectId
             try:
@@ -410,7 +390,7 @@ class MongoDBHandler:
             return False
 
     def update_user_profile(self, user_id: str, profile_data: Dict[str, Any]) -> bool:
-        """Atualiza dados do perfil (nome, matricula)"""
+       
         try:
             from bson import ObjectId
             try:
@@ -432,7 +412,7 @@ class MongoDBHandler:
             return False
 
     def add_favorito(self, user_id: str, oportunidade_id: str) -> bool:
-        """Adiciona uma oportunidade aos favoritos do usuário"""
+       
         try:
             from bson import ObjectId
             try:
@@ -453,7 +433,7 @@ class MongoDBHandler:
             return False
 
     def remove_favorito(self, user_id: str, oportunidade_id: str) -> bool:
-        """Remove uma oportunidade dos favoritos do usuário"""
+        
         try:
             from bson import ObjectId
             try:
@@ -474,7 +454,7 @@ class MongoDBHandler:
             return False
 
     def get_user_favoritos(self, user_id: str) -> List[Dict[str, Any]]:
-        """Retorna todas as oportunidades favoritadas pelo usuário"""
+        
         try:
             user = self.find_user_by_id(user_id)
             if not user or not user.get('favoritos'):
@@ -511,9 +491,7 @@ class MongoDBHandler:
             return []
 
     def get_feed_personalizado(self, user_id: str, limit: int = 50) -> List[Dict[str, Any]]:
-        """
-        Retorna oportunidades recomendadas com base nas preferências (cursos/áreas) do aluno.
-        """
+       
         try:
             user = self.find_user_by_id(user_id)
             if not user:
@@ -523,15 +501,13 @@ class MongoDBHandler:
             cursos = preferencias.get('cursos', [])
             areas = preferencias.get('areas', [])
             user_favoritos = set(user.get('favoritos', []))
-
-            # Se não houver cursos ou áreas selecionados, retorna oportunidades gerais vigentes
+         
             if not cursos and not areas:
                 todas = self.get_oportunidades(status="Aberto", limit=limit)
                 for item in todas:
                     item['favorito'] = item.get('_id') in user_favoritos
                 return todas
-
-            # Monta critérios regex OR para cursos e áreas
+           
             termos = [re.escape(c) for c in cursos if c] + [re.escape(a) for a in areas if a]
             if not termos:
                 todas = self.get_oportunidades(status="Aberto", limit=limit)
@@ -570,8 +546,7 @@ class MongoDBHandler:
                 vaga['tipo_documento'] = 'vaga'
                 vaga['favorito'] = vaga['_id'] in user_favoritos
                 resultados.append(vaga)
-
-            # Se o filtro específico retornar poucos resultados, complementa com oportunidades gerais
+        
             if len(resultados) < 5:
                 gerais = self.get_oportunidades(status="Aberto", limit=limit - len(resultados))
                 ids_existentes = {r['_id'] for r in resultados}
@@ -586,7 +561,7 @@ class MongoDBHandler:
             return self.get_oportunidades(limit=limit)
 
     def close(self) -> None:
-        """Fecha a conexão com MongoDB"""
+       
         if self.client:
             self.client.close()
             logger.info("Conexão com MongoDB fechada")

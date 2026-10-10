@@ -107,7 +107,7 @@ function atualizarInterfaceUsuario() {
         navAuth.innerHTML = `
             <div class="nav-user-box">
                 <span class="nav-user-tag">
-                    🎓 Olá, <strong id="user-name-display">${primeiroNome}</strong>
+                    <i class="ph-bold ph-student"></i> Olá, <strong id="user-name-display">${primeiroNome}</strong>
                 </span>
                 <button class="btn-nav-mini btn-nav-logout" onclick="fazerLogout()" title="Sair da Conta">
                     <i class="ph-bold ph-sign-out"></i>
@@ -131,7 +131,7 @@ function atualizarInterfaceUsuario() {
             bannerUsuario.style.display = 'flex';
             const cursosCount = (usuarioAtual.preferencias && usuarioAtual.preferencias.cursos) ? usuarioAtual.preferencias.cursos.length : 0;
             const areasCount = (usuarioAtual.preferencias && usuarioAtual.preferencias.areas) ? usuarioAtual.preferencias.areas.length : 0;
-            bannerTexto.innerHTML = `🎯 <strong>Feed Personalizado Ativo:</strong> ${cursosCount} curso(s) e ${areasCount} área(s) configurados.`;
+            bannerTexto.innerHTML = `<i class="ph-bold ph-sparkle text-brand-orange"></i> <strong>Feed Personalizado Ativo:</strong> ${cursosCount} curso(s) e ${areasCount} área(s) configurados.`;
         }
     } else {
         navAuth.innerHTML = `
@@ -179,14 +179,14 @@ function abrirSidebarPerfil() {
     containerCursos.innerHTML = '';
     TODOS_CURSOS.forEach(curso => {
         const sel = cursosSalvos.includes(curso) ? 'chip-selecionado' : '';
-        containerCursos.innerHTML += `<button type="button" class="chip-opcao ${sel}" data-valor="${curso}"><span class="chip-check">✓</span> ${curso}</button>`;
+        containerCursos.innerHTML += `<button type="button" class="chip-opcao ${sel}" data-valor="${curso}"><span class="chip-check"><i class="ph-bold ph-check"></i></span> ${curso}</button>`;
     });
 
     const containerAreas = document.getElementById('perfil-chips-areas-sidebar');
     containerAreas.innerHTML = '';
     TODAS_AREAS.forEach(area => {
         const sel = areasSalvas.includes(area) ? 'chip-selecionado' : '';
-        containerAreas.innerHTML += `<button type="button" class="chip-opcao ${sel}" data-valor="${area}"><span class="chip-check">✓</span> ${area}</button>`;
+        containerAreas.innerHTML += `<button type="button" class="chip-opcao ${sel}" data-valor="${area}"><span class="chip-check"><i class="ph-bold ph-check"></i></span> ${area}</button>`;
     });
 
     document.getElementById('perfil-receber-emails-sidebar').checked = emailNotif;
@@ -282,7 +282,7 @@ async function executarLogin(e) {
 
         setAuthSession(data.token, data.user);
         fecharModalAuth();
-        mostrarToast(`Bem-vindo de volta, ${data.user.nome.split(' ')[0]}! 🎉`, 'sucesso');
+        mostrarToast(`Bem-vindo de volta, ${data.user.nome.split(' ')[0]}!`, 'sucesso');
         carregarFeedPersonalizado();
 
     } catch (err) {
@@ -321,7 +321,7 @@ async function executarCadastro(e) {
 
         setAuthSession(data.token, data.user);
         fecharModalAuth();
-        mostrarToast(`Conta criada com sucesso! Perfil configurado. 🎓`, 'sucesso');
+        mostrarToast('Conta criada com sucesso! Perfil configurado.', 'sucesso');
         carregarFeedPersonalizado();
 
     } catch (err) {
@@ -367,7 +367,7 @@ async function salvarPreferenciasPerfil(e) {
         atualizarInterfaceUsuario();
 
         if (feedback) {
-            feedback.innerText = "Preferências atualizadas com sucesso! ✅";
+            feedback.innerText = "Preferências atualizadas com sucesso!";
             feedback.style.display = 'block';
             feedback.style.backgroundColor = '#D1FAE5';
             feedback.style.color = '#065F46';
@@ -526,7 +526,7 @@ async function carregarFeedPersonalizado() {
         container.innerHTML = `
             <div class="status-box" style="border-color: var(--color-yellow);">
                 <div class="status-box-decor"></div>
-                <h3 class="status-box-titulo">Personalize seu Feed Universitário 🎯</h3>
+                <h3 class="status-box-titulo"><i class="ph-bold ph-sparkle text-brand-orange"></i> Personalize seu Feed Universitário</h3>
                 <p class="status-box-texto">Cadastre-se para filtrar automaticamente oportunidades que combinam exatamente com o seu curso de graduação.</p>
                 <div style="margin-top: 15px;">
                     <button class="btn-hero-primary" onclick="abrirModalAuth('register')">
@@ -1020,7 +1020,7 @@ async function carregarEstatisticas() {
                         <!-- Card Estágios -->
                         <div class="dash-kpi-card card-cor-laranja">
                             <div class="dash-kpi-header">
-                                <span class="dash-kpi-icone">🎓</span>
+                                <span class="dash-kpi-icone"><i class="ph-bold ph-graduation-cap"></i></span>
                                 <span class="dash-kpi-badge-label">ESTÁGIOS (PRAE / CONVÊNIOS)</span>
                             </div>
                             <div class="dash-kpi-numero">${totalEstagios}</div>
@@ -1029,7 +1029,7 @@ async function carregarEstatisticas() {
                         <!-- Card Bolsas -->
                         <div class="dash-kpi-card card-cor-ciano">
                             <div class="dash-kpi-header">
-                                <span class="dash-kpi-icone">💰</span>
+                                <span class="dash-kpi-icone"><i class="ph-bold ph-coins"></i></span>
                                 <span class="dash-kpi-badge-label">BOLSAS (PROEX)</span>
                             </div>
                             <div class="dash-kpi-numero">${totalBolsas}</div>
@@ -1038,7 +1038,7 @@ async function carregarEstatisticas() {
                         <!-- Card UFERSA -->
                         <div class="dash-kpi-card card-cor-roxo">
                             <div class="dash-kpi-header">
-                                <span class="dash-kpi-icone">🏛️</span>
+                                <span class="dash-kpi-icone"><i class="ph-bold ph-buildings"></i></span>
                                 <span class="dash-kpi-badge-label">UFERSA EDITAIS</span>
                             </div>
                             <div class="dash-kpi-numero">${totalUfersa}</div>
@@ -1047,7 +1047,7 @@ async function carregarEstatisticas() {
                         <!-- Card Tech -->
                         <div class="dash-kpi-card card-cor-verde">
                             <div class="dash-kpi-header">
-                                <span class="dash-kpi-icone">⚡</span>
+                                <span class="dash-kpi-icone"><i class="ph-bold ph-lightning"></i></span>
                                 <span class="dash-kpi-badge-label">NOTÍCIAS TECH</span>
                             </div>
                             <div class="dash-kpi-numero">${totalTech}</div>
@@ -1056,7 +1056,7 @@ async function carregarEstatisticas() {
                         <!-- Card Portal UERN -->
                         <div class="dash-kpi-card card-cor-navy">
                             <div class="dash-kpi-header">
-                                <span class="dash-kpi-icone">🔍</span>
+                                <span class="dash-kpi-icone"><i class="ph-bold ph-magnifying-glass"></i></span>
                                 <span class="dash-kpi-badge-label">PORTAL UERN (MINERADO)</span>
                             </div>
                             <div class="dash-kpi-numero">${totalUern}</div>
@@ -1077,7 +1077,7 @@ async function carregarEstatisticas() {
                             </div>
                             <div class="dash-widget-info">
                                 <div class="dash-widget-titulo-row">
-                                    <span class="dash-icone-box bg-laranja">🎓</span>
+                                    <span class="dash-icone-box bg-laranja"><i class="ph-bold ph-graduation-cap"></i></span>
                                     <h3 class="dash-widget-titulo">ESTÁGIOS</h3>
                                 </div>
                                 <p class="dash-widget-desc">Oportunidades ativas e convênios na UFERSA, IFRN, MPRN e setor privado regional.</p>
@@ -1103,7 +1103,7 @@ async function carregarEstatisticas() {
                             </div>
                             <div class="dash-widget-info">
                                 <div class="dash-widget-titulo-row">
-                                    <span class="dash-icone-box bg-ciano">💰</span>
+                                    <span class="dash-icone-box bg-ciano"><i class="ph-bold ph-coins"></i></span>
                                     <h3 class="dash-widget-titulo">BOLSAS</h3>
                                 </div>
                                 <p class="dash-widget-desc">Projetos de extensão universitária e auxílios permanência abertos.</p>
@@ -1114,7 +1114,7 @@ async function carregarEstatisticas() {
                                 <div class="dash-slider-progresso bg-ciano" style="width: 55%;"></div>
                                 <div class="dash-slider-ponteiro" style="left: 55%;"></div>
                             </div>
-                            <span class="dash-slider-tag tag-alerta">⚠️ ${retaFinal} EXPIRAM HOJE</span>
+                            <span class="dash-slider-tag tag-alerta"><i class="ph-bold ph-warning"></i> ${retaFinal} EXPIRAM HOJE</span>
                         </div>
                     </div>
 
@@ -1129,7 +1129,7 @@ async function carregarEstatisticas() {
                             </div>
                             <div class="dash-widget-info">
                                 <div class="dash-widget-titulo-row">
-                                    <span class="dash-icone-box bg-amarelo">⚡</span>
+                                    <span class="dash-icone-box bg-amarelo"><i class="ph-bold ph-lightning"></i></span>
                                     <h3 class="dash-widget-titulo">TECH & DEV</h3>
                                 </div>
                                 <p class="dash-widget-desc">Bootcamps de IA, hackathons, cursos gratuitos e novidades do setor.</p>
@@ -1170,7 +1170,7 @@ async function carregarEstatisticas() {
                         </div>
 
                         <div class="dash-radar-footer">
-                            <span>⚡ ${canais} canais monitorados</span>
+                            <span><i class="ph-bold ph-lightning"></i> ${canais} canais monitorados</span>
                             <span class="dash-status-ativo">100% Ativos</span>
                         </div>
                     </div>
@@ -1254,64 +1254,6 @@ async function carregarEstatisticas() {
     }
 }
 
-// 3. Status e Governança NoSQL
-async function carregarInspector() {
-    const antigo = document.getElementById('bloco-paginacao');
-    if (antigo) antigo.remove();
-
-    const container = document.getElementById('container-vagas');
-    container.style.display = 'block';
-    container.innerHTML = '<p class="carregando">Lendo integridade dos nós e volumes de armazenamento...</p>';
-
-    destacarBotaoAtivo('btn-inspector');
-
-    try {
-        const res = await fetch(`${API_URL}/db-status`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-            signal: AbortSignal.timeout(10000)
-        });
-
-        if (!res.ok) throw new Error(`Erro: ${res.status}`);
-        const info = await res.json();
-
-        let html = `
-            <div style="background: white; border: 3px solid var(--color-navy); border-radius: 12px; padding: 2.5rem; box-shadow: 6px 6px 0px var(--color-cyan); margin-bottom: 2rem;">
-                <h2 style="color: var(--color-navy); margin-bottom: 0.5rem; border-bottom: 4px solid var(--color-navy); padding-bottom: 8px; font-weight: 800;">
-                    🖥️ Status da Infraestrutura e Governança NoSQL
-                </h2>
-                <p style="color: #555; margin-bottom: 2rem; font-size: 0.95rem;">
-                    Relatório transparente volumétrico do cluster NoSQL e integridade estrutural das coleções.
-                </p>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-        `;
-
-        if (info && info.colecoes) {
-            info.colecoes.forEach(col => {
-                const indexBadges = col.indices.map(idx => `<span class="badge-index">${idx}</span>`).join(' ');
-                html += `
-                    <div class="db-inspector-card">
-                        <div style="display: flex; align-items: center; margin-bottom: 12px; border-bottom: 2px solid var(--color-navy); padding-bottom: 6px;">
-                            <h3 style="color: var(--color-navy); font-size: 1.05rem; font-weight: bold;">📁 Coleção: ${col.colecao}</h3>
-                        </div>
-                        <p style="font-size: 0.9rem; margin-bottom: 6px; color: #333;">Documentos Ativos: <strong>${col.documentos}</strong></p>
-                        <p style="font-size: 0.9rem; margin-bottom: 12px; color: #333;">Alocação Física: <strong>${col.tamanho_kb} KB</strong></p>
-                        <div style="border-top: 1.5px dashed var(--color-navy); padding-top: 8px; margin-top: 10px;">
-                            <p style="font-size: 0.75rem; font-weight: 800; color: var(--color-navy); margin-bottom: 6px;">ESTRUTURAS DE ÍNDICES:</p>
-                            <div style="display: flex; flex-wrap: wrap; gap: 4px;">${indexBadges}</div>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        html += `</div></div>`;
-        container.innerHTML = html;
-    } catch (erro) {
-        container.innerHTML = `<p class="carregando" style="color: red;">Não foi possível ler os metadados: ${erro.message}</p>`;
-    }
-}
-
 function mostrarToast(mensagem, tipo = 'info') {
     const container = document.getElementById('toast-container');
     if (!container) return;
@@ -1319,10 +1261,10 @@ function mostrarToast(mensagem, tipo = 'info') {
     const toast = document.createElement('div');
     toast.className = `toast-item-memphis toast-${tipo}`;
 
-    let icone = '🔔';
-    if (tipo === 'sucesso') icone = '✅';
-    if (tipo === 'erro') icone = '❌';
-    if (tipo === 'info') icone = '💡';
+    let icone = '<i class="ph-bold ph-bell"></i>';
+    if (tipo === 'sucesso') icone = '<i class="ph-bold ph-check-circle"></i>';
+    if (tipo === 'erro') icone = '<i class="ph-bold ph-x-circle"></i>';
+    if (tipo === 'info') icone = '<i class="ph-bold ph-info"></i>';
 
     toast.innerHTML = `
         <span class="toast-icone">${icone}</span>

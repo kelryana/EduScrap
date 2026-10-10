@@ -227,7 +227,7 @@ def main():
     resultados = []
 
     if args.serial or total == 1:
-        # Modo sequencial
+       
         for chave, info in selecionados.items():
             print(f"  {info['icone']} Executando: {info['nome']}...")
             res = executar_scraper(chave, info)
@@ -237,7 +237,7 @@ def main():
             else:
                 print(f"     ❌ Falhou ({res['erro']}). Veja o log: {res['log']}")
     else:
-        # Modo paralelo concorrente (máxima performance e tempo reduzido)
+       
         print("  Iniciando raspagens simultâneas em segundo plano...")
         with ThreadPoolExecutor(max_workers=min(total, 6)) as executor:
             futuros = {
@@ -254,7 +254,7 @@ def main():
 
     tempo_total = round(time.time() - inicio_global, 1)
 
-    # Relatório Final
+   
     sucessos = sum(1 for r in resultados if r["sucesso"])
     falhas = total - sucessos
 

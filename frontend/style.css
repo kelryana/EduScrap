@@ -105,6 +105,64 @@ body {
     background: rgba(255, 122, 0, 0.08);
 }
 
+.nav-actions-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: #FFFFFF;
+    color: #0F172A;
+    border: 2.5px solid #0F172A;
+    border-radius: 12px;
+    box-shadow: 3px 3px 0px #0F172A;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+    line-height: 1;
+}
+
+.btn-theme-toggle:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0px #0F172A;
+    background-color: #FACC15;
+}
+
+.btn-theme-toggle:active {
+    transform: translate(1.5px, 1.5px);
+    box-shadow: 1.5px 1.5px 0px #0F172A;
+}
+
+.btn-theme-toggle i {
+    font-size: 1.25rem;
+    line-height: 1;
+    transition: transform 0.25s ease;
+}
+
+.btn-theme-toggle:hover i {
+    transform: rotate(20deg) scale(1.1);
+}
+
+@media (max-width: 640px) {
+    .btn-theme-toggle .theme-toggle-text {
+        display: none;
+    }
+    .btn-theme-toggle {
+        padding: 9px 12px;
+    }
+    .nav-actions-container {
+        gap: 8px;
+    }
+}
+
 .btn-nav-auth {
     background-color: #FACC15;
     color: #0F172A;
@@ -938,8 +996,29 @@ body {
 }
 
 .dash-kpi-icone {
-    font-size: 1.8rem;
+    font-size: 2.2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    margin-bottom: 2px;
 }
+
+.dash-kpi-icone i {
+    font-size: 2.2rem;
+    line-height: 1;
+}
+
+.card-cor-laranja .dash-kpi-icone i { color: #FF5C00; }
+.card-cor-ciano .dash-kpi-icone i { color: #0284C7; }
+.card-cor-roxo .dash-kpi-icone i { color: #7C3AED; }
+.card-cor-verde .dash-kpi-icone i { color: #059669; }
+.card-cor-navy .dash-kpi-icone i { color: #0F172A; }
+
+html.dark .card-cor-ciano .dash-kpi-icone i { color: #38BDF8; }
+html.dark .card-cor-roxo .dash-kpi-icone i { color: #A78BFA; }
+html.dark .card-cor-verde .dash-kpi-icone i { color: #34D399; }
+html.dark .card-cor-navy .dash-kpi-icone i { color: #60A5FA; }
 
 .dash-kpi-badge-label {
     font-size: 0.76rem;
@@ -1901,9 +1980,7 @@ body {
     max-height: 260px;
     overflow-y: auto;
     padding: 14px;
-    border: 2px solid #E2E8F0;
     border-radius: 12px;
-    background: #F8FAFC;
 }
 .chip-opcao {
     display: inline-flex;
@@ -2579,3 +2656,788 @@ body.sidebar-aberta {
 .footer-memphis.sidebar-aberta {
     transform: none !important;
 }
+
+/* ==========================================================================
+   MODO ESCURO / DARK MODE (TEMA RETRO-NEOBRUTALISTA & MEMPHIS)
+   ========================================================================== */
+
+html.dark {
+    color-scheme: dark;
+}
+
+html:not(.dark) {
+    color-scheme: light;
+}
+
+/* Transição suave ao alternar tema */
+body,
+.landing-navbar,
+.card,
+.sidebar-perfil,
+.modal-memphis,
+.login-card,
+.input-busca-memphis,
+.tab-origem-btn,
+.student-toolbar,
+.dash-bloco-superior,
+.db-inspector-container,
+.footer-memphis {
+    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Fundo Geral e Texto */
+html.dark body {
+    background-color: #0B1120 !important;
+    color: #F8FAFC !important;
+}
+
+html.dark ::selection {
+    background-color: #FF5C00 !important;
+    color: #FFFFFF !important;
+}
+
+/* Padrão de Grid e Halftone no Escuro */
+html.dark .bg-grid-pattern {
+    background-image:
+        linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px) !important;
+}
+
+html.dark .bg-halftone {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.2) 1.5px, transparent 1.5px) !important;
+}
+
+/* Barra de Navegação */
+html.dark .landing-navbar {
+    background: #111C2E !important;
+    border-color: #334155 !important;
+    box-shadow: 6px 6px 0px #020617 !important;
+}
+
+html.dark .brand-edu {
+    color: #F8FAFC !important;
+}
+
+html.dark .nav-link {
+    color: #CBD5E1 !important;
+}
+
+html.dark .nav-link:hover {
+    color: #FF5C00 !important;
+    background: rgba(255, 92, 0, 0.12) !important;
+}
+
+html.dark .nav-user-box {
+    background: #1E293B !important;
+    border: 2.5px solid #334155 !important;
+    box-shadow: 3px 3px 0px #020617 !important;
+    color: #F8FAFC !important;
+}
+
+
+html.dark .btn-nav-mini {
+    background: #334155 !important;
+    color: #F8FAFC !important;
+    border: 2px solid #475569 !important;
+}
+
+html.dark .btn-nav-mini:hover {
+    background: #EF4444 !important;
+    color: #FFFFFF !important;
+}
+
+html.dark .btn-nav-auth {
+    background-color: #FACC15 !important;
+    color: #0F172A !important;
+    border-color: #334155 !important;
+    box-shadow: 4px 4px 0px #020617 !important;
+}
+
+/* Botão de Alternância de Tema */
+html.dark .btn-theme-toggle {
+    background-color: #1E293B !important;
+    color: #F8FAFC !important;
+    border-color: #38BDF8 !important;
+    box-shadow: 3px 3px 0px #020617 !important;
+}
+
+html.dark .btn-theme-toggle:hover {
+    background-color: #334155 !important;
+    border-color: #FACC15 !important;
+    color: #FACC15 !important;
+    box-shadow: 5px 5px 0px #000000 !important;
+}
+
+html.dark .btn-theme-toggle:active {
+    box-shadow: 1.5px 1.5px 0px #000000 !important;
+}
+
+/* Seção Hero */
+html.dark .landing-section .relative.w-full.bg-white,
+html.dark .hero-card-container {
+    background-color: #111C2E !important;
+    border-color: #334155 !important;
+    box-shadow: 8px 8px 0px #020617 !important;
+}
+
+html.dark .landing-section h1,
+html.dark .hero-headline {
+    color: #F8FAFC !important;
+}
+
+html.dark .landing-section p,
+html.dark .hero-lead {
+    color: #94A3B8 !important;
+}
+
+html.dark .landing-section p strong,
+html.dark .hero-lead strong {
+    color: #F1F5F9 !important;
+}
+
+html.dark .landing-section .text-brand-dark {
+    color: #F8FAFC !important;
+}
+
+html.dark .landing-section .text-slate-800,
+html.dark .landing-section .text-slate-900 {
+    color: #64748B !important;
+}
+
+html.dark .landing-section a.bg-white {
+    background-color: #1E293B !important;
+    color: #F8FAFC !important;
+    border-color: #334155 !important;
+    box-shadow: 4px 4px 0px #020617 !important;
+}
+
+html.dark .landing-section a.bg-white:hover {
+    background-color: #334155 !important;
+    box-shadow: 6px 6px 0px #020617 !important;
+}
+
+/* Área de Busca & Oportunidades */
+html.dark .logo-box {
+    background-color: #1E293B !important;
+    color: #F8FAFC !important;
+    border-color: #334155 !important;
+    box-shadow: 6px 6px 0px var(--color-orange) !important;
+}
+
+html.dark .input-busca-memphis {
+    background-color: #111C2E !important;
+    border-color: #334155 !important;
+    box-shadow: 5px 5px 0px #020617 !important;
+    color: #F8FAFC !important;
+}
+
+html.dark .input-busca-memphis::placeholder {
+    color: #64748B !important;
+}
+
+html.dark .input-busca-memphis:focus {
+    border-color: var(--color-orange) !important;
+    box-shadow: 7px 7px 0px var(--color-orange) !important;
+}
+
+html.dark .btn-busca-memphis {
+    border-color: #334155 !important;
+    box-shadow: 5px 5px 0px #020617 !important;
+}
+
+html.dark .btn-busca-memphis:hover {
+    box-shadow: 7px 7px 0px #020617 !important;
+}
+
+/* Abas de Categorias */
+html.dark .tab-origem-btn {
+    background-color: #111C2E !important;
+    color: #CBD5E1 !important;
+    border-color: #334155 !important;
+    box-shadow: 4px 4px 0px #020617 !important;
+}
+
+html.dark .tab-origem-btn:hover:not(.ativo) {
+    background-color: #1E293B !important;
+    color: #F8FAFC !important;
+    border-color: #475569 !important;
+    box-shadow: 6px 6px 0px #020617 !important;
+}
+
+html.dark .tab-origem-btn.ativo {
+    background-color: var(--color-orange) !important;
+    color: #FFFFFF !important;
+    border-color: var(--color-orange) !important;
+    box-shadow: 3px 3px 0px #020617 !important;
+}
+
+/* Toolbar do Estudante */
+html.dark .student-toolbar {
+    background: #111C2E !important;
+    border-color: #334155 !important;
+    box-shadow: 5px 5px 0px #020617 !important;
+}
+
+html.dark .btn-filtro-aluno {
+    background: #1E293B !important;
+    color: #CBD5E1 !important;
+    border-color: #334155 !important;
+    box-shadow: 3px 3px 0px #020617 !important;
+}
+
+html.dark .btn-filtro-aluno:hover:not(.ativo) {
+    background: #334155 !important;
+    color: #F8FAFC !important;
+    box-shadow: 4px 4px 0px #020617 !important;
+}
+
+html.dark .btn-filtro-aluno.ativo {
+    background: #FACC15 !important;
+    color: #0F172A !important;
+    border-color: #FACC15 !important;
+}
+
+html.dark .toggle-vigentes-container .toggle-label {
+    color: #CBD5E1 !important;
+}
+
+html.dark .toggle-vigentes-container .custom-checkbox {
+    background: #1E293B !important;
+    border-color: #475569 !important;
+    box-shadow: 2px 2px 0px #020617 !important;
+}
+
+html.dark .toggle-vigentes-container input[type="checkbox"]:checked + .custom-checkbox {
+    background: var(--color-orange) !important;
+    border-color: var(--color-orange) !important;
+}
+
+/* Cards de Oportunidades */
+html.dark .card {
+    background: #111C2E !important;
+    border-color: #334155 !important;
+    box-shadow: 7px 7px 0px #020617 !important;
+}
+
+html.dark .card:hover {
+    border-color: #475569 !important;
+    box-shadow: 10px 10px 0px #000000 !important;
+}
+
+html.dark .card-titulo {
+    color: #F8FAFC !important;
+}
+
+html.dark .card:hover .card-titulo {
+    color: #FF7A00 !important;
+}
+
+html.dark .card-edital-numero {
+    background: #1E293B !important;
+    color: #E2E8F0 !important;
+    border-color: #334155 !important;
+    box-shadow: 1.5px 1.5px 0px #020617 !important;
+}
+
+html.dark .card-meta-box {
+    color: #94A3B8 !important;
+}
+
+html.dark .meta-icone {
+    color: #38BDF8 !important;
+}
+
+html.dark .meta-link-oficial {
+    color: #38BDF8 !important;
+}
+
+html.dark .meta-link-oficial:hover {
+    color: #FF7A00 !important;
+}
+
+html.dark .card-link-btn {
+    border-color: #334155 !important;
+    box-shadow: 3px 3px 0px #020617 !important;
+}
+
+html.dark .card-link-btn:hover {
+    box-shadow: 5px 5px 0px #020617 !important;
+}
+
+html.dark .btn-favoritar-card {
+    background: #1E293B !important;
+    color: #CBD5E1 !important;
+    border-color: #334155 !important;
+    box-shadow: 3px 3px 0px #020617 !important;
+}
+
+html.dark .btn-favoritar-card:hover {
+    background: #334155 !important;
+    color: #F8FAFC !important;
+    box-shadow: 5px 5px 0px #020617 !important;
+}
+
+html.dark .btn-favoritar-card.favoritado {
+    background: #FEF3C7 !important;
+    color: #B45309 !important;
+    border-color: #F59E0B !important;
+}
+
+/* Badges de Status no Modo Escuro */
+html.dark .badge-status-vigente {
+    background: #064E3B !important;
+    color: #6EE7B7 !important;
+    border-color: #059669 !important;
+}
+
+html.dark .badge-status-encerrado {
+    background: #1E293B !important;
+    color: #94A3B8 !important;
+    border-color: #475569 !important;
+}
+
+html.dark .badge-status-neutro {
+    background: #1E3A5F !important;
+    color: #93C5FD !important;
+    border-color: #2563EB !important;
+}
+
+html.dark .status-box {
+    background: #111C2E !important;
+    border-color: var(--color-orange) !important;
+    color: #F8FAFC !important;
+}
+
+html.dark .status-box-titulo {
+    color: #F8FAFC !important;
+}
+
+html.dark .status-box-texto {
+    color: #94A3B8 !important;
+}
+
+/* Dashboard de Métricas */
+html.dark .dash-bloco-superior {
+    background: #111C2E !important;
+    border-color: #334155 !important;
+    box-shadow: 8px 8px 0px #020617 !important;
+}
+
+html.dark .dash-neo-titulo {
+    color: #F8FAFC !important;
+}
+
+html.dark .dash-neo-subtitulo {
+    color: #94A3B8 !important;
+}
+
+html.dark .dash-kpi-card {
+    background: #1E293B !important;
+    border-color: #334155 !important;
+    box-shadow: 5px 5px 0px #020617 !important;
+}
+
+html.dark .dash-kpi-badge-label {
+    color: #94A3B8 !important;
+}
+
+html.dark .dash-kpi-numero {
+    color: #F8FAFC !important;
+}
+
+html.dark .dash-widget-circular {
+    background: #1E293B !important;
+    border-color: #334155 !important;
+    box-shadow: 5px 5px 0px #020617 !important;
+}
+
+html.dark .dash-widget-titulo {
+    color: #F8FAFC !important;
+}
+
+html.dark .dash-widget-desc {
+    color: #94A3B8 !important;
+}
+
+html.dark .dash-donut-sub {
+    color: #94A3B8 !important;
+}
+
+html.dark .dash-card-radar,
+html.dark .dash-card-fluxo {
+    background: #1E293B !important;
+    border-color: #334155 !important;
+    box-shadow: 5px 5px 0px #020617 !important;
+}
+
+html.dark .dash-radar-titulo,
+html.dark .dash-fluxo-titulo {
+    color: #F8FAFC !important;
+}
+
+html.dark .dash-fluxo-sub {
+    color: #94A3B8 !important;
+}
+
+html.dark .dash-pill-semanal {
+    background: #111C2E !important;
+    border-color: #334155 !important;
+    color: #CBD5E1 !important;
+}
+
+html.dark .dash-radar-box {
+    background: #111C2E !important;
+    border-color: #334155 !important;
+}
+
+html.dark .dash-radar-numero {
+    color: #F8FAFC !important;
+}
+
+html.dark .dash-radar-label {
+    color: #94A3B8 !important;
+}
+
+html.dark .dash-radar-footer {
+    border-top-color: #334155 !important;
+    color: #94A3B8 !important;
+}
+
+html.dark .dash-slider-trilho {
+    background: #334155 !important;
+}
+
+html.dark .dash-pilar-nome {
+    color: #CBD5E1 !important;
+}
+
+html.dark .dash-legenda-texto {
+    color: #CBD5E1 !important;
+}
+
+html.dark .dash-legenda-texto strong {
+    color: #F8FAFC !important;
+}
+
+/* Banco Inspector */
+html.dark .db-inspector-container {
+    background: #111C2E !important;
+    border-color: #334155 !important;
+    box-shadow: 8px 8px 0px #020617 !important;
+    color: #F8FAFC !important;
+}
+
+html.dark .db-inspector-card {
+    border-color: #334155 !important;
+    box-shadow: 5px 5px 0px #020617 !important;
+    color: #F8FAFC !important;
+}
+
+html.dark .badge-index {
+    background: #334155 !important;
+    border-color: #475569 !important;
+    color: #F8FAFC !important;
+}
+
+html.dark .db-inspector-container table {
+    color: #F8FAFC !important;
+}
+
+html.dark .db-inspector-container th {
+    background: #1E293B !important;
+    color: #F8FAFC !important;
+    border-color: #334155 !important;
+}
+
+html.dark .db-inspector-container td {
+    border-color: #334155 !important;
+    color: #CBD5E1 !important;
+}
+
+/* Paginação */
+html.dark #bloco-paginacao button {
+    background: #1E293B !important;
+    color: #F8FAFC !important;
+    border-color: #334155 !important;
+    box-shadow: 4px 4px 0px #020617 !important;
+}
+
+html.dark #bloco-paginacao button:hover:not(:disabled) {
+    background: var(--color-orange) !important;
+    color: #FFFFFF !important;
+    border-color: var(--color-orange) !important;
+}
+
+/* Sidebar de Perfil & Modal de Perfil */
+html.dark .sidebar-perfil {
+    background: #0B1120 !important;
+    border-right-color: #334155 !important;
+    box-shadow: 10px 0 20px rgba(0, 0, 0, 0.5) !important;
+}
+
+html.dark .sidebar-header {
+    background: #111C2E !important;
+    border-bottom-color: #334155 !important;
+}
+
+html.dark .sidebar-title {
+    color: #F8FAFC !important;
+}
+
+html.dark .sidebar-close-btn {
+    background: #1E293B !important;
+    color: #CBD5E1 !important;
+    border-color: #334155 !important;
+}
+
+html.dark .sidebar-close-btn:hover {
+    background: #EF4444 !important;
+    color: #FFFFFF !important;
+    border-color: #EF4444 !important;
+}
+
+html.dark .modal-memphis {
+    background: #0B1120 !important;
+    border-color: #334155 !important;
+    box-shadow: 10px 10px 0px #020617 !important;
+}
+
+html.dark .modal-header-memphis {
+    background: #111C2E !important;
+    border-bottom-color: #334155 !important;
+}
+
+html.dark .modal-title {
+    color: #F8FAFC !important;
+}
+
+html.dark .modal-close-btn {
+    background: #1E293B !important;
+    color: #CBD5E1 !important;
+    border-color: #334155 !important;
+}
+
+html.dark .modal-close-btn:hover {
+    background: #EF4444 !important;
+    color: #FFFFFF !important;
+    border-color: #EF4444 !important;
+}
+
+html.dark .perfil-card-info {
+    background: #111C2E !important;
+    border-color: #334155 !important;
+    box-shadow: 4px 4px 0px #020617 !important;
+}
+
+html.dark .perfil-avatar-badge {
+    background: #1E293B !important;
+    border-color: #334155 !important;
+    color: #FACC15 !important;
+    box-shadow: 2px 2px 0px #020617 !important;
+}
+
+html.dark .perfil-info-nome {
+    color: #F8FAFC !important;
+}
+
+html.dark .perfil-info-email {
+    color: #94A3B8 !important;
+}
+
+html.dark .label-memphis {
+    color: #F8FAFC !important;
+}
+
+html.dark .label-subtexto {
+    color: #94A3B8 !important;
+}
+
+html.dark .chip-opcao {
+    background: #111C2E !important;
+    color: #CBD5E1 !important;
+    border-color: #334155 !important;
+    box-shadow: 3px 3px 0px #020617 !important;
+}
+
+html.dark .chip-opcao:hover {
+    background: #1E293B !important;
+    color: #F8FAFC !important;
+    border-color: #475569 !important;
+}
+
+html.dark .chip-opcao.chip-selecionado {
+    background: var(--color-orange) !important;
+    color: #FFFFFF !important;
+    border-color: var(--color-orange) !important;
+}
+
+html.dark .checkbox-memphis-container .custom-checkbox {
+    background: #111C2E !important;
+    border-color: #334155 !important;
+    box-shadow: 2.5px 2.5px 0px #020617 !important;
+}
+
+html.dark .checkbox-memphis-container input[type="checkbox"]:checked + .custom-checkbox {
+    background: var(--color-orange) !important;
+    border-color: var(--color-orange) !important;
+}
+
+html.dark .checkbox-memphis-container .label-texto {
+    color: #E2E8F0 !important;
+}
+
+html.dark .input-memphis {
+    background: #111C2E !important;
+    border-color: #334155 !important;
+    color: #F8FAFC !important;
+}
+
+html.dark .input-memphis:focus {
+    background: #1E293B !important;
+    border-color: var(--color-orange) !important;
+    box-shadow: 4px 4px 0px #020617 !important;
+}
+
+html.dark .btn-submit-memphis {
+    border-color: #334155 !important;
+    box-shadow: 4px 4px 0px #020617 !important;
+}
+
+html.dark .msg-sucesso-memphis {
+    background: #064E3B !important;
+    border-color: #059669 !important;
+    color: #6EE7B7 !important;
+}
+
+html.dark .msg-erro-memphis {
+    background: #7F1D1D !important;
+    border-color: #DC2626 !important;
+    color: #FCA5A5 !important;
+}
+
+/* Página de Login e Cadastro (login.html) */
+html.dark .login-card {
+    background: #111C2E !important;
+    border-color: #334155 !important;
+    box-shadow: 10px 10px 0px #020617 !important;
+}
+
+html.dark .btn-voltar {
+    background: #1E293B !important;
+    color: #F8FAFC !important;
+    border-color: #334155 !important;
+    box-shadow: 4px 4px 0px #020617 !important;
+}
+
+html.dark .btn-voltar:hover {
+    background: #FACC15 !important;
+    color: #0F172A !important;
+    border-color: #0F172A !important;
+}
+
+html.dark .login-card .modal-header-memphis {
+    background: #0B1120 !important;
+    border-bottom: 2.5px solid #334155 !important;
+}
+
+html.dark .login-card .auth-tabs-wrapper {
+    background: #111C2E !important;
+}
+
+html.dark .login-card .auth-tabs-row {
+    background: #1E293B !important;
+    border-color: #334155 !important;
+}
+
+html.dark .login-card .auth-tab-btn {
+    color: #94A3B8 !important;
+}
+
+html.dark .login-card .auth-tab-btn.ativo {
+    background: #0B1120 !important;
+    color: #F8FAFC !important;
+    border-color: #334155 !important;
+    box-shadow: 3px 3px 0px #020617 !important;
+}
+
+html.dark .login-card .modal-body-memphis {
+    background: #111C2E !important;
+}
+
+html.dark .login-card .label-memphis {
+    color: #F8FAFC !important;
+}
+
+html.dark .login-card .input-memphis {
+    background: #0B1120 !important;
+    color: #F8FAFC !important;
+    border-color: #334155 !important;
+}
+
+html.dark .login-card .input-memphis:focus {
+    background: #1E293B !important;
+    border-color: #FF5C00 !important;
+    box-shadow: 4px 4px 0px #020617 !important;
+}
+
+html.dark .login-card .chip-opcao {
+    background: #0B1120 !important;
+    color: #CBD5E1 !important;
+    border-color: #334155 !important;
+    box-shadow: 2px 2px 0px #020617 !important;
+}
+
+html.dark .login-card .chip-opcao.chip-selecionado {
+    background: #FF5C00 !important;
+    color: #FFFFFF !important;
+    border-color: #FF5C00 !important;
+}
+
+html.dark .brand-subtitle {
+    color: #94A3B8 !important;
+}
+
+html.dark .login-card p.text-slate-600 {
+    color: #94A3B8 !important;
+}
+
+/* Rodapé */
+html.dark .footer-memphis {
+    background: #080D1A !important;
+    border-top: 4px solid #334155 !important;
+    color: #94A3B8 !important;
+}
+
+html.dark .footer-links a {
+    color: #94A3B8 !important;
+}
+
+html.dark .footer-links a:hover {
+    color: #FF5C00 !important;
+}
+
+html.dark .footer-shape-diamond {
+    background-color: #38BDF8 !important;
+    border-color: #334155 !important;
+}
+
+html.dark .footer-shape-square {
+    background-color: #1E293B !important;
+    border-color: #334155 !important;
+}
+
+/* Scrollbar Customizada no Modo Escuro */
+html.dark ::-webkit-scrollbar-track {
+    background: #0B1120 !important;
+    border-left: 3px solid #334155 !important;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+    background: #FF5C00 !important;
+    border: 2px solid #0B1120 !important;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+    background: #FACC15 !important;
+}
+

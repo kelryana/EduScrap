@@ -149,10 +149,7 @@ garantir_metadados_fontes()
 
 
 def resolver_vinculo_fonte(documento: dict):
-    """
-    Executa a junção lógica baseada em referência (DBRef Manual) em tempo
-    de execução, agregando os metadados ricos da instituição ao edital.
-    """
+   
     if not documento:
         return documento
 
@@ -305,7 +302,6 @@ def listar_ufersa(
     if apenas_vigentes:
         filtro["data_vencimento"] = {"$gte": datetime.now()}
 
-    # Agrupa oportunidades da UFERSA (PROAE e CPPS)
     docs_ufersa = []
     # 1. CPPS da UFERSA
     for ed in db["editais"].find({"fonte": {"$regex": "UFERSA", "$options": "i"}}):
@@ -329,7 +325,6 @@ def listar_ufersa(
         "total_documentos": total_docs,
         "dados": lista_ufersa
     }
-
 @app.get("/api/ciee")
 def listar_ciee(
     pagina: int = Query(1, ge=1),

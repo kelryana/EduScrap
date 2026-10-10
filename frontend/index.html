@@ -6,6 +6,7 @@
     <title>EduScrap - Portal Universitário de Oportunidades</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="theme.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,6 +16,7 @@
 
     <script>
       tailwind.config = {
+        darkMode: 'class',
         corePlugins: {
           preflight: false,
         },
@@ -47,7 +49,7 @@
       }
     </script>
 
-    <link rel="stylesheet" href="style.css?v=20">
+    <link rel="stylesheet" href="style.css?v=21">
 </head>
 <body class="bg-[#FAFBFD] text-brand-dark min-h-screen bg-grid-pattern font-sans antialiased selection:bg-brand-yellow selection:text-brand-dark">
 
@@ -66,15 +68,18 @@
                 <a href="#area-oportunidades" class="nav-link">Oportunidades</a>
                 <a href="#area-oportunidades" onclick="carregarFeedPersonalizado()" class="nav-link">Recomendados</a>
                 <a href="#area-oportunidades" onclick="carregarEstatisticas()" class="nav-link">Métricas</a>
-                <a href="#area-oportunidades" onclick="carregarInspector()" class="nav-link">Infraestrutura</a>
             </div>
 
             <div class="nav-actions-container">
+                <button id="btn-theme-toggle" class="btn-theme-toggle" onclick="toggleTheme()" aria-label="Alternar entre modo escuro e claro" title="Alternar entre modo escuro e claro">
+                    <i class="ph-bold ph-moon theme-toggle-icon" id="theme-toggle-icon"></i>
+                    <span class="theme-toggle-text" id="theme-toggle-text">Escuro</span>
+                </button>
 
                 <div id="nav-auth-area">
                     <div class="nav-user-box" style="padding: 10px 18px; font-size: 1.12rem;">
                         <span class="nav-user-tag" style="font-size: 1.12rem;">
-                            🎓 Olá, <strong id="user-name-display">Estudante</strong>
+                            <i class="ph-bold ph-student"></i> Olá, <strong id="user-name-display">Estudante</strong>
                         </span>
                         <button class="btn-nav-mini btn-nav-logout" onclick="fazerLogout()" title="Sair da Conta" style="width: 36px; height: 36px; font-size: 1.25rem;">
                             <i class="ph-bold ph-sign-out"></i>
@@ -173,7 +178,8 @@
                     </a>
 
                     <a href="login.html?aba=register" class="px-8 sm:px-10 py-4.5 sm:py-5 rounded-2xl border-3 border-brand-dark bg-white hover:bg-slate-50 text-brand-dark font-extrabold text-xl sm:text-2xl shadow-brutal neo-btn inline-flex items-center justify-center gap-3 whitespace-nowrap" style="text-decoration: none;">
-                      <span>🎓 Criar Perfil de Aluno</span>
+                      <i class="ph-bold ph-student text-2xl"></i>
+                      <span>Criar Perfil de Aluno</span>
                     </a>
                   </div>
 
@@ -264,9 +270,6 @@
                 <button id="btn-analises" class="tab-origem-btn" onclick="carregarEstatisticas()">
                     <i class="ph-bold ph-chart-bar"></i> <span>Indicadores</span>
                 </button>
-                <button id="btn-inspector" class="tab-origem-btn" onclick="carregarInspector()">
-                    <i class="ph-bold ph-database"></i> <span>Status Banco</span>
-                </button>
             </div>
         </div>
 
@@ -356,13 +359,13 @@
                         <div class="student-toolbar-left">
                             <button id="btn-abrir-sidebar-filtros" class="btn-filtro-aluno" onclick="alternarSidebarPerfil()">
                                 <i class="ph-bold ph-sliders-horizontal"></i>
-                                <span>⚙️ Cursos & Preferências</span>
+                                <span>Cursos & Preferências</span>
                             </button>
                             <button id="btn-personalizado" class="btn-filtro-aluno" onclick="carregarFeedPersonalizado()">
-                                <i class="ph-bold ph-sparkle"></i> <span>🎯 Para Você (Perfil)</span>
+                                <i class="ph-bold ph-sparkle"></i> <span>Para Você (Perfil)</span>
                             </button>
                             <button id="btn-favoritos" class="btn-filtro-aluno" onclick="carregarFavoritos()">
-                                <i class="ph-bold ph-star"></i> <span>⭐ Salvos (<strong id="contador-favoritos">0</strong>)</span>
+                                <i class="ph-bold ph-star"></i> <span>Salvos (<strong id="contador-favoritos">0</strong>)</span>
                             </button>
                         </div>
 
@@ -379,7 +382,7 @@
                     <div id="container-vagas" class="grid-vagas">
                         <div class="status-box">
                             <div class="status-box-decor"></div>
-                            <h3 class="status-box-titulo">Carregando Dados ⏳</h3>
+                            <h3 class="status-box-titulo"><i class="ph-bold ph-hourglass animate-spin"></i> Carregando Dados</h3>
                             <p class="status-box-texto">Buscando oportunidades no banco de dados...</p>
                         </div>
                     </div>

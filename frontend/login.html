@@ -6,6 +6,7 @@
     <title>EduScrap - Acesso e Cadastro</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="theme.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,6 +16,7 @@
 
     <script>
       tailwind.config = {
+        darkMode: 'class',
         corePlugins: { preflight: false },
         theme: {
           extend: {
@@ -441,8 +443,12 @@
 
     <div class="login-page-wrapper">
 
-        <!-- Botão Voltar ao Início -->
-        <div class="login-top-bar">
+        <!-- Barra superior com botão de tema e voltar -->
+        <div class="login-top-bar" style="gap: 12px;">
+            <button id="btn-theme-toggle" class="btn-theme-toggle" onclick="toggleTheme()" aria-label="Alternar entre modo escuro e claro" title="Alternar entre modo escuro e claro">
+                <i class="ph-bold ph-moon theme-toggle-icon" id="theme-toggle-icon"></i>
+                <span class="theme-toggle-text" id="theme-toggle-text">Escuro</span>
+            </button>
             <a href="index.html" class="btn-voltar">
                 <i class="ph-bold ph-arrow-left"></i>
                 <span>Voltar ao Início</span>
@@ -562,18 +568,18 @@
                             <span class="text-xs text-slate-500 font-bold">Selecione para personalizar seu feed de editais</span>
                         </div>
                         <div class="chips-container flex flex-wrap gap-2.5" id="reg-chips-cursos">
-                            <button type="button" class="chip-opcao chip-selecionado" data-valor="Ciência da Computação"><span class="chip-check">✓</span> Ciência da Computação</button>
-                            <button type="button" class="chip-opcao" data-valor="Sistemas de Informação"><span class="chip-check">✓</span> Sistemas de Informação</button>
-                            <button type="button" class="chip-opcao" data-valor="Medicina"><span class="chip-check">✓</span> Medicina</button>
-                            <button type="button" class="chip-opcao" data-valor="Enfermagem"><span class="chip-check">✓</span> Enfermagem</button>
-                            <button type="button" class="chip-opcao" data-valor="Direito"><span class="chip-check">✓</span> Direito</button>
-                            <button type="button" class="chip-opcao" data-valor="Administração"><span class="chip-check">✓</span> Administração</button>
-                            <button type="button" class="chip-opcao" data-valor="Ciências Contábeis"><span class="chip-check">✓</span> Ciências Contábeis</button>
-                            <button type="button" class="chip-opcao" data-valor="Educação Física"><span class="chip-check">✓</span> Educação Física</button>
-                            <button type="button" class="chip-opcao" data-valor="Letras"><span class="chip-check">✓</span> Letras</button>
-                            <button type="button" class="chip-opcao" data-valor="História"><span class="chip-check">✓</span> História</button>
-                            <button type="button" class="chip-opcao" data-valor="Pedagogia"><span class="chip-check">✓</span> Pedagogia</button>
-                            <button type="button" class="chip-opcao" data-valor="Ciências Biológicas"><span class="chip-check">✓</span> Ciências Biológicas</button>
+                            <button type="button" class="chip-opcao chip-selecionado" data-valor="Ciência da Computação"><span class="chip-check"><i class="ph-bold ph-check"></i></span> Ciência da Computação</button>
+                            <button type="button" class="chip-opcao" data-valor="Sistemas de Informação"><span class="chip-check"><i class="ph-bold ph-check"></i></span> Sistemas de Informação</button>
+                            <button type="button" class="chip-opcao" data-valor="Medicina"><span class="chip-check"><i class="ph-bold ph-check"></i></span> Medicina</button>
+                            <button type="button" class="chip-opcao" data-valor="Enfermagem"><span class="chip-check"><i class="ph-bold ph-check"></i></span> Enfermagem</button>
+                            <button type="button" class="chip-opcao" data-valor="Direito"><span class="chip-check"><i class="ph-bold ph-check"></i></span> Direito</button>
+                            <button type="button" class="chip-opcao" data-valor="Administração"><span class="chip-check"><i class="ph-bold ph-check"></i></span> Administração</button>
+                            <button type="button" class="chip-opcao" data-valor="Ciências Contábeis"><span class="chip-check"><i class="ph-bold ph-check"></i></span> Ciências Contábeis</button>
+                            <button type="button" class="chip-opcao" data-valor="Educação Física"><span class="chip-check"><i class="ph-bold ph-check"></i></span> Educação Física</button>
+                            <button type="button" class="chip-opcao" data-valor="Letras"><span class="chip-check"><i class="ph-bold ph-check"></i></span> Letras</button>
+                            <button type="button" class="chip-opcao" data-valor="História"><span class="chip-check"><i class="ph-bold ph-check"></i></span> História</button>
+                            <button type="button" class="chip-opcao" data-valor="Pedagogia"><span class="chip-check"><i class="ph-bold ph-check"></i></span> Pedagogia</button>
+                            <button type="button" class="chip-opcao" data-valor="Ciências Biológicas"><span class="chip-check"><i class="ph-bold ph-check"></i></span> Ciências Biológicas</button>
                         </div>
                     </div>
 
@@ -586,12 +592,12 @@
                             <span class="text-xs text-slate-500 font-bold">Filtre temas gerais além do curso</span>
                         </div>
                         <div class="chips-container flex flex-wrap gap-2.5" id="reg-chips-areas">
-                            <button type="button" class="chip-opcao chip-selecionado" data-valor="Tecnologia"><span class="chip-check">✓</span> Tecnologia</button>
-                            <button type="button" class="chip-opcao" data-valor="Saúde"><span class="chip-check">✓</span> Saúde</button>
-                            <button type="button" class="chip-opcao" data-valor="Humanas"><span class="chip-check">✓</span> Humanas</button>
-                            <button type="button" class="chip-opcao" data-valor="Exatas"><span class="chip-check">✓</span> Exatas</button>
-                            <button type="button" class="chip-opcao chip-selecionado" data-valor="Extensão"><span class="chip-check">✓</span> Extensão Universitária</button>
-                            <button type="button" class="chip-opcao" data-valor="Pesquisa"><span class="chip-check">✓</span> Pesquisa & Inovação</button>
+                            <button type="button" class="chip-opcao chip-selecionado" data-valor="Tecnologia"><span class="chip-check"><i class="ph-bold ph-check"></i></span> Tecnologia</button>
+                            <button type="button" class="chip-opcao" data-valor="Saúde"><span class="chip-check"><i class="ph-bold ph-check"></i></span> Saúde</button>
+                            <button type="button" class="chip-opcao" data-valor="Humanas"><span class="chip-check"><i class="ph-bold ph-check"></i></span> Humanas</button>
+                            <button type="button" class="chip-opcao" data-valor="Exatas"><span class="chip-check"><i class="ph-bold ph-check"></i></span> Exatas</button>
+                            <button type="button" class="chip-opcao chip-selecionado" data-valor="Extensão"><span class="chip-check"><i class="ph-bold ph-check"></i></span> Extensão Universitária</button>
+                            <button type="button" class="chip-opcao" data-valor="Pesquisa"><span class="chip-check"><i class="ph-bold ph-check"></i></span> Pesquisa & Inovação</button>
                         </div>
                     </div>
 
