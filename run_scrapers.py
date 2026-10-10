@@ -78,6 +78,18 @@ SCRAPERS = {
         "script": "scraper_iel_rn.py",
         "colecao": "vagas",
         "icone": "🏭"
+    },
+    "capacitacao_bolsas": {
+        "nome": "Capacitação, DIO e Bolsas de Estudo",
+        "script": "scraper_capacitacao_bolsas.py",
+        "colecao": "noticias",
+        "icone": "💡"
+    },
+    "dom_mossoro": {
+        "nome": "DOM Mossoró (Editais e Processos Seletivos)",
+        "script": "scraper_dom_mossoro.py",
+        "colecao": "editais",
+        "icone": "🏛️"
     }
 }
 

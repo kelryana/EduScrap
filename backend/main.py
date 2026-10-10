@@ -443,6 +443,38 @@ def listar_iel(
         "dados": lista_iel
     }
 
+@app.get("/api/dom")
+def listar_dom(
+    pagina: int = Query(1, ge=1),
+    limite: int = Query(6, ge=1),
+    authorization: str = Header(default=None)
+):
+    usuario = obter_usuario_opcional(authorization)
+    colecao = db["editais"]
+    pulo = (pagina - 1) * limite
+
+    filtro = {
+        "$or": [
+            {"fonte": {"$regex": "Prefeitura de Mossoró", "$options": "i"}},
+            {"titulo": {"$regex": r"\[DOM/Mossoró\]", "$options": "i"}}
+        ]
+    }
+    total_docs = colecao.count_documents(filtro)
+    lista_dom = []
+    for edital in colecao.find(filtro).skip(pulo).limit(limite):
+        edital["_id"] = str(edital["_id"])
+        edital["nome"] = edital.get("titulo") or edital.get("nome") or "Edital Municipal"
+        edital["titulo"] = edital["nome"]
+        edital = enriquecer_doc(edital, usuario)
+        lista_dom.append(edital)
+
+    return {
+        "pagina_atual": pagina,
+        "limite_por_pagina": limite,
+        "total_documentos": total_docs,
+        "dados": lista_dom
+    }
+
 @app.get("/api/portal_uern")
 def listar_portal_uern(
     pagina: int = Query(1, ge=1),
@@ -497,15 +529,29 @@ def listar_noticias(
     else:
         logger.info("[CACHE] Dados recuperados localmente via cache ativo do MongoDB.")
 
-    colecao = db["vagas_noticias"]
+    # Junta conteúdos informativos de vagas_noticias e noticias (ASSECOM, Estudar Fora, DIO, etc.)
     pulo = (pagina - 1) * limite
-
     filtro = {}
     if apenas_vigentes:
         filtro["data_vencimento"] = {"$gte": datetime.now()}
 
+    docs_todos = []
+    # 1. Novas fontes ricas de capacitação e bolsas
+    for doc in db["noticias"].find(filtro).sort("coletado_em", -1):
+        doc["nome"] = doc.get("titulo") or doc.get("nome") or "Notícia & Bolsa"
+        doc["titulo"] = doc["nome"]
+        docs_todos.append(doc)
+
+    # 2. Notícias Tech clássicas
+    for doc in db["vagas_noticias"].find(filtro):
+        doc["titulo"] = doc.get("nome") or doc.get("titulo") or "Notícia Tech"
+        docs_todos.append(doc)
+
+    total_documentos = len(docs_todos)
+    docs_paginados = docs_todos[pulo : pulo + limite]
+
     lista_noticias = []
-    for noticia in colecao.find(filtro).skip(pulo).limit(limite):
+    for noticia in docs_paginados:
         noticia["_id"] = str(noticia["_id"])
         noticia = enriquecer_doc(noticia, usuario)
         lista_noticias.append(noticia)
@@ -513,7 +559,7 @@ def listar_noticias(
     return {
         "pagina_atual": pagina,
         "limite_por_pagina": limite,
-        "total_documentos": colecao.count_documents(filtro),
+        "total_documentos": total_documentos,
         "dados": lista_noticias
     }
 
