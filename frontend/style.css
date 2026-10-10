@@ -1744,11 +1744,6 @@ body {
     }
 }
 
-/* ==========================================================================
-   TRILHO DE CONTEÚDO — Gaveta local + grade de cards lado a lado.
-   A sidebar NÃO é mais fixa/teleportada para a viewport: ela vive dentro da
-   área de oportunidades e só empurra os cards para a direita.
-   ========================================================================== */
 .trilho-conteudo {
     display: flex;
     align-items: flex-start;
@@ -1892,10 +1887,6 @@ body {
     background-color: var(--color-orange);
 }
 
-/* ==========================================================================
-   RESPONSIVO DA GAVETA LOCAL — em telas menores que 1024px a sidebar
-   passa a ocupar a linha toda, acima da grade de cards.
-   ========================================================================== */
 @media (max-width: 1023px) {
     .trilho-conteudo {
         flex-direction: column;
@@ -2029,9 +2020,6 @@ body {
     border-color: #FF5C00;
 }
 
-/* ==========================================================================
-   CHECKBOX MEMPHIS CUSTOMIZADO (sem duplicidade, acessível e alinhado)
-   ========================================================================== */
 .checkbox-memphis-container {
     display: inline-flex;
     align-items: center;

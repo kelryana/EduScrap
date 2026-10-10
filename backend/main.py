@@ -299,15 +299,26 @@ def listar_ufersa(
     authorization: str = Header(default=None)
 ):
     usuario = obter_usuario_opcional(authorization)
-    colecao = db["vagas_ufersa"]
     pulo = (pagina - 1) * limite
 
     filtro = {}
     if apenas_vigentes:
         filtro["data_vencimento"] = {"$gte": datetime.now()}
 
+    # Agrupa oportunidades da UFERSA (PROAE e CPPS)
+    docs_ufersa = []
+    # 1. CPPS da UFERSA
+    for ed in db["editais"].find({"fonte": {"$regex": "UFERSA", "$options": "i"}}):
+        docs_ufersa.append(ed)
+    # 2. PROAE da UFERSA
+    for vg in db["vagas_ufersa"].find(filtro):
+        docs_ufersa.append(vg)
+
+    total_docs = len(docs_ufersa)
+    docs_paginados = docs_ufersa[pulo : pulo + limite]
+
     lista_ufersa = []
-    for edital in colecao.find(filtro).skip(pulo).limit(limite):
+    for edital in docs_paginados:
         edital["_id"] = str(edital["_id"])
         edital = enriquecer_doc(edital, usuario)
         lista_ufersa.append(edital)
@@ -315,7 +326,7 @@ def listar_ufersa(
     return {
         "pagina_atual": pagina,
         "limite_por_pagina": limite,
-        "total_documentos": colecao.count_documents(filtro),
+        "total_documentos": total_docs,
         "dados": lista_ufersa
     }
 
@@ -338,6 +349,7 @@ def listar_ciee(
     for vaga in colecao.find(filtro).skip(pulo).limit(limite):
         vaga["_id"] = str(vaga["_id"])
         vaga["nome"] = vaga.get("nome_completo") or vaga.get("titulo") or "Vaga CIEE"
+        vaga["titulo"] = vaga["nome"]
         vaga = enriquecer_doc(vaga, usuario)
         lista_ciee.append(vaga)
 
@@ -346,6 +358,35 @@ def listar_ciee(
         "limite_por_pagina": limite,
         "total_documentos": colecao.count_documents(filtro),
         "dados": lista_ciee
+    }
+
+@app.get("/api/mprn")
+def listar_mprn(
+    pagina: int = Query(1, ge=1),
+    limite: int = Query(6, ge=1),
+    apenas_vigentes: bool = False,
+    authorization: str = Header(default=None)
+):
+    usuario = obter_usuario_opcional(authorization)
+    colecao = db["vagas"]
+    pulo = (pagina - 1) * limite
+
+    filtro = {"fonte": {"$regex": "MPRN", "$options": "i"}}
+
+    total_docs = colecao.count_documents(filtro)
+    lista_mprn = []
+    for vaga in colecao.find(filtro).skip(pulo).limit(limite):
+        vaga["_id"] = str(vaga["_id"])
+        vaga["nome"] = vaga.get("titulo") or vaga.get("nome") or "Seleção MPRN"
+        vaga["titulo"] = vaga["nome"]
+        vaga = enriquecer_doc(vaga, usuario)
+        lista_mprn.append(vaga)
+
+    return {
+        "pagina_atual": pagina,
+        "limite_por_pagina": limite,
+        "total_documentos": total_docs,
+        "dados": lista_mprn
     }
 
 @app.get("/api/portal_uern")
@@ -741,42 +782,70 @@ def feed_personalizado(usuario: dict = Depends(obter_usuario_logado), limite: in
     areas = prefs.get("areas", [])
     fav_set = set(usuario.get("favoritos", []))
 
-    termos = [re.escape(c) for c in cursos if c] + [re.escape(a) for a in areas if a]
-    filtro = {}
-    if termos:
-        regex_termo = "|".join(termos)
-        filtro = {
-            "$or": [
-                {"nome": {"$regex": regex_termo, "$options": "i"}},
-                {"categoria": {"$regex": regex_termo, "$options": "i"}}
-            ]
-        }
+    criterios_or = []
+    if cursos:
+        criterios_or.append({"cursos": {"$in": cursos}})
+        for c in cursos:
+            criterios_or.append({"nome": {"$regex": re.escape(c), "$options": "i"}})
+            criterios_or.append({"titulo": {"$regex": re.escape(c), "$options": "i"}})
 
-    colecoes = ["vagas_estagio", "vagas_bolsa", "vagas_ufersa", "vagas_ciee", "vagas_portal_uern"]
+    if areas:
+        criterios_or.append({"areas": {"$in": areas}})
+        for a in areas:
+            criterios_or.append({"areas": {"$regex": re.escape(a), "$options": "i"}})
+            criterios_or.append({"categoria": {"$regex": re.escape(a), "$options": "i"}})
+            criterios_or.append({"area": {"$regex": re.escape(a), "$options": "i"}})
+
+    filtro = {"$or": criterios_or} if criterios_or else {}
+
+    colecoes = ["vagas", "editais", "noticias", "vagas_estagio", "vagas_bolsa", "vagas_ufersa", "vagas_ciee", "vagas_portal_uern"]
     resultados = []
+    ids_vistos = set()
 
     for cname in colecoes:
         for doc in db[cname].find(filtro).limit(limite):
-            doc["_id"] = str(doc["_id"])
-            doc = enriquecer_prazo(doc)
-            doc = resolver_vinculo_fonte(doc)
-            doc["favorito"] = doc["_id"] in fav_set
-            resultados.append(doc)
-            if len(resultados) >= limite:
-                break
-        if len(resultados) >= limite:
-            break
-
-    # Se poucos resultados pelo filtro específico, complementa com oportunidades gerais
-    if len(resultados) < 6:
-        ids_vistos = {r["_id"] for r in resultados}
-        for doc in db["vagas_estagio"].find().limit(6):
-            doc["_id"] = str(doc["_id"])
-            if doc["_id"] not in ids_vistos:
+            doc_id = str(doc["_id"])
+            if doc_id not in ids_vistos:
+                ids_vistos.add(doc_id)
+                doc["_id"] = doc_id
                 doc = enriquecer_prazo(doc)
                 doc = resolver_vinculo_fonte(doc)
-                doc["favorito"] = doc["_id"] in fav_set
+                doc["favorito"] = doc_id in fav_set
                 resultados.append(doc)
+                if len(resultados) >= limite * 2:
+                    break
+
+    # Ordenação por relevância: se bate curso específico ganha peso 10, área ganha peso 4
+    def score_relevancia(item):
+        score = 0
+        item_cursos = item.get("cursos", []) or []
+        item_areas = item.get("areas", []) or []
+        item_txt = f"{item.get('titulo', '')} {item.get('nome', '')}"
+
+        for c in cursos:
+            if c in item_cursos or re.search(re.escape(c), item_txt, re.IGNORECASE):
+                score += 10
+
+        for a in areas:
+            if a in item_areas or re.search(re.escape(a), item_txt, re.IGNORECASE):
+                score += 4
+
+        return score
+
+    resultados.sort(key=score_relevancia, reverse=True)
+
+    # Se poucos resultados pelo filtro específico, complementa com oportunidades gerais
+    if len(resultados) < 4:
+        for cname in ["vagas_estagio", "editais"]:
+            for doc in db[cname].find().limit(4):
+                doc_id = str(doc["_id"])
+                if doc_id not in ids_vistos:
+                    ids_vistos.add(doc_id)
+                    doc["_id"] = doc_id
+                    doc = enriquecer_prazo(doc)
+                    doc = resolver_vinculo_fonte(doc)
+                    doc["favorito"] = doc_id in fav_set
+                    resultados.append(doc)
 
     return {
         "success": True,
