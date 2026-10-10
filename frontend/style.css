@@ -991,7 +991,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     margin-bottom: 0.6rem;
 }
 
@@ -1001,24 +1001,24 @@ body {
     align-items: center;
     justify-content: center;
     line-height: 1;
-    margin-bottom: 2px;
 }
 
 .dash-kpi-icone i {
     font-size: 2.2rem;
     line-height: 1;
+    display: block;
+    transition: transform 0.2s ease;
+}
+
+.dash-kpi-card:hover .dash-kpi-icone i {
+    transform: scale(1.15);
 }
 
 .card-cor-laranja .dash-kpi-icone i { color: #FF5C00; }
 .card-cor-ciano .dash-kpi-icone i { color: #0284C7; }
-.card-cor-roxo .dash-kpi-icone i { color: #7C3AED; }
-.card-cor-verde .dash-kpi-icone i { color: #059669; }
-.card-cor-navy .dash-kpi-icone i { color: #0F172A; }
-
-html.dark .card-cor-ciano .dash-kpi-icone i { color: #38BDF8; }
-html.dark .card-cor-roxo .dash-kpi-icone i { color: #A78BFA; }
-html.dark .card-cor-verde .dash-kpi-icone i { color: #34D399; }
-html.dark .card-cor-navy .dash-kpi-icone i { color: #60A5FA; }
+.card-cor-roxo .dash-kpi-icone i { color: #8B5CF6; }
+.card-cor-verde .dash-kpi-icone i { color: #EAB308; }
+.card-cor-navy .dash-kpi-icone i { color: #0284C7; }
 
 .dash-kpi-badge-label {
     font-size: 0.76rem;
@@ -3037,6 +3037,12 @@ html.dark .dash-kpi-card {
     box-shadow: 5px 5px 0px #020617 !important;
 }
 
+html.dark .card-cor-laranja .dash-kpi-icone i { color: #F59E0B !important; }
+html.dark .card-cor-ciano .dash-kpi-icone i { color: #38BDF8 !important; }
+html.dark .card-cor-roxo .dash-kpi-icone i { color: #A78BFA !important; }
+html.dark .card-cor-verde .dash-kpi-icone i { color: #FACC15 !important; }
+html.dark .card-cor-navy .dash-kpi-icone i { color: #38BDF8 !important; }
+
 html.dark .dash-kpi-badge-label {
     color: #94A3B8 !important;
 }
@@ -3128,6 +3134,7 @@ html.dark .db-inspector-container {
 }
 
 html.dark .db-inspector-card {
+    background: #1E293B !important;
     border-color: #334155 !important;
     box-shadow: 5px 5px 0px #020617 !important;
     color: #F8FAFC !important;
@@ -3439,5 +3446,11 @@ html.dark ::-webkit-scrollbar-thumb {
 
 html.dark ::-webkit-scrollbar-thumb:hover {
     background: #FACC15 !important;
+}
+
+/* Notificações Toast */
+html.dark .toast-item-memphis {
+    border-color: #334155 !important;
+    box-shadow: 5px 5px 0px #020617 !important;
 }
 

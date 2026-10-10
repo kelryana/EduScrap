@@ -131,7 +131,7 @@ function atualizarInterfaceUsuario() {
             bannerUsuario.style.display = 'flex';
             const cursosCount = (usuarioAtual.preferencias && usuarioAtual.preferencias.cursos) ? usuarioAtual.preferencias.cursos.length : 0;
             const areasCount = (usuarioAtual.preferencias && usuarioAtual.preferencias.areas) ? usuarioAtual.preferencias.areas.length : 0;
-            bannerTexto.innerHTML = `<i class="ph-bold ph-sparkle text-brand-orange"></i> <strong>Feed Personalizado Ativo:</strong> ${cursosCount} curso(s) e ${areasCount} área(s) configurados.`;
+            bannerTexto.innerHTML = `<i class="ph-bold ph-sparkle"></i> <strong>Feed Personalizado Ativo:</strong> ${cursosCount} curso(s) e ${areasCount} área(s) configurados.`;
         }
     } else {
         navAuth.innerHTML = `
@@ -321,7 +321,7 @@ async function executarCadastro(e) {
 
         setAuthSession(data.token, data.user);
         fecharModalAuth();
-        mostrarToast('Conta criada com sucesso! Perfil configurado.', 'sucesso');
+        mostrarToast(`Conta criada com sucesso! Perfil configurado.`, 'sucesso');
         carregarFeedPersonalizado();
 
     } catch (err) {
@@ -367,7 +367,7 @@ async function salvarPreferenciasPerfil(e) {
         atualizarInterfaceUsuario();
 
         if (feedback) {
-            feedback.innerText = "Preferências atualizadas com sucesso!";
+            feedback.innerHTML = '<i class="ph-bold ph-check-circle"></i> Preferências atualizadas com sucesso!';
             feedback.style.display = 'block';
             feedback.style.backgroundColor = '#D1FAE5';
             feedback.style.color = '#065F46';
@@ -442,7 +442,7 @@ async function toggleFavorito(idOportunidade, event) {
             throw new Error("Falha ao sincronizar favorito");
         }
 
-        mostrarToast(!estaFavoritado ? "Oportunidade salva nos seus favoritos! ⭐" : "Removido dos favoritos.", "sucesso");
+        mostrarToast(!estaFavoritado ? "Oportunidade salva nos seus favoritos!" : "Removido dos favoritos.", "sucesso");
 
         // Se estiver visualizando a tela de favoritos e desfavoritou, recarrega a lista
         if (tipoAtual === 'favoritos' && estaFavoritado) {
@@ -499,7 +499,7 @@ async function carregarFavoritos() {
             container.innerHTML = `
                 <div class="status-box">
                     <div class="status-box-decor"></div>
-                    <h3 class="status-box-titulo">Nenhum Edital Favoritado Ainda ⭐</h3>
+                    <h3 class="status-box-titulo"><i class="ph-bold ph-star"></i> Nenhum Edital Favoritado Ainda</h3>
                     <p class="status-box-texto">Clique na estrelinha dos editais e vagas para salvá-los e acompanhar os prazos aqui!</p>
                 </div>
             `;
@@ -526,7 +526,7 @@ async function carregarFeedPersonalizado() {
         container.innerHTML = `
             <div class="status-box" style="border-color: var(--color-yellow);">
                 <div class="status-box-decor"></div>
-                <h3 class="status-box-titulo"><i class="ph-bold ph-sparkle text-brand-orange"></i> Personalize seu Feed Universitário</h3>
+                <h3 class="status-box-titulo"><i class="ph-bold ph-sparkle"></i> Personalize seu Feed Universitário</h3>
                 <p class="status-box-texto">Cadastre-se para filtrar automaticamente oportunidades que combinam exatamente com o seu curso de graduação.</p>
                 <div style="margin-top: 15px;">
                     <button class="btn-hero-primary" onclick="abrirModalAuth('register')">
@@ -1038,7 +1038,7 @@ async function carregarEstatisticas() {
                         <!-- Card UFERSA -->
                         <div class="dash-kpi-card card-cor-roxo">
                             <div class="dash-kpi-header">
-                                <span class="dash-kpi-icone"><i class="ph-bold ph-buildings"></i></span>
+                                <span class="dash-kpi-icone"><i class="ph-bold ph-bank"></i></span>
                                 <span class="dash-kpi-badge-label">UFERSA EDITAIS</span>
                             </div>
                             <div class="dash-kpi-numero">${totalUfersa}</div>
@@ -1170,7 +1170,7 @@ async function carregarEstatisticas() {
                         </div>
 
                         <div class="dash-radar-footer">
-                            <span><i class="ph-bold ph-lightning"></i> ${canais} canais monitorados</span>
+                            <span><i class="ph-bold ph-broadcast"></i> ${canais} canais monitorados</span>
                             <span class="dash-status-ativo">100% Ativos</span>
                         </div>
                     </div>
@@ -1251,6 +1251,64 @@ async function carregarEstatisticas() {
         container.innerHTML = html;
     } catch (erro) {
         container.innerHTML = `<p class="carregando" style="color: red;">Falha ao gerar painel: ${erro.message}</p>`;
+    }
+}
+
+// 3. Status e Governança NoSQL
+async function carregarInspector() {
+    const antigo = document.getElementById('bloco-paginacao');
+    if (antigo) antigo.remove();
+
+    const container = document.getElementById('container-vagas');
+    container.style.display = 'block';
+    container.innerHTML = '<p class="carregando">Lendo integridade dos nós e volumes de armazenamento...</p>';
+
+    destacarBotaoAtivo('btn-inspector');
+
+    try {
+        const res = await fetch(`${API_URL}/db-status`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            signal: AbortSignal.timeout(10000)
+        });
+
+        if (!res.ok) throw new Error(`Erro: ${res.status}`);
+        const info = await res.json();
+
+        let html = `
+            <div style="background: white; border: 3px solid var(--color-navy); border-radius: 12px; padding: 2.5rem; box-shadow: 6px 6px 0px var(--color-cyan); margin-bottom: 2rem;">
+                <h2 style="color: var(--color-navy); margin-bottom: 0.5rem; border-bottom: 4px solid var(--color-navy); padding-bottom: 8px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                    <i class="ph-bold ph-database"></i> Status da Infraestrutura e Governança NoSQL
+                </h2>
+                <p style="color: #555; margin-bottom: 2rem; font-size: 0.95rem;">
+                    Relatório transparente volumétrico do cluster NoSQL e integridade estrutural das coleções.
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+        `;
+
+        if (info && info.colecoes) {
+            info.colecoes.forEach(col => {
+                const indexBadges = col.indices.map(idx => `<span class="badge-index">${idx}</span>`).join(' ');
+                html += `
+                    <div class="db-inspector-card">
+                        <div style="display: flex; align-items: center; margin-bottom: 12px; border-bottom: 2px solid var(--color-navy); padding-bottom: 6px;">
+                            <h3 style="color: var(--color-navy); font-size: 1.05rem; font-weight: bold; display: flex; align-items: center; gap: 6px;"><i class="ph-bold ph-folder"></i> Coleção: ${col.colecao}</h3>
+                        </div>
+                        <p style="font-size: 0.9rem; margin-bottom: 6px; color: #333;">Documentos Ativos: <strong>${col.documentos}</strong></p>
+                        <p style="font-size: 0.9rem; margin-bottom: 12px; color: #333;">Alocação Física: <strong>${col.tamanho_kb} KB</strong></p>
+                        <div style="border-top: 1.5px dashed var(--color-navy); padding-top: 8px; margin-top: 10px;">
+                            <p style="font-size: 0.75rem; font-weight: 800; color: var(--color-navy); margin-bottom: 6px;">ESTRUTURAS DE ÍNDICES:</p>
+                            <div style="display: flex; flex-wrap: wrap; gap: 4px;">${indexBadges}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        html += `</div></div>`;
+        container.innerHTML = html;
+    } catch (erro) {
+        container.innerHTML = `<p class="carregando" style="color: red;">Não foi possível ler os metadados: ${erro.message}</p>`;
     }
 }
 

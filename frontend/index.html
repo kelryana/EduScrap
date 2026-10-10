@@ -68,6 +68,7 @@
                 <a href="#area-oportunidades" class="nav-link">Oportunidades</a>
                 <a href="#area-oportunidades" onclick="carregarFeedPersonalizado()" class="nav-link">Recomendados</a>
                 <a href="#area-oportunidades" onclick="carregarEstatisticas()" class="nav-link">Métricas</a>
+                <a href="#area-oportunidades" onclick="carregarInspector()" class="nav-link">Infraestrutura</a>
             </div>
 
             <div class="nav-actions-container">
@@ -178,7 +179,7 @@
                     </a>
 
                     <a href="login.html?aba=register" class="px-8 sm:px-10 py-4.5 sm:py-5 rounded-2xl border-3 border-brand-dark bg-white hover:bg-slate-50 text-brand-dark font-extrabold text-xl sm:text-2xl shadow-brutal neo-btn inline-flex items-center justify-center gap-3 whitespace-nowrap" style="text-decoration: none;">
-                      <i class="ph-bold ph-student text-2xl"></i>
+                      <i class="ph-bold ph-student"></i>
                       <span>Criar Perfil de Aluno</span>
                     </a>
                   </div>
@@ -269,6 +270,9 @@
                 </button>
                 <button id="btn-analises" class="tab-origem-btn" onclick="carregarEstatisticas()">
                     <i class="ph-bold ph-chart-bar"></i> <span>Indicadores</span>
+                </button>
+                <button id="btn-inspector" class="tab-origem-btn" onclick="carregarInspector()">
+                    <i class="ph-bold ph-database"></i> <span>Status Banco</span>
                 </button>
             </div>
         </div>
@@ -382,7 +386,7 @@
                     <div id="container-vagas" class="grid-vagas">
                         <div class="status-box">
                             <div class="status-box-decor"></div>
-                            <h3 class="status-box-titulo"><i class="ph-bold ph-hourglass animate-spin"></i> Carregando Dados</h3>
+                            <h3 class="status-box-titulo"><i class="ph-bold ph-hourglass-medium"></i> Carregando Dados</h3>
                             <p class="status-box-texto">Buscando oportunidades no banco de dados...</p>
                         </div>
                     </div>
