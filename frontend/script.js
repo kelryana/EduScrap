@@ -100,17 +100,32 @@ function atualizarInterfaceUsuario() {
 
     if (usuarioAtual) {
         const primeiroNome = usuarioAtual.nome ? usuarioAtual.nome.split(' ')[0] : 'Estudante';
-        document.getElementById('user-name-display').textContent = primeiroNome;
+        const userDisplay = document.getElementById('user-name-display');
+        if (userDisplay) {
+            userDisplay.textContent = primeiroNome;
+        }
         navAuth.innerHTML = `
             <div class="nav-user-box">
                 <span class="nav-user-tag">
-                    🎓 Olá, <strong>${primeiroNome}</strong>
+                    🎓 Olá, <strong id="user-name-display">${primeiroNome}</strong>
                 </span>
                 <button class="btn-nav-mini btn-nav-logout" onclick="fazerLogout()" title="Sair da Conta">
                     <i class="ph-bold ph-sign-out"></i>
                 </button>
             </div>
         `;
+
+        // Sincroniza dados na sidebar de perfil se ela estiver presente
+        const sidebarNome = document.getElementById('perfil-nome-display-sidebar');
+        if (sidebarNome) sidebarNome.innerText = usuarioAtual.nome || 'Estudante';
+        const sidebarEmail = document.getElementById('perfil-email-display-sidebar');
+        if (sidebarEmail) sidebarEmail.innerText = usuarioAtual.email || '';
+
+        // Sincroniza dados no modal de perfil
+        const modalNome = document.getElementById('perfil-nome-display');
+        if (modalNome) modalNome.innerText = usuarioAtual.nome || 'Estudante';
+        const modalEmail = document.getElementById('perfil-email-display');
+        if (modalEmail) modalEmail.innerText = usuarioAtual.email || '';
 
         if (bannerUsuario && bannerTexto) {
             bannerUsuario.style.display = 'flex';
@@ -179,8 +194,14 @@ function abrirSidebarPerfil() {
     // Configure chip clicks
     configurarChipsClickSidebar();
 
-    // Show sidebar (gaveta flutuante — não empurra nem trava o resto da página)
     sidebar.classList.add('aberto');
+
+    // Feedback visual de que a gaveta está aberta + rolagem suave em telas estreitas
+    const gatilho = document.getElementById('btn-abrir-sidebar-filtros');
+    if (gatilho) gatilho.classList.add('ativo');
+    if (window.innerWidth < 1024) {
+        sidebar.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
 }
 
 function fecharSidebarPerfil() {
@@ -188,6 +209,9 @@ function fecharSidebarPerfil() {
     if (!sidebar) return;
 
     sidebar.classList.remove('aberto');
+
+    const gatilho = document.getElementById('btn-abrir-sidebar-filtros');
+    if (gatilho) gatilho.classList.remove('ativo');
 }
 
 // Toggle simples para abrir/fechar sem afetar o resto da página
@@ -308,17 +332,19 @@ async function executarCadastro(e) {
 
 async function salvarPreferenciasPerfil(e) {
     e.preventDefault();
-    // Check if we're using the sidebar or modal
-    const isSidebar = document.getElementById('sidebar-perfil').classList.contains('aberto');
+    const sidebarEl = document.getElementById('sidebar-perfil');
+    const isSidebar = sidebarEl && sidebarEl.classList.contains('aberto');
     const cursos = isSidebar ?
         obterChipsSelecionados('perfil-chips-cursos-sidebar') :
         obterChipsSelecionados('perfil-chips-cursos');
     const areas = isSidebar ?
         obterChipsSelecionados('perfil-chips-areas-sidebar') :
         obterChipsSelecionados('perfil-chips-areas');
+    const emailSidebarInput = document.getElementById('perfil-receber-emails-sidebar');
+    const emailModalInput = document.getElementById('perfil-receber-emails');
     const receber_emails = isSidebar ?
-        document.getElementById('perfil-receber-emails-sidebar').checked :
-        document.getElementById('perfil-receber-emails').checked;
+        (emailSidebarInput ? emailSidebarInput.checked : true) :
+        (emailModalInput ? emailModalInput.checked : true);
 
     const feedback = isSidebar ?
         document.getElementById('perfil-feedback-sidebar') :
@@ -340,10 +366,12 @@ async function salvarPreferenciasPerfil(e) {
         localStorage.setItem('eduscrap_user', JSON.stringify(data.user));
         atualizarInterfaceUsuario();
 
-        feedback.innerText = "Preferências atualizadas com sucesso! ✅";
-        feedback.style.display = 'block';
-        feedback.style.backgroundColor = '#D1FAE5';
-        feedback.style.color = '#065F46';
+        if (feedback) {
+            feedback.innerText = "Preferências atualizadas com sucesso! ✅";
+            feedback.style.display = 'block';
+            feedback.style.backgroundColor = '#D1FAE5';
+            feedback.style.color = '#065F46';
+        }
 
         setTimeout(() => {
             if (isSidebar) {
@@ -356,10 +384,14 @@ async function salvarPreferenciasPerfil(e) {
         }, 800);
 
     } catch (err) {
-        feedback.innerText = err.message;
-        feedback.style.display = 'block';
-        feedback.style.backgroundColor = '#FFD2D2';
-        feedback.style.color = '#7F1D1D';
+        if (feedback) {
+            feedback.innerText = err.message;
+            feedback.style.display = 'block';
+            feedback.style.backgroundColor = '#FFD2D2';
+            feedback.style.color = '#7F1D1D';
+        } else {
+            mostrarToast(err.message, 'erro');
+        }
     }
 }
 
@@ -431,6 +463,7 @@ async function carregarFavoritos() {
     if (antigo) antigo.remove();
 
     destacarBotaoAtivo('btn-favoritos');
+    liberarExibicaoCards();
 
     if (!usuarioAtual) {
         container.style.display = 'block';

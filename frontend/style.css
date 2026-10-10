@@ -610,30 +610,29 @@ body {
     font-size: 0.95rem;
     color: var(--color-navy);
     padding: 4px 6px;
+    position: relative;
 }
 
 .toggle-vigentes-container input {
-    width: 18px;
-    height: 18px;
-    accent-color: #2E7D32;
-    cursor: pointer;
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    margin: 0;
+    pointer-events: none;
 }
 
 .grid-vagas {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
     gap: 1.5rem;
+    align-content: flex-start;
+    min-height: 480px;
 }
 
-@media (min-width: 680px) {
+@media (max-width: 679px) {
     .grid-vagas {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (min-width: 1040px) {
-    .grid-vagas {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: 1fr;
     }
 }
 
@@ -1550,17 +1549,20 @@ body {
     cursor: pointer;
     user-select: none;
     margin-top: 6px;
+    position: relative;
 }
 .checkbox-memphis-container input {
-    width: 20px;
-    height: 20px;
-    accent-color: var(--color-navy);
-    cursor: pointer;
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    margin: 0;
+    pointer-events: none;
 }
 .checkbox-memphis-container .label-texto {
     font-family: 'Inter', sans-serif;
     font-size: 0.92rem;
-    font-weight: 500;
+    font-weight: 600;
     color: #334155;
 }
 
@@ -1742,43 +1744,90 @@ body {
     }
 }
 
-/* NEW SIDEBAR STYLES — Gaveta flutuante independente (não deforma o layout) */
+/* ==========================================================================
+   TRILHO DE CONTEÚDO — Gaveta local + grade de cards lado a lado.
+   A sidebar NÃO é mais fixa/teleportada para a viewport: ela vive dentro da
+   área de oportunidades e só empurra os cards para a direita.
+   ========================================================================== */
+.trilho-conteudo {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+}
+
+/* Coluna dos cards: ocupa o espaço restante e desliza suavemente */
+.trilho-conteudo > .grid-vagas {
+    flex: 1 1 0%;
+    min-width: 0;
+    transition: margin-left 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* NOVA SIDEBAR STYLES — Gaveta local (apenas na região dos cards)
+   Fechada = largura 0 (some do fluxo); Aberta = largura total e empurra os cards. */
 .sidebar-perfil {
-    position: fixed;
-    top: 0;
-    left: -420px; /* Oculta a gaveta fora da tela à esquerda */
-    width: 380px;
-    height: 100vh;
+    flex: 0 0 auto;
+    width: 0;               /* fechado: não ocupa nada, cards ficam intactos */
+    max-width: 395px;
+    min-width: 0;
+    opacity: 0;
+    visibility: hidden;
+    overflow: hidden;       /* conteúdo escondido enquanto a gaveta se fecha */
     background: #FFFFFF;
-    border-right: 3px solid var(--color-navy);
-    box-shadow: 10px 0px 25px rgba(15, 23, 42, 0.15);
-    z-index: 1000;
+    border: 0 solid var(--color-navy);
+    border-radius: 14px;
+    box-shadow: 6px 6px 0px var(--color-navy);
     display: flex;
     flex-direction: column;
-    transition: left 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow-y: auto;
+    align-self: flex-start; /* alinha ao topo, sem esticar artificialmente além dos cards */
+    position: sticky;       /* acompanha o scroll sem cobrir header/landing */
+    top: 1.5rem;
+    max-height: calc(100vh - 3rem);
+    z-index: 12;
+    transition:
+        width 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.2s ease,
+        border-width 0.28s ease,
+        margin-right 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-perfil.aberto {
-    left: 0;
+    width: 395px;
+    opacity: 1;
+    visibility: visible;
+    border-width: 3px;      /* moldura Memphis aparece junto com a gaveta */
+    margin-right: 1.5rem;   /* aqui os cards são empurrados p/ direita */
 }
 
+/* Quando a sidebar está aberta, os cards ganham respiro e nunca ficam espremidos */
+.sidebar-perfil.aberto + .grid-vagas {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+
+/* Painel interno com largura fixa: evita que o texto amasse durante a animação */
+.sidebar-perfil > * {
+    width: 395px;
+    max-width: 395px;
+    box-sizing: border-box;
+}
+
+/* Overlay não é mais necessário: a gaveta é local e não cobre a tela */
 .sidebar-overlay {
     display: none !important;
-    pointer-events: none !important; /* Não intercepta cliques */
+    pointer-events: none !important;
 }
 
 .sidebar-header {
-    padding: 18px 32px;
+    padding: 14px 20px;
     background: #0F172A;
     color: #ffffff;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0;
 }
 
 .sidebar-title {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     font-weight: 800;
     color: #ffffff;
     margin: 0;
@@ -1788,13 +1837,13 @@ body {
     background: none;
     border: none;
     color: #ffffff;
-    font-size: 1rem;
+    font-size: 0.92rem;
     font-weight: 800;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 12px;
+    padding: 5px 10px;
     border-radius: 6px;
     transition: background-color 0.2s ease;
 }
@@ -1821,73 +1870,128 @@ body {
 .dot-green { background-color: #22C55E; }
 
 .sidebar-body {
-    padding: 32px 32px 44px 32px;
+    padding: 18px 20px 22px 20px;
     flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #CBD5E1 transparent;
+}
+
+.sidebar-body::-webkit-scrollbar {
+    width: 6px;
+}
+.sidebar-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+.sidebar-body::-webkit-scrollbar-thumb {
+    background-color: #CBD5E1;
+    border-radius: 4px;
+}
+.sidebar-body::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-orange);
+}
+
+/* ==========================================================================
+   RESPONSIVO DA GAVETA LOCAL — em telas menores que 1024px a sidebar
+   passa a ocupar a linha toda, acima da grade de cards.
+   ========================================================================== */
+@media (max-width: 1023px) {
+    .trilho-conteudo {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .sidebar-perfil {
+        position: static;      /* sem sticky no fluxo empilhado */
+        max-height: none;
+        align-self: stretch;
+    }
+
+    .sidebar-perfil.aberto {
+        width: 100%;
+        max-width: 100%;
+        margin-right: 0;
+        margin-bottom: 1.5rem; /* empurra os cards para baixo */
+    }
+
+    /* o painel interno passa a acompanhar a largura do container */
+    .sidebar-perfil > * {
+        width: 100%;
+        max-width: 100%;
+    }
 }
 
 .perfil-card-info {
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 16px;
+    gap: 12px;
+    padding: 12px 14px;
     background: #F8FAFC;
     border: 2px solid #E2E8F0;
     border-radius: 12px;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
 }
 
 .perfil-avatar-badge {
-    width: 56px;
-    height: 56px;
-    border: 2.5px solid var(--color-navy);
-    border-radius: 12px;
+    width: 46px;
+    height: 46px;
+    border: 2px solid var(--color-navy);
+    border-radius: 10px;
     background: #FACC15;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     color: var(--color-navy);
-    box-shadow: 3px 3px 0px var(--color-navy);
+    box-shadow: 2px 2px 0px var(--color-navy);
+    flex-shrink: 0;
 }
 
 .perfil-info-textos {
     flex: 1;
+    min-width: 0;
 }
 
 .perfil-info-nome {
-    font-size: 1.2rem;
+    font-size: 1.05rem;
     font-weight: 800;
     color: var(--color-navy);
-    margin-bottom: 4px;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .perfil-info-email {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: #64748B;
     margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .form-group-memphis {
-    margin-bottom: 24px;
+    margin-bottom: 16px;
 }
 
 .label-memphis {
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 800;
     color: #0F172A;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     display: flex;
     align-items: center;
     gap: 6px;
 }
 
 .label-com-subtexto {
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .label-subtexto {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: #64748B;
     font-weight: 600;
 }
@@ -1895,12 +1999,12 @@ body {
 .chips-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
 }
 
 .chip-opcao {
-    padding: 9px 16px;
-    font-size: 0.95rem;
+    padding: 6px 13px;
+    font-size: 0.88rem;
     font-weight: 700;
     border: 2px solid #0F172A;
     border-radius: 9999px;
@@ -1911,7 +2015,7 @@ body {
     transition: all 0.15s ease;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
 }
 
 .chip-opcao:hover {
@@ -1925,70 +2029,105 @@ body {
     border-color: #FF5C00;
 }
 
+/* ==========================================================================
+   CHECKBOX MEMPHIS CUSTOMIZADO (sem duplicidade, acessível e alinhado)
+   ========================================================================== */
 .checkbox-memphis-container {
     display: inline-flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     cursor: pointer;
     user-select: none;
+    position: relative;
+    padding: 2px 0;
+}
+
+/* Oculta o input padrão nativo mas mantém foco e acessibilidade */
+.checkbox-memphis-container input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    margin: 0;
+    pointer-events: none;
 }
 
 .custom-checkbox {
     position: relative;
     width: 22px;
     height: 22px;
-    border: 2px solid #0F172A;
-    border-radius: 4px;
+    background: #FFFFFF;
+    border: 2.5px solid #0F172A;
+    border-radius: 5px;
     box-shadow: 2px 2px 0px #0F172A;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    transition: all 0.15s ease;
 }
 
-.checkbox-memphis-container input[type="checkbox"]:checked + .custom-checkbox {
+.checkbox-memphis-container:hover .custom-checkbox,
+.toggle-vigentes-container:hover .custom-checkbox {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0px #0F172A;
+}
+
+.checkbox-memphis-container input[type="checkbox"]:checked + .custom-checkbox,
+.toggle-vigentes-container input[type="checkbox"]:checked + .custom-checkbox {
     background: #0F172A;
-    border-color: #FF5C00;
+    border-color: #0F172A;
 }
 
-.checkbox-memphis-container input[type="checkbox"]:checked + .custom-checkbox::after {
+.checkbox-memphis-container input[type="checkbox"]:checked + .custom-checkbox::after,
+.toggle-vigentes-container input[type="checkbox"]:checked + .custom-checkbox::after {
     content: "✓";
-    color: #FFFFFF;
+    color: #FACC15;
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.checkbox-memphis-container input[type="checkbox"]:focus-visible + .custom-checkbox,
+.toggle-vigentes-container input[type="checkbox"]:focus-visible + .custom-checkbox {
+    outline: 2.5px solid var(--color-orange);
+    outline-offset: 2px;
 }
 
 .label-texto {
     font-weight: 700;
     color: #0F172A;
-    font-size: 0.95rem;
+    font-size: 0.92rem;
 }
 
 .msg-sucesso-memphis {
-    padding: 12px;
+    padding: 10px 14px;
     background: #D1FAE5;
     border: 2px solid #10B981;
     border-radius: 8px;
     color: #065F46;
     font-weight: 600;
-    margin-bottom: 16px;
+    font-size: 0.9rem;
+    margin-bottom: 14px;
     text-align: center;
 }
 
 .perfil-botoes-row {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
+    margin-top: 14px;
 }
 
 .btn-submit-memphis {
-    padding: 14px 20px;
-    font-size: 1rem;
+    min-height: 44px;
+    padding: 11px 18px;
+    font-size: 0.95rem;
     font-weight: 800;
     border: 2.5px solid #0F172A;
     border-radius: 10px;
     cursor: pointer;
-    box-shadow: 4px 4px 0px #0F172A;
+    box-shadow: 3.5px 3.5px 0px #0F172A;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1999,7 +2138,7 @@ body {
 
 .btn-submit-memphis:hover:not(:disabled) {
     transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0px #0F172A;
+    box-shadow: 5px 5px 0px #0F172A;
 }
 
 .btn-submit-primary {
@@ -2012,9 +2151,9 @@ body {
     color: #FFFFFF;
 }
 
-/* Sidebar é uma gaveta flutuante (position: fixed) — não empurra nem trava o layout */
+/* Rede de proteção */
 body.sidebar-aberta {
-    overflow-y: auto !important; /* Permite rolar normalmente */
+    overflow-y: auto !important;
 }
 
 .app-container.sidebar-aberta,
