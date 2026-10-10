@@ -389,6 +389,60 @@ def listar_mprn(
         "dados": lista_mprn
     }
 
+@app.get("/api/ifrn")
+def listar_ifrn(
+    pagina: int = Query(1, ge=1),
+    limite: int = Query(6, ge=1),
+    authorization: str = Header(default=None)
+):
+    usuario = obter_usuario_opcional(authorization)
+    colecao = db["editais"]
+    pulo = (pagina - 1) * limite
+
+    filtro = {"fonte": {"$regex": "IFRN", "$options": "i"}}
+    total_docs = colecao.count_documents(filtro)
+    lista_ifrn = []
+    for edital in colecao.find(filtro).skip(pulo).limit(limite):
+        edital["_id"] = str(edital["_id"])
+        edital["nome"] = edital.get("titulo") or edital.get("nome") or "Processo IFRN"
+        edital["titulo"] = edital["nome"]
+        edital = enriquecer_doc(edital, usuario)
+        lista_ifrn.append(edital)
+
+    return {
+        "pagina_atual": pagina,
+        "limite_por_pagina": limite,
+        "total_documentos": total_docs,
+        "dados": lista_ifrn
+    }
+
+@app.get("/api/iel")
+def listar_iel(
+    pagina: int = Query(1, ge=1),
+    limite: int = Query(6, ge=1),
+    authorization: str = Header(default=None)
+):
+    usuario = obter_usuario_opcional(authorization)
+    colecao = db["vagas"]
+    pulo = (pagina - 1) * limite
+
+    filtro = {"fonte": {"$regex": "IEL", "$options": "i"}}
+    total_docs = colecao.count_documents(filtro)
+    lista_iel = []
+    for vaga in colecao.find(filtro).skip(pulo).limit(limite):
+        vaga["_id"] = str(vaga["_id"])
+        vaga["nome"] = vaga.get("titulo") or vaga.get("nome") or "Vaga IEL/RN"
+        vaga["titulo"] = vaga["nome"]
+        vaga = enriquecer_doc(vaga, usuario)
+        lista_iel.append(vaga)
+
+    return {
+        "pagina_atual": pagina,
+        "limite_por_pagina": limite,
+        "total_documentos": total_docs,
+        "dados": lista_iel
+    }
+
 @app.get("/api/portal_uern")
 def listar_portal_uern(
     pagina: int = Query(1, ge=1),
