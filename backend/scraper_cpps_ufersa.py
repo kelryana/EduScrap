@@ -1,8 +1,4 @@
 # backend/scraper_cpps_ufersa.py
-"""
-Scraper para o portal CPPS da UFERSA (Comissão Permanente de Processos Seletivos).
-Captura editais de processos seletivos, vagas ociosas, transferências e seleções acadêmicas.
-"""
 
 import os
 import re
@@ -16,7 +12,6 @@ from pymongo import MongoClient
 import urllib3
 urllib3.disable_warnings()
 
-# Garante path para módulos internos
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from src.normalizer.classifier import classificar_oportunidade
 
@@ -99,21 +94,18 @@ def raspar_cpps():
         if href in posts_processados:
             continue
         posts_processados.add(href)
-
-        # Busca bloco circundante para obter texto e data
+        
         parent = a.find_parent(["div", "article", "li"])
         snippet = parent.get_text(" ", strip=True) if parent else ""
 
         data_pub = extrair_data_edital(snippet) or datetime.now().strftime("%Y-%m-%d")
-
-        # Classifica cursos e áreas
+       
         classificacao = classificar_oportunidade(titulo, snippet)
         cursos = classificacao["cursos"]
         areas = classificacao["areas"] or ["Processos Seletivos", "Universitário"]
 
         documento = {
             "titulo": f"[CPPS/UFERSA] {titulo}",
-            "nome": f"[CPPS/UFERSA] {titulo}",
             "descricao": snippet[:350] if snippet else titulo,
             "link": href,
             "url": href,
