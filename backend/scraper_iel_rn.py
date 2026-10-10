@@ -1,8 +1,4 @@
 # backend/scraper_iel_rn.py
-"""
-Scraper para oportunidades de estágio e vagas do IEL/RN (Instituto Euvaldo Lodi).
-Captura vagas abertas na plataforma oficial do IEL/RN (Empregare).
-"""
 
 import os
 import re

@@ -1,9 +1,4 @@
 # backend/scraper_dom_mossoro.py
-"""
-Scraper para o Diário Oficial de Mossoró (DOM / Prefeitura de Mossoró).
-Captura editais municipais de processos seletivos, convocações de estágio,
-bolsas culturais e de assistência do município de Mossoró.
-"""
 
 import os
 import re
@@ -16,7 +11,6 @@ from pymongo import MongoClient
 import urllib3
 urllib3.disable_warnings()
 
-# Garante import do classificador semântico
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from src.normalizer.classifier import classificar_oportunidade
 
