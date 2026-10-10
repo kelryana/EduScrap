@@ -100,9 +100,10 @@ function atualizarInterfaceUsuario() {
 
     if (usuarioAtual) {
         const primeiroNome = usuarioAtual.nome ? usuarioAtual.nome.split(' ')[0] : 'Estudante';
+        document.getElementById('user-name-display').textContent = primeiroNome;
         navAuth.innerHTML = `
             <div class="nav-user-box">
-                <button class="nav-user-badge" onclick="abrirModalPerfil()" title="Meu Perfil e Preferências de Cursos">
+                <button class="nav-user-badge" onclick="abrirSidebarPerfil()" title="Meu Perfil e Preferências de Cursos">
                     🎓 Olá, <strong>${primeiroNome}</strong>
                 </button>
                 <button class="btn-nav-mini btn-nav-logout" onclick="fazerLogout()" title="Sair da Conta">
@@ -130,6 +131,7 @@ function atualizarInterfaceUsuario() {
 function fazerLogout() {
     limparSessao();
     fecharModalPerfil();
+    fecharSidebarPerfil(); // Close sidebar if open
     mostrarToast("Você saiu da sua conta.", "info");
     carregarDados('estagios');
 }
@@ -138,80 +140,83 @@ function abrirModalAuth(aba = 'login') {
     window.location.href = `login.html?aba=${aba}`;
 }
 
-function fecharModalAuth() {
-    const modal = document.getElementById('modal-auth');
-    if (modal) modal.style.display = 'none';
-    const errLogin = document.getElementById('login-erro');
-    const errReg = document.getElementById('register-erro');
-    if (errLogin) errLogin.style.display = 'none';
-    if (errReg) errReg.style.display = 'none';
-}
 
-function alternarAbaAuth(aba) {
-    const tabLogin = document.getElementById('tab-login');
-    const tabReg = document.getElementById('tab-register');
-    const formLogin = document.getElementById('form-login');
-    const formReg = document.getElementById('form-register');
-    const title = document.getElementById('modal-auth-title');
 
-    if (aba === 'login') {
-        tabLogin.classList.add('ativo');
-        tabReg.classList.remove('ativo');
-        formLogin.style.display = 'block';
-        formReg.style.display = 'none';
-        if (title) title.innerText = "Entrar no EduScrap";
-    } else {
-        tabLogin.classList.remove('ativo');
-        tabReg.classList.add('ativo');
-        formLogin.style.display = 'none';
-        formReg.style.display = 'block';
-        if (title) title.innerText = "Criar Perfil Universitário";
-    }
-}
-
-function abrirModalPerfil() {
+function abrirSidebarPerfil() {
     if (!usuarioAtual) {
         abrirModalAuth('login');
         return;
     }
-    const modal = document.getElementById('modal-perfil');
-    if (!modal) return;
-
-    document.getElementById('perfil-nome-display').innerText = usuarioAtual.nome || 'Estudante';
-    document.getElementById('perfil-email-display').innerText = usuarioAtual.email || '';
+    
+    const sidebar = document.getElementById('sidebar-perfil');
+    const overlay = document.getElementById('sidebar-overlay');
+    
+    // Update sidebar content with user data
+    document.getElementById('perfil-nome-display-sidebar').innerText = usuarioAtual.nome || 'Estudante';
+    document.getElementById('perfil-email-display-sidebar').innerText = usuarioAtual.email || '';
 
     const pref = usuarioAtual.preferencias || {};
     const cursosSalvos = pref.cursos || [];
     const areasSalvas = pref.areas || [];
     const emailNotif = pref.receber_emails !== false;
 
-    // Renderiza chips no modal de perfil
-    const containerCursos = document.getElementById('perfil-chips-cursos');
+    // Renderiza chips no sidebar
+    const containerCursos = document.getElementById('perfil-chips-cursos-sidebar');
     containerCursos.innerHTML = '';
     TODOS_CURSOS.forEach(curso => {
         const sel = cursosSalvos.includes(curso) ? 'chip-selecionado' : '';
         containerCursos.innerHTML += `<button type="button" class="chip-opcao ${sel}" data-valor="${curso}"><span class="chip-check">✓</span> ${curso}</button>`;
     });
 
-    const containerAreas = document.getElementById('perfil-chips-areas');
+    const containerAreas = document.getElementById('perfil-chips-areas-sidebar');
     containerAreas.innerHTML = '';
     TODAS_AREAS.forEach(area => {
         const sel = areasSalvas.includes(area) ? 'chip-selecionado' : '';
         containerAreas.innerHTML += `<button type="button" class="chip-opcao ${sel}" data-valor="${area}"><span class="chip-check">✓</span> ${area}</button>`;
     });
 
-    document.getElementById('perfil-receber-emails').checked = emailNotif;
+    document.getElementById('perfil-receber-emails-sidebar').checked = emailNotif;
 
-    configurarChipsClick();
-    modal.style.display = 'flex';
+    // Configure chip clicks
+    configurarChipsClickSidebar();
+
+    // Show sidebar
+    sidebar.classList.add('aberto');
+    overlay.style.display = 'block';
+    
+    // Add class to body to push content
+    document.body.classList.add('sidebar-aberta');
+    document.querySelector('.app-container').classList.add('sidebar-aberta');
+    document.querySelector('.landing-section').classList.add('sidebar-aberta');
+    document.querySelector('.footer-memphis').classList.add('sidebar-aberta');
 }
 
-function fecharModalPerfil() {
-    const modal = document.getElementById('modal-perfil');
-    if (modal) modal.style.display = 'none';
-    const feedback = document.getElementById('perfil-feedback');
-    if (feedback) feedback.style.display = 'none';
+function fecharSidebarPerfil() {
+    const sidebar = document.getElementById('sidebar-perfil');
+    const overlay = document.getElementById('sidebar-overlay');
+    
+    sidebar.classList.remove('aberto');
+    overlay.style.display = 'none';
+    
+    // Remove class to restore content position
+    document.body.classList.remove('sidebar-aberta');
+    document.querySelector('.app-container').classList.remove('sidebar-aberta');
+    document.querySelector('.landing-section').classList.remove('sidebar-aberta');
+    document.querySelector('.footer-memphis').classList.remove('sidebar-aberta');
 }
+
+function configurarChipsClickSidebar() {
+    document.querySelectorAll('#perfil-chips-cursos-sidebar .chip-opcao, #perfil-chips-areas-sidebar .chip-opcao').forEach(btn => {
+        btn.onclick = function() {
+            this.classList.toggle('chip-selecionado');
+            // Trigger real-time update of feed when chips are toggled
+            if (tipoAtual === 'personalizado') {
+                carregarFeedPersonalizado();
+            }
+        };
+    });
+}
+
 
 function configurarChipsClick() {
     document.querySelectorAll('.chip-opcao').forEach(btn => {
@@ -303,10 +308,21 @@ async function executarCadastro(e) {
 
 async function salvarPreferenciasPerfil(e) {
     e.preventDefault();
-    const cursos = obterChipsSelecionados('perfil-chips-cursos');
-    const areas = obterChipsSelecionados('perfil-chips-areas');
-    const receber_emails = document.getElementById('perfil-receber-emails').checked;
-    const feedback = document.getElementById('perfil-feedback');
+    // Check if we're using the sidebar or modal
+    const isSidebar = document.getElementById('sidebar-perfil').classList.contains('aberto');
+    const cursos = isSidebar ? 
+        obterChipsSelecionados('perfil-chips-cursos-sidebar') : 
+        obterChipsSelecionados('perfil-chips-cursos');
+    const areas = isSidebar ? 
+        obterChipsSelecionados('perfil-chips-areas-sidebar') : 
+        obterChipsSelecionados('perfil-chips-areas');
+    const receber_emails = isSidebar ? 
+        document.getElementById('perfil-receber-emails-sidebar').checked : 
+        document.getElementById('perfil-receber-emails').checked;
+    
+    const feedback = isSidebar ? 
+        document.getElementById('perfil-feedback-sidebar') : 
+        document.getElementById('perfil-feedback');
 
     try {
         const resp = await fetch(`${API_URL}/auth/preferencias`, {
@@ -326,8 +342,15 @@ async function salvarPreferenciasPerfil(e) {
 
         feedback.innerText = "Preferências atualizadas com sucesso! ✅";
         feedback.style.display = 'block';
+        feedback.style.backgroundColor = '#D1FAE5';
+        feedback.style.color = '#065F46';
+        
         setTimeout(() => {
-            fecharModalPerfil();
+            if (isSidebar) {
+                fecharSidebarPerfil();
+            } else {
+                fecharModalPerfil();
+            }
             mostrarToast("Feed adaptado com suas novas preferências!", "sucesso");
             carregarFeedPersonalizado();
         }, 800);
@@ -336,6 +359,7 @@ async function salvarPreferenciasPerfil(e) {
         feedback.innerText = err.message;
         feedback.style.display = 'block';
         feedback.style.backgroundColor = '#FFD2D2';
+        feedback.style.color = '#7F1D1D';
     }
 }
 
@@ -1031,3 +1055,13 @@ function mostrarToast(mensagem, tipo = 'info') {
         setTimeout(() => toast.remove(), 400);
     }, 3500);
 }
+
+// Add keyboard support for closing sidebar
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        const sidebar = document.getElementById('sidebar-perfil');
+        if (sidebar && sidebar.classList.contains('aberto')) {
+            fecharSidebarPerfil();
+        }
+    }
+});

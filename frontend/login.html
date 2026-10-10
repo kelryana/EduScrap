@@ -273,12 +273,169 @@
             border-color: #FF5C00;
         }
 
-        @media (max-width: 640px) {
-            .brand-logo-img { height: 60px; }
-            .brand-title-text { font-size: 2.4rem; }
-            .login-card .modal-body-memphis { padding: 20px 20px 32px 20px; }
-            .login-card .auth-tabs-wrapper { padding: 16px 20px 0 20px; }
+        /* Estilo do Sidebar de Perfil */
+        .sidebar-perfil {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            max-width: 400px;
+            height: 100%;
+            background: #ffffff;
+            border-right: 3.5px solid #0F172A;
+            box-shadow: 10px 0 10px -5px rgba(15, 23, 42, 0.1);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
         }
+
+        .sidebar-perfil.aberto {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            padding: 18px 32px;
+            background: #0F172A;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sidebar-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin: 0;
+            font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .sidebar-close-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: #ffffff;
+            border: 2px solid #0F172A;
+            border-radius: 8px;
+            color: #0F172A;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px #0F172A;
+            transition: all 0.15s ease;
+        }
+
+        .sidebar-close-btn:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0px #0F172A;
+        }
+
+        .sidebar-body {
+            padding: 24px 28px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .perfil-card-info {
+            background: #F1F5F9;
+            border: 2.5px solid #0F172A;
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            box-shadow: 4px 4px 0px #0F172A;
+        }
+
+        .perfil-avatar-badge {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background: #ffffff;
+            border: 2px solid #0F172A;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 2px 2px 0px #0F172A;
+        }
+
+        .perfil-info-textos {
+            flex: 1;
+        }
+
+        .perfil-info-nome {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #0F172A;
+            margin: 0;
+        }
+
+        .perfil-info-email {
+            font-size: 0.95rem;
+            color: #475569;
+            margin: 0;
+        }
+
+        .label-com-subtexto {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .label-subtexto {
+            font-size: 0.8rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .perfil-botoes-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn-submit-memphis.btn-submit-danger {
+            background: #EF4444;
+            color: #ffffff;
+        }
+
+        .btn-submit-memphis.btn-submit-danger:hover:not(:disabled) {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px #0F172A;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.3);
+            backdrop-filter: blur(2px);
+            z-index: 40;
+            display: none;
+        }
+
+        @media (max-width: 640px) {
+            .perfil-botoes-row {
+                flex-direction: column-reverse;
+            }
+
+            .perfil-botoes-row button {
+                width: 100%;
+            }
+        }
+
+        .brand-logo-img { height: 60px; }
+        .brand-title-text { font-size: 2.4rem; }
+        .login-card .modal-body-memphis { padding: 20px 20px 32px 20px; }
+        .login-card .auth-tabs-wrapper { padding: 16px 20px 0 20px; }
+    }
     </style>
 </head>
 <body class="bg-[#FAFBFD] text-brand-dark min-h-screen bg-grid-pattern font-sans antialiased selection:bg-brand-yellow selection:text-brand-dark">
@@ -324,9 +481,14 @@
             <!-- Seletor de Abas (Login / Cadastro) -->
             <div class="auth-tabs-wrapper">
                 <div class="auth-tabs-row" role="tablist">
-                    <button id="tab-login" class="auth-tab-btn ativo" onclick="alternarAba('login')" role="tab">
-                        <i class="ph-bold ph-sign-in"></i> Já tenho conta
-                    </button>
+                    <div class="nav-user-box flex items-center gap-3">
+                        <button class="nav-user-badge" onclick="alternarAba('login')" role="tab" title="Meu Perfil e Preferências de Cursos">
+                            🎓 Olá, <strong id="user-name-display">usuário</strong>
+                        </button>
+                        <button class="btn-nav-mini btn-nav-logout" onclick="alternarAba('login')" title="Sair da Conta">
+                            <i class="ph-bold ph-sign-out"></i>
+                        </button>
+                    </div>
                     <button id="tab-register" class="auth-tab-btn" onclick="alternarAba('register')" role="tab">
                         <i class="ph-bold ph-user-plus"></i> Novo Cadastro
                     </button>
@@ -464,6 +626,82 @@
             </div>
         </main>
     </div>
+
+    <!-- ADDED LEFT PUSH SIDEBAR -->
+    <div id="sidebar-perfil" class="sidebar-perfil">
+        <div class="sidebar-header">
+            <div class="modal-dots">
+                <span class="dot dot-red"></span>
+                <span class="dot dot-yellow"></span>
+                <span class="dot dot-green"></span>
+            </div>
+            <h3 class="sidebar-title">Meu Perfil & Preferências</h3>
+            <button class="sidebar-close-btn" onclick="fecharSidebarPerfil()" title="Fechar janela" aria-label="Fechar">
+                <i class="ph-bold ph-x"></i> <span>Voltar</span>
+            </button>
+        </div>
+
+        <div class="sidebar-body">
+            <!-- Card de Perfil Limpo e Confortável -->
+            <div class="perfil-card-info">
+                <div class="perfil-avatar-badge">
+                    <i class="ph-bold ph-student"></i>
+                </div>
+                <div class="perfil-info-textos">
+                    <h4 id="perfil-nome-display-sidebar" class="perfil-info-nome">Nome do Aluno</h4>
+                    <p id="perfil-email-display-sidebar" class="perfil-info-email">aluno@uern.br</p>
+                </div>
+            </div>
+
+            <form id="form-perfil-preferencias-sidebar" onsubmit="salvarPreferenciasPerfil(event)">
+                <div class="form-group-memphis">
+                    <div class="label-com-subtexto">
+                        <label class="label-memphis">
+                            <i class="ph-bold ph-graduation-cap"></i> Cursos de Interesse:
+                        </label>
+                        <span class="label-subtexto">O feed 'Para Você' exibirá editais dessas áreas</span>
+                    </div>
+                    <div class="chips-container" id="perfil-chips-cursos-sidebar">
+                        <!-- Injetado dinamicamente via JS com chip-check -->
+                    </div>
+                </div>
+
+                <div class="form-group-memphis">
+                    <div class="label-com-subtexto">
+                        <label class="label-memphis">
+                            <i class="ph-bold ph-bookmarks"></i> Áreas de Interesse:
+                        </label>
+                        <span class="label-subtexto">Categorias complementares</span>
+                    </div>
+                    <div class="chips-container" id="perfil-chips-areas-sidebar">
+                        <!-- Injetado dinamicamente via JS com chip-check -->
+                    </div>
+                </div>
+
+                <div class="form-group-memphis">
+                    <label class="checkbox-memphis-container">
+                        <input type="checkbox" id="perfil-receber-emails-sidebar">
+                        <span class="custom-checkbox"></span>
+                        <span class="label-texto">Receber alertas de prazos por e-mail</span>
+                    </label>
+                </div>
+
+                <div id="perfil-feedback-sidebar" class="msg-sucesso-memphis" style="display: none;"></div>
+
+                <div class="perfil-botoes-row">
+                    <button type="submit" class="btn-submit-memphis btn-submit-primary" style="flex: 1;">
+                        <i class="ph-bold ph-floppy-disk"></i> Salvar Alterações
+                    </button>
+                    <button type="button" class="btn-submit-memphis btn-submit-danger" onclick="fazerLogout()">
+                        <i class="ph-bold ph-sign-out"></i> Sair da Conta
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Overlay para quando o sidebar estiver aberto -->
+    <div id="sidebar-overlay" class="sidebar-overlay" style="display: none;" onclick="fecharSidebarPerfil()"></div>
 
     <script>
         const API_URL = "http://localhost:8000/api";
