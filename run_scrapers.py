@@ -66,6 +66,18 @@ SCRAPERS = {
         "script": "scraper_mprn.py",
         "colecao": "vagas",
         "icone": "⚖️"
+    },
+    "ifrn": {
+        "nome": "IFRN (Bolsas e Editais de Ensino)",
+        "script": "scraper_ifrn.py",
+        "colecao": "editais",
+        "icone": "🌿"
+    },
+    "iel_rn": {
+        "nome": "IEL/RN (Estágios e Oportunidades)",
+        "script": "scraper_iel_rn.py",
+        "colecao": "vagas",
+        "icone": "🏭"
     }
 }
 

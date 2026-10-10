@@ -624,6 +624,8 @@ function normalizarCategoriaTag(categoria, tipoContexto) {
             'bolsas': 'Bolsas (PROEX)',
             'ufersa': 'Editais UFERSA',
             'mprn': 'Estágios MPRN',
+            'ifrn': 'Editais IFRN',
+            'iel': 'Estágios IEL/RN',
             'ciee': 'Vagas CIEE',
             'portal_uern': 'Portal UERN',
             'noticias': 'Notícia'
@@ -632,6 +634,8 @@ function normalizarCategoriaTag(categoria, tipoContexto) {
     }
 
     const cLower = categoria.toLowerCase();
+    if (cLower.includes('ifrn')) return 'Editais IFRN';
+    if (cLower.includes('iel')) return 'Estágios IEL/RN';
     if (cLower.includes('mprn') || cLower.includes('residência') || cLower.includes('residencia')) return 'Estágios MPRN';
     if (cLower.includes('inclusão digital') || cLower.includes('inclusao digital')) return 'Inclusão Digital';
     if (cLower.includes('moradia')) return 'Auxílio Moradia';
