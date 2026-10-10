@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EduScrap - Portal Universitário de Oportunidades</title>
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@600;700;800&family=Lexend:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
+
     <script>
       tailwind.config = {
         corePlugins: {
@@ -46,13 +46,13 @@
         }
       }
     </script>
-    
+
     <link rel="stylesheet" href="style.css?v=19">
 </head>
 <body class="bg-[#FAFBFD] text-brand-dark min-h-screen bg-grid-pattern font-sans antialiased selection:bg-brand-yellow selection:text-brand-dark">
 
     <section id="landing-hero" class="landing-section w-full max-w-[1360px] mx-auto px-4 sm:px-6">
-       
+
         <nav class="landing-navbar">
             <div class="nav-brand" style="display: inline-flex; align-items: center; gap: 10px;">
                 <img src="assets/logo.png" alt="EduScrap Logo" class="nav-brand-img h-10 sm:h-11 w-auto" height="42" style="height: 70px !important; max-height: 72px !important; width: auto !important; object-fit: contain; display: block; flex-shrink: 0;">
@@ -70,12 +70,12 @@
             </div>
 
             <div class="nav-actions-container">
-               
+
                 <div id="nav-auth-area">
                     <div class="nav-user-box">
-                        <button class="nav-user-badge" onclick="abrirSidebarPerfil()" title="Meu Perfil e Preferências de Cursos">
-                            🎓 Olá, <strong id="user-name-display">kelly</strong>
-                        </button>
+                        <span class="nav-user-tag">
+                            🎓 Olá, <strong id="user-name-display">Estudante</strong>
+                        </span>
                         <button class="btn-nav-mini btn-nav-logout" onclick="fazerLogout()" title="Sair da Conta">
                             <i class="ph-bold ph-sign-out"></i>
                         </button>
@@ -101,98 +101,98 @@
                 <path d="M-10 55 L10 70 L30 55 L50 70 L70 55 L90 70" />
               </svg>
             </div>
-    
+
             <div class="hidden sm:block absolute -bottom-5 left-6 select-none pointer-events-none z-0">
               <span class="text-brand-orange text-2xl font-black">✦</span>
             </div>
 
-            
+
             <div class="hidden sm:block absolute -top-6 -right-6 lg:-right-8 w-20 h-20 lg:w-24 lg:h-24 rounded-full border-3 border-brand-dark bg-white shadow-brutal select-none pointer-events-none z-20 overflow-hidden">
               <div class="w-full h-full bg-halftone"></div>
             </div>
-           
+
             <div class="hidden sm:block absolute top-36 -right-5 lg:-right-6 text-slate-900 text-3xl font-black select-none pointer-events-none z-0">
               +
             </div>
-            
-            <div class="hidden sm:block absolute top-60 -right-6 lg:-right-8 w-16 h-16 lg:w-18 lg:h-18 border-3 border-brand-dark shadow-brutal rotate-12 select-none pointer-events-none z-20 overflow-hidden" 
+
+            <div class="hidden sm:block absolute top-60 -right-6 lg:-right-8 w-16 h-16 lg:w-18 lg:h-18 border-3 border-brand-dark shadow-brutal rotate-12 select-none pointer-events-none z-20 overflow-hidden"
                  style="background: repeating-linear-gradient(-45deg, #FACC15, #FACC15 6px, #0F172A 6px, #0F172A 12px);">
             </div>
-           
+
             <div class="hidden sm:block absolute bottom-36 -right-7 lg:-right-9 select-none pointer-events-none z-20">
               <svg width="65" height="22" viewBox="0 0 65 22" fill="none">
                 <path d="M2 11 Q 9 2, 16 11 T 30 11 T 44 11 T 58 11" stroke="#FF5C00" stroke-width="4.5" stroke-linecap="round"/>
               </svg>
             </div>
-           
+
             <div class="hidden sm:block absolute -bottom-8 -right-6 lg:-right-8 select-none pointer-events-none z-20">
               <svg width="105" height="95" viewBox="0 0 100 90" class="drop-shadow-[4px_4px_0px_#0F172A]">
                 <polygon points="50,5 95,85 5,85" fill="#FF5C00" stroke="#0F172A" stroke-width="4" stroke-linejoin="round"/>
                 <polygon points="50,22 80,78 20,78" fill="#FACC15"/>
               </svg>
             </div>
-          
+
             <div class="hidden sm:block absolute -bottom-4 left-[58%] select-none pointer-events-none z-20">
               <svg width="36" height="36" viewBox="0 0 40 40">
                 <polygon points="20,2 38,36 2,36" fill="#FF5C00" stroke="#0F172A" stroke-width="3"/>
               </svg>
             </div>
-          
+
             <div class="relative w-full bg-white border-3 border-brand-dark rounded-3xl shadow-brutal-xl overflow-hidden p-8 sm:p-12 lg:p-16 pl-8 sm:pl-16 lg:pl-20 z-10">
-              
-              <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center"> 
-            
+
+              <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+
                 <div class="lg:col-span-7 space-y-7 relative z-30">
-            
-                 
+
+
                   <div class="inline-flex items-center gap-2 px-4.5 font-display font-extrabold text-sm sm:text-base text-brand-dark">
                     <span class="text-brand-orange text-base">✦</span>
                     <span>Portal Universitário de Oportunidades</span>
                   </div>
 
-                 
+
                   <h1 class="font-display font-extrabold text-4xl sm:text-6xl lg:text-[3.85rem] text-brand-dark tracking-tight leading-[1.14]">
-                    Descubra editais e vagas em 
+                    Descubra editais e vagas em
                     <span class="relative inline-block text-brand-orange">
                       tempo real
-                    
+
                       <svg class="absolute -bottom-2 left-0 w-full h-3" viewBox="0 0 100 12" preserveAspectRatio="none" fill="none">
                         <path d="M0 6 Q 12 0, 25 6 T 50 6 T 75 6 T 100 6" stroke="#FACC15" stroke-width="5" stroke-linecap="round"/>
                       </svg>
                     </span>
                     na sua universidade.
                   </h1>
-                 
+
                   <p class="text-slate-600 text-lg sm:text-xl lg:text-[1.22rem] leading-relaxed max-w-2xl font-medium">
                     O <strong>EduScrap</strong> monitora e unifica automaticamente as oportunidades da UERN, UFERSA, CIEE, PRAE e PROEX. Personalize seu perfil, salve seus editais favoritos e não perca nenhum prazo de inscrição.
                   </p>
-                  
+
                   <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
                     <a href="#area-oportunidades" class="px-7 sm:px-8 py-4 sm:py-4.5 rounded-xl border-2.5 border-brand-dark bg-brand-orange hover:bg-brand-orange-hover text-white font-extrabold text-lg sm:text-xl shadow-brutal neo-btn inline-flex items-center justify-center gap-2.5 whitespace-nowrap">
                       <span>Explorar Oportunidades</span>
                       <span class="text-xl">→</span>
                     </a>
-                    
+
                     <a href="login.html?aba=register" class="px-7 sm:px-8 py-4 sm:py-4.5 rounded-xl border-2.5 border-brand-dark bg-white hover:bg-slate-50 text-brand-dark font-extrabold text-lg sm:text-xl shadow-brutal neo-btn inline-flex items-center justify-center gap-2.5 whitespace-nowrap" style="text-decoration: none;">
                       <span>🎓 Criar Perfil de Aluno</span>
                     </a>
                   </div>
 
                 </div>
-               
+
                 <div class="lg:col-span-5 relative flex justify-center items-center pt-4 lg:pt-0">
-                  
+
                   <div class="relative w-full max-w-[430px] sm:max-w-[460px] lg:max-w-[480px] flex items-center justify-center py-2">
-                    
-                   
+
+
                     <div class="absolute -top-1 -right-2 text-brand-orange text-3xl font-black select-none z-20">
                       ✦
                     </div>
 
-                  
+
                     <div class="relative z-10 w-[290px] sm:w-[350px] lg:w-[380px] h-[390px] sm:h-[450px] lg:h-[485px] rounded-2xl border-3 border-brand-dark bg-gradient-to-b from-[#FFFDE7] to-[#FFE082] overflow-hidden shadow-brutal-xl flex items-end justify-center">
-                      <img 
-                        src="assets/estudante.png" 
+                      <img
+                        src="assets/estudante.png"
                         alt="Estudante universitária"
                         class="w-full h-full object-contain object-bottom select-none pointer-events-none"
                       />
@@ -220,9 +220,9 @@
 
         <!-- Barra de Busca Ampla e Acessível -->
         <div class="busca-wrapper">
-            <input type="text" id="input-busca" 
-                class="input-busca-memphis" 
-                placeholder="Pesquisar editais (ex: estágio, computação, bolsa, UERN)..." 
+            <input type="text" id="input-busca"
+                class="input-busca-memphis"
+                placeholder="Pesquisar editais (ex: estágio, computação, bolsa, UERN)..."
                 onkeyup="if(event.key === 'Enter') realizarPesquisa()">
             <button id="btn-pesquisar" class="btn-busca-memphis" onclick="realizarPesquisa()">
                 <i class="ph-bold ph-magnifying-glass"></i> Buscar
@@ -262,6 +262,10 @@
         <!-- BARRA DE UTILITÁRIOS E FILTROS DO ESTUDANTE -->
         <div class="student-toolbar">
             <div class="student-toolbar-left">
+                <button id="btn-abrir-sidebar-filtros" class="btn-filtro-aluno" onclick="alternarSidebarPerfil()">
+                    <i class="ph-bold ph-sliders-horizontal"></i>
+                    <span>⚙️ Cursos & Preferências</span>
+                </button>
                 <button id="btn-personalizado" class="btn-filtro-aluno" onclick="carregarFeedPersonalizado()">
                     <i class="ph-bold ph-sparkle"></i> <span>🎯 Para Você (Perfil)</span>
                 </button>
@@ -269,7 +273,7 @@
                     <i class="ph-bold ph-star"></i> <span>⭐ Salvos (<strong id="contador-favoritos">0</strong>)</span>
                 </button>
             </div>
-            
+
             <div class="student-toolbar-right">
                 <label class="toggle-vigentes-container" for="filtroVigentes">
                     <input type="checkbox" id="filtroVigentes" onchange="toggleFiltroVigentes()">
@@ -278,7 +282,7 @@
                 </label>
             </div>
         </div>
-       
+
         <main>
             <div id="container-vagas" class="grid-vagas">
                 <div class="status-box">

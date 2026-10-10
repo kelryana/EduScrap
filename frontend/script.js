@@ -103,9 +103,9 @@ function atualizarInterfaceUsuario() {
         document.getElementById('user-name-display').textContent = primeiroNome;
         navAuth.innerHTML = `
             <div class="nav-user-box">
-                <button class="nav-user-badge" onclick="abrirSidebarPerfil()" title="Meu Perfil e Preferências de Cursos">
+                <span class="nav-user-tag">
                     🎓 Olá, <strong>${primeiroNome}</strong>
-                </button>
+                </span>
                 <button class="btn-nav-mini btn-nav-logout" onclick="fazerLogout()" title="Sair da Conta">
                     <i class="ph-bold ph-sign-out"></i>
                 </button>
@@ -147,10 +147,9 @@ function abrirSidebarPerfil() {
         abrirModalAuth('login');
         return;
     }
-    
+
     const sidebar = document.getElementById('sidebar-perfil');
-    const overlay = document.getElementById('sidebar-overlay');
-    
+
     // Update sidebar content with user data
     document.getElementById('perfil-nome-display-sidebar').innerText = usuarioAtual.nome || 'Estudante';
     document.getElementById('perfil-email-display-sidebar').innerText = usuarioAtual.email || '';
@@ -180,29 +179,30 @@ function abrirSidebarPerfil() {
     // Configure chip clicks
     configurarChipsClickSidebar();
 
-    // Show sidebar
+    // Show sidebar (gaveta flutuante — não empurra nem trava o resto da página)
     sidebar.classList.add('aberto');
-    overlay.style.display = 'block';
-    
-    // Add class to body to push content
-    document.body.classList.add('sidebar-aberta');
-    document.querySelector('.app-container').classList.add('sidebar-aberta');
-    document.querySelector('.landing-section').classList.add('sidebar-aberta');
-    document.querySelector('.footer-memphis').classList.add('sidebar-aberta');
 }
 
 function fecharSidebarPerfil() {
     const sidebar = document.getElementById('sidebar-perfil');
-    const overlay = document.getElementById('sidebar-overlay');
-    
+    if (!sidebar) return;
+
     sidebar.classList.remove('aberto');
-    overlay.style.display = 'none';
-    
-    // Remove class to restore content position
-    document.body.classList.remove('sidebar-aberta');
-    document.querySelector('.app-container').classList.remove('sidebar-aberta');
-    document.querySelector('.landing-section').classList.remove('sidebar-aberta');
-    document.querySelector('.footer-memphis').classList.remove('sidebar-aberta');
+}
+
+// Toggle simples para abrir/fechar sem afetar o resto da página
+function alternarSidebarPerfil() {
+    if (!usuarioAtual) {
+        abrirModalAuth('login');
+        return;
+    }
+    const sidebar = document.getElementById('sidebar-perfil');
+    if (!sidebar) return;
+    if (sidebar.classList.contains('aberto')) {
+        fecharSidebarPerfil();
+    } else {
+        abrirSidebarPerfil();
+    }
 }
 
 function configurarChipsClickSidebar() {
@@ -310,18 +310,18 @@ async function salvarPreferenciasPerfil(e) {
     e.preventDefault();
     // Check if we're using the sidebar or modal
     const isSidebar = document.getElementById('sidebar-perfil').classList.contains('aberto');
-    const cursos = isSidebar ? 
-        obterChipsSelecionados('perfil-chips-cursos-sidebar') : 
+    const cursos = isSidebar ?
+        obterChipsSelecionados('perfil-chips-cursos-sidebar') :
         obterChipsSelecionados('perfil-chips-cursos');
-    const areas = isSidebar ? 
-        obterChipsSelecionados('perfil-chips-areas-sidebar') : 
+    const areas = isSidebar ?
+        obterChipsSelecionados('perfil-chips-areas-sidebar') :
         obterChipsSelecionados('perfil-chips-areas');
-    const receber_emails = isSidebar ? 
-        document.getElementById('perfil-receber-emails-sidebar').checked : 
+    const receber_emails = isSidebar ?
+        document.getElementById('perfil-receber-emails-sidebar').checked :
         document.getElementById('perfil-receber-emails').checked;
-    
-    const feedback = isSidebar ? 
-        document.getElementById('perfil-feedback-sidebar') : 
+
+    const feedback = isSidebar ?
+        document.getElementById('perfil-feedback-sidebar') :
         document.getElementById('perfil-feedback');
 
     try {
@@ -344,7 +344,7 @@ async function salvarPreferenciasPerfil(e) {
         feedback.style.display = 'block';
         feedback.style.backgroundColor = '#D1FAE5';
         feedback.style.color = '#065F46';
-        
+
         setTimeout(() => {
             if (isSidebar) {
                 fecharSidebarPerfil();
@@ -533,7 +533,7 @@ function destacarBotaoAtivo(idBotao) {
 
 function formatarTituloEdital(texto) {
     if (!texto || typeof texto !== 'string') return '';
-    
+
     // Detecta proporção de letras maiúsculas
     const letras = texto.replace(/[^a-zA-ZáéíóúÁÉÍÓÚãõÃÕâêîôûÂÊÎÔÛçÇ]/g, '');
     if (letras.length === 0) return texto;
@@ -551,7 +551,7 @@ function formatarTituloEdital(texto) {
     ]);
 
     const minusculas = new Set([
-        'de', 'da', 'do', 'das', 'dos', 'em', 'no', 'na', 'nos', 'nas', 
+        'de', 'da', 'do', 'das', 'dos', 'em', 'no', 'na', 'nos', 'nas',
         'a', 'o', 'as', 'os', 'e', 'ou', 'com', 'por', 'para', 'pelo', 'pela', 'ao', 'aos', 'à', 'às'
     ]);
 
@@ -748,7 +748,7 @@ function renderizarCards(listaDeVagas) {
 
         let badgeStatusHTML = "";
         let status = vaga.status_prazo || "";
-        
+
         if (!ehNoticia && vaga.data_vencimento_formatada) {
             let dias = vaga.dias_restantes;
             if (typeof dias !== "number") {
@@ -811,7 +811,7 @@ function renderizarCards(listaDeVagas) {
                     ${numeroEditalHTML}
 
                     <h3 class="card-titulo" title="${vaga.nome}">${infoEdital.tituloLimpo}</h3>
-                    
+
                     <div class="card-meta-box">
                         <i class="ph-bold ph-buildings meta-icone"></i>
                         <span class="meta-texto"><strong>Origem:</strong> ${linkFonteHTML}</span>
@@ -824,8 +824,8 @@ function renderizarCards(listaDeVagas) {
                         <i class="ph-bold ph-arrow-up-right"></i>
                     </a>
 
-                    <button id="fav-btn-${idStr}" 
-                        class="btn-favoritar-card ${ehFavorito ? 'favoritado' : ''}" 
+                    <button id="fav-btn-${idStr}"
+                        class="btn-favoritar-card ${ehFavorito ? 'favoritado' : ''}"
                         onclick="toggleFavorito('${idStr}', event)"
                         title="${ehFavorito ? 'Remover dos favoritos' : 'Salvar oportunidade'}">
                         <i class="${ehFavorito ? 'ph-fill ph-star' : 'ph-bold ph-star'}"></i>
