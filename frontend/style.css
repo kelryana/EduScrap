@@ -71,10 +71,10 @@ body {
 .landing-section {
     position: relative;
     z-index: 10;
-    max-width: 1360px;
+    max-width: 1520px;
     width: 100%;
     margin: 0 auto;
-    padding: 1.5rem 1.25rem 2.5rem 1.25rem;
+    padding: 1.8rem 1.5rem 2.8rem 1.5rem;
 }
 
 /* Navigation Bar */
@@ -82,21 +82,21 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.1rem 1.75rem;
+    padding: 1.35rem 2.4rem;
     background: #FFFFFF;
-    border: 2.5px solid var(--color-navy);
-    border-radius: 12px;
-    box-shadow: 5px 5px 0px var(--color-navy);
-    margin-bottom: 2rem;
+    border: 3px solid var(--color-navy);
+    border-radius: 16px;
+    box-shadow: 6px 6px 0px var(--color-navy);
+    margin-bottom: 2.2rem;
 }
 
 .nav-link {
     color: var(--color-navy);
     text-decoration: none;
     font-weight: 700;
-    font-size: 1.18rem;
-    padding: 6px 12px;
-    border-radius: 6px;
+    font-size: 1.25rem;
+    padding: 8px 16px;
+    border-radius: 8px;
     transition: all 0.15s ease;
 }
 
@@ -409,23 +409,22 @@ body {
     display: inline-block;
     background-color: var(--color-navy);
     color: var(--color-white);
-    padding: 0.5rem 1.5rem;
-    font-size: 2rem;
+    padding: 0.8rem 2.5rem;
+    font-size: 3.0rem;
     font-weight: 900;
-    border: 2.5px solid var(--color-navy);
+    border: 3px solid var(--color-navy);
     border-radius: 8px;
-    box-shadow: 5px 5px 0px var(--color-orange);
-    transform: none;
+    box-shadow: 6px 6px 0px var(--color-orange);
+    transform: rotate(-1.5deg);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    cursor: default;
+    cursor: pointer;
     user-select: none;
-    margin-top: -1.5rem;
-    margin-bottom: 1.5rem;
+    margin-top: -2rem; /* Move the logo higher */
 }
 
 .logo-box:hover {
-    transform: none;
-    box-shadow: 7px 7px 0px var(--color-orange);
+    transform: rotate(0deg);
+    box-shadow: 8px 8px 0px var(--color-orange);
 }
 
 /* Barra de Busca */
@@ -960,66 +959,67 @@ body {
 /* 2. BLOCO DO MEIO: WIDGETS CIRCULARES E SLIDERS */
 .dash-grid-widgets-circulares {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-    gap: 1.6rem;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 2rem;
 }
 
 .dash-widget-circular {
     background: #FFFFFF;
     border: 3.5px solid var(--color-navy);
-    border-radius: 20px;
-    padding: 1.8rem 1.6rem;
-    box-shadow: 7px 7px 0px var(--color-navy);
+    border-radius: 22px;
+    padding: 2.2rem 2rem;
+    box-shadow: 8px 8px 0px var(--color-navy);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 1.4rem;
+    gap: 1.8rem;
 }
 
 .dash-widget-topo {
     display: flex;
     align-items: center;
-    gap: 18px;
+    gap: 22px;
 }
 
 /* Anel / Donut circular com conic-gradient */
 .dash-donut-container {
-    width: 96px;
-    height: 96px;
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
     background: conic-gradient(var(--cor-anel) var(--porcentagem), #E2E8F0 0deg);
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 3px solid var(--color-navy);
-    box-shadow: 3px 3px 0px var(--color-navy);
+    border: 3.5px solid var(--color-navy);
+    box-shadow: 4px 4px 0px var(--color-navy);
     flex-shrink: 0;
 }
 
 .dash-donut-circulo {
-    width: 68px;
-    height: 68px;
+    width: 86px;
+    height: 86px;
     background: #FFFFFF;
     border-radius: 50%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border: 2px solid var(--color-navy);
+    border: 2.5px solid var(--color-navy);
 }
 
 .dash-donut-valor {
-    font-size: 1.65rem;
+    font-size: 2.2rem;
     font-weight: 900;
     color: var(--color-navy);
     line-height: 1;
 }
 
 .dash-donut-sub {
-    font-size: 0.65rem;
+    font-size: 0.82rem;
     font-weight: 800;
     color: #64748B;
     letter-spacing: 0.5px;
+    margin-top: 2px;
 }
 
 .dash-widget-info {
@@ -1029,19 +1029,19 @@ body {
 .dash-widget-titulo-row {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 6px;
+    gap: 10px;
+    margin-bottom: 8px;
 }
 
 .dash-icone-box {
-    width: 28px;
-    height: 28px;
-    border-radius: 7px;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 1rem;
-    border: 2px solid var(--color-navy);
+    font-size: 1.25rem;
+    border: 2.5px solid var(--color-navy);
 }
 
 .bg-laranja { background: #FF5C00; color: #FFFFFF; }
@@ -1052,7 +1052,7 @@ body {
 .bg-navy { background: var(--color-navy); color: #FFFFFF; }
 
 .dash-widget-titulo {
-    font-size: 1.25rem;
+    font-size: 1.45rem;
     font-weight: 900;
     color: var(--color-navy);
     margin: 0;
@@ -1060,27 +1060,27 @@ body {
 }
 
 .dash-widget-desc {
-    font-size: 0.88rem;
+    font-size: 1.02rem;
     color: #64748B;
-    line-height: 1.4;
+    line-height: 1.45;
     margin: 0;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .dash-widget-slider-box {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 14px;
-    padding-top: 10px;
-    border-top: 1.5px dashed #E2E8F0;
+    gap: 18px;
+    padding-top: 14px;
+    border-top: 2px dashed #CBD5E1;
 }
 
 .dash-slider-trilho {
     flex: 1;
-    height: 12px;
+    height: 16px;
     background: #E2E8F0;
-    border: 2.5px solid var(--color-navy);
+    border: 3px solid var(--color-navy);
     border-radius: 9999px;
     position: relative;
     overflow: visible;
@@ -1095,20 +1095,20 @@ body {
     position: absolute;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
     background: #FFFFFF;
-    border: 2.5px solid var(--color-navy);
+    border: 3px solid var(--color-navy);
     border-radius: 50%;
-    box-shadow: 1.5px 1.5px 0px var(--color-navy);
+    box-shadow: 2px 2px 0px var(--color-navy);
 }
 
 .dash-slider-tag {
-    font-size: 0.82rem;
+    font-size: 0.96rem;
     font-weight: 800;
-    padding: 3px 9px;
-    border-radius: 6px;
-    border: 1.5px solid var(--color-navy);
+    padding: 5px 12px;
+    border-radius: 8px;
+    border: 2px solid var(--color-navy);
     white-space: nowrap;
 }
 
@@ -1134,7 +1134,7 @@ body {
 .dash-grid-inferior {
     display: grid;
     grid-template-columns: 1fr 1.6fr;
-    gap: 1.8rem;
+    gap: 2rem;
 }
 
 @media (max-width: 1023px) {
@@ -1146,9 +1146,9 @@ body {
 .dash-card-radar {
     background: #FFFFFF;
     border: 3.5px solid var(--color-navy);
-    border-radius: 20px;
-    padding: 1.8rem 1.6rem;
-    box-shadow: 7px 7px 0px var(--color-navy);
+    border-radius: 22px;
+    padding: 2.2rem 2rem;
+    box-shadow: 8px 8px 0px var(--color-navy);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -1158,11 +1158,11 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.8rem;
 }
 
 .dash-radar-titulo {
-    font-size: 1.28rem;
+    font-size: 1.48rem;
     font-weight: 900;
     color: var(--color-navy);
     margin: 0;
@@ -1171,30 +1171,30 @@ body {
 .dash-badge-auto-sync {
     background: #F1F5F9;
     color: var(--color-navy);
-    border: 2px solid var(--color-navy);
-    border-radius: 6px;
-    padding: 3px 9px;
-    font-size: 0.78rem;
+    border: 2.5px solid var(--color-navy);
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-size: 0.88rem;
     font-weight: 800;
-    box-shadow: 1.5px 1.5px 0px var(--color-navy);
+    box-shadow: 2px 2px 0px var(--color-navy);
 }
 
 .dash-radar-contadores-row {
     display: flex;
-    gap: 12px;
-    margin-bottom: 1.6rem;
+    gap: 16px;
+    margin-bottom: 2rem;
 }
 
 .dash-radar-box {
     flex: 1;
-    border-radius: 12px;
-    padding: 1.1rem 0.6rem;
+    border-radius: 14px;
+    padding: 1.4rem 0.8rem;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border: 2.5px dashed;
+    border: 3px dashed;
 }
 
 .box-ufersa {
@@ -1213,15 +1213,15 @@ body {
 }
 
 .dash-radar-numero {
-    font-size: 2.2rem;
+    font-size: 2.8rem;
     font-weight: 900;
     color: var(--color-navy);
     line-height: 1;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
 }
 
 .dash-radar-label {
-    font-size: 0.72rem;
+    font-size: 0.85rem;
     font-weight: 800;
     text-transform: uppercase;
     color: #475569;
@@ -1231,11 +1231,11 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 0.88rem;
-    font-weight: 700;
+    font-size: 1.05rem;
+    font-weight: 800;
     color: #475569;
-    padding-top: 12px;
-    border-top: 2px dashed #E2E8F0;
+    padding-top: 16px;
+    border-top: 2.5px dashed #E2E8F0;
 }
 
 .dash-status-ativo {
@@ -1247,9 +1247,9 @@ body {
 .dash-card-fluxo {
     background: #FFFFFF;
     border: 3.5px solid var(--color-navy);
-    border-radius: 20px;
-    padding: 1.8rem 1.8rem;
-    box-shadow: 7px 7px 0px var(--color-navy);
+    border-radius: 22px;
+    padding: 2.2rem 2.2rem;
+    box-shadow: 8px 8px 0px var(--color-navy);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -1259,19 +1259,19 @@ body {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 1.5rem;
+    gap: 16px;
+    margin-bottom: 1.8rem;
 }
 
 .dash-fluxo-titulo {
-    font-size: 1.28rem;
+    font-size: 1.48rem;
     font-weight: 900;
     color: var(--color-navy);
-    margin: 0 0 4px 0;
+    margin: 0 0 6px 0;
 }
 
 .dash-fluxo-sub {
-    font-size: 0.88rem;
+    font-size: 1rem;
     color: #64748B;
     margin: 0;
     font-weight: 600;
@@ -1281,11 +1281,11 @@ body {
     background: #FACC15;
     color: #0F172A;
     font-weight: 800;
-    font-size: 0.82rem;
-    padding: 4px 12px;
-    border: 2px solid var(--color-navy);
+    font-size: 0.95rem;
+    padding: 6px 16px;
+    border: 2.5px solid var(--color-navy);
     border-radius: 9999px;
-    box-shadow: 2px 2px 0px var(--color-navy);
+    box-shadow: 2.5px 2.5px 0px var(--color-navy);
     white-space: nowrap;
 }
 
@@ -1293,7 +1293,7 @@ body {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-    gap: 24px;
+    gap: 30px;
 }
 
 @media (max-width: 768px) {
@@ -1306,10 +1306,10 @@ body {
 .dash-barras-grafico {
     display: flex;
     align-items: flex-end;
-    gap: 16px;
-    height: 180px;
-    padding-bottom: 6px;
-    border-bottom: 3.5px solid var(--color-navy);
+    gap: 18px;
+    height: 220px;
+    padding-bottom: 8px;
+    border-bottom: 4px solid var(--color-navy);
     flex: 1;
 }
 
@@ -1317,16 +1317,16 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     flex: 1;
 }
 
 .dash-barra-pilar {
     width: 100%;
-    max-width: 38px;
-    border: 2.5px solid var(--color-navy);
-    border-radius: 20px;
-    box-shadow: 2px 2px 0px var(--color-navy);
+    max-width: 44px;
+    border: 3px solid var(--color-navy);
+    border-radius: 22px;
+    box-shadow: 2.5px 2.5px 0px var(--color-navy);
     transition: transform 0.2s ease;
 }
 
@@ -1343,7 +1343,7 @@ body {
 .pilar-verde { background: #10B981; }
 
 .dash-pilar-nome {
-    font-size: 0.78rem;
+    font-size: 0.92rem;
     font-weight: 800;
     color: var(--color-navy);
 }
@@ -1351,29 +1351,29 @@ body {
 .dash-fluxo-legenda {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    max-width: 250px;
+    gap: 16px;
+    max-width: 290px;
 }
 
 .dash-legenda-item {
     display: flex;
     align-items: flex-start;
-    gap: 10px;
+    gap: 12px;
 }
 
 .dash-legenda-ponto {
-    width: 14px;
-    height: 14px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
-    border: 2px solid var(--color-navy);
+    border: 2.5px solid var(--color-navy);
     flex-shrink: 0;
     margin-top: 3px;
 }
 
 .dash-legenda-texto {
-    font-size: 0.82rem;
+    font-size: 0.95rem;
     color: #475569;
-    line-height: 1.35;
+    line-height: 1.45;
 }
 
 .dash-legenda-texto strong {
