@@ -1786,11 +1786,11 @@ body {
 }
 
 .sidebar-perfil.aberto {
-    width: 395px;
+    width: 460px;
     opacity: 1;
     visibility: visible;
     border-width: 3px;      /* moldura Memphis aparece junto com a gaveta */
-    margin-right: 1.5rem;   /* aqui os cards são empurrados p/ direita */
+    margin-right: 1.75rem;  /* aqui os cards são empurrados p/ direita */
 }
 
 /* Quando a sidebar está aberta, os cards ganham respiro e nunca ficam espremidos */
@@ -1800,8 +1800,8 @@ body {
 
 /* Painel interno com largura fixa: evita que o texto amasse durante a animação */
 .sidebar-perfil > * {
-    width: 395px;
-    max-width: 395px;
+    width: 460px;
+    max-width: 460px;
     box-sizing: border-box;
 }
 
@@ -1812,20 +1812,26 @@ body {
 }
 
 .sidebar-header {
-    padding: 14px 20px;
+    padding: 16px 20px;
     background: #0F172A;
     color: #ffffff;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 14px;
     flex-shrink: 0;
 }
 
 .sidebar-title {
-    font-size: 1.15rem;
+    font-size: 1.12rem;
     font-weight: 800;
     color: #ffffff;
     margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    padding-left: 6px;
 }
 
 .sidebar-close-btn {

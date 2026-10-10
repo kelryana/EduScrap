@@ -372,6 +372,8 @@ def listar_mprn(
     pulo = (pagina - 1) * limite
 
     filtro = {"fonte": {"$regex": "MPRN", "$options": "i"}}
+    if apenas_vigentes:
+        filtro["data_vencimento"] = {"$gte": datetime.now()}
 
     total_docs = colecao.count_documents(filtro)
     lista_mprn = []

@@ -70,6 +70,37 @@ def raspar_mprn():
         parent = h.find_parent(["article", "div"])
         snippet = parent.get_text(" ", strip=True) if parent else ""
 
+        # Extração inteligente da data limite de inscrição do texto
+        meses_pt = {
+            "janeiro": 1, "fevereiro": 2, "março": 3, "marco": 3, "abril": 4,
+            "maio": 5, "junho": 6, "julho": 7, "agosto": 8,
+            "setembro": 9, "outubro": 10, "novembro": 11, "dezembro": 12
+        }
+        data_vencimento = None
+        status_vaga = "Aberto"
+
+        padroes_prazo = [
+            r"(?:entre\s+os\s+dias\s+\d+\s+e\s+|de\s+\d+\s+a\s+|a\s+|até\s+(?:o\s+dia\s+)?|às\s+\d+h\s+de\s+)(\d{1,2})(?:º)?\s+de\s+([a-zA-Zç]+)(?:\s+de\s+(\d{4}))?",
+            r"(\d{1,2})\s+de\s+([a-zA-Zç]+)(?:\s+de\s+(\d{4}))?"
+        ]
+        texto_analise = f"{titulo} {snippet}"
+        for padrao in padroes_prazo:
+            matches = re.findall(padrao, texto_analise, re.IGNORECASE)
+            if matches:
+                dia_str, mes_str, ano_str = matches[-1]
+                mes_num = meses_pt.get(mes_str.lower())
+                if mes_num:
+                    ano_num = int(ano_str) if ano_str else 2026
+                    try:
+                        data_vencimento = datetime(ano_num, mes_num, int(dia_str))
+                        if data_vencimento.date() < datetime.now().date():
+                            status_vaga = "Encerrado"
+                        else:
+                            status_vaga = "Aberto"
+                        break
+                    except Exception:
+                        pass
+
         # Classifica cursos e áreas
         classificacao = classificar_oportunidade(titulo, snippet)
         cursos = classificacao["cursos"]
@@ -83,14 +114,21 @@ def raspar_mprn():
             "url": href,
             "fonte": "MPRN (Ministério Público do RN)",
             "tipo": "vaga",
-            "categoria": "Estágio / Residência Remunerada",
-            "status": "Aberto",
+            "categoria": "Estágios MPRN",
+            "status": status_vaga,
             "data_publicacao": datetime.now().strftime("%Y-%m-%d"),
             "cursos": cursos,
             "areas": areas,
             "cidade": "Mossoró / RN",
             "coletado_em": datetime.now().isoformat()
         }
+
+        if data_vencimento:
+            documento["data_vencimento"] = data_vencimento
+            documento["data_vencimento_formatada"] = data_vencimento.strftime("%d/%m/%Y")
+            dias_rest = (data_vencimento.date() - datetime.now().date()).days
+            documento["dias_restantes"] = dias_rest
+            documento["status_prazo"] = "vigente" if dias_rest >= 0 else "vencido"
 
         res = colecao.update_one(
             {"link": href},
