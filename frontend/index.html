@@ -47,7 +47,7 @@
       }
     </script>
 
-    <link rel="stylesheet" href="style.css?v=19">
+    <link rel="stylesheet" href="style.css?v=20">
 </head>
 <body class="bg-[#FAFBFD] text-brand-dark min-h-screen bg-grid-pattern font-sans antialiased selection:bg-brand-yellow selection:text-brand-dark">
 
@@ -284,22 +284,11 @@
         </div>
 
         <main>
-            <div id="container-vagas" class="grid-vagas">
-                <div class="status-box">
-                    <div class="status-box-decor"></div>
-                    <h3 class="status-box-titulo">Carregando Dados ⏳</h3>
-                    <p class="status-box-texto">Buscando oportunidades no banco de dados...</p>
-                </div>
-            </div>
-        </main>
-    </div>
+            <!-- TRILHO DE CONTEÚDO: gaveta de filtros + grade de cards lado a lado.
+                 Ao abrir a gaveta, os cards são empurrados para a direita. -->
+            <div id="trilho-conteudo" class="trilho-conteudo">
 
-
-
-    <!-- =========================================================================
-         4. SIDEBAR DE PERFIL & PREFERÊNCIAS DO ALUNO - NOVO SIDEBAR À ESQUERDA
-         ========================================================================= -->
-    <div id="sidebar-perfil" class="sidebar-perfil">
+                <aside id="sidebar-perfil" class="sidebar-perfil" aria-label="Cursos e preferências">
         <div class="sidebar-header">
             <div class="modal-dots">
                 <span class="dot dot-red"></span>
@@ -360,23 +349,30 @@
                 <div id="perfil-feedback-sidebar" class="msg-sucesso-memphis" style="display: none;"></div>
 
                 <div class="perfil-botoes-row">
-                    <button type="submit" class="btn-submit-memphis btn-submit-primary" style="flex: 1;">
-                        <i class="ph-bold ph-floppy-disk"></i> Salvar Alterações
-                    </button>
-                    <button type="button" class="btn-submit-memphis btn-submit-danger" onclick="fazerLogout()">
-                        <i class="ph-bold ph-sign-out"></i> Sair da Conta
-                    </button>
-                </div>
-            </form>
+                        <button type="submit" class="btn-submit-memphis btn-submit-primary" style="flex: 1;">
+                            <i class="ph-bold ph-floppy-disk"></i> Salvar Alterações
+                        </button>
+                        <button type="button" class="btn-submit-memphis btn-submit-danger" onclick="fazerLogout()">
+                            <i class="ph-bold ph-sign-out"></i> Sair da Conta
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </aside>
+
+        <!-- GRADE DE CARDS (empurrada para a direita quando a gaveta abre) -->
+        <div id="container-vagas" class="grid-vagas">
+            <div class="status-box">
+                <div class="status-box-decor"></div>
+                <h3 class="status-box-titulo">Carregando Dados ⏳</h3>
+                <p class="status-box-texto">Buscando oportunidades no banco de dados...</p>
+            </div>
         </div>
+
+            </div><!-- /#trilho-conteudo -->
+        </main>
     </div>
 
-    <!-- Overlay para quando o sidebar estiver aberto -->
-    <div id="sidebar-overlay" class="sidebar-overlay" style="display: none;" onclick="fecharSidebarPerfil()"></div>
-
-    <!-- =========================================================================
-         5. MODAL DE PERFIL & PREFERÊNCIAS DO ALUNO - REESTRUTURADO
-         ========================================================================= -->
     <div id="modal-perfil" class="modal-backdrop" style="display: none;" onclick="if(event.target === this) fecharModalPerfil()">
         <div class="modal-memphis" role="dialog" aria-modal="true" aria-labelledby="modal-perfil-title">
             <div class="modal-header-memphis">
@@ -471,7 +467,7 @@
         </div>
     </footer>
 
-    <script src="script.js?v=10"></script>
+    <script src="script.js?v=20"></script>
     <script>
         function scrollParaBusca() {
             const target = document.getElementById('area-oportunidades');
