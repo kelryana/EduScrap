@@ -626,6 +626,7 @@ function normalizarCategoriaTag(categoria, tipoContexto) {
             'mprn': 'Estágios MPRN',
             'ifrn': 'Editais IFRN',
             'iel': 'Estágios IEL/RN',
+            'dom': 'DOM Mossoró',
             'ciee': 'Vagas CIEE',
             'portal_uern': 'Portal UERN',
             'noticias': 'Notícia'
@@ -634,6 +635,7 @@ function normalizarCategoriaTag(categoria, tipoContexto) {
     }
 
     const cLower = categoria.toLowerCase();
+    if (cLower.includes('dom') || cLower.includes('mossoró') || cLower.includes('mossoro')) return 'DOM Mossoró';
     if (cLower.includes('ifrn')) return 'Editais IFRN';
     if (cLower.includes('iel')) return 'Estágios IEL/RN';
     if (cLower.includes('mprn') || cLower.includes('residência') || cLower.includes('residencia')) return 'Estágios MPRN';
