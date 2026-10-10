@@ -51,12 +51,12 @@
 </head>
 <body class="bg-[#FAFBFD] text-brand-dark min-h-screen bg-grid-pattern font-sans antialiased selection:bg-brand-yellow selection:text-brand-dark">
 
-    <section id="landing-hero" class="landing-section w-full max-w-[1360px] mx-auto px-4 sm:px-6">
+    <section id="landing-hero" class="landing-section w-full max-w-[1520px] mx-auto px-4 sm:px-6">
 
         <nav class="landing-navbar">
-            <div class="nav-brand" style="display: inline-flex; align-items: center; gap: 10px;">
-                <img src="assets/logo.png" alt="EduScrap Logo" class="nav-brand-img h-10 sm:h-11 w-auto" height="42" style="height: 70px !important; max-height: 72px !important; width: auto !important; object-fit: contain; display: block; flex-shrink: 0;">
-                <span class="nav-brand-title" style="font-size: 1.75rem; font-weight: 800; line-height: 1; display: inline-flex; align-items: center;">
+            <div class="nav-brand" style="display: inline-flex; align-items: center; gap: 12px;">
+                <img src="assets/logo.png" alt="EduScrap Logo" class="nav-brand-img h-12 sm:h-14 w-auto" height="52" style="height: 76px !important; max-height: 80px !important; width: auto !important; object-fit: contain; display: block; flex-shrink: 0;">
+                <span class="nav-brand-title" style="font-size: 2rem; font-weight: 900; line-height: 1; display: inline-flex; align-items: center;">
                     <span class="brand-edu" style="color: #0F172A;">Edu</span><span class="brand-scrap" style="color: #FF5C00;">Scrap</span>
                 </span>
             </div>
@@ -72,11 +72,11 @@
             <div class="nav-actions-container">
 
                 <div id="nav-auth-area">
-                    <div class="nav-user-box">
-                        <span class="nav-user-tag">
+                    <div class="nav-user-box" style="padding: 10px 18px; font-size: 1.12rem;">
+                        <span class="nav-user-tag" style="font-size: 1.12rem;">
                             🎓 Olá, <strong id="user-name-display">Estudante</strong>
                         </span>
-                        <button class="btn-nav-mini btn-nav-logout" onclick="fazerLogout()" title="Sair da Conta">
+                        <button class="btn-nav-mini btn-nav-logout" onclick="fazerLogout()" title="Sair da Conta" style="width: 36px; height: 36px; font-size: 1.25rem;">
                             <i class="ph-bold ph-sign-out"></i>
                         </button>
                     </div>
@@ -84,17 +84,17 @@
             </div>
         </nav>
 
-        <div class="relative w-full max-w-7xl py-10 my-4 mx-auto">
+        <div class="relative w-full max-w-full py-10 my-4 mx-auto">
 
-            <div class="hidden sm:flex absolute -top-5 left-4 sm:left-6 flex-row gap-2 select-none pointer-events-none text-slate-800 font-black text-xl tracking-widest z-0">
+            <div class="hidden sm:flex absolute -top-5 left-4 sm:left-6 flex-row gap-2 select-none pointer-events-none text-slate-800 font-black text-2xl tracking-widest z-0">
               + + +
             </div>
 
-            <div class="hidden sm:flex absolute top-14 -left-9 sm:-left-12 lg:-left-14 w-20 h-20 sm:w-24 sm:h-24 lg:w-26 lg:h-26 rounded-full bg-brand-orange border-3 border-brand-dark shadow-brutal items-center justify-center select-none pointer-events-none z-20">
-              <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-full bg-white border-3 border-brand-dark"></div>
+            <div class="hidden sm:flex absolute top-14 -left-9 sm:-left-12 lg:-left-14 w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-full bg-brand-orange border-3 border-brand-dark shadow-brutal items-center justify-center select-none pointer-events-none z-20">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-full bg-white border-3 border-brand-dark"></div>
             </div>
 
-            <div class="hidden sm:block absolute top-60 -left-8 sm:-left-9 lg:-left-11 w-16 h-16 sm:w-18 sm:h-18 lg:w-20 lg:h-20 rounded-full border-3 border-brand-dark bg-slate-900 overflow-hidden shadow-brutal select-none pointer-events-none z-20">
+            <div class="hidden sm:block absolute top-60 -left-8 sm:-left-9 lg:-left-11 w-20 h-20 sm:w-22 sm:h-22 lg:w-24 lg:h-24 rounded-full border-3 border-brand-dark bg-slate-900 overflow-hidden shadow-brutal select-none pointer-events-none z-20">
               <svg class="w-full h-full text-white p-1" viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="4.5">
                 <path d="M-10 15 L10 30 L30 15 L50 30 L70 15 L90 30" />
                 <path d="M-10 35 L10 50 L30 35 L50 50 L70 35 L90 50" />
@@ -103,77 +103,76 @@
             </div>
 
             <div class="hidden sm:block absolute -bottom-5 left-6 select-none pointer-events-none z-0">
-              <span class="text-brand-orange text-2xl font-black">✦</span>
+              <span class="text-brand-orange text-3xl font-black">✦</span>
             </div>
 
 
-            <div class="hidden sm:block absolute -top-6 -right-6 lg:-right-8 w-20 h-20 lg:w-24 lg:h-24 rounded-full border-3 border-brand-dark bg-white shadow-brutal select-none pointer-events-none z-20 overflow-hidden">
+            <div class="hidden sm:block absolute -top-6 -right-6 lg:-right-8 w-24 h-24 lg:w-28 lg:h-28 rounded-full border-3 border-brand-dark bg-white shadow-brutal select-none pointer-events-none z-20 overflow-hidden">
               <div class="w-full h-full bg-halftone"></div>
             </div>
 
-            <div class="hidden sm:block absolute top-36 -right-5 lg:-right-6 text-slate-900 text-3xl font-black select-none pointer-events-none z-0">
+            <div class="hidden sm:block absolute top-36 -right-5 lg:-right-6 text-slate-900 text-4xl font-black select-none pointer-events-none z-0">
               +
             </div>
 
-            <div class="hidden sm:block absolute top-60 -right-6 lg:-right-8 w-16 h-16 lg:w-18 lg:h-18 border-3 border-brand-dark shadow-brutal rotate-12 select-none pointer-events-none z-20 overflow-hidden"
-                 style="background: repeating-linear-gradient(-45deg, #FACC15, #FACC15 6px, #0F172A 6px, #0F172A 12px);">
+            <div class="hidden sm:block absolute top-60 -right-6 lg:-right-8 w-20 h-20 lg:w-24 lg:h-24 border-3 border-brand-dark shadow-brutal rotate-12 select-none pointer-events-none z-20 overflow-hidden"
+                 style="background: repeating-linear-gradient(-45deg, #FACC15, #FACC15 7px, #0F172A 7px, #0F172A 14px);">
             </div>
 
             <div class="hidden sm:block absolute bottom-36 -right-7 lg:-right-9 select-none pointer-events-none z-20">
-              <svg width="65" height="22" viewBox="0 0 65 22" fill="none">
+              <svg width="75" height="26" viewBox="0 0 65 22" fill="none">
                 <path d="M2 11 Q 9 2, 16 11 T 30 11 T 44 11 T 58 11" stroke="#FF5C00" stroke-width="4.5" stroke-linecap="round"/>
               </svg>
             </div>
 
             <div class="hidden sm:block absolute -bottom-8 -right-6 lg:-right-8 select-none pointer-events-none z-20">
-              <svg width="105" height="95" viewBox="0 0 100 90" class="drop-shadow-[4px_4px_0px_#0F172A]">
+              <svg width="120" height="110" viewBox="0 0 100 90" class="drop-shadow-[4px_4px_0px_#0F172A]">
                 <polygon points="50,5 95,85 5,85" fill="#FF5C00" stroke="#0F172A" stroke-width="4" stroke-linejoin="round"/>
                 <polygon points="50,22 80,78 20,78" fill="#FACC15"/>
               </svg>
             </div>
 
             <div class="hidden sm:block absolute -bottom-4 left-[58%] select-none pointer-events-none z-20">
-              <svg width="36" height="36" viewBox="0 0 40 40">
+              <svg width="42" height="42" viewBox="0 0 40 40">
                 <polygon points="20,2 38,36 2,36" fill="#FF5C00" stroke="#0F172A" stroke-width="3"/>
               </svg>
             </div>
 
-            <div class="relative w-full bg-white border-3 border-brand-dark rounded-3xl shadow-brutal-xl overflow-hidden p-8 sm:p-12 lg:p-16 pl-8 sm:pl-16 lg:pl-20 z-10">
+            <div class="relative w-full bg-white border-3 border-brand-dark rounded-3xl shadow-brutal-xl overflow-hidden p-10 sm:p-14 lg:p-18 pl-10 sm:pl-18 lg:pl-22 z-10">
 
-              <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+              <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
 
-                <div class="lg:col-span-7 space-y-7 relative z-30">
+                <div class="lg:col-span-7 space-y-8 relative z-30">
 
 
-                  <div class="inline-flex items-center gap-2 px-4.5 font-display font-extrabold text-sm sm:text-base text-brand-dark">
-                    <span class="text-brand-orange text-base">✦</span>
+                  <div class="inline-flex items-center gap-2.5 px-5 font-display font-extrabold text-base sm:text-lg text-brand-dark">
+                    <span class="text-brand-orange text-lg">✦</span>
                     <span>Portal Universitário de Oportunidades</span>
                   </div>
 
 
-                  <h1 class="font-display font-extrabold text-4xl sm:text-6xl lg:text-[3.85rem] text-brand-dark tracking-tight leading-[1.14]">
+                  <h1 class="font-display font-extrabold text-5xl sm:text-7xl lg:text-[4.5rem] text-brand-dark tracking-tight leading-[1.12]">
                     Descubra editais e vagas em
                     <span class="relative inline-block text-brand-orange">
                       tempo real
-
-                      <svg class="absolute -bottom-2 left-0 w-full h-3" viewBox="0 0 100 12" preserveAspectRatio="none" fill="none">
+                      <svg class="absolute -bottom-2 left-0 w-full h-3.5" viewBox="0 0 100 12" preserveAspectRatio="none" fill="none">
                         <path d="M0 6 Q 12 0, 25 6 T 50 6 T 75 6 T 100 6" stroke="#FACC15" stroke-width="5" stroke-linecap="round"/>
                       </svg>
                     </span>
                     na sua universidade.
                   </h1>
 
-                  <p class="text-slate-600 text-lg sm:text-xl lg:text-[1.22rem] leading-relaxed max-w-2xl font-medium">
+                  <p class="text-slate-600 text-xl sm:text-2xl lg:text-[1.38rem] leading-relaxed max-w-3xl font-medium">
                     O <strong>EduScrap</strong> monitora e unifica automaticamente as oportunidades da UERN, UFERSA, CIEE, PRAE e PROEX. Personalize seu perfil, salve seus editais favoritos e não perca nenhum prazo de inscrição.
                   </p>
 
-                  <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
-                    <a href="#area-oportunidades" class="px-7 sm:px-8 py-4 sm:py-4.5 rounded-xl border-2.5 border-brand-dark bg-brand-orange hover:bg-brand-orange-hover text-white font-extrabold text-lg sm:text-xl shadow-brutal neo-btn inline-flex items-center justify-center gap-2.5 whitespace-nowrap">
+                  <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-5 pt-3">
+                    <a href="#area-oportunidades" class="px-8 sm:px-10 py-4.5 sm:py-5 rounded-2xl border-3 border-brand-dark bg-brand-orange hover:bg-brand-orange-hover text-white font-extrabold text-xl sm:text-2xl shadow-brutal neo-btn inline-flex items-center justify-center gap-3 whitespace-nowrap">
                       <span>Explorar Oportunidades</span>
-                      <span class="text-xl">→</span>
+                      <span class="text-2xl">→</span>
                     </a>
 
-                    <a href="login.html?aba=register" class="px-7 sm:px-8 py-4 sm:py-4.5 rounded-xl border-2.5 border-brand-dark bg-white hover:bg-slate-50 text-brand-dark font-extrabold text-lg sm:text-xl shadow-brutal neo-btn inline-flex items-center justify-center gap-2.5 whitespace-nowrap" style="text-decoration: none;">
+                    <a href="login.html?aba=register" class="px-8 sm:px-10 py-4.5 sm:py-5 rounded-2xl border-3 border-brand-dark bg-white hover:bg-slate-50 text-brand-dark font-extrabold text-xl sm:text-2xl shadow-brutal neo-btn inline-flex items-center justify-center gap-3 whitespace-nowrap" style="text-decoration: none;">
                       <span>🎓 Criar Perfil de Aluno</span>
                     </a>
                   </div>
@@ -182,15 +181,15 @@
 
                 <div class="lg:col-span-5 relative flex justify-center items-center pt-4 lg:pt-0">
 
-                  <div class="relative w-full max-w-[430px] sm:max-w-[460px] lg:max-w-[480px] flex items-center justify-center py-2">
+                  <div class="relative w-full max-w-[480px] sm:max-w-[520px] lg:max-w-[560px] flex items-center justify-center py-2">
 
 
-                    <div class="absolute -top-1 -right-2 text-brand-orange text-3xl font-black select-none z-20">
+                    <div class="absolute -top-1 -right-2 text-brand-orange text-4xl font-black select-none z-20">
                       ✦
                     </div>
 
 
-                    <div class="relative z-10 w-[290px] sm:w-[350px] lg:w-[380px] h-[390px] sm:h-[450px] lg:h-[485px] rounded-2xl border-3 border-brand-dark bg-gradient-to-b from-[#FFFDE7] to-[#FFE082] overflow-hidden shadow-brutal-xl flex items-end justify-center">
+                    <div class="relative z-10 w-[330px] sm:w-[400px] lg:w-[450px] h-[440px] sm:h-[510px] lg:h-[560px] rounded-2xl border-3 border-brand-dark bg-gradient-to-b from-[#FFFDE7] to-[#FFE082] overflow-hidden shadow-brutal-xl flex items-end justify-center">
                       <img
                         src="assets/estudante.png"
                         alt="Estudante universitária"
