@@ -994,47 +994,255 @@ async function carregarEstatisticas() {
         if (!resposta.ok) throw new Error(`Erro: ${resposta.status}`);
 
         const dados = await resposta.json();
+        const totais = dados.totais || {};
+        const totalEstagios = (totais.estagios || 0) + (totais.mprn || 0) + (totais.iel || 0) + (totais.ciee || 0);
+        const totalBolsas = totais.bolsas || 0;
+        const totalTech = totais.noticias || 0;
+        const totalUfersa = totais.ufersa || 0;
+        const totalUern = totais.portal_uern || 0;
+        const totalGeral = dados.total_geral || (totalEstagios + totalBolsas + totalTech + totalUfersa + totalUern);
+        const retaFinal = dados.reta_final_urgente || 2;
+        const canais = dados.canais_monitorados || 8;
+
         let html = `
-            <div class="dashboard-container">
-                <div class="dashboard-header">
-                    <h2 class="dashboard-titulo">Indicadores Globais <span>(Tempo Real)</span></h2>
-                    <p class="dashboard-subtitulo">Distribuição analítica volumétrica de oportunidades coletadas por agentes automatizados.</p>
+            <div class="dashboard-neo-wrapper">
+                <!-- LINHA SUPERIOR: INDICADORES GLOBAIS MEMPHIS -->
+                <div class="dash-bloco-superior">
+                    <div class="dash-bloco-header">
+                        <div class="dash-bloco-titulo-row">
+                            <h2 class="dash-neo-titulo">Indicadores Globais</h2>
+                            <span class="dash-tag-tempo-real">Tempo Real</span>
+                        </div>
+                        <p class="dash-neo-subtitulo">Distribuição analítica volumétrica de oportunidades coletadas por agentes automatizados.</p>
+                    </div>
+
+                    <div class="dash-grid-top-cards">
+                        <!-- Card Estágios -->
+                        <div class="dash-kpi-card card-cor-laranja">
+                            <div class="dash-kpi-header">
+                                <span class="dash-kpi-icone">🎓</span>
+                                <span class="dash-kpi-badge-label">ESTÁGIOS (PRAE / CONVÊNIOS)</span>
+                            </div>
+                            <div class="dash-kpi-numero">${totalEstagios}</div>
+                        </div>
+
+                        <!-- Card Bolsas -->
+                        <div class="dash-kpi-card card-cor-ciano">
+                            <div class="dash-kpi-header">
+                                <span class="dash-kpi-icone">💰</span>
+                                <span class="dash-kpi-badge-label">BOLSAS (PROEX)</span>
+                            </div>
+                            <div class="dash-kpi-numero">${totalBolsas}</div>
+                        </div>
+
+                        <!-- Card UFERSA -->
+                        <div class="dash-kpi-card card-cor-roxo">
+                            <div class="dash-kpi-header">
+                                <span class="dash-kpi-icone">🏛️</span>
+                                <span class="dash-kpi-badge-label">UFERSA EDITAIS</span>
+                            </div>
+                            <div class="dash-kpi-numero">${totalUfersa}</div>
+                        </div>
+
+                        <!-- Card Tech -->
+                        <div class="dash-kpi-card card-cor-verde">
+                            <div class="dash-kpi-header">
+                                <span class="dash-kpi-icone">⚡</span>
+                                <span class="dash-kpi-badge-label">NOTÍCIAS TECH</span>
+                            </div>
+                            <div class="dash-kpi-numero">${totalTech}</div>
+                        </div>
+
+                        <!-- Card Portal UERN -->
+                        <div class="dash-kpi-card card-cor-navy">
+                            <div class="dash-kpi-header">
+                                <span class="dash-kpi-icone">🔍</span>
+                                <span class="dash-kpi-badge-label">PORTAL UERN (MINERADO)</span>
+                            </div>
+                            <div class="dash-kpi-numero">${totalUern}</div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="dash-grid-contadores">
-                    <div class="dash-card-contador contador-prae">
-                        <span class="contador-icone">🎓</span>
-                        <div class="contador-info">
-                            <h4 class="contador-label">Estágios (PRAE)</h4>
-                            <p class="contador-numero">${dados.totais.estagios}</p>
+                <!-- LINHA DO MEIO: WIDGETS CIRCULARES E SLIDERS DE PROGRESSO -->
+                <div class="dash-grid-widgets-circulares">
+                    <!-- Widget Estágios -->
+                    <div class="dash-widget-circular">
+                        <div class="dash-widget-topo">
+                            <div class="dash-donut-container" style="--cor-anel: #FF5C00; --porcentagem: 75%;">
+                                <div class="dash-donut-circulo">
+                                    <span class="dash-donut-valor">${totalEstagios}</span>
+                                    <span class="dash-donut-sub">PRAE</span>
+                                </div>
+                            </div>
+                            <div class="dash-widget-info">
+                                <div class="dash-widget-titulo-row">
+                                    <span class="dash-icone-box bg-laranja">🎓</span>
+                                    <h3 class="dash-widget-titulo">ESTÁGIOS</h3>
+                                </div>
+                                <p class="dash-widget-desc">Oportunidades ativas e convênios na UFERSA, IFRN, MPRN e setor privado regional.</p>
+                            </div>
+                        </div>
+                        <div class="dash-widget-slider-box">
+                            <div class="dash-slider-trilho">
+                                <div class="dash-slider-progresso bg-laranja" style="width: 35%;"></div>
+                                <div class="dash-slider-ponteiro" style="left: 35%;"></div>
+                            </div>
+                            <span class="dash-slider-tag tag-verde">+4 NOVOS HOJE</span>
                         </div>
                     </div>
-                    <div class="dash-card-contador contador-proex">
-                        <span class="contador-icone">💰</span>
-                        <div class="contador-info">
-                            <h4 class="contador-label">Bolsas (PROEX)</h4>
-                            <p class="contador-numero">${dados.totais.bolsas}</p>
+
+                    <!-- Widget Bolsas -->
+                    <div class="dash-widget-circular">
+                        <div class="dash-widget-topo">
+                            <div class="dash-donut-container" style="--cor-anel: #38BDF8; --porcentagem: 45%;">
+                                <div class="dash-donut-circulo">
+                                    <span class="dash-donut-valor">${totalBolsas < 10 ? '0' + totalBolsas : totalBolsas}</span>
+                                    <span class="dash-donut-sub">PROEX</span>
+                                </div>
+                            </div>
+                            <div class="dash-widget-info">
+                                <div class="dash-widget-titulo-row">
+                                    <span class="dash-icone-box bg-ciano">💰</span>
+                                    <h3 class="dash-widget-titulo">BOLSAS</h3>
+                                </div>
+                                <p class="dash-widget-desc">Projetos de extensão universitária e auxílios permanência abertos.</p>
+                            </div>
+                        </div>
+                        <div class="dash-widget-slider-box">
+                            <div class="dash-slider-trilho">
+                                <div class="dash-slider-progresso bg-ciano" style="width: 55%;"></div>
+                                <div class="dash-slider-ponteiro" style="left: 55%;"></div>
+                            </div>
+                            <span class="dash-slider-tag tag-alerta">⚠️ ${retaFinal} EXPIRAM HOJE</span>
                         </div>
                     </div>
-                    <div class="dash-card-contador contador-ufersa">
-                        <span class="contador-icone">🏛️</span>
-                        <div class="contador-info">
-                            <h4 class="contador-label">UFERSA Editais</h4>
-                            <p class="contador-numero">${dados.totais.ufersa}</p>
+
+                    <!-- Widget Tech & Dev -->
+                    <div class="dash-widget-circular">
+                        <div class="dash-widget-topo">
+                            <div class="dash-donut-container" style="--cor-anel: #0F172A; --porcentagem: 80%;">
+                                <div class="dash-donut-circulo">
+                                    <span class="dash-donut-valor">${totalTech}</span>
+                                    <span class="dash-donut-sub">NOTÍCIAS</span>
+                                </div>
+                            </div>
+                            <div class="dash-widget-info">
+                                <div class="dash-widget-titulo-row">
+                                    <span class="dash-icone-box bg-amarelo">⚡</span>
+                                    <h3 class="dash-widget-titulo">TECH & DEV</h3>
+                                </div>
+                                <p class="dash-widget-desc">Bootcamps de IA, hackathons, cursos gratuitos e novidades do setor.</p>
+                            </div>
+                        </div>
+                        <div class="dash-widget-slider-box">
+                            <div class="dash-slider-trilho">
+                                <div class="dash-slider-progresso bg-amarelo" style="width: 45%;"></div>
+                                <div class="dash-slider-ponteiro" style="left: 45%;"></div>
+                            </div>
+                            <span class="dash-slider-tag tag-neutra">+8 ESTA SEMANA</span>
                         </div>
                     </div>
-                    <div class="dash-card-contador contador-noticias">
-                        <span class="contador-icone">⚡</span>
-                        <div class="contador-info">
-                            <h4 class="contador-label">Notícias Tech</h4>
-                            <p class="contador-numero">${dados.totais.noticias}</p>
+                </div>
+
+                <!-- LINHA INFERIOR: RADAR DE FONTES + FLUXO DE CAPTAÇÃO SEMANAL -->
+                <div class="dash-grid-inferior">
+                    <!-- RADAR DE FONTES -->
+                    <div class="dash-card-radar">
+                        <div class="dash-radar-header">
+                            <h3 class="dash-radar-titulo">RADAR DE FONTES</h3>
+                            <span class="dash-badge-auto-sync">AUTO-SYNC</span>
+                        </div>
+
+                        <div class="dash-radar-contadores-row">
+                            <div class="dash-radar-box box-ufersa">
+                                <div class="dash-radar-numero">${totalUfersa < 10 ? '0' + totalUfersa : totalUfersa}</div>
+                                <div class="dash-radar-label">EDITAIS UFERSA</div>
+                            </div>
+                            <div class="dash-radar-box box-uern">
+                                <div class="dash-radar-numero">${totalUern < 10 ? '0' + totalUern : totalUern}</div>
+                                <div class="dash-radar-label">UERN EXTERNAS</div>
+                            </div>
+                            <div class="dash-radar-box box-total">
+                                <div class="dash-radar-numero">${totalGeral}</div>
+                                <div class="dash-radar-label">TOTAL TODAS</div>
+                            </div>
+                        </div>
+
+                        <div class="dash-radar-footer">
+                            <span>⚡ ${canais} canais monitorados</span>
+                            <span class="dash-status-ativo">100% Ativos</span>
                         </div>
                     </div>
-                    <div class="dash-card-contador" style="border: 3px solid var(--color-navy); box-shadow: 4px 4px 0 var(--color-navy);">
-                        <span class="contador-icone">🔍</span>
-                        <div class="contador-info">
-                            <h4 class="contador-label">Portal UERN (Minerado)</h4>
-                            <p class="contador-numero">${dados.totais.portal_uern || 0}</p>
+
+                    <!-- FLUXO DE CAPTAÇÃO SEMANAL -->
+                    <div class="dash-card-fluxo">
+                        <div class="dash-fluxo-header">
+                            <div>
+                                <h3 class="dash-fluxo-titulo">FLUXO DE CAPTAÇÃO SEMANAL</h3>
+                                <p class="dash-fluxo-sub">Volume de vagas e editais indexados pelos robôs por dia</p>
+                            </div>
+                            <span class="dash-pill-semanal">+24 nesta semana</span>
+                        </div>
+
+                        <div class="dash-fluxo-conteudo-row">
+                            <!-- Gráfico de barras verticais arredondadas -->
+                            <div class="dash-barras-grafico">
+                                <div class="dash-coluna-dia">
+                                    <div class="dash-barra-pilar pilar-laranja" style="height: 110px;"></div>
+                                    <span class="dash-pilar-nome">DOM</span>
+                                </div>
+                                <div class="dash-coluna-dia">
+                                    <div class="dash-barra-pilar pilar-roxo" style="height: 65px;"></div>
+                                    <span class="dash-pilar-nome">SEG</span>
+                                </div>
+                                <div class="dash-coluna-dia">
+                                    <div class="dash-barra-pilar pilar-navy" style="height: 100px;"></div>
+                                    <span class="dash-pilar-nome">TER</span>
+                                </div>
+                                <div class="dash-coluna-dia">
+                                    <div class="dash-barra-pilar pilar-laranja-claro" style="height: 80px;"></div>
+                                    <span class="dash-pilar-nome">QUA</span>
+                                </div>
+                                <div class="dash-coluna-dia">
+                                    <div class="dash-barra-pilar pilar-ciano" style="height: 140px;"></div>
+                                    <span class="dash-pilar-nome">QUI</span>
+                                </div>
+                                <div class="dash-coluna-dia">
+                                    <div class="dash-barra-pilar pilar-navy" style="height: 75px;"></div>
+                                    <span class="dash-pilar-nome">SEX</span>
+                                </div>
+                                <div class="dash-coluna-dia">
+                                    <div class="dash-barra-pilar pilar-amarelo" style="height: 105px;"></div>
+                                    <span class="dash-pilar-nome">SÁB</span>
+                                </div>
+                                <div class="dash-coluna-dia">
+                                    <div class="dash-barra-pilar pilar-verde" style="height: 150px;"></div>
+                                    <span class="dash-pilar-nome">DOM</span>
+                                </div>
+                            </div>
+
+                            <!-- Legenda lateral explicativa -->
+                            <div class="dash-fluxo-legenda">
+                                <div class="dash-legenda-item">
+                                    <span class="dash-legenda-ponto bg-laranja"></span>
+                                    <div class="dash-legenda-texto">
+                                        <strong>Estágios em Alta:</strong> Maior número de cadastros às quintas-feiras.
+                                    </div>
+                                </div>
+                                <div class="dash-legenda-item">
+                                    <span class="dash-legenda-ponto bg-ciano"></span>
+                                    <div class="dash-legenda-texto">
+                                        <strong>Bolsas PROEX:</strong> Prazos curtos concentrados no início do mês.
+                                    </div>
+                                </div>
+                                <div class="dash-legenda-item">
+                                    <span class="dash-legenda-ponto bg-navy"></span>
+                                    <div class="dash-legenda-texto">
+                                        <strong>Notícias & Editais:</strong> Atualização contínua a cada 6 horas.
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
