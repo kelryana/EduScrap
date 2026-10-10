@@ -34,7 +34,7 @@ body {
 
 .bg-grid-pattern {
     background-size: 28px 28px;
-    background-image: 
+    background-image:
         linear-gradient(to right, rgba(15, 23, 42, 0.08) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(15, 23, 42, 0.08) 1px, transparent 1px);
 }
@@ -410,7 +410,7 @@ body {
     background-color: var(--color-navy);
     color: var(--color-white);
     padding: 0.65rem 2rem;
-    font-size: 2.7rem; 
+    font-size: 2.7rem;
     font-weight: 900;
     border: 3px solid var(--color-navy);
     border-radius: 8px;
@@ -1137,6 +1137,20 @@ body {
     transform: translate(-2px, -2px);
     box-shadow: 4px 4px 0 var(--color-navy);
 }
+/* Indicador de usuário no topo (apenas identificação, sem ação de filtros) */
+.nav-user-tag {
+    background-color: var(--color-white);
+    color: var(--color-navy);
+    border: 3px solid var(--color-navy);
+    padding: 10px 18px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    font-family: inherit;
+    box-shadow: 3px 3px 0 var(--color-navy);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
 .btn-nav-mini {
     background: var(--color-white);
     border: 3px solid var(--color-navy);
@@ -1728,21 +1742,20 @@ body {
     }
 }
 
-/* NEW SIDEBAR STYLES */
+/* NEW SIDEBAR STYLES — Gaveta flutuante independente (não deforma o layout) */
 .sidebar-perfil {
     position: fixed;
     top: 0;
-    left: -450px; /* Hidden off-screen initially */
-    width: 400px;
+    left: -420px; /* Oculta a gaveta fora da tela à esquerda */
+    width: 380px;
     height: 100vh;
     background: #FFFFFF;
-    border: 3px solid var(--color-navy);
-    border-radius: 0 12px 12px 0;
-    box-shadow: 8px 0 0 var(--color-navy);
+    border-right: 3px solid var(--color-navy);
+    box-shadow: 10px 0px 25px rgba(15, 23, 42, 0.15);
     z-index: 1000;
     display: flex;
     flex-direction: column;
-    transition: left 0.3s ease;
+    transition: left 0.28s cubic-bezier(0.4, 0, 0.2, 1);
     overflow-y: auto;
 }
 
@@ -1751,14 +1764,8 @@ body {
 }
 
 .sidebar-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: transparent; /* No dimming effect */
-    z-index: 999;
-    display: none;
+    display: none !important;
+    pointer-events: none !important; /* Não intercepta cliques */
 }
 
 .sidebar-header {
@@ -2005,18 +2012,13 @@ body {
     color: #FFFFFF;
 }
 
-/* Push content when sidebar is open */
+/* Sidebar é uma gaveta flutuante (position: fixed) — não empurra nem trava o layout */
 body.sidebar-aberta {
-    overflow: hidden;
+    overflow-y: auto !important; /* Permite rolar normalmente */
 }
 
 .app-container.sidebar-aberta,
-.landing-section.sidebar-aberta {
-    transform: translateX(400px);
-    transition: transform 0.3s ease;
-}
-
+.landing-section.sidebar-aberta,
 .footer-memphis.sidebar-aberta {
-    transform: translateX(400px);
-    transition: transform 0.3s ease;
+    transform: none !important;
 }
