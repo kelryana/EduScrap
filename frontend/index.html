@@ -72,9 +72,14 @@
             <div class="nav-actions-container">
                
                 <div id="nav-auth-area">
-                    <a href="login.html" class="btn-nav-auth" style="text-decoration: none;">
-                        <i class="ph-bold ph-user"></i> <span>Entrar / Cadastrar</span>
-                    </a>
+                    <div class="nav-user-box">
+                        <button class="nav-user-badge" onclick="abrirSidebarPerfil()" title="Meu Perfil e Preferências de Cursos">
+                            🎓 Olá, <strong id="user-name-display">kelly</strong>
+                        </button>
+                        <button class="btn-nav-mini btn-nav-logout" onclick="fazerLogout()" title="Sair da Conta">
+                            <i class="ph-bold ph-sign-out"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -288,7 +293,85 @@
 
 
     <!-- =========================================================================
-         4. MODAL DE PERFIL & PREFERÊNCIAS DO ALUNO - REESTRUTURADO
+         4. SIDEBAR DE PERFIL & PREFERÊNCIAS DO ALUNO - NOVO SIDEBAR À ESQUERDA
+         ========================================================================= -->
+    <div id="sidebar-perfil" class="sidebar-perfil">
+        <div class="sidebar-header">
+            <div class="modal-dots">
+                <span class="dot dot-red"></span>
+                <span class="dot dot-yellow"></span>
+                <span class="dot dot-green"></span>
+            </div>
+            <h3 class="sidebar-title">Meu Perfil & Preferências</h3>
+            <button class="sidebar-close-btn" onclick="fecharSidebarPerfil()" title="Fechar janela" aria-label="Fechar">
+                <i class="ph-bold ph-x"></i> <span>Voltar</span>
+            </button>
+        </div>
+
+        <div class="sidebar-body">
+            <!-- Card de Perfil Limpo e Confortável -->
+            <div class="perfil-card-info">
+                <div class="perfil-avatar-badge">
+                    <i class="ph-bold ph-student"></i>
+                </div>
+                <div class="perfil-info-textos">
+                    <h4 id="perfil-nome-display-sidebar" class="perfil-info-nome">Nome do Aluno</h4>
+                    <p id="perfil-email-display-sidebar" class="perfil-info-email">aluno@uern.br</p>
+                </div>
+            </div>
+
+            <form id="form-perfil-preferencias-sidebar" onsubmit="salvarPreferenciasPerfil(event)">
+                <div class="form-group-memphis">
+                    <div class="label-com-subtexto">
+                        <label class="label-memphis">
+                            <i class="ph-bold ph-graduation-cap"></i> Cursos de Interesse:
+                        </label>
+                        <span class="label-subtexto">O feed 'Para Você' exibirá editais dessas áreas</span>
+                    </div>
+                    <div class="chips-container" id="perfil-chips-cursos-sidebar">
+                        <!-- Injetado dinamicamente via JS com chip-check -->
+                    </div>
+                </div>
+
+                <div class="form-group-memphis">
+                    <div class="label-com-subtexto">
+                        <label class="label-memphis">
+                            <i class="ph-bold ph-bookmarks"></i> Áreas de Interesse:
+                        </label>
+                        <span class="label-subtexto">Categorias complementares</span>
+                    </div>
+                    <div class="chips-container" id="perfil-chips-areas-sidebar">
+                        <!-- Injetado dinamicamente via JS com chip-check -->
+                    </div>
+                </div>
+
+                <div class="form-group-memphis">
+                    <label class="checkbox-memphis-container">
+                        <input type="checkbox" id="perfil-receber-emails-sidebar">
+                        <span class="custom-checkbox"></span>
+                        <span class="label-texto">Receber alertas de prazos por e-mail</span>
+                    </label>
+                </div>
+
+                <div id="perfil-feedback-sidebar" class="msg-sucesso-memphis" style="display: none;"></div>
+
+                <div class="perfil-botoes-row">
+                    <button type="submit" class="btn-submit-memphis btn-submit-primary" style="flex: 1;">
+                        <i class="ph-bold ph-floppy-disk"></i> Salvar Alterações
+                    </button>
+                    <button type="button" class="btn-submit-memphis btn-submit-danger" onclick="fazerLogout()">
+                        <i class="ph-bold ph-sign-out"></i> Sair da Conta
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Overlay para quando o sidebar estiver aberto -->
+    <div id="sidebar-overlay" class="sidebar-overlay" style="display: none;" onclick="fecharSidebarPerfil()"></div>
+
+    <!-- =========================================================================
+         5. MODAL DE PERFIL & PREFERÊNCIAS DO ALUNO - REESTRUTURADO
          ========================================================================= -->
     <div id="modal-perfil" class="modal-backdrop" style="display: none;" onclick="if(event.target === this) fecharModalPerfil()">
         <div class="modal-memphis" role="dialog" aria-modal="true" aria-labelledby="modal-perfil-title">
