@@ -481,14 +481,9 @@
             <!-- Seletor de Abas (Login / Cadastro) -->
             <div class="auth-tabs-wrapper">
                 <div class="auth-tabs-row" role="tablist">
-                    <div class="nav-user-box flex items-center gap-3">
-                        <button class="nav-user-badge" onclick="alternarAba('login')" role="tab" title="Meu Perfil e Preferências de Cursos">
-                            🎓 Olá, <strong id="user-name-display">usuário</strong>
-                        </button>
-                        <button class="btn-nav-mini btn-nav-logout" onclick="alternarAba('login')" title="Sair da Conta">
-                            <i class="ph-bold ph-sign-out"></i>
-                        </button>
-                    </div>
+                    <button id="tab-login" class="auth-tab-btn ativo" onclick="alternarAba('login')" role="tab">
+                        <i class="ph-bold ph-sign-in"></i> Entrar na Conta
+                    </button>
                     <button id="tab-register" class="auth-tab-btn" onclick="alternarAba('register')" role="tab">
                         <i class="ph-bold ph-user-plus"></i> Novo Cadastro
                     </button>

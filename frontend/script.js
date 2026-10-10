@@ -103,9 +103,9 @@ function atualizarInterfaceUsuario() {
         document.getElementById('user-name-display').textContent = primeiroNome;
         navAuth.innerHTML = `
             <div class="nav-user-box">
-                <button class="nav-user-badge" onclick="abrirSidebarPerfil()" title="Meu Perfil e Preferências de Cursos">
+                <span class="nav-user-tag">
                     🎓 Olá, <strong>${primeiroNome}</strong>
-                </button>
+                </span>
                 <button class="btn-nav-mini btn-nav-logout" onclick="fazerLogout()" title="Sair da Conta">
                     <i class="ph-bold ph-sign-out"></i>
                 </button>
@@ -149,7 +149,6 @@ function abrirSidebarPerfil() {
     }
     
     const sidebar = document.getElementById('sidebar-perfil');
-    const overlay = document.getElementById('sidebar-overlay');
     
     // Update sidebar content with user data
     document.getElementById('perfil-nome-display-sidebar').innerText = usuarioAtual.nome || 'Estudante';
@@ -180,29 +179,30 @@ function abrirSidebarPerfil() {
     // Configure chip clicks
     configurarChipsClickSidebar();
 
-    // Show sidebar
+    // Show sidebar (floating drawer overlay — page layout is never shifted)
     sidebar.classList.add('aberto');
-    overlay.style.display = 'block';
-    
-    // Add class to body to push content
+
     document.body.classList.add('sidebar-aberta');
-    document.querySelector('.app-container').classList.add('sidebar-aberta');
-    document.querySelector('.landing-section').classList.add('sidebar-aberta');
-    document.querySelector('.footer-memphis').classList.add('sidebar-aberta');
 }
 
 function fecharSidebarPerfil() {
     const sidebar = document.getElementById('sidebar-perfil');
-    const overlay = document.getElementById('sidebar-overlay');
-    
-    sidebar.classList.remove('aberto');
-    overlay.style.display = 'none';
-    
-    // Remove class to restore content position
+
+    if (sidebar) sidebar.classList.remove('aberto');
+
     document.body.classList.remove('sidebar-aberta');
-    document.querySelector('.app-container').classList.remove('sidebar-aberta');
-    document.querySelector('.landing-section').classList.remove('sidebar-aberta');
-    document.querySelector('.footer-memphis').classList.remove('sidebar-aberta');
+}
+
+// Simples alternação abrir/fechar sem afetar o restante do layout
+function alternarSidebarPerfil() {
+    const sidebar = document.getElementById('sidebar-perfil');
+    if (!sidebar) return;
+
+    if (sidebar.classList.contains('aberto')) {
+        fecharSidebarPerfil();
+    } else {
+        abrirSidebarPerfil();
+    }
 }
 
 function configurarChipsClickSidebar() {

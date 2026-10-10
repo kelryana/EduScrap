@@ -73,9 +73,9 @@
                
                 <div id="nav-auth-area">
                     <div class="nav-user-box">
-                        <button class="nav-user-badge" onclick="abrirSidebarPerfil()" title="Meu Perfil e Preferências de Cursos">
-                            🎓 Olá, <strong id="user-name-display">kelly</strong>
-                        </button>
+                        <span class="nav-user-tag">
+                            🎓 Olá, <strong id="user-name-display">Estudante</strong>
+                        </span>
                         <button class="btn-nav-mini btn-nav-logout" onclick="fazerLogout()" title="Sair da Conta">
                             <i class="ph-bold ph-sign-out"></i>
                         </button>
@@ -262,6 +262,10 @@
         <!-- BARRA DE UTILITÁRIOS E FILTROS DO ESTUDANTE -->
         <div class="student-toolbar">
             <div class="student-toolbar-left">
+                <button id="btn-abrir-sidebar-filtros" class="btn-filtro-aluno" onclick="alternarSidebarPerfil()">
+                    <i class="ph-bold ph-sliders-horizontal"></i>
+                    <span>⚙️ Cursos & Preferências</span>
+                </button>
                 <button id="btn-personalizado" class="btn-filtro-aluno" onclick="carregarFeedPersonalizado()">
                     <i class="ph-bold ph-sparkle"></i> <span>🎯 Para Você (Perfil)</span>
                 </button>
