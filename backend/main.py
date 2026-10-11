@@ -1,4 +1,4 @@
-##backend/main.py 
+##backend/main.py
 import logging
 import os
 import subprocess
@@ -43,7 +43,7 @@ API_KEY = os.getenv("API_KEY", "")
 def verificar_api_key(x_api_key: str = Header(default=None)):
 
     if not API_KEY:
-       
+
         return True
     if x_api_key != API_KEY:
         raise HTTPException(
@@ -59,7 +59,7 @@ client = MongoClient(MONGODB_URI)
 db = client[MONGODB_DB]
 
 def obter_usuario_logado(authorization: str = Header(default=None)):
-   
+
     if not authorization:
         raise HTTPException(status_code=401, detail="Token de autorização não fornecido")
     parts = authorization.split()
@@ -78,7 +78,7 @@ def obter_usuario_logado(authorization: str = Header(default=None)):
     return user
 
 def obter_usuario_opcional(authorization: str = Header(default=None)):
-    
+
     if not authorization:
         return None
     try:
@@ -149,7 +149,7 @@ garantir_metadados_fontes()
 
 
 def resolver_vinculo_fonte(documento: dict):
-   
+
     if not documento:
         return documento
 
@@ -175,15 +175,15 @@ def enriquecer_prazo(documento: dict):
         return documento
 
     vencimento = documento.get("data_vencimento")
-    
+
     # Para notícias tecnológicas, não aplicamos o conceito de prazo
     categoria = documento.get("categoria", "")
     fonte = documento.get("fonte", "")
     fonte_id = documento.get("fonte_id", "")
-    
+
     # Verifica se é conteúdo de notícia técnica que não tem prazo por natureza
-    if ("notícia tech" in categoria.lower() or 
-        "g1" in fonte.lower() or 
+    if ("notícia tech" in categoria.lower() or
+        "g1" in fonte.lower() or
         "canaltech" in fonte.lower() or
         "noticias" in fonte_id.lower() or
         "ciee_agente" == fonte_id):  # CIEE entries don't have deadlines either
@@ -501,6 +501,112 @@ def listar_portal_uern(
     }
 
 
+# Marcadores de conteúdo de capacitação/cursos gravados na coleção "noticias"
+# pelo scraper_capacitacao_bolsas (aba Cursos & Bolsas). Não são notícias reais.
+MARCADORES_CAPACITACAO = [
+    "capacitação", "capacitacao",
+    "cursos gratuitos", "bolsas de estudo",
+    "freecodecamp", "alison", "microsoft learn",
+    "coursera", "fundação estudar", "fundacao estudar",
+]
+
+
+def eh_documento_de_noticia(doc: dict) -> bool:
+    """Identifica se um documento da coleção 'noticias' é uma notícia real
+    (ex.: ASSECOM UFERSA), e não um card de capacitação/cursos/bolsas."""
+    tipo = (doc.get("tipo") or "").lower()
+    categoria = (doc.get("categoria") or "").lower()
+    texto = f"{doc.get('titulo', '')} {doc.get('nome', '')} {doc.get('descricao', '')}".lower()
+
+    eh_capacitacao = (
+        tipo in ("capacitacao", "bolsa_estudo")
+        or any(marcador in categoria for marcador in MARCADORES_CAPACITACAO)
+        or any(marcador in texto for marcador in MARCADORES_CAPACITACAO)
+    )
+    return not eh_capacitacao
+
+
+def paginar_docs(lista_docs, pagina: int, limite: int, usuario: dict):
+    pulo = (pagina - 1) * limite
+    docs_paginados = lista_docs[pulo : pulo + limite]
+    lista = []
+    for doc in docs_paginados:
+        doc["_id"] = str(doc["_id"])
+        doc = enriquecer_doc(doc, usuario)
+        lista.append(doc)
+    return {
+        "pagina_atual": pagina,
+        "limite_por_pagina": limite,
+        "total_documentos": len(lista_docs),
+        "dados": lista
+    }
+
+
+@app.get("/api/cursos-bolsas")
+def listar_cursos_bolsas(
+    pagina: int = Query(1, ge=1),
+    limite: int = Query(6, ge=1),
+    apenas_vigentes: bool = False,
+    authorization: str = Header(default=None)
+):
+    """Aba 'Cursos & Bolsas': bootcamps, cursos gratuitos com certificado e
+    bolsas de estudo (freeCodeCamp, Alison, Microsoft Learn, Estudar Fora...).
+    Antes esta rota não existia na API, causando o erro 404 no front-end."""
+    usuario = obter_usuario_opcional(authorization)
+    pulo = (pagina - 1) * limite
+
+    filtro = {"tipo": {"$in": ["capacitacao", "bolsa_estudo"]}}
+    if apenas_vigentes:
+        filtro["data_vencimento"] = {"$gte": datetime.now()}
+
+    docs_curso = list(db["noticias"].find(filtro).sort("coletado_em", -1))
+
+    # Garantia extra: remove documentos de notícia institucional que porventura
+    # tenham sido marcados com categoria de capacitação pelo classificador.
+    docs_curso = [d for d in docs_curso if (d.get("tipo") or "") != "noticia"]
+
+    return paginar_docs(docs_curso, pagina, limite, usuario)
+
+
+@app.get("/api/noticias-ufersa")
+def listar_noticias_ufersa(
+    pagina: int = Query(1, ge=1),
+    limite: int = Query(6, ge=1),
+    apenas_vigentes: bool = False,
+    authorization: str = Header(default=None)
+):
+    """Aba 'Notícias UFERSA': notícias institucionais do portal ASSECOM UFERSA
+    (ex.: 'Estudantes fazem visita técnica ao Projeto Malha d'Água e ao açude Cedro').
+    Antes esta rota não existia na API e caía no endpoint de editais, exibindo
+    tags erradas ('Editais UFERSA') e o erro 404."""
+    usuario = obter_usuario_opcional(authorization)
+
+    filtro_base = {
+        "$or": [
+            {"fonte": {"$regex": "UFERSA", "$options": "i"}},
+            {"titulo": {"$regex": "ufersa", "$options": "i"}},
+        ]
+    }
+    filtro_noticias = dict(filtro_base)
+    filtro_noticias["tipo"] = "noticia"
+    if apenas_vigentes:
+        filtro_noticias["data_vencimento"] = {"$gte": datetime.now()}
+
+    docs_noticias = []
+    for col_name in ("noticias", "vagas_noticias"):
+        try:
+            for doc in db[col_name].find(filtro_noticias).sort("coletado_em", -1):
+                doc["nome"] = doc.get("titulo") or doc.get("nome") or "Notícia UFERSA"
+                doc["titulo"] = doc["nome"]
+                if not doc.get("categoria"):
+                    doc["categoria"] = "Notícia UFERSA"
+                docs_noticias.append(doc)
+        except Exception as e:
+            logger.warning(f"Falha ao buscar notícias UFERSA na coleção {col_name}: {e}")
+
+    return paginar_docs(docs_noticias, pagina, limite, usuario)
+
+
 @app.get("/api/noticias")
 def listar_noticias(
     pagina: int = Query(1, ge=1),
@@ -526,39 +632,28 @@ def listar_noticias(
     else:
         logger.info("[CACHE] Dados recuperados localmente via cache ativo do MongoDB.")
 
-    # Junta conteúdos informativos de vagas_noticias e noticias (ASSECOM, Estudar Fora, DIO, etc.)
     pulo = (pagina - 1) * limite
     filtro = {}
     if apenas_vigentes:
         filtro["data_vencimento"] = {"$gte": datetime.now()}
 
     docs_todos = []
-    # 1. Novas fontes ricas de capacitação e bolsas
+
+    # 1. Notícias reais da coleção "noticias" (ASSECOM UFERSA, portais acadêmicos etc.).
+    #    Cards de capacitação/cursos/bolsas ficam EXCLUSIVAMENTE na aba Cursos & Bolsas.
     for doc in db["noticias"].find(filtro).sort("coletado_em", -1):
-        doc["nome"] = doc.get("titulo") or doc.get("nome") or "Notícia & Bolsa"
+        if not eh_documento_de_noticia(doc):
+            continue
+        doc["nome"] = doc.get("titulo") or doc.get("nome") or "Notícia"
         doc["titulo"] = doc["nome"]
         docs_todos.append(doc)
 
-    # 2. Notícias Tech clássicas
+    # 2. Notícias Tech clássicas (G1 / Canaltech)
     for doc in db["vagas_noticias"].find(filtro):
         doc["titulo"] = doc.get("nome") or doc.get("titulo") or "Notícia Tech"
         docs_todos.append(doc)
 
-    total_documentos = len(docs_todos)
-    docs_paginados = docs_todos[pulo : pulo + limite]
-
-    lista_noticias = []
-    for noticia in docs_paginados:
-        noticia["_id"] = str(noticia["_id"])
-        noticia = enriquecer_doc(noticia, usuario)
-        lista_noticias.append(noticia)
-
-    return {
-        "pagina_atual": pagina,
-        "limite_por_pagina": limite,
-        "total_documentos": total_documentos,
-        "dados": lista_noticias
-    }
+    return paginar_docs(docs_todos, pagina, limite, usuario)
 
 @app.get("/api/pesquisar")
 def pesquisar_unificado(
@@ -586,12 +681,20 @@ def pesquisar_unificado(
 
 @app.get("/api/estatisticas")
 def obter_estatisticas():
+    # Notícias reais (exclui cards de capacitação/cursos/bolsas da aba Cursos & Bolsas)
+    noticias_reais = [d for d in db["noticias"].find({}) if eh_documento_de_noticia(d)]
+    total_noticias_ufersa = sum(
+        1 for d in noticias_reais if "ufersa" in (d.get("fonte") or "").lower()
+    ) + db["vagas_noticias"].count_documents({"tipo": "noticia"})
+
     totais = {
         "estagios": db["vagas_estagio"].count_documents({}),
         "bolsas": db["vagas_bolsa"].count_documents({}),
         "ufersa": db["vagas_ufersa"].count_documents({}),
         "ciee": db["vagas_ciee"].count_documents({}),
-        "noticias": db["vagas_noticias"].count_documents({}),
+        "noticias": db["vagas_noticias"].count_documents({}) + len(noticias_reais),
+        "noticias_ufersa": total_noticias_ufersa,
+        "cursos_bolsas": db["noticias"].count_documents({"tipo": {"$in": ["capacitacao", "bolsa_estudo"]}}),
         "portal_uern": db["vagas_portal_uern"].count_documents({}),
         "mprn": db["vagas_mprn"].count_documents({}) if "vagas_mprn" in db.list_collection_names() else 0,
         "ifrn": db["vagas_ifrn"].count_documents({}) if "vagas_ifrn" in db.list_collection_names() else 0,
