@@ -80,7 +80,7 @@ SCRAPERS = {
         "icone": "🏭"
     },
     "capacitacao_bolsas": {
-        "nome": "Capacitação, DIO e Bolsas de Estudo",
+        "nome": "Capacitação, freeCodeCamp/Alison e Bolsas de Estudo",
         "script": "scraper_capacitacao_bolsas.py",
         "colecao": "noticias",
         "icone": "💡"
