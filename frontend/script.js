@@ -627,10 +627,23 @@ function normalizarCategoriaTag(categoria, tipoContexto, vaga) {
     if (fonte.includes('iel') || titulo.includes('[iel') || tipoContexto === 'iel') return 'Estágios IEL/RN';
     if (fonte.includes('mprn') || titulo.includes('[mprn') || tipoContexto === 'mprn' || cLower.includes('mprn')) return 'Estágios MPRN';
     if (fonte.includes('prefeitura de mossoró') || titulo.includes('[dom/mossoró') || tipoContexto === 'dom') return 'DOM Mossoró';
+
+    // 1b. Aba "Notícias UFERSA": NUNCA rotular notícias ASSECOM como "Editais UFERSA".
+    // O rótulo "Editais UFERSA" é reservado apenas para editais/processos seletivos (aba própria).
+    if (cLower.includes('notícia ufersa') || cLower.includes('noticia ufersa') ||
+        cLower.includes('comunicação universitária') || tipoContexto === 'noticias-ufersa') {
+        return 'Notícia UFERSA';
+    }
+    if (vaga && vaga.tipo === 'noticia') return 'Notícia UFERSA';
+
     if (fonte.includes('ufersa') || titulo.includes('[cpps') || tipoContexto === 'ufersa') return 'Editais UFERSA';
     if (fonte.includes('ciee') || tipoContexto === 'ciee') return 'Vagas CIEE';
     if (fonte.includes('estudar fora') || fonte.includes('fundação estudar')) return 'Bolsa de Estudos';
     if (fonte.includes('dio') || fonte.includes('microsoft') || fonte.includes('trabalho')) return 'Capacitação & Cursos';
+    if (tipoContexto === 'cursos-bolsas') {
+        if (cLower.includes('bolsa')) return 'Bolsa de Estudos';
+        return 'Capacitação & Cursos';
+    }
 
     // 2. Se a origem for o Portal UERN (Blog institucional/AGECOM)
     if (fonte.includes('portal uern') || tipoContexto === 'portal_uern' || (vaga && vaga.fonte_id === 'portal_uern_oficial')) {
@@ -662,6 +675,10 @@ function normalizarCategoriaTag(categoria, tipoContexto, vaga) {
     if (tipoContexto === 'estagios' || fonte.includes('prae')) return 'Estágios (PRAE)';
     if (tipoContexto === 'bolsas' || fonte.includes('proex')) return 'Bolsas (PROEX)';
     if (cLower.includes('notícia tech') || (tipoContexto === 'noticias' && (fonte.includes('g1') || fonte.includes('canaltech')))) return 'Notícia Tech';
+    // Notícias de outras áreas (educação, saúde, economia...) agregadas na aba "Notícias"
+    if (cLower.startsWith('notícia ') || cLower.startsWith('noticia ')) {
+        return formatarTituloEdital(categoria);
+    }
 
     if (!categoria) {
         return 'Oportunidade';
@@ -802,6 +819,10 @@ function renderizarCards(listaDeVagas) {
         "Intercâmbio & Cursos": "#0D9488",
         "Notícia UERN": "#047857",
         "Notícia Tech": "#1E7E34",
+        "Notícia UFERSA": "#7C3AED",
+        "Notícia Educação": "#0891B2",
+        "Notícia Saúde": "#DB2777",
+        "Notícia Economia": "#CA8A04",
         "Bolsa de Estudos": "#0D9488",
         "Capacitação & Cursos": "#7C3AED"
     };
@@ -811,7 +832,7 @@ function renderizarCards(listaDeVagas) {
     listaDeVagas.forEach(vaga => {
         const idStr = String(vaga._id);
         const ehFavorito = vaga.favorito === true || favSet.has(idStr);
-        const ehNoticia = vaga.categoria === "Notícia Tech" || tipoAtual === "noticias";
+        const ehNoticia = vaga.categoria === "Notícia Tech" || tipoAtual === "noticias" || tipoAtual === "noticias-ufersa";
         const categoriaFormatada = normalizarCategoriaTag(vaga.categoria, tipoAtual, vaga);
         const corTag = corCategoriaMap[vaga.categoria] || corCategoriaMap[categoriaFormatada] || "#112244";
 
@@ -870,6 +891,12 @@ function renderizarCards(listaDeVagas) {
         }
 
         const linkDestino = vaga.link || vaga.url || '#';
+        let textoAcao = 'Ver Edital Oficial';
+        if (ehNoticia) {
+            textoAcao = 'Ler Notícia';
+        } else if (tipoAtual === 'cursos-bolsas' || vaga.tipo === 'capacitacao') {
+            textoAcao = 'Ver Curso / Inscrever-se';
+        }
 
         const cardHTML = `
             <div class="card ${classeVencido}">
@@ -893,7 +920,7 @@ function renderizarCards(listaDeVagas) {
 
                 <div class="card-acoes-row">
                     <a href="${linkDestino}" target="_blank" rel="noopener noreferrer" class="card-link-btn">
-                        <span>Ver Edital Oficial</span>
+                        <span>${textoAcao}</span>
                         <i class="ph-bold ph-arrow-up-right"></i>
                     </a>
 
@@ -998,6 +1025,7 @@ async function carregarEstatisticas() {
         const totalEstagios = (totais.estagios || 0) + (totais.mprn || 0) + (totais.iel || 0) + (totais.ciee || 0);
         const totalBolsas = totais.bolsas || 0;
         const totalTech = totais.noticias || 0;
+        const totalCursosBolsas = totais.cursos_bolsas || 0;
         const totalUfersa = totais.ufersa || 0;
         const totalUern = totais.portal_uern || 0;
         const totalGeral = dados.total_geral || (totalEstagios + totalBolsas + totalTech + totalUfersa + totalUern);
@@ -1039,16 +1067,25 @@ async function carregarEstatisticas() {
                         <div class="dash-kpi-card card-cor-roxo">
                             <div class="dash-kpi-header">
                                 <span class="dash-kpi-icone"><i class="ph-bold ph-bank"></i></span>
-                                <span class="dash-kpi-badge-label">UFERSA EDITAIS</span>
+                                <span class="dash-kpi-badge-label">EDITAIS UFERSA</span>
                             </div>
                             <div class="dash-kpi-numero">${totalUfersa}</div>
+                        </div>
+
+                        <!-- Card Cursos & Bolsas (capacitações gratuitas) -->
+                        <div class="dash-kpi-card card-cor-ciano">
+                            <div class="dash-kpi-header">
+                                <span class="dash-kpi-icone"><i class="ph-bold ph-book-open"></i></span>
+                                <span class="dash-kpi-badge-label">CURSOS & BOLSAS</span>
+                            </div>
+                            <div class="dash-kpi-numero">${totalCursosBolsas}</div>
                         </div>
 
                         <!-- Card Tech -->
                         <div class="dash-kpi-card card-cor-verde">
                             <div class="dash-kpi-header">
                                 <span class="dash-kpi-icone"><i class="ph-bold ph-lightning"></i></span>
-                                <span class="dash-kpi-badge-label">NOTÍCIAS TECH</span>
+                                <span class="dash-kpi-badge-label">NOTÍCIAS (TECH, EDU, SAÚDE...)</span>
                             </div>
                             <div class="dash-kpi-numero">${totalTech}</div>
                         </div>
