@@ -1291,64 +1291,6 @@ async function carregarEstatisticas() {
     }
 }
 
-// 3. Status e Governança NoSQL
-async function carregarInspector() {
-    const antigo = document.getElementById('bloco-paginacao');
-    if (antigo) antigo.remove();
-
-    const container = document.getElementById('container-vagas');
-    container.style.display = 'block';
-    container.innerHTML = '<p class="carregando">Lendo integridade dos nós e volumes de armazenamento...</p>';
-
-    destacarBotaoAtivo('btn-inspector');
-
-    try {
-        const res = await fetch(`${API_URL}/db-status`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-            signal: AbortSignal.timeout(10000)
-        });
-
-        if (!res.ok) throw new Error(`Erro: ${res.status}`);
-        const info = await res.json();
-
-        let html = `
-            <div style="background: white; border: 3px solid var(--color-navy); border-radius: 12px; padding: 2.5rem; box-shadow: 6px 6px 0px var(--color-cyan); margin-bottom: 2rem;">
-                <h2 style="color: var(--color-navy); margin-bottom: 0.5rem; border-bottom: 4px solid var(--color-navy); padding-bottom: 8px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
-                    <i class="ph-bold ph-database"></i> Status da Infraestrutura e Governança NoSQL
-                </h2>
-                <p style="color: #555; margin-bottom: 2rem; font-size: 0.95rem;">
-                    Relatório transparente volumétrico do cluster NoSQL e integridade estrutural das coleções.
-                </p>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-        `;
-
-        if (info && info.colecoes) {
-            info.colecoes.forEach(col => {
-                const indexBadges = col.indices.map(idx => `<span class="badge-index">${idx}</span>`).join(' ');
-                html += `
-                    <div class="db-inspector-card">
-                        <div style="display: flex; align-items: center; margin-bottom: 12px; border-bottom: 2px solid var(--color-navy); padding-bottom: 6px;">
-                            <h3 style="color: var(--color-navy); font-size: 1.05rem; font-weight: bold; display: flex; align-items: center; gap: 6px;"><i class="ph-bold ph-folder"></i> Coleção: ${col.colecao}</h3>
-                        </div>
-                        <p style="font-size: 0.9rem; margin-bottom: 6px; color: #333;">Documentos Ativos: <strong>${col.documentos}</strong></p>
-                        <p style="font-size: 0.9rem; margin-bottom: 12px; color: #333;">Alocação Física: <strong>${col.tamanho_kb} KB</strong></p>
-                        <div style="border-top: 1.5px dashed var(--color-navy); padding-top: 8px; margin-top: 10px;">
-                            <p style="font-size: 0.75rem; font-weight: 800; color: var(--color-navy); margin-bottom: 6px;">ESTRUTURAS DE ÍNDICES:</p>
-                            <div style="display: flex; flex-wrap: wrap; gap: 4px;">${indexBadges}</div>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        html += `</div></div>`;
-        container.innerHTML = html;
-    } catch (erro) {
-        container.innerHTML = `<p class="carregando" style="color: red;">Não foi possível ler os metadados: ${erro.message}</p>`;
-    }
-}
-
 function mostrarToast(mensagem, tipo = 'info') {
     const container = document.getElementById('toast-container');
     if (!container) return;
