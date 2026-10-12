@@ -974,6 +974,13 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.dash-kpi-card:focus-visible {
+    outline: 3px dashed #FF5C00;
+    outline-offset: 3px;
 }
 
 .dash-kpi-card:hover {
@@ -1396,8 +1403,10 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: flex-end;
     gap: 10px;
     flex: 1;
+    height: 100%;
 }
 
 .dash-barra-pilar {
@@ -1406,11 +1415,137 @@ body {
     border: 3px solid var(--color-navy);
     border-radius: 22px;
     box-shadow: 2.5px 2.5px 0px var(--color-navy);
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, height 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .dash-barra-pilar:hover {
     transform: scaleY(1.05);
+}
+
+/* Valor numérico acima de cada barra do fluxo */
+.dash-barra-valor {
+    font-size: 0.88rem;
+    font-weight: 900;
+    color: var(--color-navy);
+    line-height: 1;
+}
+
+html.dark .dash-barra-valor {
+    color: #F8FAFC !important;
+}
+
+/* Ranking de fontes (Radar) */
+.dash-ranking-fontes {
+    list-style: none;
+    margin: 0 0 1.4rem 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.dash-ranking-item {
+    display: grid;
+    grid-template-columns: auto 1fr 2fr auto;
+    align-items: center;
+    gap: 10px;
+}
+
+.dash-ranking-posicao {
+    font-weight: 900;
+    font-size: 0.85rem;
+    color: #FF5C00;
+}
+
+.dash-ranking-nome {
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: var(--color-navy);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dash-ranking-barra {
+    height: 12px;
+    background: #E2E8F0;
+    border: 2px solid var(--color-navy);
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.dash-ranking-preenchimento {
+    display: block;
+    height: 100%;
+    border-radius: 9999px;
+    transition: width 0.6s ease;
+}
+
+.dash-ranking-total {
+    font-size: 0.95rem;
+    font-weight: 900;
+    color: var(--color-navy);
+}
+
+html.dark .dash-ranking-nome,
+html.dark .dash-ranking-total {
+    color: #F8FAFC !important;
+}
+
+html.dark .dash-ranking-barra {
+    background: #1E293B !important;
+    border-color: #334155 !important;
+}
+
+/* Mini-barras horizontais das categorias PRAE */
+.dash-cat-barra-row {
+    display: grid;
+    grid-template-columns: minmax(90px, 1.2fr) 2fr auto;
+    align-items: center;
+    gap: 10px;
+}
+
+.dash-cat-nome {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #475569;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dash-cat-trilho {
+    height: 12px;
+    background: #E2E8F0;
+    border: 2px solid var(--color-navy);
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.dash-cat-preenchimento {
+    display: block;
+    height: 100%;
+    border-radius: 9999px;
+    transition: width 0.6s ease;
+}
+
+.dash-cat-total {
+    font-size: 0.9rem;
+    font-weight: 900;
+    color: var(--color-navy);
+}
+
+html.dark .dash-cat-nome {
+    color: #CBD5E1 !important;
+}
+
+html.dark .dash-cat-total {
+    color: #F8FAFC !important;
+}
+
+html.dark .dash-cat-trilho {
+    background: #1E293B !important;
+    border-color: #334155 !important;
 }
 
 .pilar-laranja { background: #FF5C00; }
@@ -3448,3 +3583,21 @@ html.dark .text-gray-700 {
     color: #FFFFFF !important;
 }
 
+
+/* =========================================================
+   ACESSIBILIDADE: RESPEITO A "REDUZIR MOVIMENTO" NO DASHBOARD
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+    .dash-kpi-card,
+    .dash-kpi-icone i,
+    .dash-barra-pilar,
+    .dash-ranking-preenchimento,
+    .dash-cat-preenchimento {
+        transition: none !important;
+    }
+
+    .dash-kpi-card:hover,
+    .dash-barra-pilar:hover {
+        transform: none;
+    }
+}

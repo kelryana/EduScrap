@@ -701,6 +701,8 @@ def pesquisar_unificado(
 
 @app.get("/api/estatisticas")
 def obter_estatisticas():
+    nome_colecoes = db.list_collection_names()
+
     # Notícias reais (exclui cards de capacitação/cursos/bolsas da aba Cursos & Bolsas)
     noticias_reais = [d for d in db["noticias"].find({}) if eh_documento_de_noticia(d)]
     total_noticias_ufersa = sum(
@@ -716,10 +718,10 @@ def obter_estatisticas():
         "noticias_ufersa": total_noticias_ufersa,
         "cursos_bolsas": db["noticias"].count_documents({"tipo": {"$in": ["capacitacao", "bolsa_estudo"]}}),
         "portal_uern": db["vagas_portal_uern"].count_documents({}),
-        "mprn": db["vagas_mprn"].count_documents({}) if "vagas_mprn" in db.list_collection_names() else 0,
-        "ifrn": db["vagas_ifrn"].count_documents({}) if "vagas_ifrn" in db.list_collection_names() else 0,
-        "iel": db["vagas_iel"].count_documents({}) if "vagas_iel" in db.list_collection_names() else 0,
-        "dom": db["vagas_dom"].count_documents({}) if "vagas_dom" in db.list_collection_names() else 0,
+        "mprn": db["vagas_mprn"].count_documents({}) if "vagas_mprn" in nome_colecoes else 0,
+        "ifrn": db["vagas_ifrn"].count_documents({}) if "vagas_ifrn" in nome_colecoes else 0,
+        "iel": db["vagas_iel"].count_documents({}) if "vagas_iel" in nome_colecoes else 0,
+        "dom": db["vagas_dom"].count_documents({}) if "vagas_dom" in nome_colecoes else 0,
     }
 
     total_geral = sum(totais.values())
@@ -735,7 +737,16 @@ def obter_estatisticas():
     }
 
     colecoes_prazo = ["vagas_estagio", "vagas_bolsa", "vagas_ufersa", "vagas_ciee", "vagas_mprn", "vagas_ifrn", "vagas_iel", "vagas_dom"]
-    total_reta_final = sum(db[col].count_documents(query_reta_final) for col in colecoes_prazo if col in db.list_collection_names())
+    total_reta_final = sum(db[col].count_documents(query_reta_final) for col in colecoes_prazo if col in nome_colecoes)
+
+    # Editais vigentes (ainda dentro do prazo de inscrição) — usado no anel de saúde do hub
+    query_vigentes = {"data_vencimento": {"$gte": agora}}
+    total_oportunidades_com_prazo = sum(
+        db[col].count_documents({}) for col in colecoes_prazo if col in nome_colecoes
+    )
+    total_vigentes = sum(
+        db[col].count_documents(query_vigentes) for col in colecoes_prazo if col in nome_colecoes
+    )
 
     pipeline_prae = [
         {"$group": {"_id": "$categoria", "total": {"$sum": 1}}},
@@ -744,24 +755,82 @@ def obter_estatisticas():
     distribuicao_prae = list(db["vagas_estagio"].aggregate(pipeline_prae))
     formatar = lambda lista: [{"categoria": item["_id"] if item["_id"] else "Geral / Não Especificada", "total": item["total"]} for item in lista]
 
-    # Distribuição semanal de captação estimada baseada nos dados
-    dias_semana = [
-        {"dia": "DOM", "valor": 18, "cor": "#FF5C00"},
-        {"dia": "SEG", "valor": 12, "cor": "#7C3AED"},
-        {"dia": "TER", "valor": 26, "cor": "#0F172A"},
-        {"dia": "QUA", "valor": 16, "cor": "#FF5C00"},
-        {"dia": "QUI", "valor": 34, "cor": "#38BDF8"},
-        {"dia": "SEX", "valor": 14, "cor": "#0F172A"},
-        {"dia": "SÁB", "valor": 28, "cor": "#10B981"}
-    ]
+    # ---- Fluxo REAL de captação dos últimos 7 dias (por dia da semana) ----
+    # Usa o campo de data mais confiável disponível em cada coleção.
+    inicio_janela = (agora - timedelta(days=6)).replace(hour=0, minute=0, second=0, microsecond=0)
+    campos_data_captura = ["criado_em", "data_publicacao", "data_criacao", "coletado_em", "updated_at", "data_noticia"]
+    nomes_dias = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"]
+    contagem_por_dia = [0] * 7
+
+    def _extrair_dt_documento(doc):
+        for campo in campos_data_captura:
+            valor = doc.get(campo)
+            if isinstance(valor, datetime):
+                return valor
+        return None
+
+    for col in colecoes_prazo + ["vagas_noticias", "noticias"]:
+        if col not in nome_colecoes:
+            continue
+        try:
+            or_clausulas = [{campo: {"$gte": inicio_janela}} for campo in campos_data_captura]
+            cursor = db[col].find({"$or": or_clausulas})
+            for doc in cursor:
+                dt = _extrair_dt_documento(doc)
+                if dt and dt >= inicio_janela:
+                    contagem_por_dia[dt.weekday()] += 1
+        except Exception:
+            continue
+
+    cores_dias = ["#10B981", "#FF5C00", "#0F172A", "#38BDF8", "#8B5CF6", "#FACC15", "#FB923C"]
+    ordem_exibicao = [6, 0, 1, 2, 3, 4, 5]  # DOM, SEG..SÁB
+    tem_dados_fluxo = any(contagem_por_dia)
+    dias_semana = []
+    for idx in ordem_exibicao:
+        dias_semana.append({
+            "dia": nomes_dias[idx],
+            "valor": contagem_por_dia[idx] if tem_dados_fluxo else 0,
+            "cor": cores_dias[idx]
+        })
+
+    # ---- Status da última varredura automatizada ----
+    ultima_varredura = None
+    if "historico_varreduras" in nome_colecoes:
+        try:
+            log = db["historico_varreduras"].find_one(
+                {}, sort=[("data_execucao", -1)]
+            )
+            if log:
+                data_exec = log.get("data_execucao")
+                ultima_varredura = {
+                    "data": data_exec.isoformat() if isinstance(data_exec, datetime) else None,
+                    "status": log.get("status"),
+                    "duracao_segundos": log.get("tempo_duracao_segundos"),
+                }
+        except Exception:
+            ultima_varredura = None
+
+    # ---- Ranking real das origens monitoradas (para o radar de fontes) ----
+    ranking_fontes = sorted(
+        [{"origem": chave, "total": valor} for chave, valor in totais.items() if valor > 0],
+        key=lambda item: item["total"],
+        reverse=True
+    )
+
+    canais_monitorados = sum(1 for v in totais.values() if v and v > 0)
 
     return {
         "totais": totais,
         "total_geral": total_geral,
         "reta_final_urgente": total_reta_final,
+        "vigentes": total_vigentes,
+        "oportunidades_com_prazo": total_oportunidades_com_prazo,
         "prae_categorias": formatar(distribuicao_prae),
         "fluxo_semanal": dias_semana,
-        "canais_monitorados": 8
+        "tem_dados_fluxo": tem_dados_fluxo,
+        "ultima_varredura": ultima_varredura,
+        "ranking_fontes": ranking_fontes,
+        "canais_monitorados": canais_monitorados
     }
 @app.get("/api/db-status")
 def obter_status_do_banco():
