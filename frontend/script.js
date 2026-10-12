@@ -1097,15 +1097,26 @@ async function carregarEstatisticas() {
         const maxCat = categorias.length ? Math.max(...categorias.map(c => c.total), 1) : 1;
         const coresCategorias = ['#FF5C00', '#38BDF8', '#8B5CF6', '#10B981', '#FACC15', '#0F172A'];
 
+        // Paleta por KPI espelhando o design de referência (cor + fundo pastel da pílula)
+        const PALETA_KPI = {
+            laranja:  { cor: '#FF5C00', bg: '#FFF4ED' },
+            coral:    { cor: '#EA580C', bg: '#FFF4ED' },
+            ciano:    { cor: '#0284C7', bg: '#EFF9FE' },
+            roxo:     { cor: '#8B5CF6', bg: '#F5F1FD' },
+            verde:    { cor: '#10B981', bg: '#EEFDF5' },
+            azul:     { cor: '#1E3A8A', bg: '#EEF2FE' },
+            grafite:  { cor: '#1E293B', bg: '#EFF3F8' }
+        };
+
         const kpis = [
             { rotulo: 'TOTAL NO HUB', numero: totalGeral, icone: 'ph-stack', cor: 'laranja', acao: "carregarDados('estagios')" },
-            { rotulo: 'ESTÁGIOS (PRAE / CIEE / MPRN / IEL)', numero: totalEstagios, icone: 'ph-graduation-cap', cor: 'laranja', acao: "carregarDados('estagios')" },
+            { rotulo: 'ESTÁGIOS (PRAE / CIEE / MPRN / IEL)', numero: totalEstagios, icone: 'ph-graduation-cap', cor: 'coral', acao: "carregarDados('estagios')" },
             { rotulo: 'BOLSAS (PROEX)', numero: totalBolsas, icone: 'ph-coins', cor: 'ciano', acao: "carregarDados('bolsas')" },
             { rotulo: 'EDITAIS UFERSA', numero: totalUfersa, icone: 'ph-bank', cor: 'roxo', acao: "carregarDados('ufersa')" },
             { rotulo: 'CURSOS & BOLSAS', numero: totalCursosBolsas, icone: 'ph-book-open', cor: 'ciano', acao: "carregarDados('cursos-bolsas')" },
             { rotulo: 'NOTÍCIAS (TECH, EDU, SAÚDE...)', numero: totalTech, icone: 'ph-lightning', cor: 'verde', acao: "carregarDados('noticias')" },
-            { rotulo: 'PORTAL UERN (MINERADO)', numero: totalUern, icone: 'ph-magnifying-glass', cor: 'navy', acao: "carregarDados('portal_uern')" },
-            { rotulo: 'DOM MOSSORÓ', numero: totalDom, icone: 'ph-newspaper-clipping', cor: 'navy', acao: "carregarDados('dom')" }
+            { rotulo: 'PORTAL UERN (MINERADO)', numero: totalUern, icone: 'ph-magnifying-glass', cor: 'azul', acao: "carregarDados('portal_uern')" },
+            { rotulo: 'DOM MOSSORÓ', numero: totalDom, icone: 'ph-newspaper-clipping', cor: 'grafite', acao: "carregarDados('dom')" }
         ];
 
         let html = `
@@ -1121,14 +1132,14 @@ async function carregarEstatisticas() {
                     </div>
 
                     <div class="dash-grid-top-cards">
-                        ${kpis.map(k => `
-                        <button type="button" class="dash-kpi-card card-cor-${k.cor}" onclick="${k.acao}" title="Ver ${k.rotulo}">
-                            <div class="dash-kpi-header">
-                                <span class="dash-kpi-icone"><i class="ph-bold ${k.icone}"></i></span>
-                                <span class="dash-kpi-badge-label">${k.rotulo}</span>
-                            </div>
+                        ${kpis.map(k => {
+                            const paleta = PALETA_KPI[k.cor] || PALETA_KPI.laranja;
+                            return `
+                        <button type="button" class="dash-kpi-card card-cor-${k.cor}" style="--kpi-cor: ${paleta.cor}; --kpi-bg: ${paleta.bg};" onclick="${k.acao}" title="Ver ${k.rotulo}">
+                            <span class="dash-kpi-icone"><i class="ph-bold ${k.icone}"></i></span>
+                            <span class="dash-kpi-badge-label">${k.rotulo}</span>
                             <div class="dash-kpi-numero" data-alvo="${k.numero}">0</div>
-                        </button>`).join('')}
+                        </button>`; }).join('')}
                     </div>
                 </div>
 
@@ -1238,25 +1249,27 @@ async function carregarEstatisticas() {
                                 ${fluxo.map(d => `
                                 <div class="dash-coluna-dia">
                                     <span class="dash-barra-valor">${d.valor}</span>
-                                    <div class="dash-barra-pilar" style="height: ${temFluxo ? Math.max((d.valor / maxFluxo) * 180, 6) : 6}px; background: ${d.cor};"></div>
+                                    ${d.valor > 0 ? `<div class="dash-barra-pilar" style="height: ${Math.max((d.valor / maxFluxo) * 180, 6)}px; background: ${d.cor};"></div>` : `<div class="dash-pill-zero" style="background: ${d.cor};"></div>`}
                                     <span class="dash-pilar-nome">${d.dia}</span>
                                 </div>`).join('')}
                             </div>
-                            <div class="dash-fluxo-legenda">
-                                ${categorias.length ? `
-                                <div class="dash-legenda-item" style="flex-direction: column; gap: 10px; align-items: stretch;">
-                                    <strong style="color: var(--color-navy);">Categorias dos estágios PRAE</strong>
-                                    ${categorias.map((c, i) => `
+                            <div class="dash-prae-categorias">
+                                <div class="dash-prae-header">
+                                    <i class="ph-bold ph-tag" style="color: #FF5C00;"></i>
+                                    <span>Categorias dos estágios PRAE</span>
+                                </div>
+                                <div class="dash-prae-lista">
+                                    ${categorias.length ? categorias.map((c, i) => `
                                     <div class="dash-cat-barra-row">
                                         <span class="dash-cat-nome" title="${c.categoria}">${c.categoria}</span>
                                         <span class="dash-cat-trilho"><span class="dash-cat-preenchimento" style="width: ${(c.total / maxCat) * 100}%; background: ${coresCategorias[i % coresCategorias.length]};"></span></span>
                                         <strong class="dash-cat-total">${c.total}</strong>
-                                    </div>`).join('')}
-                                </div>` : `
-                                <div class="dash-legenda-item">
-                                    <span class="dash-legenda-ponto" style="background:#FF5C00;"></span>
-                                    <p class="dash-legenda-texto">Execute <strong>run_scrapers.py</strong> ou clique em <strong>Varredura Global</strong> para popular o hub com dados reais.</p>
-                                </div>`}
+                                    </div>`).join('') : `
+                                    <div class="dash-legenda-item">
+                                        <span class="dash-legenda-ponto" style="background:#FF5C00;"></span>
+                                        <p class="dash-legenda-texto">Execute <strong>run_scrapers.py</strong> ou clique em <strong>Varredura Global</strong> para popular o hub com dados reais.</p>
+                                    </div>`}
+                                </div>
                             </div>
                         </div>
                     </div>
