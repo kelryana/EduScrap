@@ -1047,6 +1047,62 @@ function escaparHTML(texto) {
     return div.innerHTML;
 }
 
+// Regra do dashboard no tema ESCURO: tudo que é escuro no tema claro passa a
+// ser CLARO. Cores inline (barras, pilares, anéis de progresso) são ajustadas
+// aqui, pois o CSS não alcança valores definidos via style="".
+const CORES_ESCURAS_TEMA_CLARO = new Set([
+    '#0F172A', '#1E3A8A', '#1E293B', '#EA580C', '#0284C7', '#0D47A1', '#166534'
+]);
+const COR_ESCURA_PARA_CLARA = {
+    '#0F172A': '#F8FAFC',
+    '#1E3A8A': '#93C5FD',
+    '#1E293B': '#CBD5E1',
+    '#EA580C': '#FB923C',
+    '#0284C7': '#7DD3FC',
+    '#0D47A1': '#93C5FD',
+    '#166534': '#6EE7B7'
+};
+
+function ajustarCoresDashboardParaTema() {
+    const container = document.getElementById('container-vagas');
+    if (!container || !container.querySelector('.dashboard-neo-wrapper')) return;
+
+    const ehEscuro = document.documentElement.classList.contains('dark');
+
+    // 1. Preenchimentos (barras de fluxo, ranking de fontes, categorias) e
+    //    pílulas zero: cor clara quando o tema é escuro.
+    const alvosCor = container.querySelectorAll(
+        '.dash-barra-pilar, .dash-ranking-preenchimento, .dash-cat-preenchimento, .dash-pill-zero, .dash-donut-container, .dash-slider-progresso'
+    );
+    alvosCor.forEach(el => {
+        const original = el.dataset.corOriginal || (el.style.background || '').trim().toUpperCase();
+        if (!el.dataset.corOriginal) el.dataset.corOriginal = original;
+        let corFinal = original;
+        if (ehEscuro && CORES_ESCURAS_TEMA_CLARO.has(original)) {
+            corFinal = COR_ESCURA_PARA_CLARA[original] || '#F8FAFC';
+        }
+        if (corFinal) el.style.background = corFinal;
+        // Anéis donut usam variáveis CSS para o conic-gradient
+        if (el.classList.contains('dash-donut-container') && corFinal) {
+            el.style.setProperty('--cor-anel', corFinal);
+        }
+    });
+
+    // 2. Pontos da legenda: contorno branco no tema escuro (fundo escuro).
+    container.querySelectorAll('.dash-legenda-ponto').forEach(ponto => {
+        ponto.style.borderColor = ehEscuro ? '#FFFFFF' : '';
+    });
+
+    // 3. Fundo dos cards KPI acompanha o tema (pastel no claro / grafite no escuro).
+    container.querySelectorAll('.dash-kpi-card').forEach(card => {
+        card.style.backgroundColor = ehEscuro ? '#1E293B' : '';
+    });
+}
+
+window.addEventListener('themechange', () => {
+    try { ajustarCoresDashboardParaTema(); } catch (e) {}
+});
+
 function animarNumero(el, alvo, duracao = 900) {
     const prefereMenosMovimento = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefereMenosMovimento || duracao <= 0) { el.textContent = alvo; return; }
@@ -1100,7 +1156,7 @@ async function carregarEstatisticas() {
         const maxFluxo = Math.max(...fluxo.map(d => d.valor), 1);
         const totalFluxo = fluxo.reduce((soma, d) => soma + (d.valor || 0), 0);
         const varredura = dados.ultima_varredura;
-        const categorias = (dados.prae_categorias || []).slice(0, 6);
+        const categorias = (dados.categorias_hub || dados.prae_categorias || []).slice(0, 6);
         const maxCat = categorias.length ? Math.max(...categorias.map(c => c.total), 1) : 1;
         const coresCategorias = ['#FF5C00', '#38BDF8', '#8B5CF6', '#10B981', '#FACC15', '#E2E8F0'];
 
@@ -1265,7 +1321,7 @@ async function carregarEstatisticas() {
                             <div class="dash-prae-categorias">
                                 <div class="dash-prae-header">
                                     <i class="ph-bold ph-tag" style="color: #FF5C00;"></i>
-                                    <span>Categorias dos estágios PRAE</span>
+                                    <span>Categorias do Hub (todas as fontes)</span>
                                 </div>
                                 <div class="dash-prae-lista">
                                     ${categorias.length ? categorias.map((c, i) => `
@@ -1291,6 +1347,8 @@ async function carregarEstatisticas() {
         container.querySelectorAll('[data-alvo]').forEach((el, i) => {
             animarNumero(el, parseInt(el.dataset.alvo, 10) || 0, 700 + i * 40);
         });
+
+        ajustarCoresDashboardParaTema();
     } catch (erro) {
         container.innerHTML = `
             <div class="status-box" style="border-color: var(--color-red);">
