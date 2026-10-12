@@ -3094,14 +3094,14 @@ html.dark .dash-legenda-texto {
 }
 
 html.dark .dash-legenda-texto strong {
-    color: #F8FAFC !important;
+    color: #07131e !important;
 }
 
 /* Paginação */
 html.dark #bloco-paginacao button {
     background: #1E293B !important;
     color: #F8FAFC !important;
-    border-color: #334155 !important;
+    border-color: #F8FAFC !important;
     box-shadow: 4px 4px 0px #020617 !important;
 }
 

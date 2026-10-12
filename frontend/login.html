@@ -49,24 +49,32 @@
 
         .login-top-bar {
             width: 100%;
-            max-width: 940px;
+            max-width: 1000px;
             display: flex;
             justify-content: flex-end;
             align-items: center;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
+        }
+
+        .login-top-bar .btn-theme-toggle {
+            padding: 12px 20px;
+            font-size: 1.05rem;
+            border: 2.5px solid #0F172A;
+            border-radius: 12px;
+            box-shadow: 4px 4px 0px #0F172A;
         }
 
         .btn-voltar {
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            padding: 11px 22px;
+            padding: 12px 24px;
             background: #ffffff;
             border: 2.5px solid #0F172A;
             border-radius: 12px;
             color: #0F172A;
             font-weight: 800;
-            font-size: 1.05rem;
+            font-size: 1.1rem;
             text-decoration: none;
             box-shadow: 4px 4px 0px #0F172A;
             transition: all 0.15s ease;
@@ -84,14 +92,14 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            margin-bottom: 24px;
+            margin-bottom: 26px;
             text-align: center;
         }
 
         .brand-link {
             display: inline-flex;
             align-items: center;
-            gap: 16px;
+            gap: 18px;
             text-decoration: none;
             transition: transform 0.2s ease;
         }
@@ -101,14 +109,14 @@
         }
 
         .brand-logo-img {
-            height: 82px;
+            height: 90px;
             width: auto;
             object-fit: contain;
             filter: drop-shadow(4px 4px 0px rgba(15, 23, 42, 0.15));
         }
 
         .brand-title-text {
-            font-size: 3.2rem;
+            font-size: 3.5rem;
             font-weight: 900;
             line-height: 1;
             font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
@@ -116,8 +124,8 @@
         }
 
         .brand-subtitle {
-            margin-top: 8px;
-            font-size: 1.05rem;
+            margin-top: 10px;
+            font-size: 1.18rem;
             font-weight: 700;
             color: #475569;
         }
@@ -125,16 +133,16 @@
         /* Card de Login / Cadastro Maior */
         .login-card {
             width: 100%;
-            max-width: 940px;
+            max-width: 1000px;
             background: #ffffff;
             border: 3.5px solid #0F172A;
             box-shadow: 10px 10px 0px #0F172A;
-            border-radius: 20px;
+            border-radius: 22px;
             overflow: hidden;
         }
 
         .login-card .modal-header-memphis {
-            padding: 18px 32px;
+            padding: 20px 36px;
             background: #0F172A;
             color: #ffffff;
             display: flex;
@@ -143,32 +151,37 @@
         }
 
         .login-card .modal-title {
-            font-size: 1.25rem;
+            font-size: 1.35rem;
             font-weight: 800;
             color: #ffffff;
             margin: 0;
         }
 
+        .login-card .modal-dots .dot {
+            width: 14px;
+            height: 14px;
+        }
+
         .login-card .auth-tabs-wrapper {
-            padding: 20px 32px 0 32px;
+            padding: 24px 36px 0 36px;
             background: #ffffff;
         }
 
         .login-card .auth-tabs-row {
             display: flex;
-            gap: 12px;
+            gap: 14px;
             background: #F1F5F9;
-            padding: 6px;
+            padding: 8px;
             border: 2.5px solid #0F172A;
-            border-radius: 12px;
+            border-radius: 14px;
         }
 
         .login-card .auth-tab-btn {
             flex: 1;
-            padding: 13px 20px;
-            font-size: 1.1rem;
+            padding: 16px 24px;
+            font-size: 1.18rem;
             font-weight: 800;
-            border-radius: 8px;
+            border-radius: 10px;
             border: 2px solid transparent;
             cursor: pointer;
             background: transparent;
@@ -176,37 +189,45 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
             transition: all 0.15s ease;
+        }
+
+        .login-card .auth-tab-btn i {
+            font-size: 1.35rem;
         }
 
         .login-card .auth-tab-btn.ativo {
             background: #ffffff;
             color: #0F172A;
             border-color: #0F172A;
-            box-shadow: 3px 3px 0px #0F172A;
+            box-shadow: 4px 4px 0px #0F172A;
         }
 
         .login-card .modal-body-memphis {
-            padding: 32px 40px 44px 40px;
+            padding: 36px 44px 48px 44px;
         }
 
         .login-card .label-memphis {
-            font-size: 1rem;
+            font-size: 1.12rem;
             font-weight: 800;
             color: #0F172A;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+        }
+
+        .login-card .label-memphis i {
+            font-size: 1.3rem;
         }
 
         .login-card .input-memphis {
             width: 100%;
-            padding: 14px 18px;
-            font-size: 1.05rem;
-            border: 2.5px solid #0F172A;
-            border-radius: 10px;
+            padding: 16px 20px;
+            font-size: 1.12rem;
+            border: 3px solid #0F172A;
+            border-radius: 12px;
             background: #FAFBFD;
             font-family: inherit;
             color: #0F172A;
@@ -222,23 +243,27 @@
         }
 
         .login-card .btn-submit-memphis {
-            padding: 16px 28px;
-            font-size: 1.15rem;
-            font-weight: 800;
-            border: 2.5px solid #0F172A;
-            border-radius: 12px;
+            padding: 18px 32px;
+            font-size: 1.25rem;
+            font-weight: 900;
+            border: 3px solid #0F172A;
+            border-radius: 14px;
             cursor: pointer;
-            box-shadow: 4px 4px 0px #0F172A;
+            box-shadow: 5px 5px 0px #0F172A;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
             transition: all 0.15s ease;
         }
 
         .login-card .btn-submit-memphis:hover:not(:disabled) {
             transform: translate(-2px, -2px);
-            box-shadow: 6px 6px 0px #0F172A;
+            box-shadow: 7px 7px 0px #0F172A;
+        }
+
+        .login-card .btn-submit-memphis i {
+            font-size: 1.35rem;
         }
 
         .login-card .btn-submit-primary {
@@ -284,12 +309,12 @@
         }
 
         .input-password-wrapper .input-memphis {
-            padding-right: 50px !important;
+            padding-right: 58px !important;
         }
 
         .btn-toggle-senha {
             position: absolute;
-            right: 10px;
+            right: 12px;
             top: 50%;
             transform: translateY(-50%);
             background: transparent;
@@ -297,7 +322,7 @@
             padding: 8px;
             cursor: pointer;
             color: #64748B;
-            font-size: 1.3rem;
+            font-size: 1.55rem;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -314,12 +339,12 @@
         /* Medidor de Força e Requisitos de Senha */
         .senha-forca-track {
             width: 100%;
-            height: 8px;
+            height: 12px;
             background: #E2E8F0;
-            border: 2px solid #0F172A;
+            border: 2.5px solid #0F172A;
             border-radius: 9999px;
             overflow: hidden;
-            margin-top: 6px;
+            margin-top: 8px;
         }
 
         .senha-forca-barra {
@@ -333,12 +358,12 @@
         .senha-requisitos-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 8px 14px;
+            gap: 12px 18px;
             background: #F8FAFC;
-            border: 2px solid #E2E8F0;
-            border-radius: 12px;
-            padding: 12px 16px;
-            margin-top: 10px;
+            border: 2.5px solid #E2E8F0;
+            border-radius: 14px;
+            padding: 16px 20px;
+            margin-top: 14px;
         }
 
         @media (max-width: 640px) {
@@ -350,15 +375,15 @@
         .senha-req-item {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 0.85rem;
+            gap: 10px;
+            font-size: 1.1rem;
             font-weight: 700;
-            color: #64748B;
+            color: #041429;
             transition: all 0.2s ease;
         }
 
         .senha-req-item .req-icon {
-            font-size: 1.05rem;
+            font-size: 1.25rem;
             color: #94A3B8;
             flex-shrink: 0;
             transition: all 0.2s ease;
@@ -375,15 +400,13 @@
         .card-info-preferencias {
             background: #F8FAFC;
             border: 2.5px dashed #CBD5E1;
-            border-radius: 12px;
-            padding: 14px 18px;
+            border-radius: 16px;
+            padding: 22px 26px;
             display: flex;
             align-items: flex-start;
-            gap: 12px;
+            gap: 16px;
             color: #334155;
-            font-size: 0.92rem;
-            font-weight: 700;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
         /* Dark mode para novos elementos */
@@ -580,12 +603,15 @@
             .perfil-botoes-row button {
                 width: 100%;
             }
-        }
 
-        .brand-logo-img { height: 60px; }
-        .brand-title-text { font-size: 2.4rem; }
-        .login-card .modal-body-memphis { padding: 20px 20px 32px 20px; }
-        .login-card .auth-tabs-wrapper { padding: 16px 20px 0 20px; }
+            .brand-logo-img { height: 68px; }
+            .brand-title-text { font-size: 2.6rem; }
+            .login-card .modal-body-memphis { padding: 22px 20px 32px 20px; }
+            .login-card .auth-tabs-wrapper { padding: 18px 20px 0 20px; }
+            .login-card .auth-tab-btn { padding: 13px 14px; font-size: 1.05rem; }
+            .login-card .input-memphis { padding: 14px 16px; font-size: 1.05rem; }
+            .login-card .btn-submit-memphis { padding: 15px 22px; font-size: 1.15rem; }
+        }
     </style>
 </head>
 <body class="bg-[#FAFBFD] text-brand-dark min-h-screen bg-grid-pattern font-sans antialiased selection:bg-brand-yellow selection:text-brand-dark">
@@ -627,8 +653,8 @@
                     </div>
                     <h1 class="modal-title" id="page-auth-title">Portal do Estudante - EduScrap</h1>
                 </div>
-                <div class="flex items-center gap-1.5 text-slate-300 font-bold text-sm">
-                    <i class="ph-bold ph-lock-key"></i> <span>Acesso Seguro</span>
+                <div class="flex items-center gap-2 text-slate-300 font-extrabold text-base">
+                    <i class="ph-bold ph-lock-key text-lg"></i> <span>Acesso Seguro</span>
                 </div>
             </div>
 
@@ -675,15 +701,15 @@
                         </button>
                     </div>
 
-                    <p class="text-center mt-6 text-slate-600 font-semibold text-base">
+                    <p class="text-center mt-7 text-slate-600 dark:text-slate-400 font-semibold text-lg">
                         Não tem uma conta ainda?
-                        <a href="javascript:void(0)" onclick="alternarAba('register')" class="text-brand-orange font-extrabold underline hover:text-orange-700">Cadastre-se gratuitamente</a>
+                        <a href="javascript:void(0)" onclick="alternarAba('register')" class="text-brand-orange font-extrabold underline hover:text-orange-700 ml-1">Cadastre-se gratuitamente</a>
                     </p>
                 </form>
 
                 <!-- FORMULÁRIO DE CADASTRO -->
                 <form id="form-register" style="display: none;" onsubmit="executarCadastro(event)">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                         <div class="form-group-memphis">
                             <label class="label-memphis" for="reg-nome">
                                 <i class="ph-bold ph-user text-brand-orange"></i> Nome Completo:
@@ -698,7 +724,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                         <div class="form-group-memphis">
                             <label class="label-memphis" for="reg-email">
                                 <i class="ph-bold ph-envelope-simple text-brand-orange"></i> E-mail Institucional ou Pessoal:
@@ -719,10 +745,10 @@
                     </div>
 
                     <!-- Medidor Visual de Força da Senha & Checklist -->
-                    <div class="mb-5">
-                        <div class="flex justify-between items-center text-xs font-bold mb-1">
-                            <span class="text-slate-600 dark:text-slate-300">Força da Senha:</span>
-                            <span id="senha-forca-texto" class="font-extrabold text-slate-500">Aguardando senha...</span>
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center text-sm font-bold mb-1.5">
+                            <span class="text-slate-700 dark:text-slate-200">Força da Senha:</span>
+                            <span id="senha-forca-texto" class="font-extrabold text-slate-600 dark:text-slate-300">Aguardando senha...</span>
                         </div>
                         <div class="senha-forca-track">
                             <div id="senha-forca-barra" class="senha-forca-barra"></div>
@@ -750,21 +776,13 @@
 
                     <!-- Aviso amigável sobre preferências de cursos pós-cadastro -->
                     <div class="card-info-preferencias">
-                        <i class="ph-bold ph-sparkle text-brand-orange text-2xl flex-shrink-0"></i>
+                        <i class="ph-bold ph-sparkle text-brand-orange text-4xl flex-shrink-0 mt-0.5"></i>
                         <div>
-                            <span class="text-brand-dark dark:text-white font-extrabold">Personalização Inteligente de Vagas</span>
-                            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
-                                Você poderá escolher seus cursos e áreas de interesse a qualquer momento no seu <strong>Perfil</strong> após entrar na conta para filtrar seu feed de editais.
+                            <span class="text-brand-dark dark:text-white font-black text-xl sm:text-2xl block">Personalização Inteligente de Vagas</span>
+                            <p class="text-base sm:text-lg font-medium text-slate-700 dark:text-slate-200 mt-1.5 leading-relaxed">
+                                Você poderá escolher seus cursos e áreas de interesse a qualquer momento no seu <strong class="text-brand-orange font-extrabold underline decoration-2">Perfil</strong> após entrar na conta para filtrar seu feed de editais.
                             </p>
                         </div>
-                    </div>
-
-                    <!-- Notificações por E-mail -->
-                    <div class="form-group-memphis mb-5">
-                        <label class="checkbox-memphis-container flex items-center gap-3 cursor-pointer select-none">
-                            <input type="checkbox" id="reg-receber-emails" checked class="w-5 h-5 accent-brand-orange cursor-pointer">
-                            <span class="label-texto font-bold text-sm text-slate-800 dark:text-slate-200">Receber notificações e alertas de prazos por e-mail</span>
-                        </label>
                     </div>
 
                     <div id="register-erro" class="msg-erro-memphis mb-4" style="display: none;"></div>
@@ -776,9 +794,9 @@
                         </button>
                     </div>
 
-                    <p class="text-center mt-6 text-slate-600 font-semibold text-base">
+                    <p class="text-center mt-7 text-slate-600 dark:text-slate-400 font-semibold text-lg">
                         Já possui cadastro?
-                        <a href="javascript:void(0)" onclick="alternarAba('login')" class="text-brand-orange font-extrabold underline hover:text-orange-700">Fazer login</a>
+                        <a href="javascript:void(0)" onclick="alternarAba('login')" class="text-brand-orange font-extrabold underline hover:text-orange-700 ml-1">Fazer login</a>
                     </p>
                 </form>
             </div>
