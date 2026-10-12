@@ -1027,6 +1027,33 @@ async function realizarPesquisa() {
 }
 
 // 2. Indicadores e Métricas
+const ROTULOS_FONTES = {
+    estagios: 'Estágios PRAE', bolsas: 'Bolsas PROEX', ufersa: 'Editais UFERSA',
+    ciee: 'Vagas CIEE', noticias: 'Notícias', noticias_ufersa: 'Notícias UFERSA',
+    cursos_bolsas: 'Cursos & Bolsas', portal_uern: 'Portal UERN', mprn: 'Estágios MPRN',
+    ifrn: 'IFRN', iel: 'IEL / FIERN', dom: 'DOM Mossoró'
+};
+
+function formatarHoraISO(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '—';
+    return d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+}
+
+function animarNumero(el, alvo, duracao = 900) {
+    const prefereMenosMovimento = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefereMenosMovimento || duracao <= 0) { el.textContent = alvo; return; }
+    const inicio = performance.now();
+    function passo(agora) {
+        const progresso = Math.min((agora - inicio) / duracao, 1);
+        const suavizado = 1 - Math.pow(1 - progresso, 3);
+        el.textContent = Math.round(alvo * suavizado);
+        if (progresso < 1) requestAnimationFrame(passo);
+    }
+    requestAnimationFrame(passo);
+}
+
 async function carregarEstatisticas() {
     const antigo = document.getElementById('bloco-paginacao');
     if (antigo) antigo.remove();
@@ -1041,7 +1068,7 @@ async function carregarEstatisticas() {
         const resposta = await fetch(`${API_URL}/estatisticas`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
-            signal: AbortSignal.timeout(10000)
+            signal: AbortSignal.timeout(15000)
         });
 
         if (!resposta.ok) throw new Error(`Erro: ${resposta.status}`);
@@ -1054,84 +1081,200 @@ async function carregarEstatisticas() {
         const totalCursosBolsas = totais.cursos_bolsas || 0;
         const totalUfersa = totais.ufersa || 0;
         const totalUern = totais.portal_uern || 0;
+        const totalDom = totais.dom || 0;
         const totalGeral = dados.total_geral || (totalEstagios + totalBolsas + totalTech + totalUfersa + totalUern);
-        const retaFinal = dados.reta_final_urgente || 2;
-        const canais = dados.canais_monitorados || 8;
+        const retaFinal = dados.reta_final_urgente || 0;
+        const canais = dados.canais_monitorados || 0;
+        const vigentes = dados.vigentes || 0;
+        const comPrazo = dados.oportunidades_com_prazo || 0;
+        const pctVigentes = comPrazo > 0 ? Math.round((vigentes / comPrazo) * 100) : 0;
+        const fluxo = dados.fluxo_semanal || [];
+        const temFluxo = !!dados.tem_dados_fluxo;
+        const maxFluxo = Math.max(...fluxo.map(d => d.valor), 1);
+        const totalFluxo = fluxo.reduce((soma, d) => soma + (d.valor || 0), 0);
+        const varredura = dados.ultima_varredura;
+        const categorias = (dados.prae_categorias || []).slice(0, 6);
+        const maxCat = categorias.length ? Math.max(...categorias.map(c => c.total), 1) : 1;
+        const coresCategorias = ['#FF5C00', '#38BDF8', '#8B5CF6', '#10B981', '#FACC15', '#0F172A'];
+
+        const kpis = [
+            { rotulo: 'TOTAL NO HUB', numero: totalGeral, icone: 'ph-stack', cor: 'laranja', acao: "carregarDados('estagios')" },
+            { rotulo: 'ESTÁGIOS (PRAE / CIEE / MPRN / IEL)', numero: totalEstagios, icone: 'ph-graduation-cap', cor: 'laranja', acao: "carregarDados('estagios')" },
+            { rotulo: 'BOLSAS (PROEX)', numero: totalBolsas, icone: 'ph-coins', cor: 'ciano', acao: "carregarDados('bolsas')" },
+            { rotulo: 'EDITAIS UFERSA', numero: totalUfersa, icone: 'ph-bank', cor: 'roxo', acao: "carregarDados('ufersa')" },
+            { rotulo: 'CURSOS & BOLSAS', numero: totalCursosBolsas, icone: 'ph-book-open', cor: 'ciano', acao: "carregarDados('cursos-bolsas')" },
+            { rotulo: 'NOTÍCIAS (TECH, EDU, SAÚDE...)', numero: totalTech, icone: 'ph-lightning', cor: 'verde', acao: "carregarDados('noticias')" },
+            { rotulo: 'PORTAL UERN (MINERADO)', numero: totalUern, icone: 'ph-magnifying-glass', cor: 'navy', acao: "carregarDados('portal_uern')" },
+            { rotulo: 'DOM MOSSORÓ', numero: totalDom, icone: 'ph-newspaper-clipping', cor: 'navy', acao: "carregarDados('dom')" }
+        ];
 
         let html = `
             <div class="dashboard-neo-wrapper">
-                <!-- LINHA SUPERIOR: INDICADORES GLOBAIS MEMPHIS -->
+                <!-- LINHA SUPERIOR: INDICADORES GLOBAIS -->
                 <div class="dash-bloco-superior">
                     <div class="dash-bloco-header">
                         <div class="dash-bloco-titulo-row">
                             <h2 class="dash-neo-titulo">Indicadores Globais</h2>
                             <span class="dash-tag-tempo-real">Tempo Real</span>
                         </div>
-                        <p class="dash-neo-subtitulo">Distribuição analítica volumétrica de oportunidades coletadas por agentes automatizados.</p>
+                        <p class="dash-neo-subtitulo">Panorama das oportunidades coletadas pelos robôs em ${canais} canais monitorados. Clique em um indicador para explorar os editais.</p>
                     </div>
 
                     <div class="dash-grid-top-cards">
-                        <!-- Card Estágios -->
-                        <div class="dash-kpi-card card-cor-laranja">
+                        ${kpis.map(k => `
+                        <button type="button" class="dash-kpi-card card-cor-${k.cor}" onclick="${k.acao}" title="Ver ${k.rotulo}">
                             <div class="dash-kpi-header">
-                                <span class="dash-kpi-icone"><i class="ph-bold ph-graduation-cap"></i></span>
-                                <span class="dash-kpi-badge-label">ESTÁGIOS (PRAE / CONVÊNIOS)</span>
+                                <span class="dash-kpi-icone"><i class="ph-bold ${k.icone}"></i></span>
+                                <span class="dash-kpi-badge-label">${k.rotulo}</span>
                             </div>
-                            <div class="dash-kpi-numero">${totalEstagios}</div>
-                        </div>
+                            <div class="dash-kpi-numero" data-alvo="${k.numero}">0</div>
+                        </button>`).join('')}
+                    </div>
+                </div>
 
-                        <!-- Card Bolsas -->
-                        <div class="dash-kpi-card card-cor-ciano">
-                            <div class="dash-kpi-header">
-                                <span class="dash-kpi-icone"><i class="ph-bold ph-coins"></i></span>
-                                <span class="dash-kpi-badge-label">BOLSAS (PROEX)</span>
+                <!-- LINHA DO MEIO: ANÉIS DE SAÚDE DO HUB -->
+                <div class="dash-grid-widgets-circulares">
+                    <div class="dash-widget-circular">
+                        <div class="dash-widget-topo">
+                            <div class="dash-donut-container" style="--cor-anel: #FF5C00; --porcentagem: ${(retaFinal / Math.max(totalGeral, 1)) * 360}deg;">
+                                <div class="dash-donut-circulo">
+                                    <span class="dash-donut-valor" data-alvo="${retaFinal}">0</span>
+                                    <span class="dash-donut-sub">próximos 7 dias</span>
+                                </div>
                             </div>
-                            <div class="dash-kpi-numero">${totalBolsas}</div>
+                            <div class="dash-widget-info">
+                                <div class="dash-widget-titulo-row">
+                                    <span class="dash-icone-box bg-laranja"><i class="ph-bold ph-timer"></i></span>
+                                    <h3 class="dash-widget-titulo">Reta Final Urgente</h3>
+                                </div>
+                                <p class="dash-widget-desc">Editais que encerram as inscrições nos próximos 7 dias. Não perca nenhum prazo!</p>
+                            </div>
                         </div>
-
-                        <!-- Card UFERSA -->
-                        <div class="dash-kpi-card card-cor-roxo">
-                            <div class="dash-kpi-header">
-                                <span class="dash-kpi-icone"><i class="ph-bold ph-bank"></i></span>
-                                <span class="dash-kpi-badge-label">EDITAIS UFERSA</span>
+                        <div class="dash-widget-slider-box">
+                            <div class="dash-slider-trilho">
+                                <div class="dash-slider-progresso" style="width: ${Math.min((retaFinal / Math.max(totalGeral, 1)) * 100 * 4, 100)}%; background: #FF5C00;"></div>
+                                <div class="dash-slider-ponteiro" style="left: ${Math.min((retaFinal / Math.max(totalGeral, 1)) * 100 * 4, 100)}%;"></div>
                             </div>
-                            <div class="dash-kpi-numero">${totalUfersa}</div>
+                            <span class="dash-slider-tag tag-alerta">${retaFinal} vencendo em breve</span>
                         </div>
+                    </div>
 
-                        <!-- Card Cursos & Bolsas (capacitações gratuitas) -->
-                        <div class="dash-kpi-card card-cor-ciano">
-                            <div class="dash-kpi-header">
-                                <span class="dash-kpi-icone"><i class="ph-bold ph-book-open"></i></span>
-                                <span class="dash-kpi-badge-label">CURSOS & BOLSAS</span>
+                    <div class="dash-widget-circular">
+                        <div class="dash-widget-topo">
+                            <div class="dash-donut-container" style="--cor-anel: #10B981; --porcentagem: ${pctVigentes * 3.6}deg;">
+                                <div class="dash-donut-circulo">
+                                    <span class="dash-donut-valor" data-alvo="${pctVigentes}">0</span>
+                                    <span class="dash-donut-sub">% vigentes</span>
+                                </div>
                             </div>
-                            <div class="dash-kpi-numero">${totalCursosBolsas}</div>
+                            <div class="dash-widget-info">
+                                <div class="dash-widget-titulo-row">
+                                    <span class="dash-icone-box bg-verde"><i class="ph-bold ph-heartbeat"></i></span>
+                                    <h3 class="dash-widget-titulo">Saúde do Hub</h3>
+                                </div>
+                                <p class="dash-widget-desc">${vigentes} de ${comPrazo} oportunidades ainda estão dentro do prazo de inscrição.</p>
+                            </div>
                         </div>
-
-                        <!-- Card Tech -->
-                        <div class="dash-kpi-card card-cor-verde">
-                            <div class="dash-kpi-header">
-                                <span class="dash-kpi-icone"><i class="ph-bold ph-lightning"></i></span>
-                                <span class="dash-kpi-badge-label">NOTÍCIAS (TECH, EDU, SAÚDE...)</span>
+                        <div class="dash-widget-slider-box">
+                            <div class="dash-slider-trilho">
+                                <div class="dash-slider-progresso" style="width: ${pctVigentes}%; background: #10B981;"></div>
+                                <div class="dash-slider-ponteiro" style="left: ${pctVigentes}%;"></div>
                             </div>
-                            <div class="dash-kpi-numero">${totalTech}</div>
-                        </div>
-
-                        <!-- Card Portal UERN -->
-                        <div class="dash-kpi-card card-cor-navy">
-                            <div class="dash-kpi-header">
-                                <span class="dash-kpi-icone"><i class="ph-bold ph-magnifying-glass"></i></span>
-                                <span class="dash-kpi-badge-label">PORTAL UERN (MINERADO)</span>
-                            </div>
-                            <div class="dash-kpi-numero">${totalUern}</div>
+                            <span class="dash-slider-tag ${pctVigentes >= 60 ? 'tag-verde' : 'tag-alerta'}">${pctVigentes >= 60 ? 'Base saudável' : 'Requer varredura'}</span>
                         </div>
                     </div>
                 </div>
 
+                <!-- LINHA INFERIOR: RADAR DE FONTES + FLUXO SEMANAL -->
+                <div class="dash-grid-inferior">
+                    <div class="dash-card-radar">
+                        <div class="dash-radar-header">
+                            <h3 class="dash-radar-titulo">Radar de Fontes</h3>
+                            <span class="dash-badge-auto-sync"><i class="ph-bold ph-arrows-clockwise"></i> Auto-sync</span>
+                        </div>
+
+                        <div class="dash-radar-contadores-row">
+                            <div class="dash-radar-box box-total">
+                                <span class="dash-radar-numero" data-alvo="${canais}">0</span>
+                                <span class="dash-radar-label">Canais ativos</span>
+                            </div>
+                            <div class="dash-radar-box box-uern">
+                                <span class="dash-radar-numero" data-alvo="${totalUern}">0</span>
+                                <span class="dash-radar-label">UERN</span>
+                            </div>
+                            <div class="dash-radar-box box-ufersa">
+                                <span class="dash-radar-numero" data-alvo="${totalUfersa}">0</span>
+                                <span class="dash-radar-label">UFERSA</span>
+                            </div>
+                        </div>
+
+                        <ul class="dash-ranking-fontes" aria-label="Ranking de fontes monitoradas">
+                            ${(dados.ranking_fontes || []).slice(0, 5).map((f, i) => `
+                            <li class="dash-ranking-item">
+                                <span class="dash-ranking-posicao">#${i + 1}</span>
+                                <span class="dash-ranking-nome">${ROTULOS_FONTES[f.origem] || f.origem}</span>
+                                <span class="dash-ranking-barra"><span class="dash-ranking-preenchimento" style="width: ${(f.total / Math.max(totalGeral, 1)) * 100}%; background: ${coresCategorias[i % coresCategorias.length]};"></span></span>
+                                <strong class="dash-ranking-total">${f.total}</strong>
+                            </li>`).join('') || '<li class="dash-legenda-texto">Nenhuma fonte com dados ainda. Execute uma varredura.</li>'}
+                        </ul>
+
+                        <div class="dash-radar-footer">
+                            <span><i class="ph-bold ph-clock"></i> Última varredura: <strong>${varredura ? formatarHoraISO(varredura.data) : 'Sem registro'}</strong></span>
+                            <span class="dash-status-ativo">${varredura && varredura.status === 'Sucesso' ? '● Operacional' : varredura ? '● ' + varredura.status : '○ Aguardando'}</span>
+                        </div>
+                    </div>
+
+                    <div class="dash-card-fluxo">
+                        <div class="dash-fluxo-header">
+                            <div>
+                                <h3 class="dash-fluxo-titulo">Fluxo de Captação</h3>
+                                <p class="dash-fluxo-sub">${temFluxo ? `Novos itens coletados nos últimos 7 dias (${totalFluxo} no total).` : 'Ainda sem capturas recentes registradas — os robôs alimentam este gráfico automaticamente.'}</p>
+                            </div>
+                            <span class="dash-pill-semanal">${temFluxo ? '+' + totalFluxo + ' nesta semana' : 'Sem capturas'}</span>
+                        </div>
+
+                        <div class="dash-fluxo-conteudo-row">
+                            <div class="dash-barras-grafico" role="img" aria-label="Gráfico de barras do fluxo semanal de captação">
+                                ${fluxo.map(d => `
+                                <div class="dash-coluna-dia">
+                                    <span class="dash-barra-valor">${d.valor}</span>
+                                    <div class="dash-barra-pilar" style="height: ${temFluxo ? Math.max((d.valor / maxFluxo) * 180, 6) : 6}px; background: ${d.cor};"></div>
+                                    <span class="dash-pilar-nome">${d.dia}</span>
+                                </div>`).join('')}
+                            </div>
+                            <div class="dash-fluxo-legenda">
+                                ${categorias.length ? `
+                                <div class="dash-legenda-item" style="flex-direction: column; gap: 10px; align-items: stretch;">
+                                    <strong style="color: var(--color-navy);">Categorias dos estágios PRAE</strong>
+                                    ${categorias.map((c, i) => `
+                                    <div class="dash-cat-barra-row">
+                                        <span class="dash-cat-nome" title="${c.categoria}">${c.categoria}</span>
+                                        <span class="dash-cat-trilho"><span class="dash-cat-preenchimento" style="width: ${(c.total / maxCat) * 100}%; background: ${coresCategorias[i % coresCategorias.length]};"></span></span>
+                                        <strong class="dash-cat-total">${c.total}</strong>
+                                    </div>`).join('')}
+                                </div>` : `
+                                <div class="dash-legenda-item">
+                                    <span class="dash-legenda-ponto" style="background:#FF5C00;"></span>
+                                    <p class="dash-legenda-texto">Execute <strong>run_scrapers.py</strong> ou clique em <strong>Varredura Global</strong> para popular o hub com dados reais.</p>
+                                </div>`}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
         container.innerHTML = html;
+
+        // Animação contada dos números (count-up)
+        container.querySelectorAll('[data-alvo]').forEach((el, i) => {
+            animarNumero(el, parseInt(el.dataset.alvo, 10) || 0, 700 + i * 40);
+        });
     } catch (erro) {
-        container.innerHTML = `<p class="carregando" style="color: red;">Falha ao gerar painel: ${erro.message}</p>`;
+        container.innerHTML = `
+            <div class="status-box" style="border-color: var(--color-red);">
+                <h3 class="status-box-titulo" style="color: var(--color-red);">Falha ao gerar painel</h3>
+                <p class="status-box-texto">${erro.message}. Verifique se a API está rodando em localhost:8000.</p>
+            </div>`;
     }
 }
 
