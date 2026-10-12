@@ -3094,14 +3094,14 @@ html.dark .dash-legenda-texto {
 }
 
 html.dark .dash-legenda-texto strong {
-    color: #07131e !important;
+    color: #F8FAFC !important;
 }
 
 /* Paginação */
 html.dark #bloco-paginacao button {
     background: #1E293B !important;
     color: #F8FAFC !important;
-    border-color: #F8FAFC !important;
+    border-color: #334155 !important;
     box-shadow: 4px 4px 0px #020617 !important;
 }
 
@@ -3388,5 +3388,7 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 html.dark .toast-item-memphis {
     border-color: #334155 !important;
     box-shadow: 5px 5px 0px #020617 !important;
+/*quero mudar a cor da fonte do toast para preto, porque ela no modo dark fica em branco e não aparece direito, então quero que fique preta*/
+    color: #000000 !important;
 }
 
