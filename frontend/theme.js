@@ -52,13 +52,6 @@ function toggleTheme() {
     const temaAtual = obterTemaAtual();
     const novoTema = (temaAtual === 'dark') ? 'light' : 'dark';
     aplicarTema(novoTema, true);
-
-    if (typeof mostrarToast === 'function') {
-        mostrarToast(
-            novoTema === 'dark' ? 'Modo Escuro ativado' : 'Modo Claro ativado',
-            'info'
-        );
-    }
 }
 
 function atualizarBotoesTema(isDark) {

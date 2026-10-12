@@ -1464,38 +1464,57 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 15px;
+    gap: 16px;
     margin-top: 40px;
+    margin-bottom: 20px;
 }
 
-#bloco-paginacao button {
+#bloco-paginacao button,
+.btn-paginacao-nav {
     background: var(--color-white);
     color: var(--color-navy);
     border: 3px solid var(--color-navy);
     box-shadow: 4px 4px 0px var(--color-navy);
-    padding: 8px 18px;
+    padding: 10px 20px;
     font-weight: 800;
-    font-size: 0.95rem;
+    font-size: 1rem;
+    border-radius: 10px;
     cursor: pointer;
     transition: all 0.15s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
-#bloco-paginacao button:hover:not(:disabled) {
+#bloco-paginacao button:hover:not(:disabled),
+.btn-paginacao-nav:hover:not(:disabled) {
     transform: translate(-2px, -2px);
     box-shadow: 6px 6px 0px var(--color-navy);
     background-color: var(--color-orange);
     color: var(--color-white);
 }
 
-#bloco-paginacao button:active:not(:disabled) {
+#bloco-paginacao button:active:not(:disabled),
+.btn-paginacao-nav:active:not(:disabled) {
     transform: translate(2px, 2px);
     box-shadow: 2px 2px 0px var(--color-navy);
 }
 
-#bloco-paginacao button:disabled {
+#bloco-paginacao button:disabled,
+.btn-paginacao-nav:disabled {
     opacity: 0.4;
     cursor: not-allowed;
     box-shadow: none;
+    transform: none;
+}
+
+#bloco-paginacao span,
+.paginacao-texto-info {
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--color-navy);
+    padding: 6px 12px;
+    user-select: none;
 }
 
 /* Rodapé */
@@ -2759,26 +2778,26 @@ html.dark .hero-headline {
 
 html.dark .landing-section p,
 html.dark .hero-lead {
-    color: #94A3B8 !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .landing-section p strong,
 html.dark .hero-lead strong {
-    color: #F1F5F9 !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .landing-section .text-brand-dark {
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .landing-section .text-slate-800,
 html.dark .landing-section .text-slate-900 {
-    color: #64748B !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .landing-section a.bg-white {
     background-color: #1E293B !important;
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
     border-color: #334155 !important;
     box-shadow: 4px 4px 0px #020617 !important;
 }
@@ -2791,7 +2810,7 @@ html.dark .landing-section a.bg-white:hover {
 /* Área de Busca & Oportunidades */
 html.dark .logo-box {
     background-color: #1E293B !important;
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
     border-color: #334155 !important;
     box-shadow: 6px 6px 0px var(--color-orange) !important;
 }
@@ -2800,11 +2819,11 @@ html.dark .input-busca-memphis {
     background-color: #111C2E !important;
     border-color: #334155 !important;
     box-shadow: 5px 5px 0px #020617 !important;
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .input-busca-memphis::placeholder {
-    color: #64748B !important;
+    color: #94A3B8 !important;
 }
 
 html.dark .input-busca-memphis:focus {
@@ -2824,14 +2843,14 @@ html.dark .btn-busca-memphis:hover {
 /* Abas de Categorias */
 html.dark .tab-origem-btn {
     background-color: #111C2E !important;
-    color: #CBD5E1 !important;
+    color: #FFFFFF !important;
     border-color: #334155 !important;
     box-shadow: 4px 4px 0px #020617 !important;
 }
 
 html.dark .tab-origem-btn:hover:not(.ativo) {
     background-color: #1E293B !important;
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
     border-color: #475569 !important;
     box-shadow: 6px 6px 0px #020617 !important;
 }
@@ -2852,14 +2871,14 @@ html.dark .student-toolbar {
 
 html.dark .btn-filtro-aluno {
     background: #1E293B !important;
-    color: #CBD5E1 !important;
+    color: #FFFFFF !important;
     border-color: #334155 !important;
     box-shadow: 3px 3px 0px #020617 !important;
 }
 
 html.dark .btn-filtro-aluno:hover:not(.ativo) {
     background: #334155 !important;
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
     box-shadow: 4px 4px 0px #020617 !important;
 }
 
@@ -2870,7 +2889,7 @@ html.dark .btn-filtro-aluno.ativo {
 }
 
 html.dark .toggle-vigentes-container .toggle-label {
-    color: #CBD5E1 !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .toggle-vigentes-container .custom-checkbox {
@@ -2897,7 +2916,7 @@ html.dark .card:hover {
 }
 
 html.dark .card-titulo {
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .card:hover .card-titulo {
@@ -2906,13 +2925,19 @@ html.dark .card:hover .card-titulo {
 
 html.dark .card-edital-numero {
     background: #1E293B !important;
-    color: #E2E8F0 !important;
+    color: #FFFFFF !important;
     border-color: #334155 !important;
     box-shadow: 1.5px 1.5px 0px #020617 !important;
 }
 
 html.dark .card-meta-box {
-    color: #94A3B8 !important;
+    color: #FFFFFF !important;
+}
+
+html.dark .card-meta-box span,
+html.dark .card-meta-box p,
+html.dark .card-meta-box strong {
+    color: #FFFFFF !important;
 }
 
 html.dark .meta-icone {
@@ -2938,14 +2963,14 @@ html.dark .card-link-btn:hover {
 
 html.dark .btn-favoritar-card {
     background: #1E293B !important;
-    color: #CBD5E1 !important;
+    color: #FFFFFF !important;
     border-color: #334155 !important;
     box-shadow: 3px 3px 0px #020617 !important;
 }
 
 html.dark .btn-favoritar-card:hover {
     background: #334155 !important;
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
     box-shadow: 5px 5px 0px #020617 !important;
 }
 
@@ -2964,7 +2989,7 @@ html.dark .badge-status-vigente {
 
 html.dark .badge-status-encerrado {
     background: #1E293B !important;
-    color: #94A3B8 !important;
+    color: #FFFFFF !important;
     border-color: #475569 !important;
 }
 
@@ -2977,15 +3002,15 @@ html.dark .badge-status-neutro {
 html.dark .status-box {
     background: #111C2E !important;
     border-color: var(--color-orange) !important;
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .status-box-titulo {
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .status-box-texto {
-    color: #94A3B8 !important;
+    color: #FFFFFF !important;
 }
 
 /* Dashboard de Métricas */
@@ -3000,7 +3025,7 @@ html.dark .dash-neo-titulo {
 }
 
 html.dark .dash-neo-subtitulo {
-    color: #94A3B8 !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .dash-kpi-card {
@@ -3016,11 +3041,11 @@ html.dark .card-cor-verde .dash-kpi-icone i { color: #FACC15 !important; }
 html.dark .card-cor-navy .dash-kpi-icone i { color: #38BDF8 !important; }
 
 html.dark .dash-kpi-badge-label {
-    color: #94A3B8 !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .dash-kpi-numero {
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .dash-widget-circular {
@@ -3030,15 +3055,15 @@ html.dark .dash-widget-circular {
 }
 
 html.dark .dash-widget-titulo {
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .dash-widget-desc {
-    color: #94A3B8 !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .dash-donut-sub {
-    color: #94A3B8 !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .dash-card-radar,
@@ -3050,17 +3075,17 @@ html.dark .dash-card-fluxo {
 
 html.dark .dash-radar-titulo,
 html.dark .dash-fluxo-titulo {
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .dash-fluxo-sub {
-    color: #94A3B8 !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .dash-pill-semanal {
     background: #111C2E !important;
     border-color: #334155 !important;
-    color: #CBD5E1 !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .dash-radar-box {
@@ -3069,16 +3094,16 @@ html.dark .dash-radar-box {
 }
 
 html.dark .dash-radar-numero {
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .dash-radar-label {
-    color: #94A3B8 !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .dash-radar-footer {
     border-top-color: #334155 !important;
-    color: #94A3B8 !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .dash-slider-trilho {
@@ -3086,29 +3111,37 @@ html.dark .dash-slider-trilho {
 }
 
 html.dark .dash-pilar-nome {
-    color: #CBD5E1 !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .dash-legenda-texto {
-    color: #CBD5E1 !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .dash-legenda-texto strong {
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
 }
 
 /* Paginação */
-html.dark #bloco-paginacao button {
+html.dark #bloco-paginacao button,
+html.dark .btn-paginacao-nav {
     background: #1E293B !important;
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
     border-color: #334155 !important;
     box-shadow: 4px 4px 0px #020617 !important;
 }
 
-html.dark #bloco-paginacao button:hover:not(:disabled) {
+html.dark #bloco-paginacao button:hover:not(:disabled),
+html.dark .btn-paginacao-nav:hover:not(:disabled) {
     background: var(--color-orange) !important;
     color: #FFFFFF !important;
     border-color: var(--color-orange) !important;
+}
+
+html.dark #bloco-paginacao span,
+html.dark .paginacao-texto-info {
+    color: #FFFFFF !important;
+    text-shadow: 0 0 1px rgba(255, 255, 255, 0.4);
 }
 
 /* Sidebar de Perfil & Modal de Perfil */
@@ -3129,7 +3162,7 @@ html.dark .sidebar-title {
 
 html.dark .sidebar-close-btn {
     background: #1E293B !important;
-    color: #CBD5E1 !important;
+    color: #FFFFFF !important;
     border-color: #334155 !important;
 }
 
@@ -3151,12 +3184,12 @@ html.dark .modal-header-memphis {
 }
 
 html.dark .modal-title {
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .modal-close-btn {
     background: #1E293B !important;
-    color: #CBD5E1 !important;
+    color: #FFFFFF !important;
     border-color: #334155 !important;
 }
 
@@ -3180,31 +3213,31 @@ html.dark .perfil-avatar-badge {
 }
 
 html.dark .perfil-info-nome {
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .perfil-info-email {
-    color: #94A3B8 !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .label-memphis {
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .label-subtexto {
-    color: #94A3B8 !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .chip-opcao {
     background: #111C2E !important;
-    color: #CBD5E1 !important;
+    color: #FFFFFF !important;
     border-color: #334155 !important;
     box-shadow: 3px 3px 0px #020617 !important;
 }
 
 html.dark .chip-opcao:hover {
     background: #1E293B !important;
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
     border-color: #475569 !important;
 }
 
@@ -3226,13 +3259,13 @@ html.dark .checkbox-memphis-container input[type="checkbox"]:checked + .custom-c
 }
 
 html.dark .checkbox-memphis-container .label-texto {
-    color: #E2E8F0 !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .input-memphis {
     background: #111C2E !important;
     border-color: #334155 !important;
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .input-memphis:focus {
@@ -3267,7 +3300,7 @@ html.dark .login-card {
 
 html.dark .btn-voltar {
     background: #1E293B !important;
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
     border-color: #334155 !important;
     box-shadow: 4px 4px 0px #020617 !important;
 }
@@ -3293,12 +3326,14 @@ html.dark .login-card .auth-tabs-row {
 }
 
 html.dark .login-card .auth-tab-btn {
-    color: #94A3B8 !important;
+    color: #FFFFFF !important;
+    opacity: 0.85;
 }
 
 html.dark .login-card .auth-tab-btn.ativo {
     background: #0B1120 !important;
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
+    opacity: 1;
     border-color: #334155 !important;
     box-shadow: 3px 3px 0px #020617 !important;
 }
@@ -3308,12 +3343,12 @@ html.dark .login-card .modal-body-memphis {
 }
 
 html.dark .login-card .label-memphis {
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .login-card .input-memphis {
     background: #0B1120 !important;
-    color: #F8FAFC !important;
+    color: #FFFFFF !important;
     border-color: #334155 !important;
 }
 
@@ -3325,7 +3360,7 @@ html.dark .login-card .input-memphis:focus {
 
 html.dark .login-card .chip-opcao {
     background: #0B1120 !important;
-    color: #CBD5E1 !important;
+    color: #FFFFFF !important;
     border-color: #334155 !important;
     box-shadow: 2px 2px 0px #020617 !important;
 }
@@ -3337,22 +3372,22 @@ html.dark .login-card .chip-opcao.chip-selecionado {
 }
 
 html.dark .brand-subtitle {
-    color: #94A3B8 !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .login-card p.text-slate-600 {
-    color: #94A3B8 !important;
+    color: #FFFFFF !important;
 }
 
 /* Rodapé */
 html.dark .footer-memphis {
     background: #080D1A !important;
     border-top: 4px solid #334155 !important;
-    color: #94A3B8 !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .footer-links a {
-    color: #94A3B8 !important;
+    color: #FFFFFF !important;
 }
 
 html.dark .footer-links a:hover {
@@ -3388,7 +3423,28 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 html.dark .toast-item-memphis {
     border-color: #334155 !important;
     box-shadow: 5px 5px 0px #020617 !important;
-/*quero mudar a cor da fonte do toast para preto, porque ela no modo dark fica em branco e não aparece direito, então quero que fique preta*/
     color: #000000 !important;
+}
+
+/* Regras globais para fontes 100% brancas no modo escuro */
+html.dark p:not(.toast-item-memphis p),
+html.dark span:not(.chip-check):not(.badge-status):not(.meta-icone):not(.toast-item-memphis span):not(.text-brand-orange):not(.text-brand-yellow),
+html.dark label,
+html.dark small,
+html.dark li {
+    color: #FFFFFF;
+}
+
+html.dark .text-slate-400,
+html.dark .text-slate-500,
+html.dark .text-slate-600,
+html.dark .text-slate-700,
+html.dark .text-slate-800,
+html.dark .text-slate-900,
+html.dark .text-gray-400,
+html.dark .text-gray-500,
+html.dark .text-gray-600,
+html.dark .text-gray-700 {
+    color: #FFFFFF !important;
 }
 
