@@ -23,7 +23,19 @@ window.addEventListener('DOMContentLoaded', () => {
     inicializarAutenticacao();
     configurarChipsClick();
     carregarDados('estagios');
+    verificarNovoUsuarioOnboarding();
 });
+
+function verificarNovoUsuarioOnboarding() {
+    if (localStorage.getItem('eduscrap_novo_usuario') === 'true') {
+        localStorage.removeItem('eduscrap_novo_usuario');
+        setTimeout(() => {
+            if (typeof abrirSidebarPerfil === 'function' && usuarioAtual) {
+                abrirSidebarPerfil();
+            }
+        }, 600);
+    }
+}
 
 function getAuthToken() {
     return localStorage.getItem('eduscrap_token') || null;

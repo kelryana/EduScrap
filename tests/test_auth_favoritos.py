@@ -137,7 +137,7 @@ def test_api_register_and_login_flow(client, db_handler):
     reg_response = client.post('/api/auth/register', json={
         'nome': 'Mariana Souza',
         'email': 'mariana@uern.br',
-        'senha': 'segredoForte123',
+        'senha': 'SegredoForte123!',
         'matricula': '2025102',
         'cursos': ['Direito', 'Administração'],
         'areas': ['Humanas']
@@ -151,7 +151,7 @@ def test_api_register_and_login_flow(client, db_handler):
     # 2. Login com sucesso
     login_response = client.post('/api/auth/login', json={
         'email': 'mariana@uern.br',
-        'senha': 'segredoForte123'
+        'senha': 'SegredoForte123!'
     })
     assert login_response.status_code == 200
     login_data = login_response.get_json()
@@ -177,12 +177,35 @@ def test_api_register_and_login_flow(client, db_handler):
     assert no_token_response.status_code == 401
 
 
+def test_api_register_password_strength_validation(client):
+    """Testa que senhas fracas são rejeitadas pelo backend"""
+    # Menos de 8 caracteres
+    res = client.post('/api/auth/register', json={'nome': 'Teste', 'email': 't1@uern.br', 'senha': 'Ab1!'})
+    assert res.status_code == 400
+    assert "8 caracteres" in res.get_json()['error']
+
+    # Sem letra maiúscula
+    res = client.post('/api/auth/register', json={'nome': 'Teste', 'email': 't2@uern.br', 'senha': 'senhafraca123!'})
+    assert res.status_code == 400
+    assert "maiúscula" in res.get_json()['error']
+
+    # Sem número
+    res = client.post('/api/auth/register', json={'nome': 'Teste', 'email': 't3@uern.br', 'senha': 'SenhaForteSemNum!'})
+    assert res.status_code == 400
+    assert "número" in res.get_json()['error']
+
+    # Sem caractere especial
+    res = client.post('/api/auth/register', json={'nome': 'Teste', 'email': 't4@uern.br', 'senha': 'SenhaForteSemEspecial123'})
+    assert res.status_code == 400
+    assert "especial" in res.get_json()['error']
+
+
 def test_api_favoritos_and_feed(client, db_handler):
     # Registra usuário
     reg_res = client.post('/api/auth/register', json={
         'nome': 'Lucas Lima',
         'email': 'lucas@uern.br',
-        'senha': 'minhasenha123',
+        'senha': 'MinhaSenha123!',
         'cursos': ['Ciência da Computação'],
         'areas': ['Tecnologia']
     })

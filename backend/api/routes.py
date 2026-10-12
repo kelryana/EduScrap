@@ -242,8 +242,18 @@ def register():
     if not email or '@' not in email:
         return jsonify({'success': False, 'error': 'Email válido é obrigatório'}), 400
 
-    if not senha or len(senha) < 6:
-        return jsonify({'success': False, 'error': 'Senha deve ter no mínimo 6 caracteres'}), 400
+    # Validação de segurança da senha
+    if not senha or len(senha) < 8:
+        return jsonify({'success': False, 'error': 'A senha deve conter no mínimo 8 caracteres.'}), 400
+
+    if not re.search(r'[A-Z]', senha):
+        return jsonify({'success': False, 'error': 'A senha deve conter pelo menos uma letra maiúscula (A-Z).'}), 400
+
+    if not re.search(r'[0-9]', senha):
+        return jsonify({'success': False, 'error': 'A senha deve conter pelo menos um número (0-9).'}), 400
+
+    if not re.search(r'[^a-zA-Z0-9]', senha):
+        return jsonify({'success': False, 'error': 'A senha deve conter pelo menos um caractere especial (!@#$%^&* etc.).'}), 400
 
     # Normaliza listas de preferências
     if isinstance(cursos, str):
