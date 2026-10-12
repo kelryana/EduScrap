@@ -829,12 +829,31 @@ def obter_estatisticas():
     proximos_a_vencer = _coletar_lista(query_reta_final, colecoes_prazo + ["vagas", "editais"], 6, ordena_asc=True)
     vencidos_recentes = _coletar_lista(query_vencidos, colecoes_prazo + ["vagas", "editais"], 6, ordena_asc=False)
 
-    pipeline_prae = [
+    # ---- Distribuição por CATEGORIA em TODO o hub (não apenas PRAE) ----
+    # Antes este bloco agrupava somente a coleção "vagas_estagio" (estágios PRAE).
+    # Agora varre todas as coleções de oportunidades/notícias do hub, agregando
+    # pelo campo "categoria" e somando as contagens entre coleções.
+    pipeline_categoria = [
+        {"$match": {"categoria": {"$exists": True, "$nin": [None, ""]}}},
         {"$group": {"_id": "$categoria", "total": {"$sum": 1}}},
         {"$sort": {"total": -1}}
     ]
-    distribuicao_prae = list(db["vagas_estagio"].aggregate(pipeline_prae))
-    formatar = lambda lista: [{"categoria": item["_id"] if item["_id"] else "Geral / Não Especificada", "total": item["total"]} for item in lista]
+    contagem_categorias = {}
+    for col in nome_colecoes:
+        if col in ("controle_cache", "historico_varreduras", "fontes_provedores", "usuarios"):
+            continue
+        try:
+            for item in db[col].aggregate(pipeline_categoria):
+                chave = item["_id"] or "Geral / Não Especificada"
+                contagem_categorias[chave] = contagem_categorias.get(chave, 0) + item["total"]
+        except Exception:
+            continue
+    distribuicao_categorias = sorted(
+        [{"categoria": chave, "total": total} for chave, total in contagem_categorias.items()],
+        key=lambda item: item["total"],
+        reverse=True
+    )
+    formatar = lambda lista: [{"categoria": item["categoria"], "total": item["total"]} for item in lista]
 
     # ---- Fluxo REAL de captação dos últimos 7 dias (por dia da semana) ----
     # Usa o campo de data mais confiável disponível em cada coleção.
@@ -933,7 +952,11 @@ def obter_estatisticas():
         "proximos_a_vencer": proximos_a_vencer,
         "vencidos_recentes": vencidos_recentes,
         "oportunidades_com_prazo": total_oportunidades_com_prazo,
-        "prae_categorias": formatar(distribuicao_prae),
+        # Distribuição por categoria de TODO o hub (todas as fontes/coleções).
+        # Mantém a chave legada "prae_categorias" para compatibilidade com
+        # clientes antigos; a nova chave canônica é "categorias_hub".
+        "categorias_hub": formatar(distribuicao_categorias),
+        "prae_categorias": formatar(distribuicao_categorias),
         "fluxo_semanal": dias_semana,
         "tem_dados_fluxo": tem_dados_fluxo,
         "ultima_varredura": ultima_varredura,
