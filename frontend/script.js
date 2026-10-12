@@ -1124,7 +1124,7 @@ async function carregarEstatisticas() {
                         ${kpis.map(k => `
                         <button type="button" class="dash-kpi-card card-cor-${k.cor}" onclick="${k.acao}" title="Ver ${k.rotulo}">
                             <div class="dash-kpi-header">
-                                <span class="dash-kpi-icone"><i class="ph-bold ${k.icone}"></i></span>
+                                <span class="dash-kpi-icone chip-cor-${k.cor}"><i class="ph-bold ${k.icone}"></i></span>
                                 <span class="dash-kpi-badge-label">${k.rotulo}</span>
                             </div>
                             <div class="dash-kpi-numero" data-alvo="${k.numero}">0</div>

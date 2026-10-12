@@ -3597,3 +3597,327 @@ html.dark .text-gray-700 {
         transform: none;
     }
 }
+
+/* =========================================================
+   POLIMENTO VISUAL DO DASHBOARD (camada de refinamento)
+   Aplicada por último para sobrepor os estilos base.
+   ========================================================= */
+
+/* --- Tokens de brilho e sombras suaves --- */
+.dashboard-neo-wrapper {
+    --dash-glow-laranja: rgba(255, 92, 0, 0.16);
+    --dash-glow-ciano: rgba(56, 189, 248, 0.16);
+    --dash-glow-roxo: rgba(139, 92, 246, 0.16);
+    --dash-glow-verde: rgba(16, 185, 129, 0.16);
+    --dash-glow-navy: rgba(17, 34, 68, 0.14);
+    gap: 2.4rem;
+}
+
+/* --- Entrada suave dos blocos (staggered fade-up) --- */
+@keyframes dash-fade-up {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.dashboard-neo-wrapper > * {
+    animation: dash-fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.dashboard-neo-wrapper > *:nth-child(2) { animation-delay: 0.1s; }
+.dashboard-neo-wrapper > *:nth-child(3) { animation-delay: 0.2s; }
+
+/* --- Cabeçalho do bloco superior com faixa de gradiente --- */
+.dash-bloco-superior {
+    background:
+        linear-gradient(180deg, rgba(255, 92, 0, 0.05) 0%, rgba(255, 255, 255, 0) 140px),
+        #FFFFFF;
+}
+
+.dash-tag-tempo-real {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border-radius: 9999px;
+    padding: 5px 14px;
+    background: linear-gradient(135deg, #FF5C00, #FF7A00);
+    box-shadow: 2px 2px 0px var(--color-navy), 0 0 14px var(--dash-glow-laranja);
+}
+
+/* "pulso" de tempo real via ::after (sem alterar o HTML) */
+.dash-tag-tempo-real::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.8);
+    animation: dash-pulso 1.8s ease-out infinite;
+}
+
+@keyframes dash-pulso {
+    0%   { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.85); }
+    70%  { box-shadow: 0 0 0 7px rgba(255, 255, 255, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+}
+
+/* --- Cartões KPI: brilho colorido na borda superior + micro-interações --- */
+.dash-kpi-card {
+    position: relative;
+    overflow: hidden;
+    border-top-width: 8px;
+    transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.18s ease,
+                border-color 0.18s ease;
+}
+
+.dash-kpi-card::before {
+    content: "";
+    position: absolute;
+    top: -8px;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: currentColor;
+    opacity: 0.9;
+    filter: blur(0.5px);
+}
+
+.card-cor-laranja { border-top-color: #FF5C00; }
+.card-cor-ciano   { border-top-color: #38BDF8; }
+.card-cor-roxo    { border-top-color: #8B5CF6; }
+.card-cor-verde   { border-top-color: #10B981; }
+.card-cor-navy    { border-top-color: var(--color-navy); }
+
+.card-cor-laranja::before { color: #FF5C00; }
+.card-cor-ciano::before   { color: #38BDF8; }
+.card-cor-roxo::before    { color: #8B5CF6; }
+.card-cor-verde::before   { color: #10B981; }
+.card-cor-navy::before    { color: #38BDF8; }
+
+.card-cor-laranja:hover { box-shadow: 7px 7px 0px var(--color-navy), 0 10px 26px var(--dash-glow-laranja); }
+.card-cor-ciano:hover   { box-shadow: 7px 7px 0px var(--color-navy), 0 10px 26px var(--dash-glow-ciano); }
+.card-cor-roxo:hover    { box-shadow: 7px 7px 0px var(--color-navy), 0 10px 26px var(--dash-glow-roxo); }
+.card-cor-verde:hover   { box-shadow: 7px 7px 0px var(--color-navy), 0 10px 26px var(--dash-glow-verde); }
+.card-cor-navy:hover    { box-shadow: 7px 7px 0px var(--color-navy), 0 10px 26px var(--dash-glow-navy); }
+
+.dash-kpi-card:hover {
+    transform: translate(-3px, -3px);
+}
+
+.dash-kpi-card:active {
+    transform: translate(1px, 1px);
+    box-shadow: 3px 3px 0px var(--color-navy);
+}
+
+.dash-kpi-numero {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -1px;
+}
+
+/* --- Ícones dos KPIs dentro de "chips" arredondados --- */
+.dash-kpi-icone {
+    width: 58px;
+    height: 58px;
+    border-radius: 16px;
+    border: 2.5px solid var(--color-navy);
+    background: #F8FAFC;
+    box-shadow: 2.5px 2.5px 0px var(--color-navy);
+    transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dash-kpi-card:hover .dash-kpi-icone {
+    transform: rotate(-6deg) scale(1.06);
+}
+
+/* Chips de ícone com fundo levemente colorido por KPI */
+.chip-cor-laranja { background: #FFF3E8; }
+.chip-cor-ciano   { background: #E8F7FE; }
+.chip-cor-roxo    { background: #F3EEFF; }
+.chip-cor-verde   { background: #E9FBF3; }
+.chip-cor-navy    { background: #EDF2FE; }
+
+html.dark .chip-cor-laranja { background: #2A1A10; }
+html.dark .chip-cor-ciano   { background: #0B2434; }
+html.dark .chip-cor-roxo    { background: #211A33; }
+html.dark .chip-cor-verde   { background: #0F2A20; }
+html.dark .chip-cor-navy    { background: #12203B; }
+
+/* --- Donuts: anel com trilha suave e glow interno --- */
+.dash-donut-container {
+    position: relative;
+    background: conic-gradient(var(--cor-anel) var(--porcentagem), #EDF2F7 0deg);
+    box-shadow: 4px 4px 0px var(--color-navy), 0 0 22px var(--dash-glow-laranja);
+    transition: transform 0.25s ease;
+}
+
+.dash-donut-container:hover {
+    transform: scale(1.04);
+}
+
+.dash-donut-valor {
+    font-variant-numeric: tabular-nums;
+}
+
+/* --- Sliders: preenchimento com gradiente e brilho --- */
+.dash-slider-progresso {
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0)) !important;
+    box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08);
+    transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dash-slider-ponteiro {
+    transition: left 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* --- Barras horizontais (ranking e categorias): gradiente + brilho --- */
+.dash-ranking-preenchimento,
+.dash-cat-preenchimento {
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0)) !important;
+    box-shadow: 0 0 10px rgba(15, 23, 42, 0.12);
+    transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dash-ranking-item {
+    padding: 6px 8px;
+    border-radius: 10px;
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.dash-ranking-item:hover {
+    background: #F8FAFC;
+    transform: translateX(3px);
+}
+
+/* --- Barras verticais do fluxo: gradiente e animação de crescimento --- */
+@keyframes dash-crescer {
+    from { transform: scaleY(0); }
+    to   { transform: scaleY(1); }
+}
+
+.dash-barra-pilar {
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0)) !important;
+    transform-origin: bottom;
+    animation: dash-crescer 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.dash-coluna-dia:nth-child(1) .dash-barra-pilar { animation-delay: 0.05s; }
+.dash-coluna-dia:nth-child(2) .dash-barra-pilar { animation-delay: 0.12s; }
+.dash-coluna-dia:nth-child(3) .dash-barra-pilar { animation-delay: 0.19s; }
+.dash-coluna-dia:nth-child(4) .dash-barra-pilar { animation-delay: 0.26s; }
+.dash-coluna-dia:nth-child(5) .dash-barra-pilar { animation-delay: 0.33s; }
+.dash-coluna-dia:nth-child(6) .dash-barra-pilar { animation-delay: 0.40s; }
+.dash-coluna-dia:nth-child(7) .dash-barra-pilar { animation-delay: 0.47s; }
+
+.dash-barra-pilar:hover {
+    transform: scaleY(1.05);
+    filter: brightness(1.08) saturate(1.15);
+}
+
+/* --- Contadores do Radar: cards sólidos com borda no lugar de tracejado --- */
+.dash-radar-box {
+    border-style: solid;
+    box-shadow: 3px 3px 0px rgba(15, 23, 42, 0.12);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.dash-radar-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 4px 6px 0px rgba(15, 23, 42, 0.16);
+}
+
+.dash-radar-numero {
+    font-variant-numeric: tabular-nums;
+}
+
+.box-total { background: linear-gradient(160deg, #FFF7ED, #FFEDD5); }
+.box-uern  { background: linear-gradient(160deg, #ECFDF5, #D1FAE5); }
+.box-ufersa { background: linear-gradient(160deg, #F5F3FF, #EDE9FE); }
+
+/* --- Badge Auto-sync com ícone girando lentamente --- */
+@keyframes dash-sync-giro {
+    to { transform: rotate(360deg); }
+}
+
+.dash-badge-auto-sync i {
+    display: inline-block;
+    animation: dash-sync-giro 3.5s linear infinite;
+}
+
+/* --- Pill semanal com leve gradiente --- */
+.dash-pill-semanal {
+    background: linear-gradient(135deg, #FACC15, #FFE600);
+}
+
+/* --- Status operacional piscando suavemente --- */
+@keyframes dash-respirar {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.55; }
+}
+
+.dash-status-ativo {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    animation: dash-respirar 2.4s ease-in-out infinite;
+}
+
+/* ---------- Modo escuro: adaptações do polimento ---------- */
+html.dark .dash-bloco-superior {
+    background:
+        linear-gradient(180deg, rgba(255, 92, 0, 0.08) 0%, rgba(17, 28, 46, 0) 140px),
+        #111C2E !important;
+}
+
+html.dark .dash-kpi-icone {
+    background: #0F1B2D;
+    border-color: #334155;
+    box-shadow: 2.5px 2.5px 0px #020617;
+}
+
+html.dark .dash-donut-container {
+    background: conic-gradient(var(--cor-anel) var(--porcentagem), #1E293B 0deg) !important;
+    box-shadow: 4px 4px 0px #020617, 0 0 22px rgba(255, 92, 0, 0.18);
+}
+
+html.dark .dash-ranking-item:hover {
+    background: #0F1B2D;
+}
+
+html.dark .box-total { background: linear-gradient(160deg, #2A1A10, #1E293B); }
+html.dark .box-uern  { background: linear-gradient(160deg, #0F2A20, #1E293B); }
+html.dark .box-ufersa { background: linear-gradient(160deg, #211A33, #1E293B); }
+
+html.dark .dash-pill-semanal {
+    background: linear-gradient(135deg, #3B2F06, #111C2E) !important;
+}
+
+/* ---------- Acessibilidade: respeita movimento reduzido ---------- */
+@media (prefers-reduced-motion: reduce) {
+    .dashboard-neo-wrapper > *,
+    .dash-barra-pilar,
+    .dash-tag-tempo-real::after,
+    .dash-badge-auto-sync i,
+    .dash-status-ativo {
+        animation: none !important;
+    }
+
+    .dash-kpi-card,
+    .dash-donut-container,
+    .dash-radar-box,
+    .dash-slider-progresso,
+    .dash-slider-ponteiro,
+    .dash-ranking-preenchimento,
+    .dash-cat-preenchimento,
+    .dash-ranking-item {
+        transition: none !important;
+    }
+
+    .dash-kpi-card:hover,
+    .dash-kpi-card:active,
+    .dash-donut-container:hover,
+    .dash-radar-box:hover,
+    .dash-ranking-item:hover,
+    .dash-barra-pilar:hover,
+    .dash-kpi-card:hover .dash-kpi-icone {
+        transform: none;
+    }
+}
