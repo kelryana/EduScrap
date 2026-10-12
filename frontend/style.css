@@ -1,6 +1,7 @@
 :root {
     --color-white: #FFFFFF;
     --color-navy: #112244;
+    --color-navy-text: #112244;
     --color-orange: #FF7A00;
     --color-yellow: #FFE600;
     --color-gray: #EAEAEA;
@@ -91,7 +92,7 @@ body {
 }
 
 .nav-link {
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     text-decoration: none;
     font-weight: 700;
     font-size: 1.25rem;
@@ -265,7 +266,7 @@ body {
 .hero-badge-text {
     font-size: 0.82rem;
     font-weight: 800;
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     letter-spacing: 0.2px;
 }
 
@@ -274,7 +275,7 @@ body {
     font-size: 2.2rem;
     font-weight: 800;
     line-height: 1.25;
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     margin-bottom: 1.25rem;
     letter-spacing: -0.5px;
 }
@@ -301,7 +302,7 @@ body {
 }
 
 .hero-lead strong {
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     font-weight: 700;
 }
 
@@ -342,7 +343,7 @@ body {
 
 .btn-hero-secondary {
     background-color: #FFFFFF;
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     padding: 1rem 1.6rem;
     font-weight: 800;
     font-size: 1.02rem;
@@ -438,7 +439,7 @@ body {
 .portrait-badge-text strong {
     font-size: 0.92rem;
     font-weight: 800;
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
 }
 
 .portrait-badge-text small {
@@ -511,7 +512,7 @@ body {
     box-shadow: 5px 5px 0px var(--color-navy);
     outline: none;
     transition: all 0.15s ease-in-out;
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
 }
 
 .input-busca-memphis:focus {
@@ -565,7 +566,7 @@ body {
 
 .tab-origem-btn {
     background-color: #FFFFFF;
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     border: 3px solid var(--color-navy);
     border-radius: 14px;
     padding: 14px 26px;
@@ -626,7 +627,7 @@ body {
 
 .btn-filtro-aluno {
     background-color: #FFFDE7;
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     border: 2.5px solid var(--color-navy);
     border-radius: 12px;
     padding: 14px 24px;
@@ -670,7 +671,7 @@ body {
     user-select: none;
     font-weight: 800;
     font-size: 1.12rem;
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     padding: 8px 10px;
     position: relative;
 }
@@ -805,7 +806,7 @@ body {
     font-size: 1.26rem;
     font-weight: 800;
     line-height: 1.45;
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     margin-bottom: 1rem;
     text-transform: none !important;
     word-break: break-word;
@@ -833,7 +834,7 @@ body {
 
 .meta-icone {
     font-size: 1.25rem;
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     flex-shrink: 0;
     margin-top: 2px;
 }
@@ -843,7 +844,7 @@ body {
 }
 
 .meta-link-oficial {
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     font-weight: 700;
     text-decoration: underline;
     text-underline-offset: 2px;
@@ -894,7 +895,7 @@ body {
     font-size: 1.05rem;
     font-weight: 600;
     line-height: 1.6;
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
 }
 
 /* =========================================================
@@ -933,7 +934,7 @@ body {
 .dash-neo-titulo {
     font-size: 2.3rem;
     font-weight: 900;
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     letter-spacing: -0.5px;
     margin: 0;
 }
@@ -1076,7 +1077,7 @@ body {
     font-size: 2.75rem;
     font-weight: 900;
     line-height: 1;
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     font-variant-numeric: tabular-nums;
 }
 
@@ -1134,7 +1135,7 @@ body {
 .dash-donut-valor {
     font-size: 2.2rem;
     font-weight: 900;
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     line-height: 1;
 }
 
@@ -1192,9 +1193,9 @@ body {
 
 .dash-prazo-chip {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
     padding: 1rem 1.2rem;
     border-radius: 16px;
     border: 3px solid var(--color-navy);
@@ -1203,6 +1204,31 @@ body {
     font-family: inherit;
     cursor: default;
     transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s ease;
+}
+
+/* Ícone de estado (redundância codificada: cor + forma + texto — WCAG 1.4.1) */
+.dash-prazo-chip-icone {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    color: #FFFFFF;
+    border: 2.5px solid var(--color-navy);
+}
+
+.chip-aberto .dash-prazo-chip-icone { background: #10B981; }
+.chip-vencendo .dash-prazo-chip-icone { background: #FF5C00; }
+.chip-vencido .dash-prazo-chip-icone { background: #DC2626; }
+
+.dash-prazo-chip-conteudo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
 }
 
 button.dash-prazo-chip {
@@ -1235,7 +1261,7 @@ button.dash-prazo-chip:active {
     font-size: 2.1rem;
     font-weight: 900;
     line-height: 1;
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
 }
 
 .chip-aberto .dash-prazo-chip-numero { color: #10B981; }
@@ -1248,6 +1274,69 @@ button.dash-prazo-chip:active {
     color: #334155;
     letter-spacing: 0.2px;
 }
+
+/* ---- Barra proporcional (pré-attentive encoding: a distribuição dos editais
+       é lida de imediato, sem precisar processar os números — Tufte / Cleveland & McGill) ---- */
+.dash-prazos-proporcao {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.dash-proporcao-track {
+    display: flex;
+    height: 16px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2.5px solid var(--color-navy);
+    background: #F1F5F9;
+}
+
+.dash-proporcao-titulo {
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #64748B;
+}
+
+.dash-proporcao-seg {
+    height: 100%;
+    min-width: 0;
+    transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.seg-aberto   { background: #10B981; }
+.seg-vencendo { background: #FF5C00; }
+.seg-vencido  { background: #DC2626; opacity: 0.55; }
+
+.dash-proporcao-legenda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+}
+
+.dash-proporcao-chave {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #475569;
+}
+
+.chave-ponto {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    border: 2px solid var(--color-navy);
+    flex-shrink: 0;
+}
+
+.ponto-aberto   { background: #10B981; }
+.ponto-vencendo { background: #FF5C00; }
+.ponto-vencido  { background: #DC2626; opacity: 0.6; }
 
 .dash-prazos-listas {
     display: grid;
@@ -1287,6 +1376,76 @@ button.dash-prazo-chip:active {
     border: 2.5px solid var(--color-navy);
     background: #F7F9FC;
     box-shadow: 3px 3px 0px var(--color-navy);
+    /* Itens agora são botões (interação direta com o edital) */
+    width: 100%;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.dash-prazo-item:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0px var(--color-navy);
+    background: #EEF2F8;
+}
+
+.dash-prazo-item:active {
+    transform: translate(1.5px, 1.5px);
+    box-shadow: 1.5px 1.5px 0px var(--color-navy);
+}
+
+.dash-prazo-item:focus-visible {
+    outline: 3px solid #FF5C00;
+    outline-offset: 2px;
+}
+
+/* Seta de affordance (indicador visual de que o item é clicável — Nielsen) */
+.dash-prazo-item-seta {
+    flex-shrink: 0;
+    font-size: 0.95rem;
+    color: #64748B;
+    transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.dash-prazo-item:hover .dash-prazo-item-seta {
+    color: #FF5C00;
+    transform: translate(2px, -2px);
+}
+
+.dash-prazo-item-badges {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* Badge de urgência (≤ 3 dias): sinalização proativa do prazo crítico */
+.prazo-alerta-urgente {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    background: #DC2626;
+    border: 2px solid var(--color-navy);
+    border-radius: 8px;
+    padding: 2px 8px;
+    animation: pulso-urgente 1.6s ease-in-out infinite;
+}
+
+@keyframes pulso-urgente {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.65; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .prazo-alerta-urgente { animation: none; }
+    .dash-proporcao-seg { transition: none; }
+    .dash-prazo-item, .dash-prazo-chip { transition: none; }
 }
 
 .dash-prazo-item.item-vencido {
@@ -1296,7 +1455,7 @@ button.dash-prazo-chip:active {
 .dash-prazo-item-titulo {
     font-size: 0.94rem;
     font-weight: 700;
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     line-height: 1.3;
     white-space: nowrap;
     overflow: hidden;
@@ -1334,7 +1493,7 @@ button.dash-prazo-chip:active {
 .dash-widget-titulo {
     font-size: 1.45rem;
     font-weight: 900;
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     margin: 0;
     letter-spacing: 0.3px;
 }
@@ -1423,7 +1582,7 @@ button.dash-prazo-chip:active {
 #bloco-paginacao button,
 .btn-paginacao-nav {
     background: var(--color-white);
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     border: 3px solid var(--color-navy);
     box-shadow: 4px 4px 0px var(--color-navy);
     padding: 10px 20px;
@@ -1463,7 +1622,7 @@ button.dash-prazo-chip:active {
 .paginacao-texto-info {
     font-weight: 800;
     font-size: 1.1rem;
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     padding: 6px 12px;
     user-select: none;
 }
@@ -1545,7 +1704,7 @@ button.dash-prazo-chip:active {
 }
 .nav-user-badge {
     background-color: var(--color-white);
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     border: 3px solid var(--color-navy);
     padding: 10px 18px;
     font-size: 1.1rem;
@@ -1566,7 +1725,7 @@ button.dash-prazo-chip:active {
 /* Indicador de usuário no topo (apenas identificação, sem ação de filtros) */
 .nav-user-tag {
     background-color: var(--color-white);
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     border: 3px solid var(--color-navy);
     padding: 10px 18px;
     font-size: 1.1rem;
@@ -1580,7 +1739,7 @@ button.dash-prazo-chip:active {
 .btn-nav-mini {
     background: var(--color-white);
     border: 3px solid var(--color-navy);
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     padding: 10px 14px;
     font-weight: 800;
     cursor: pointer;
@@ -1599,7 +1758,7 @@ button.dash-prazo-chip:active {
 .btn-banner-ajustar {
     background-color: var(--color-cyan);
     border: 2px solid var(--color-navy);
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     font-weight: 800;
     padding: 4px 10px;
     cursor: pointer;
@@ -1648,7 +1807,7 @@ button.dash-prazo-chip:active {
 .card-link-btn {
     flex: 1;
     background-color: #FFFFFF;
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     border: 2.5px solid var(--color-navy);
     border-radius: 10px;
     box-shadow: 3.5px 3.5px 0px var(--color-navy);
@@ -1683,7 +1842,7 @@ button.dash-prazo-chip:active {
     background: #FFFFFF;
     border: 2.5px solid var(--color-navy);
     border-radius: 10px;
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     padding: 13px 18px;
     font-weight: 800;
     font-size: 1.02rem;
@@ -1835,12 +1994,12 @@ button.dash-prazo-chip:active {
     gap: 8px;
 }
 .auth-tab-btn:hover:not(.ativo) {
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     background: rgba(255, 255, 255, 0.6);
 }
 .auth-tab-btn.ativo {
     background: #FFFFFF;
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     font-weight: 700;
     box-shadow: 2px 2px 0 var(--color-navy);
     border: 1.5px solid var(--color-navy);
@@ -1944,7 +2103,7 @@ button.dash-prazo-chip:active {
 }
 .chip-opcao:hover {
     border-color: var(--color-navy);
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     background: #F1F5F9;
     transform: translateY(-1px);
 }
@@ -2023,7 +2182,7 @@ button.dash-prazo-chip:active {
 
 .btn-submit-primary {
     background: var(--color-yellow);
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
 }
 .btn-submit-primary:hover {
     background: #FFD600;
@@ -2090,13 +2249,13 @@ button.dash-prazo-chip:active {
     align-items: center;
     justify-content: center;
     font-size: 1.4rem;
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
 }
 .perfil-info-nome {
     font-family: 'Lexend', sans-serif;
     font-size: 1.05rem;
     font-weight: 700;
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     margin-bottom: 2px;
 }
 .perfil-info-email {
@@ -2380,7 +2539,7 @@ button.dash-prazo-chip:active {
     align-items: center;
     justify-content: center;
     font-size: 1.8rem;
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     box-shadow: 3px 3px 0px var(--color-navy);
     flex-shrink: 0;
 }
@@ -2393,7 +2552,7 @@ button.dash-prazo-chip:active {
 .perfil-info-nome {
     font-size: 1.3rem;
     font-weight: 800;
-    color: var(--color-navy);
+    color: var(--color-navy-text, #112244);
     margin-bottom: 4px;
     white-space: nowrap;
     overflow: hidden;
@@ -2646,9 +2805,13 @@ html.dark .btn-theme-toggle:hover { box-shadow: 6px 6px 0px #E2E8F0; }
 html.dark .neo-btn:active,
 html.dark .btn-theme-toggle:active { box-shadow: 2px 2px 0px #E2E8F0; }
 
-/* 4. Cor CSS global de fundo "navy" -> tom claro no tema escuro */
+/* 4. No modo escuro mantemos o "navy" estrutural (bordas/sombras/fundos de
+   destaque) em tom claro, MAS a tinta de TEXTO continua escura (#112244), pois
+   texto claro sobre fundos claros/pastel ficava ilegível. Os textos que devem
+   ser brancos no escuro já possuem overrides específicos próprios. */
 html.dark {
     --color-navy: #E2E8F0;
+    --color-navy-text: #112244;
 }
 
 /* 5. Elementos com cor inline escura (decoções da landing page) */
@@ -2965,13 +3128,29 @@ html.dark .meta-link-oficial:hover {
     color: #FF7A00 !important;
 }
 
+/* FIX CONTRASTE MODO ESCURO: fundo branco hardcoded + regra global de span
+   branco deixava o texto invisível. Força fundo escuro e texto claro. */
 html.dark .card-link-btn {
+    background-color: #1E293B !important;
+    color: #F8FAFC !important;
     border-color: #334155 !important;
     box-shadow: 3px 3px 0px #020617 !important;
 }
 
+html.dark .card-link-btn span,
+html.dark .card-link-btn i {
+    color: #F8FAFC !important;
+}
+
 html.dark .card-link-btn:hover {
+    background-color: var(--color-orange) !important;
+    color: #FFFFFF !important;
     box-shadow: 5px 5px 0px #020617 !important;
+}
+
+html.dark .card-link-btn:hover span,
+html.dark .card-link-btn:hover i {
+    color: #FFFFFF !important;
 }
 
 html.dark .btn-favoritar-card {
@@ -3392,13 +3571,129 @@ html.dark .toast-item-memphis {
     color: #000000 !important;
 }
 
-/* Regras globais para fontes 100% brancas no modo escuro */
+/* Regras globais para fontes 100% brancas no modo escuro.
+   FIX CONTRASTE: exclui spans/ícones que vivem dentro de elementos com fundo
+   claro/pastel (botões .card-link-btn/.btn-favoritar-card, chips e itens do
+   widget "Editais: Abertos x Vencidos", pílula do usuário na navbar), pois o
+   branco sobre fundo claro deixava o texto ilegível. Esses componentes têm
+   overrides próprios de cor logo abaixo. */
 html.dark p:not(.toast-item-memphis p),
-html.dark span:not(.chip-check):not(.badge-status):not(.meta-icone):not(.toast-item-memphis span):not(.text-brand-orange):not(.text-brand-yellow),
+html.dark span:not(.chip-check):not(.badge-status):not(.meta-icone):not(.toast-item-memphis span):not(.text-brand-orange):not(.text-brand-yellow):not(.card-link-btn span):not(.btn-favoritar-card span):not(.dash-prazo-chip span):not(.dash-prazo-item span):not(.dash-prazo-item strong):not(.nav-user-tag span):not(.nav-user-tag strong),
 html.dark label,
 html.dark small,
 html.dark li {
     color: #FFFFFF;
+}
+
+/* A barra proporcional é texto de apoio em fundo escuro: tintas próprias */
+html.dark .dash-proporcao-chave {
+    color: #CBD5E1 !important;
+}
+
+html.dark .chave-ponto {
+    border-color: #475569 !important;
+}
+
+html.dark .ponto-vencido { opacity: 0.85; }
+
+html.dark .seg-vencendo { background: #FDBA74; }
+html.dark .seg-vencido { background: #B91C1C; opacity: 0.9; }
+
+/* ==========================================================================
+   FIXES DE CONTRASTE NO MODO ESCURO (fundo claro + texto branco ilegível)
+   ========================================================================== */
+
+/* Pílula "Olá, <usuário>" da navbar: mantém o fundo branco do card claro e
+   garante texto navy ESCURO legível (a regra global de span branco foi
+   neutralizada com :not() acima). */
+html.dark .nav-user-tag {
+    background-color: #FFFFFF !important;
+    color: var(--color-navy-text, #112244) !important;
+    border-color: var(--color-navy) !important;
+    box-shadow: 3px 3px 0px var(--color-navy) !important;
+}
+
+html.dark .nav-user-tag i,
+html.dark .nav-user-tag strong {
+    color: var(--color-navy-text, #112244) !important;
+}
+
+/* Widget "Editais: Abertos x Vencidos": card, chips e itens ganham fundos
+   escuros com textos claros/contrastantes (cores vivas nos números/títulos). */
+html.dark .dash-card-prazos {
+    background: #111C2E !important;
+    border-color: #334155 !important;
+    box-shadow: 4px 4px 0px #E2E8F0 !important;
+}
+
+html.dark .dash-card-prazos .dash-widget-titulo,
+html.dark .dash-card-prazos .dash-widget-desc {
+    color: #F8FAFC !important;
+}
+
+html.dark .dash-prazo-chip {
+    border-color: #475569 !important;
+    box-shadow: 4px 4px 0px #020617 !important;
+}
+
+/* Ícones dos chips ganham contorno discreto no escuro (fundo escuro do card) */
+html.dark .dash-prazo-chip-icone {
+    border-color: #475569 !important;
+}
+
+html.dark .chip-aberto { background: #064E3B !important; }
+html.dark .chip-vencendo { background: #7C2D12 !important; }
+html.dark .chip-vencido { background: #7F1D1D !important; }
+
+html.dark .chip-aberto .dash-prazo-chip-numero { color: #6EE7B7 !important; }
+html.dark .chip-vencendo .dash-prazo-chip-numero { color: #FDBA74 !important; }
+html.dark .chip-vencido .dash-prazo-chip-numero { color: #FCA5A5 !important; }
+
+html.dark .dash-prazo-chip-rotulo {
+    color: #E2E8F0 !important;
+}
+
+html.dark button.dash-prazo-chip:hover {
+    box-shadow: 6px 6px 0px #020617 !important;
+}
+
+html.dark .dash-prazos-listas {
+    border-top-color: #334155 !important;
+}
+
+html.dark .dash-prazo-item {
+    background: #1E293B !important;
+    border-color: #475569 !important;
+    box-shadow: 3px 3px 0px #020617 !important;
+}
+
+html.dark .dash-prazo-item:hover {
+    background: #273449 !important;
+    box-shadow: 5px 5px 0px #020617 !important;
+}
+
+html.dark .dash-prazo-item-seta {
+    color: #94A3B8 !important;
+}
+
+html.dark .dash-prazo-item:hover .dash-prazo-item-seta {
+    color: #FDBA74 !important;
+}
+
+html.dark .dash-prazo-item-titulo {
+    color: #F8FAFC !important;
+}
+
+html.dark .item-aberto .dash-prazo-item-data {
+    background: #064E3B !important;
+    color: #6EE7B7 !important;
+    border-color: #059669 !important;
+}
+
+html.dark .item-vencido .dash-prazo-item-data {
+    background: #7F1D1D !important;
+    color: #FCA5A5 !important;
+    border-color: #B91C1C !important;
 }
 
 html.dark .text-slate-400,

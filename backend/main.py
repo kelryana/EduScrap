@@ -806,7 +806,7 @@ def obter_estatisticas():
     def _coletar_lista(query, colecoes, limite, ordena_asc=True):
         """Puxa uma amostra real de editais para o painel de prazos."""
         itens = []
-        projection = {"titulo": 1, "nome": 1, "data_vencimento": 1}
+        projection = {"titulo": 1, "nome": 1, "data_vencimento": 1, "link": 1, "url": 1, "link_edital": 1}
         for col in colecoes:
             if col not in nome_colecoes or len(itens) >= limite:
                 continue
@@ -820,6 +820,7 @@ def obter_estatisticas():
                         itens.append({
                             "titulo": _titulo_documento(doc),
                             "data": venc.strftime("%d/%m/%Y"),
+                            "link": (doc.get("link") or doc.get("url") or doc.get("link_edital") or ""),
                         })
             except Exception:
                 continue
@@ -827,7 +828,7 @@ def obter_estatisticas():
         return itens[:limite]
 
     proximos_a_vencer = _coletar_lista(query_reta_final, colecoes_prazo + ["vagas", "editais"], 6, ordena_asc=True)
-    vencidos_recentes = _coletar_lista(query_vencidos, colecoes_prazo + ["vagas", "editais"], 6, ordena_asc=False)
+    vencidos_recentes = _coletar_lista(query_vencidos, colecoes_prazo + ["vagas", "editais"], 10, ordena_asc=False)
 
     # ---- Distribuição por CATEGORIA em TODO o hub (não apenas PRAE) ----
     # Antes este bloco agrupava somente a coleção "vagas_estagio" (estágios PRAE).
