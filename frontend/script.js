@@ -1033,6 +1033,32 @@ function escaparHTML(texto) {
     return div.innerHTML;
 }
 
+// "Data → dias restantes" para o widget de prazos (retorna null se inválida)
+function calcularDiasAteData(dataStr) {
+    if (!dataStr || !/^\d{2}\/\d{2}\/\d{4}$/.test(String(dataStr).trim())) return null;
+    const [dia, mes, ano] = String(dataStr).trim().split('/').map(Number);
+    const alvo = new Date(ano, mes - 1, dia, 23, 59, 59);
+    if (isNaN(alvo.getTime())) return null;
+    return Math.ceil((alvo - new Date()) / 86400000);
+}
+
+// Navegação a partir dos itens do painel de prazos: abre o edital original.
+// Se o link direto não vier na API, cai no fallback: filtra o hub pelo título.
+function irParaEdital(link, id) {
+    if (link && /^https?:\/\//i.test(link)) {
+        window.open(link, '_blank', 'noopener,noreferrer');
+        return;
+    }
+    const campoBusca = document.getElementById('input-busca');
+    const item = typeof event !== 'undefined' && event && event.currentTarget
+        ? event.currentTarget.querySelector('.dash-prazo-item-titulo')
+        : null;
+    if (campoBusca && item) {
+        campoBusca.value = item.textContent.trim();
+        if (typeof realizarPesquisa === 'function') realizarPesquisa();
+    }
+}
+
 // Regra do dashboard no tema ESCURO: tudo que é escuro no tema claro passa a
 // ser CLARO. Cores inline (barras, pilares, anéis de progresso) são ajustadas
 // aqui, pois o CSS não alcança valores definidos via style="".
@@ -1137,6 +1163,7 @@ async function carregarEstatisticas() {
         const vencidos = dados.vencidos || 0;
         const proximos = dados.proximos_a_vencer || [];
         const vencidosLista = dados.vencidos_recentes || [];
+        const totalPrazos = vigentes + retaFinal + vencidos;
 
         // Paleta por KPI espelhando o design de referência (cor + fundo pastel da pílula)
         const PALETA_KPI = {
@@ -1201,16 +1228,40 @@ async function carregarEstatisticas() {
 
                         <div class="dash-prazos-resumo">
                             <button type="button" class="dash-prazo-chip chip-aberto" onclick="carregarDados('estagios')" title="Ver oportunidades com inscrições abertas">
-                                <span class="dash-prazo-chip-numero" data-alvo="${vigentes}">0</span>
-                                <span class="dash-prazo-chip-rotulo">Abertos para inscrição</span>
+                                <span class="dash-prazo-chip-icone"><i class="ph-bold ph-check-circle"></i></span>
+                                <div class="dash-prazo-chip-conteudo">
+                                    <span class="dash-prazo-chip-numero" data-alvo="${vigentes}">0</span>
+                                    <span class="dash-prazo-chip-rotulo">Abertos para inscrição</span>
+                                </div>
                             </button>
                             <button type="button" class="dash-prazo-chip chip-vencendo" title="Editais que vencem nos próximos 7 dias">
-                                <span class="dash-prazo-chip-numero" data-alvo="${retaFinal}">0</span>
-                                <span class="dash-prazo-chip-rotulo">Vencem em até 7 dias</span>
+                                <span class="dash-prazo-chip-icone"><i class="ph-bold ph-timer"></i></span>
+                                <div class="dash-prazo-chip-conteudo">
+                                    <span class="dash-prazo-chip-numero" data-alvo="${retaFinal}">0</span>
+                                    <span class="dash-prazo-chip-rotulo">Vencem em até 7 dias</span>
+                                </div>
                             </button>
                             <div class="dash-prazo-chip chip-vencido">
-                                <span class="dash-prazo-chip-numero" data-alvo="${vencidos}">0</span>
-                                <span class="dash-prazo-chip-rotulo">Editais vencidos</span>
+                                <span class="dash-prazo-chip-icone"><i class="ph-bold ph-prohibit"></i></span>
+                                <div class="dash-prazo-chip-conteudo">
+                                    <span class="dash-prazo-chip-numero" data-alvo="${vencidos}">0</span>
+                                    <span class="dash-prazo-chip-rotulo">Editais vencidos</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Barra proporcional: leitura visual imediata da distribuição dos editais -->
+                        <div class="dash-prazos-proporcao" role="img" aria-label="Distribuição entre abertos, vencendo em breve e vencidos">
+                            <p class="dash-proporcao-titulo">Proporção do acervo monitorado</p>
+                            <div class="dash-proporcao-track">
+                                <span class="dash-proporcao-seg seg-aberto" style="width: ${totalPrazos ? (vigentes / totalPrazos * 100) : 0}%"></span>
+                                <span class="dash-proporcao-seg seg-vencendo" style="width: ${totalPrazos ? (retaFinal / totalPrazos * 100) : 0}%"></span>
+                                <span class="dash-proporcao-seg seg-vencido" style="width: ${totalPrazos ? (vencidos / totalPrazos * 100) : 0}%"></span>
+                            </div>
+                            <div class="dash-proporcao-legenda">
+                                <span class="dash-proporcao-chave"><i class="chave-ponto ponto-aberto"></i> Abertos</span>
+                                <span class="dash-proporcao-chave"><i class="chave-ponto ponto-vencendo"></i> Vencem em 7 dias</span>
+                                <span class="dash-proporcao-chave"><i class="chave-ponto ponto-vencido"></i> Vencidos</span>
                             </div>
                         </div>
 
@@ -1219,21 +1270,30 @@ async function carregarEstatisticas() {
                                 <h4 class="dash-prazo-coluna-titulo titulo-aberto">
                                     <i class="ph-bold ph-flag-banner"></i> Próximos a vencer
                                 </h4>
-                                ${proximos.length ? proximos.map(e => `
-                                <div class="dash-prazo-item item-aberto">
-                                    <span class="dash-prazo-item-titulo" title="${escaparHTML(e.titulo)}">${escaparHTML(e.titulo)}</span>
-                                    <strong class="dash-prazo-item-data">${escaparHTML(e.data)}</strong>
-                                </div>`).join('') : `<p class="dash-legenda-texto">Nenhum edital vence nos próximos 7 dias. 🎉</p>`}
+                                ${proximos.length ? proximos.map(e => {
+                                    const diasRestantes = calcularDiasAteData(e.data);
+                                    return `
+                                <button type="button" class="dash-prazo-item item-aberto" onclick="irParaEdital('${escaparHTML(e.link || '')}', '${escaparHTML(e.id || '')}')" title="Abrir este edital">
+                                    <span class="dash-prazo-item-seta"><i class="ph-bold ph-arrow-up-right"></i></span>
+                                    <span class="dash-prazo-item-titulo">${escaparHTML(e.titulo)}</span>
+                                    <span class="dash-prazo-item-badges">
+                                        ${diasRestantes !== null && diasRestantes <= 3 ? '<span class="prazo-alerta-urgente"><i class="ph-bold ph-alarm"></i> Urgente</span>' : ''}
+                                        <strong class="dash-prazo-item-data">${escaparHTML(e.data)}</strong>
+                                    </span>
+                                </button>`; }).join('') : `<p class="dash-legenda-texto">Nenhum edital vence nos próximos 7 dias. 🎉</p>`}
                             </div>
                             <div class="dash-prazo-coluna">
                                 <h4 class="dash-prazo-coluna-titulo titulo-vencido">
                                     <i class="ph-bold ph-prohibit"></i> Encerrados recentemente
                                 </h4>
                                 ${vencidosLista.length ? vencidosLista.map(e => `
-                                <div class="dash-prazo-item item-vencido">
-                                    <span class="dash-prazo-item-titulo" title="${escaparHTML(e.titulo)}">${escaparHTML(e.titulo)}</span>
-                                    <strong class="dash-prazo-item-data">${escaparHTML(e.data)}</strong>
-                                </div>`).join('') : `<p class="dash-legenda-texto">Nenhum edital encerrado recentemente.</p>`}
+                                <button type="button" class="dash-prazo-item item-vencido" onclick="irParaEdital('${escaparHTML(e.link || '')}', '${escaparHTML(e.id || '')}')" title="Abrir este edital">
+                                    <span class="dash-prazo-item-seta"><i class="ph-bold ph-arrow-up-right"></i></span>
+                                    <span class="dash-prazo-item-titulo">${escaparHTML(e.titulo)}</span>
+                                    <span class="dash-prazo-item-badges">
+                                        <strong class="dash-prazo-item-data">${escaparHTML(e.data)}</strong>
+                                    </span>
+                                </button>`).join('') : `<p class="dash-legenda-texto">Nenhum edital encerrado recentemente.</p>`}
                             </div>
                         </div>
                     </div>
