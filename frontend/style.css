@@ -965,10 +965,10 @@ body {
 .dash-kpi-card {
     background: #FFFFFF;
     border: 3px solid var(--color-navy);
-    border-radius: 14px;
-    padding: 1.4rem 1.2rem;
+    border-radius: 18px;
+    padding: 1.25rem 1rem;
     text-align: center;
-    box-shadow: 5px 5px 0px var(--color-navy);
+    box-shadow: 4px 4px 0px var(--color-navy);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
     display: flex;
     flex-direction: column;
@@ -976,6 +976,20 @@ body {
     justify-content: center;
     font-family: inherit;
     cursor: pointer;
+    position: relative;
+    min-height: 180px;
+}
+
+/* Faixa de cor superior curva (design de referência EduScrap) */
+.dash-kpi-card::before {
+    content: "";
+    position: absolute;
+    top: -3px;
+    left: 18px;
+    right: 18px;
+    height: 6px;
+    border-radius: 9999px;
+    background-color: var(--kpi-cor, #FF5C00);
 }
 
 .dash-kpi-card:focus-visible {
@@ -985,14 +999,17 @@ body {
 
 .dash-kpi-card:hover {
     transform: translate(-2px, -2px);
-    box-shadow: 7px 7px 0px var(--color-navy);
+    box-shadow: 6px 6px 0px var(--color-navy);
 }
 
-.card-cor-laranja { border-top: 8px solid #FF5C00; }
-.card-cor-ciano { border-top: 8px solid #38BDF8; }
-.card-cor-roxo { border-top: 8px solid #8B5CF6; }
-.card-cor-verde { border-top: 8px solid #10B981; }
-.card-cor-navy { border-top: 8px solid var(--color-navy); }
+.card-cor-laranja { border-top: 3px solid var(--color-navy); }
+.card-cor-ciano { border-top: 3px solid var(--color-navy); }
+.card-cor-roxo { border-top: 3px solid var(--color-navy); }
+.card-cor-verde { border-top: 3px solid var(--color-navy); }
+.card-cor-navy { border-top: 3px solid var(--color-navy); }
+.card-cor-coral { border-top: 3px solid var(--color-navy); }
+.card-cor-azul { border-top: 3px solid var(--color-navy); }
+.card-cor-grafite { border-top: 3px solid var(--color-navy); }
 
 .dash-kpi-header {
     display: flex;
@@ -1003,15 +1020,25 @@ body {
 }
 
 .dash-kpi-icone {
-    font-size: 2.2rem;
-    display: inline-flex;
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+    border: 2.5px solid var(--color-navy);
+    background: var(--kpi-bg, #FFF7ED);
+    display: flex;
     align-items: center;
     justify-content: center;
+    margin-bottom: 0.85rem;
+    box-shadow: 2.5px 2.5px 0px var(--color-navy);
+    color: var(--kpi-cor, #FF5C00);
+    transition: all 0.2s ease;
+    font-size: 1.6rem;
     line-height: 1;
+    flex-shrink: 0;
 }
 
 .dash-kpi-icone i {
-    font-size: 2.2rem;
+    font-size: 1.6rem;
     line-height: 1;
     display: block;
     transition: transform 0.2s ease;
@@ -1021,25 +1048,36 @@ body {
     transform: scale(1.15);
 }
 
-.card-cor-laranja .dash-kpi-icone i { color: #FF5C00; }
-.card-cor-ciano .dash-kpi-icone i { color: #0284C7; }
-.card-cor-roxo .dash-kpi-icone i { color: #8B5CF6; }
-.card-cor-verde .dash-kpi-icone i { color: #EAB308; }
-.card-cor-navy .dash-kpi-icone i { color: #0284C7; }
+.card-cor-laranja .dash-kpi-icone i { color: var(--kpi-cor, #FF5C00); }
+.card-cor-ciano .dash-kpi-icone i { color: var(--kpi-cor, #0284C7); }
+.card-cor-roxo .dash-kpi-icone i { color: var(--kpi-cor, #8B5CF6); }
+.card-cor-verde .dash-kpi-icone i { color: var(--kpi-cor, #10B981); }
+.card-cor-navy .dash-kpi-icone i { color: var(--kpi-cor, #0F172A); }
+.card-cor-coral .dash-kpi-icone i { color: var(--kpi-cor, #EA580C); }
+.card-cor-azul .dash-kpi-icone i { color: var(--kpi-cor, #1E3A8A); }
+.card-cor-grafite .dash-kpi-icone i { color: var(--kpi-cor, #1E293B); }
 
 .dash-kpi-badge-label {
-    font-size: 0.76rem;
+    font-size: 0.73rem;
     font-weight: 800;
     color: #0F172A;
-    letter-spacing: 0.4px;
+    letter-spacing: 0.3px;
     text-transform: uppercase;
+    line-height: 1.25;
+    margin-bottom: 0.65rem;
+    min-height: 2.5em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 90%;
 }
 
 .dash-kpi-numero {
-    font-size: 3rem;
+    font-size: 2.75rem;
     font-weight: 900;
     line-height: 1;
     color: var(--color-navy);
+    font-variant-numeric: tabular-nums;
 }
 
 /* 2. BLOCO DO MEIO: WIDGETS CIRCULARES E SLIDERS */
@@ -1392,11 +1430,16 @@ body {
 .dash-barras-grafico {
     display: flex;
     align-items: flex-end;
-    gap: 18px;
+    justify-content: space-around;
+    gap: 12px;
     height: 220px;
-    padding-bottom: 8px;
+    padding-bottom: 12px;
     border-bottom: 4px solid var(--color-navy);
     flex: 1;
+}
+
+html.dark .dash-barras-grafico {
+    border-bottom-color: #334155 !important;
 }
 
 .dash-coluna-dia {
@@ -1404,7 +1447,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: flex-end;
-    gap: 10px;
+    gap: 8px;
     flex: 1;
     height: 100%;
 }
@@ -1414,12 +1457,28 @@ body {
     max-width: 44px;
     border: 3px solid var(--color-navy);
     border-radius: 22px;
-    box-shadow: 2.5px 2.5px 0px var(--color-navy);
-    transition: transform 0.2s ease, height 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 3px 3px 0px var(--color-navy);
+    transition: transform 0.15s ease, height 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.dash-barra-pilar:hover {
-    transform: scaleY(1.05);
+/* Pílula de valor zero (dia sem capturas) — estilo da referência EduScrap */
+.dash-pill-zero {
+    width: 38px;
+    height: 14px;
+    border: 2.5px solid var(--color-navy);
+    border-radius: 9999px;
+    box-shadow: 2px 2px 0px var(--color-navy);
+    transition: transform 0.15s ease;
+}
+
+.dash-barra-pilar:hover,
+.dash-pill-zero:hover {
+    transform: scale(1.08);
+}
+
+html.dark .dash-pill-zero {
+    border-color: #334155 !important;
+    box-shadow: 2px 2px 0px #020617 !important;
 }
 
 /* Valor numérico acima de cada barra do fluxo */
@@ -1500,23 +1559,30 @@ html.dark .dash-ranking-barra {
 /* Mini-barras horizontais das categorias PRAE */
 .dash-cat-barra-row {
     display: grid;
-    grid-template-columns: minmax(90px, 1.2fr) 2fr auto;
+    grid-template-columns: 150px 1fr 28px;
     align-items: center;
-    gap: 10px;
+    gap: 14px;
+}
+
+@media (max-width: 560px) {
+    .dash-cat-barra-row {
+        grid-template-columns: 110px 1fr 28px;
+        gap: 10px;
+    }
 }
 
 .dash-cat-nome {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: #475569;
+    font-size: 0.98rem;
+    font-weight: 800;
+    color: var(--color-navy);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .dash-cat-trilho {
-    height: 12px;
-    background: #E2E8F0;
+    height: 18px;
+    background: #F1F5F9;
     border: 2px solid var(--color-navy);
     border-radius: 9999px;
     overflow: hidden;
@@ -1526,17 +1592,18 @@ html.dark .dash-ranking-barra {
     display: block;
     height: 100%;
     border-radius: 9999px;
-    transition: width 0.6s ease;
+    transition: width 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .dash-cat-total {
-    font-size: 0.9rem;
+    font-size: 1.05rem;
     font-weight: 900;
     color: var(--color-navy);
+    text-align: right;
 }
 
 html.dark .dash-cat-nome {
-    color: #CBD5E1 !important;
+    color: #F8FAFC !important;
 }
 
 html.dark .dash-cat-total {
@@ -1544,8 +1611,51 @@ html.dark .dash-cat-total {
 }
 
 html.dark .dash-cat-trilho {
-    background: #1E293B !important;
+    background: #0F172A !important;
     border-color: #334155 !important;
+}
+
+/* Card interno de Categorias PRAE — estilo da referência EduScrap */
+.dash-prae-categorias {
+    background: #FFFFFF;
+    border: 3.5px solid var(--color-navy);
+    border-radius: 22px;
+    box-shadow: 6px 6px 0px var(--color-navy);
+    padding: 1.75rem 1.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    width: 100%;
+    max-width: 420px;
+    flex-shrink: 0;
+}
+
+html.dark .dash-prae-categorias {
+    background: #111C2E !important;
+    border-color: #334155 !important;
+    box-shadow: 6px 6px 0px #020617 !important;
+}
+
+.dash-prae-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--color-navy);
+    border-bottom: 2.5px dashed #CBD5E1;
+    padding-bottom: 0.9rem;
+}
+
+html.dark .dash-prae-header {
+    color: #F8FAFC !important;
+    border-bottom-color: #334155 !important;
+}
+
+.dash-prae-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
 .pilar-laranja { background: #FF5C00; }
@@ -3166,17 +3276,26 @@ html.dark .dash-neo-subtitulo {
 html.dark .dash-kpi-card {
     background: #1E293B !important;
     border-color: #334155 !important;
-    box-shadow: 5px 5px 0px #020617 !important;
+    box-shadow: 4px 4px 0px #020617 !important;
 }
 
-html.dark .card-cor-laranja .dash-kpi-icone i { color: #F59E0B !important; }
-html.dark .card-cor-ciano .dash-kpi-icone i { color: #38BDF8 !important; }
-html.dark .card-cor-roxo .dash-kpi-icone i { color: #A78BFA !important; }
-html.dark .card-cor-verde .dash-kpi-icone i { color: #FACC15 !important; }
-html.dark .card-cor-navy .dash-kpi-icone i { color: #38BDF8 !important; }
+/* No modo escuro, a pílula do ícone mantém o fundo pastel vívido da referência */
+html.dark .dash-kpi-icone {
+    border-color: #0F172A !important;
+    box-shadow: 2.5px 2.5px 0px #020617 !important;
+}
+
+html.dark .card-cor-laranja .dash-kpi-icone i { color: var(--kpi-cor, #FF5C00) !important; }
+html.dark .card-cor-ciano .dash-kpi-icone i { color: var(--kpi-cor, #0284C7) !important; }
+html.dark .card-cor-roxo .dash-kpi-icone i { color: var(--kpi-cor, #8B5CF6) !important; }
+html.dark .card-cor-verde .dash-kpi-icone i { color: var(--kpi-cor, #059669) !important; }
+html.dark .card-cor-navy .dash-kpi-icone i { color: var(--kpi-cor, #0F172A) !important; }
+html.dark .card-cor-coral .dash-kpi-icone i { color: var(--kpi-cor, #EA580C) !important; }
+html.dark .card-cor-azul .dash-kpi-icone i { color: var(--kpi-cor, #1E3A8A) !important; }
+html.dark .card-cor-grafite .dash-kpi-icone i { color: var(--kpi-cor, #0F172A) !important; }
 
 html.dark .dash-kpi-badge-label {
-    color: #FFFFFF !important;
+    color: #CBD5E1 !important;
 }
 
 html.dark .dash-kpi-numero {
