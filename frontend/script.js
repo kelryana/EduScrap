@@ -1027,20 +1027,6 @@ async function realizarPesquisa() {
 }
 
 // 2. Indicadores e Métricas
-const ROTULOS_FONTES = {
-    estagios: 'Estágios PRAE', bolsas: 'Bolsas PROEX', ufersa: 'Editais UFERSA',
-    ciee: 'Vagas CIEE', noticias: 'Notícias', noticias_ufersa: 'Notícias UFERSA',
-    cursos_bolsas: 'Cursos & Bolsas', portal_uern: 'Portal UERN', mprn: 'Estágios MPRN',
-    ifrn: 'IFRN', iel: 'IEL / FIERN', dom: 'DOM Mossoró'
-};
-
-function formatarHoraISO(iso) {
-    if (!iso) return '—';
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return '—';
-    return d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-}
-
 function escaparHTML(texto) {
     const div = document.createElement('div');
     div.textContent = texto == null ? '' : String(texto);
@@ -1151,14 +1137,6 @@ async function carregarEstatisticas() {
         const vencidos = dados.vencidos || 0;
         const proximos = dados.proximos_a_vencer || [];
         const vencidosLista = dados.vencidos_recentes || [];
-        const fluxo = dados.fluxo_semanal || [];
-        const temFluxo = !!dados.tem_dados_fluxo;
-        const maxFluxo = Math.max(...fluxo.map(d => d.valor), 1);
-        const totalFluxo = fluxo.reduce((soma, d) => soma + (d.valor || 0), 0);
-        const varredura = dados.ultima_varredura;
-        const categorias = (dados.categorias_hub || dados.prae_categorias || []).slice(0, 6);
-        const maxCat = categorias.length ? Math.max(...categorias.map(c => c.total), 1) : 1;
-        const coresCategorias = ['#FF5C00', '#38BDF8', '#8B5CF6', '#10B981', '#FACC15', '#E2E8F0'];
 
         // Paleta por KPI espelhando o design de referência (cor + fundo pastel da pílula)
         const PALETA_KPI = {
@@ -1261,84 +1239,6 @@ async function carregarEstatisticas() {
                     </div>
                 </div>
 
-                <!-- LINHA INFERIOR: RADAR DE FONTES + FLUXO SEMANAL -->
-                <div class="dash-grid-inferior">
-                    <div class="dash-card-radar">
-                        <div class="dash-radar-header">
-                            <h3 class="dash-radar-titulo">Radar de Fontes</h3>
-                            <span class="dash-badge-auto-sync"><i class="ph-bold ph-arrows-clockwise"></i> Auto-sync</span>
-                        </div>
-
-                        <div class="dash-radar-contadores-row">
-                            <div class="dash-radar-box box-total">
-                                <span class="dash-radar-numero" data-alvo="${canais}">0</span>
-                                <span class="dash-radar-label">Canais ativos</span>
-                            </div>
-                            <div class="dash-radar-box box-uern">
-                                <span class="dash-radar-numero" data-alvo="${totalUern}">0</span>
-                                <span class="dash-radar-label">UERN</span>
-                            </div>
-                            <div class="dash-radar-box box-ufersa">
-                                <span class="dash-radar-numero" data-alvo="${totalUfersa}">0</span>
-                                <span class="dash-radar-label">UFERSA</span>
-                            </div>
-                        </div>
-
-                        <ul class="dash-ranking-fontes" aria-label="Ranking de fontes monitoradas">
-                            ${(dados.ranking_fontes || []).slice(0, 5).map((f, i) => `
-                            <li class="dash-ranking-item">
-                                <span class="dash-ranking-posicao">#${i + 1}</span>
-                                <span class="dash-ranking-nome">${ROTULOS_FONTES[f.origem] || f.origem}</span>
-                                <span class="dash-ranking-barra"><span class="dash-ranking-preenchimento" style="width: ${(f.total / Math.max(totalGeral, 1)) * 100}%; background: ${coresCategorias[i % coresCategorias.length]};"></span></span>
-                                <strong class="dash-ranking-total">${f.total}</strong>
-                            </li>`).join('') || '<li class="dash-legenda-texto">Nenhuma fonte com dados ainda. Execute uma varredura.</li>'}
-                        </ul>
-
-                        <div class="dash-radar-footer">
-                            <span><i class="ph-bold ph-clock"></i> Última varredura: <strong>${varredura ? formatarHoraISO(varredura.data) : 'Sem registro'}</strong></span>
-                            <span class="dash-status-ativo">${varredura && varredura.status === 'Sucesso' ? '● Operacional' : varredura ? '● ' + varredura.status : '○ Aguardando'}</span>
-                        </div>
-                    </div>
-
-                    <div class="dash-card-fluxo">
-                        <div class="dash-fluxo-header">
-                            <div>
-                                <h3 class="dash-fluxo-titulo">Fluxo de Captação</h3>
-                                <p class="dash-fluxo-sub">${temFluxo ? `Novos itens coletados nos últimos 7 dias (${totalFluxo} no total).` : 'Ainda sem capturas recentes registradas — os robôs alimentam este gráfico automaticamente.'}</p>
-                            </div>
-                            <span class="dash-pill-semanal">${temFluxo ? '+' + totalFluxo + ' nesta semana' : 'Sem capturas'}</span>
-                        </div>
-
-                        <div class="dash-fluxo-conteudo-row">
-                            <div class="dash-barras-grafico" role="img" aria-label="Gráfico de barras do fluxo semanal de captação">
-                                ${fluxo.map(d => `
-                                <div class="dash-coluna-dia">
-                                    <span class="dash-barra-valor">${d.valor}</span>
-                                    ${d.valor > 0 ? `<div class="dash-barra-pilar" style="height: ${Math.max((d.valor / maxFluxo) * 180, 6)}px; background: ${d.cor};"></div>` : `<div class="dash-pill-zero" style="background: ${d.cor};"></div>`}
-                                    <span class="dash-pilar-nome">${d.dia}</span>
-                                </div>`).join('')}
-                            </div>
-                            <div class="dash-prae-categorias">
-                                <div class="dash-prae-header">
-                                    <i class="ph-bold ph-tag" style="color: #FF5C00;"></i>
-                                    <span>Categorias do Hub (todas as fontes)</span>
-                                </div>
-                                <div class="dash-prae-lista">
-                                    ${categorias.length ? categorias.map((c, i) => `
-                                    <div class="dash-cat-barra-row">
-                                        <span class="dash-cat-nome" title="${c.categoria}">${c.categoria}</span>
-                                        <span class="dash-cat-trilho"><span class="dash-cat-preenchimento" style="width: ${(c.total / maxCat) * 100}%; background: ${coresCategorias[i % coresCategorias.length]};"></span></span>
-                                        <strong class="dash-cat-total">${c.total}</strong>
-                                    </div>`).join('') : `
-                                    <div class="dash-legenda-item">
-                                        <span class="dash-legenda-ponto" style="background:#FF5C00;"></span>
-                                        <p class="dash-legenda-texto">Execute <strong>run_scrapers.py</strong> ou clique em <strong>Varredura Global</strong> para popular o hub com dados reais.</p>
-                                    </div>`}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         `;
         container.innerHTML = html;
