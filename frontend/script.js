@@ -622,19 +622,25 @@ function normalizarCategoriaTag(categoria, tipoContexto, vaga) {
     const titulo = ((vaga && (vaga.titulo || vaga.nome)) || '').toLowerCase();
     const cLower = (categoria || '').toLowerCase();
 
-    // 1. Prioridade por Fonte / Instituição Real
+    // 1. Notícias temáticas explícitas (Notícia Saúde, Notícia Educação, Notícia Tech, Notícia Geral...)
+    if (cLower.startsWith('notícia ') || cLower.startsWith('noticia ')) {
+        if (cLower.includes('ufersa') || fonte.includes('ufersa') || tipoContexto === 'noticias-ufersa') {
+            return 'Notícia UFERSA';
+        }
+        return formatarTituloEdital(categoria);
+    }
+
+    // 2. Prioridade por Fonte / Instituição Real
     if (fonte.includes('ifrn') || titulo.includes('[ifrn') || tipoContexto === 'ifrn') return 'Editais IFRN';
     if (fonte.includes('iel') || titulo.includes('[iel') || tipoContexto === 'iel') return 'Estágios IEL/RN';
     if (fonte.includes('mprn') || titulo.includes('[mprn') || tipoContexto === 'mprn' || cLower.includes('mprn')) return 'Estágios MPRN';
     if (fonte.includes('prefeitura de mossoró') || titulo.includes('[dom/mossoró') || tipoContexto === 'dom') return 'DOM Mossoró';
 
-    // 1b. Aba "Notícias UFERSA": NUNCA rotular notícias ASSECOM como "Editais UFERSA".
-    // O rótulo "Editais UFERSA" é reservado apenas para editais/processos seletivos (aba própria).
-    if (cLower.includes('notícia ufersa') || cLower.includes('noticia ufersa') ||
-        cLower.includes('comunicação universitária') || tipoContexto === 'noticias-ufersa') {
+    // 3. Notícias Institucionais UFERSA (ASSECOM)
+    if (tipoContexto === 'noticias-ufersa' || (fonte.includes('ufersa') && (vaga && vaga.tipo === 'noticia')) ||
+        (fonte.includes('ufersa') && cLower.includes('comunicação'))) {
         return 'Notícia UFERSA';
     }
-    if (vaga && vaga.tipo === 'noticia') return 'Notícia UFERSA';
 
     if (fonte.includes('ufersa') || titulo.includes('[cpps') || tipoContexto === 'ufersa') return 'Editais UFERSA';
     if (fonte.includes('ciee') || tipoContexto === 'ciee') return 'Vagas CIEE';
@@ -645,7 +651,7 @@ function normalizarCategoriaTag(categoria, tipoContexto, vaga) {
         return 'Capacitação & Cursos';
     }
 
-    // 2. Se a origem for o Portal UERN (Blog institucional/AGECOM)
+    // 4. Se a origem for o Portal UERN (Blog institucional/AGECOM)
     if (fonte.includes('portal uern') || tipoContexto === 'portal_uern' || (vaga && vaga.fonte_id === 'portal_uern_oficial')) {
         if (titulo.includes('solidariedade') || titulo.includes('nota de') || titulo.includes('luto') || titulo.includes('pesar')) {
             return 'Comunicado Oficial';
@@ -665,7 +671,7 @@ function normalizarCategoriaTag(categoria, tipoContexto, vaga) {
         return 'Notícia UERN';
     }
 
-    // 3. Editais de Assistência e Extensão da UERN (vindos de coleções específicas da PRAE/PROEX)
+    // 5. Editais de Assistência e Extensão da UERN (vindos de coleções específicas da PRAE/PROEX)
     if (cLower.includes('inclusão digital') || cLower.includes('inclusao digital')) return 'Inclusão Digital';
     if (cLower.includes('moradia')) return 'Auxílio Moradia';
     if (cLower.includes('creche')) return 'Auxílio Creche';
@@ -674,10 +680,15 @@ function normalizarCategoriaTag(categoria, tipoContexto, vaga) {
     if (cLower.includes('permanência') || cLower.includes('permanencia')) return 'Permanência Estudantil';
     if (tipoContexto === 'estagios' || fonte.includes('prae')) return 'Estágios (PRAE)';
     if (tipoContexto === 'bolsas' || fonte.includes('proex')) return 'Bolsas (PROEX)';
-    if (cLower.includes('notícia tech') || (tipoContexto === 'noticias' && (fonte.includes('g1') || fonte.includes('canaltech')))) return 'Notícia Tech';
-    // Notícias de outras áreas (educação, saúde, economia...) agregadas na aba "Notícias"
-    if (cLower.startsWith('notícia ') || cLower.startsWith('noticia ')) {
-        return formatarTituloEdital(categoria);
+
+    // 6. Demais notícias gerais
+    if (cLower.includes('notícia tech') || cLower.includes('noticia tech') || fonte.includes('canaltech')) {
+        return 'Notícia Tech';
+    }
+    if (tipoContexto === 'noticias') {
+        if (fonte.includes('g1') && cLower.includes('saúde')) return 'Notícia Saúde';
+        if (fonte.includes('g1') && cLower.includes('educação')) return 'Notícia Educação';
+        return categoria ? formatarTituloEdital(categoria) : 'Notícia';
     }
 
     if (!categoria) {
@@ -823,6 +834,8 @@ function renderizarCards(listaDeVagas) {
         "Notícia Educação": "#0891B2",
         "Notícia Saúde": "#DB2777",
         "Notícia Economia": "#CA8A04",
+        "Notícia Geral": "#2563EB",
+        "Notícia": "#2563EB",
         "Bolsa de Estudos": "#0D9488",
         "Capacitação & Cursos": "#7C3AED"
     };
@@ -832,7 +845,8 @@ function renderizarCards(listaDeVagas) {
     listaDeVagas.forEach(vaga => {
         const idStr = String(vaga._id);
         const ehFavorito = vaga.favorito === true || favSet.has(idStr);
-        const ehNoticia = vaga.categoria === "Notícia Tech" || tipoAtual === "noticias" || tipoAtual === "noticias-ufersa";
+        const catLower = (vaga.categoria || "").toLowerCase();
+        const ehNoticia = vaga.tipo === "noticia" || catLower.includes("notícia") || catLower.includes("noticia") || tipoAtual === "noticias" || tipoAtual === "noticias-ufersa";
         const categoriaFormatada = normalizarCategoriaTag(vaga.categoria, tipoAtual, vaga);
         const corTag = corCategoriaMap[vaga.categoria] || corCategoriaMap[categoriaFormatada] || "#112244";
 

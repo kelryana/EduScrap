@@ -1,16 +1,4 @@
 # backend/scraper_capacitacao_bolsas.py
-"""
-Scraper para Oportunidades de Capacitação, Certificações Gratuitas e Bolsas de Estudo.
-Fontes integradas:
-1. freeCodeCamp Brasil (tutoriais e trilhas gratuitas de programação em português, sem anúncios)
-2. Alison.com (cursos online gratuitos com certificado/diploma em TI, gestão e dados)
-3. Estudar Fora / Fundação Estudar (Bolsas internacionais de graduação, pós, STEM e mobilidade acadêmica)
-4. Catálogo curado de plataformas gratuitas de cursos (Microsoft Learn, Coursera/Google, UFABC, USP, UFRJ etc.)
-
-Observação: a fonte DIO.me foi removida do módulo por excesso de anúncios na plataforma,
-e os cards "[MEC/MTE]" da Escola do Trabalhador 4.0 foram substituídos porque o site oficial
-só oferece uma página geral (sem páginas individuais por curso).
-"""
 
 import os
 import re
@@ -155,73 +143,6 @@ def raspar_freecodecamp(colecao):
     return total
 
 
-def raspar_alison(colecao):
-    """Alison.com: plataforma internacional de cursos online gratuitos com certificado/diploma."""
-    logger.info("-> Coletando cursos gratuitos com certificado da Alison.com...")
-    categorias = [
-        ("https://alison.com/courses/it", ["Ciência da Computação", "Sistemas de Informação", "Engenharia de Software"],
-         ["Tecnologia", "Capacitação & Cursos"]),
-        ("https://alison.com/courses/business", ["Administração", "Ciências Contábeis", "Economia"],
-         ["Gestão", "Exatas", "Capacitação & Cursos"]),
-    ]
-    headers = {"User-Agent": "Mozilla/5.0"}
-    total = 0
-    vistos = set()
-
-    for url, cursos_padrao, areas in categorias:
-        try:
-            resp = requests.get(url, headers=headers, timeout=12, verify=False)
-            if resp.status_code != 200:
-                logger.warning(f"Status {resp.status_code} ao acessar {url}")
-                continue
-
-            soup = BeautifulSoup(resp.text, "html.parser")
-            for a in soup.find_all("a", href=True):
-                href = a["href"]
-                if "/course/" not in href or not href.startswith("http"):
-                    continue
-
-                titulo = a.get_text(" ", strip=True)
-                # filtra links de texto corrido: títulos de curso são âncoras curtas e limpas
-                if not titulo or len(titulo) < 8 or len(titulo) > 120 or titulo in vistos or href in vistos:
-                    continue
-                vistos.add(titulo)
-                vistos.add(href)
-
-                classificacao = classificar_oportunidade(titulo, "Curso online gratuito com certificado / diploma")
-                cursos = classificacao["cursos"] or cursos_padrao
-
-                documento = {
-                    "titulo": f"[Alison] {titulo}",
-                    "nome": f"[Alison] {titulo}",
-                    "descricao": (f"Curso online gratuito da plataforma Alison com certificado/diploma reconhecido. "
-                                  f"Cada curso leva direto à sua página individual de inscrição: {titulo}."),
-                    "link": href,
-                    "url": href,
-                    "fonte": "Alison (Cursos Gratuitos com Certificado)",
-                    "tipo": "capacitacao",
-                    "categoria": "Capacitação & Cursos",
-                    "status": "Aberto",
-                    "data_publicacao": datetime.now().strftime("%Y-%m-%d"),
-                    "cursos": cursos,
-                    "areas": areas,
-                    "geral": False,
-                    "coletado_em": datetime.now().isoformat()
-                }
-
-                res = colecao.update_one({"link": href}, {"$set": documento}, upsert=True)
-                if res.upserted_id or res.modified_count > 0:
-                    total += 1
-                    logger.info(f"   Salvo Alison: {titulo[:50]}...")
-                if total >= 12:
-                    return total
-
-        except Exception as e:
-            logger.error(f"Erro ao coletar Alison ({url}): {e}")
-
-    return total
-
-
 def adicionar_catalogo_cursos_gratuitos(colecao):
     """Catálogo curado de cursos gratuitos com PÁGINA INDIVIDUAL (cada link abre o curso, não a home).
     Substitui os antigos cards [MEC/MTE] da Escola do Trabalhador 4.0, cujo site só possui página geral."""
@@ -252,36 +173,37 @@ def adicionar_catalogo_cursos_gratuitos(colecao):
             "areas": ["Tecnologia", "Capacitação & Cursos"]
         },
         {
-            "titulo": "[Alison] Diploma em Programação Python",
-            "descricao": ("Diploma online gratuito da Alison (com certificado reconhecido) cobrindo Python "
-                          "do básico ao avançado. Página individual do curso."),
-            "link": "https://alison.com/course/diploma-in-python-programming-revised",
-            "cursos": ["Ciência da Computação", "Engenharia de Software", "Matemática"],
+            "titulo": "[freeCodeCamp] Certificação Cientista de Dados",
+            "descricao": ("Trilha completa e gratuita do freeCodeCamp para Ciência de Dados "
+                          "(Python, Pandas, visualização e machine learning), com certificação. "
+                          "Página individual da certificação."),
+            "link": "https://www.freecodecamp.org/portuguese/learn/data-analysis-with-python/",
+            "cursos": ["Ciência da Computação", "Estatística", "Matemática"],
             "areas": ["Tecnologia", "Exatas", "Capacitação & Cursos"]
         },
         {
-            "titulo": "[Alison] Elementos de Inteligência Artificial (IA)",
-            "descricao": ("Curso gratuito da Alison sobre os fundamentos de IA e machine learning, "
-                          "com certificado. Página individual do curso."),
-            "link": "https://alison.com/course/elements-of-ai-artificial-intelligence",
+            "titulo": "[Kaggle Learn] Introdução ao Python",
+            "descricao": ("Micro-curso gratuito e prático do Kaggle Learn para iniciantes em Python, "
+                          "com notebooks interativos e certificado de conclusão. Página individual do curso."),
+            "link": "https://www.kaggle.com/learn/python",
             "cursos": ["Ciência da Computação", "Estatística", "Engenharia de Software"],
+            "areas": ["Tecnologia", "Exatas", "Capacitação & Cursos"]
+        },
+        {
+            "titulo": "[AWS Skill Builder] Fundamentos da AWS: Modelos de Nuvem",
+            "descricao": ("Treinamento oficial gratuito da Amazon Web Services sobre fundamentos de "
+                          "computação em nuvem, com certificado de conclusão. Página individual do curso."),
+            "link": "https://explore.skillbuilder.aws/learn/course/internal/view/elearning/126/fundamentos-da-aws-modelos-de-nuvem",
+            "cursos": ["Ciência da Computação", "Sistemas de Informação", "Engenharia de Software"],
             "areas": ["Tecnologia", "Capacitação & Cursos"]
         },
         {
-            "titulo": "[Alison] Análise de Dados com Power BI",
-            "descricao": ("Curso gratuito da Alison de Data Analytics usando Power BI, voltado à tomada "
-                          "de decisão. Página individual do curso."),
-            "link": "https://alison.com/course/data-analytics-using-power-bi",
-            "cursos": ["Administração", "Estatística", "Ciências Contábeis"],
-            "areas": ["Exatas", "Gestão", "Capacitação & Cursos"]
-        },
-        {
-            "titulo": "[Alison] Introdução ao Microsoft Azure",
-            "descricao": ("Fundamentos de computação em nuvem com Azure na plataforma Alison, gratuito "
-                          "e com certificado. Página individual do curso."),
-            "link": "https://alison.com/course/introduction-to-microsoft-azure",
-            "cursos": ["Ciência da Computação", "Sistemas de Informação"],
-            "areas": ["Tecnologia", "Capacitação & Cursos"]
+            "titulo": "[Coursera/Michigan] Como Aprender a Aprender",
+            "descricao": ("Curso gratuito (modo auditório) mais popular do Coursera, da Universidade de "
+                          "Michigan, sobre técnicas de aprendizagem eficazes. Página individual do curso."),
+            "link": "https://www.coursera.org/learn/aprender",
+            "cursos": ["Licenciatura", "Pedagogia", "Psicologia"],
+            "areas": ["Humanas", "Educação", "Capacitação & Cursos"]
         },
         {
             "titulo": "[Coursera/Google] Certificado Profissional de Análise de Dados do Google",
@@ -290,6 +212,54 @@ def adicionar_catalogo_cursos_gratuitos(colecao):
             "link": "https://www.coursera.org/professional-certificates/google-data-analytics",
             "cursos": ["Estatística", "Ciência da Computação", "Administração"],
             "areas": ["Exatas", "Tecnologia", "Capacitação & Cursos"]
+        },
+        {
+            "titulo": "[Fundação Bradesco] Microsoft Excel - Básico ao Avançado",
+            "descricao": ("Curso 100% gratuito com certificado de conclusão emitido pela Escola Virtual da "
+                          "Fundação Bradesco. Criação de planilhas, fórmulas e tabelas dinâmicas. Link individual."),
+            "link": "https://www.ev.org.br/cursos/fundamentos-de-ti-e-produtividade/microsoft-excel-2016-basico",
+            "cursos": ["Administração", "Ciências Contábeis", "Economia", "Engenharia de Produção"],
+            "areas": ["Gestão", "Exatas", "Capacitação & Cursos"]
+        },
+        {
+            "titulo": "[Fundação Bradesco] Linguagem de Programação Python",
+            "descricao": ("Curso gratuito com certificado oficial da Fundação Bradesco para introdução à linguagem "
+                          "Python, lógica de desenvolvimento e estruturas de dados. Link individual do curso."),
+            "link": "https://www.ev.org.br/cursos/desenvolvimento-de-sistemas/linguagem-de-programacao-python-basico",
+            "cursos": ["Ciência da Computação", "Engenharia de Software", "Sistemas de Informação"],
+            "areas": ["Tecnologia", "Capacitação & Cursos"]
+        },
+        {
+            "titulo": "[FGV] Fundamentos da Gestão de Projetos",
+            "descricao": ("Curso online gratuito da Fundação Getulio Vargas com declaração de conclusão. "
+                          "Conceitos de escopo, prazos, custos e metodologias ágeis de projetos. Link individual."),
+            "link": "https://educacao-executiva.fgv.br/cursos/online/curta-media-duracao-online/fundamentos-da-gestao-de-projetos",
+            "cursos": ["Administração", "Engenharia de Produção", "Gestão Pública"],
+            "areas": ["Gestão", "Humanas", "Capacitação & Cursos"]
+        },
+        {
+            "titulo": "[FGV] Introdução à Ciência de Dados",
+            "descricao": ("Curso gratuito da FGV sobre o papel da Ciência de Dados na tomada de decisão estratégica, "
+                          "métricas analíticas e Big Data, com declaração de conclusão. Link individual."),
+            "link": "https://educacao-executiva.fgv.br/cursos/online/curta-media-duracao-online/introducao-ciencia-de-dados",
+            "cursos": ["Ciência da Computação", "Estatística", "Administração"],
+            "areas": ["Tecnologia", "Exatas", "Capacitação & Cursos"]
+        },
+        {
+            "titulo": "[SEBRAE] Marketing Digital para o Empreendedor",
+            "descricao": ("Capacitação oficial e gratuita do SEBRAE para posicionamento de marcas nas redes sociais, "
+                          "análise de métricas e geração de leads. Link individual com certificado."),
+            "link": "https://sebrae.com.br/sites/PortalSebrae/cursosonline/marketing-digital-para-o-empreendedor,b0d2b8a6a2862810VgnVCM100000d701210aRCRD",
+            "cursos": ["Administração", "Comunicação Social", "Publicidade"],
+            "areas": ["Gestão", "Comunicação", "Capacitação & Cursos"]
+        },
+        {
+            "titulo": "[Harvard CS50x / edX] Introdução à Ciência da Computação",
+            "descricao": ("O famoso curso CS50 de Harvard oferecido gratuitamente pelo edX. C, Python, SQL, "
+                          "algoritmos e desenvolvimento web com materiais didáticos de padrão internacional."),
+            "link": "https://www.edx.org/learn/computer-science/harvard-university-cs50-s-introduction-to-computer-science",
+            "cursos": ["Ciência da Computação", "Engenharia de Software", "Sistemas de Informação"],
+            "areas": ["Tecnologia", "Exatas", "Capacitação & Cursos"]
         },
     ]
 
@@ -320,8 +290,9 @@ def adicionar_catalogo_cursos_gratuitos(colecao):
 
 
 def limpar_fontes_antigas(colecao):
-    """Remove registros obsoletos das fontes substituídas: DIO (excesso de anúncios)
-    e Escola do Trabalhador 4.0 / MTE (links apenas para página geral, sem curso individual)."""
+    """Remove registros obsoletos das fontes substituídas: DIO (excesso de anúncios),
+    Escola do Trabalhador 4.0 / MTE (links apenas para página geral, sem curso individual)
+    e Alison.com (links raspados levavam só à página geral de cursos)."""
     removidos_dio = colecao.delete_many({
         "$or": [
             {"fonte": {"$regex": "Digital Innovation One|DIO", "$options": "i"}},
@@ -335,9 +306,19 @@ def limpar_fontes_antigas(colecao):
             {"link": {"$regex": "escoladotrabalhador40", "$options": "i"}},
         ]
     }).deleted_count
-    if removidos_dio or removidos_mte:
-        logger.info(f"   Limpeza: {removidos_dio} registros DIO e {removidos_mte} registros MEC/MTE removidos.")
-    return removidos_dio + removidos_mte
+    removidos_alison = colecao.delete_many({
+        "$or": [
+            {"fonte": {"$regex": "alison", "$options": "i"}},
+            {"titulo": {"$regex": "\\[Alison\\]", "$options": "i"}},
+            {"link": {"$regex": "alison\\.com", "$options": "i"}},
+        ]
+    }).deleted_count
+    if removidos_dio or removidos_mte or removidos_alison:
+        logger.info(
+            f"   Limpeza: {removidos_dio} registros DIO, {removidos_mte} registros MEC/MTE "
+            f"e {removidos_alison} registros Alison removidos."
+        )
+    return removidos_dio + removidos_mte + removidos_alison
 
 
 def raspar_todas_capacitacoes():
@@ -347,7 +328,6 @@ def raspar_todas_capacitacoes():
     limpar_fontes_antigas(colecao)
     total += raspar_estudar_fora(colecao)
     total += raspar_freecodecamp(colecao)
-    total += raspar_alison(colecao)
     total += adicionar_catalogo_cursos_gratuitos(colecao)
     logger.info(f"=== MÓDULO 3 CONCLUÍDO! Total de {total} registros atualizados. ===")
     return total

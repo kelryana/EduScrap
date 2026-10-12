@@ -506,7 +506,7 @@ def listar_portal_uern(
 MARCADORES_CAPACITACAO = [
     "capacitação", "capacitacao",
     "cursos gratuitos", "bolsas de estudo",
-    "freecodecamp", "alison", "microsoft learn",
+    "freecodecamp", "microsoft learn",
     "coursera", "fundação estudar", "fundacao estudar",
 ]
 
@@ -550,7 +550,7 @@ def listar_cursos_bolsas(
     authorization: str = Header(default=None)
 ):
     """Aba 'Cursos & Bolsas': bootcamps, cursos gratuitos com certificado e
-    bolsas de estudo (freeCodeCamp, Alison, Microsoft Learn, Estudar Fora...).
+    bolsas de estudo (freeCodeCamp, Microsoft Learn, Estudar Fora...).
     Antes esta rota não existia na API, causando o erro 404 no front-end."""
     usuario = obter_usuario_opcional(authorization)
     pulo = (pagina - 1) * limite
@@ -561,9 +561,13 @@ def listar_cursos_bolsas(
 
     docs_curso = list(db["noticias"].find(filtro).sort("coletado_em", -1))
 
-    # Garantia extra: remove documentos de notícia institucional que porventura
-    # tenham sido marcados com categoria de capacitação pelo classificador.
-    docs_curso = [d for d in docs_curso if (d.get("tipo") or "") != "noticia"]
+    # Remove notícias institucionais e links genéricos de páginas gerais (como Alison)
+    docs_curso = [
+        d for d in docs_curso
+        if (d.get("tipo") or "") != "noticia"
+        and "alison.com" not in (d.get("link") or "").lower()
+        and "[alison]" not in (d.get("titulo") or "").lower()
+    ]
 
     return paginar_docs(docs_curso, pagina, limite, usuario)
 
@@ -639,18 +643,34 @@ def listar_noticias(
 
     docs_todos = []
 
-    # 1. Notícias reais da coleção "noticias" (ASSECOM UFERSA, portais acadêmicos etc.).
-    #    Cards de capacitação/cursos/bolsas ficam EXCLUSIVAMENTE na aba Cursos & Bolsas.
+    def eh_noticia_ufersa(doc: dict) -> bool:
+        """Notícias institucionais da UFERSA pertencem EXCLUSIVAMENTE à aba
+        'Notícias UFERSA' (/api/noticias-ufersa), nunca à aba geral de Notícias."""
+        texto = f"{doc.get('fonte', '')} {doc.get('titulo', '') or doc.get('nome', '')}".lower()
+        return "ufersa" in texto
+
+    # 1. Notícias reais da coleção "noticias" (portais acadêmicos etc.).
+    #    Cards de capacitação/cursos/bolsas ficam EXCLUSIVAMENTE na aba Cursos & Bolsas,
+    #    e notícias da UFERSA ficam EXCLUSIVAMENTE na aba Notícias UFERSA.
     for doc in db["noticias"].find(filtro).sort("coletado_em", -1):
         if not eh_documento_de_noticia(doc):
             continue
+        if eh_noticia_ufersa(doc):
+            continue
         doc["nome"] = doc.get("titulo") or doc.get("nome") or "Notícia"
         doc["titulo"] = doc["nome"]
+        if not doc.get("categoria"):
+            doc["categoria"] = "Notícia"
         docs_todos.append(doc)
 
-    # 2. Notícias Tech clássicas (G1 / Canaltech)
+    # 2. Notícias gerais ao vivo (G1 Educação/Saúde, Agência Brasil, Tech...) —
+    #    exclui qualquer documento com marca de UFERSA.
     for doc in db["vagas_noticias"].find(filtro):
-        doc["titulo"] = doc.get("nome") or doc.get("titulo") or "Notícia Tech"
+        if eh_noticia_ufersa(doc):
+            continue
+        doc["titulo"] = doc.get("nome") or doc.get("titulo") or "Notícia"
+        if not doc.get("categoria"):
+            doc["categoria"] = "Notícia"
         docs_todos.append(doc)
 
     return paginar_docs(docs_todos, pagina, limite, usuario)

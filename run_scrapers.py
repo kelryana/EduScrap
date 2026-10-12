@@ -80,7 +80,7 @@ SCRAPERS = {
         "icone": "🏭"
     },
     "capacitacao_bolsas": {
-        "nome": "Capacitação, freeCodeCamp/Alison e Bolsas de Estudo",
+        "nome": "Capacitação, freeCodeCamp e Bolsas de Estudo",
         "script": "scraper_capacitacao_bolsas.py",
         "colecao": "noticias",
         "icone": "💡"
@@ -94,14 +94,14 @@ SCRAPERS = {
 }
 
 def obter_python_bin():
-   
+
     venv_python = PROJECT_ROOT / "venv" / "bin" / "python"
     if venv_python.exists():
         return str(venv_python)
     return sys.executable
 
 def obter_contagem_colecao(nome_colecao):
-   
+
     try:
         from pymongo import MongoClient
         uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
@@ -112,7 +112,7 @@ def obter_contagem_colecao(nome_colecao):
         return None
 
 def executar_scraper(chave, info):
-   
+
     python_bin = obter_python_bin()
     script_path = BACKEND_DIR / info["script"]
     log_file_path = LOGS_DIR / f"{chave}.log"
@@ -227,7 +227,7 @@ def main():
     resultados = []
 
     if args.serial or total == 1:
-       
+
         for chave, info in selecionados.items():
             print(f"  {info['icone']} Executando: {info['nome']}...")
             res = executar_scraper(chave, info)
@@ -237,7 +237,7 @@ def main():
             else:
                 print(f"     ❌ Falhou ({res['erro']}). Veja o log: {res['log']}")
     else:
-       
+
         print("  Iniciando raspagens simultâneas em segundo plano...")
         with ThreadPoolExecutor(max_workers=min(total, 6)) as executor:
             futuros = {
@@ -254,7 +254,7 @@ def main():
 
     tempo_total = round(time.time() - inicio_global, 1)
 
-   
+
     sucessos = sum(1 for r in resultados if r["sucesso"])
     falhas = total - sucessos
 
