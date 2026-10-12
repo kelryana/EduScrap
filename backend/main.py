@@ -782,6 +782,12 @@ def obter_estatisticas():
     total_vigentes = sum(
         db[col].count_documents(query_vigentes) for col in colecoes_prazo if col in nome_colecoes
     )
+    # Editais VENCIDOS (prazo de inscrição já encerrado) — alimenta o card
+    # "Editais: Abertos x Vencidos" do dashboard.
+    query_vencidos = {"data_vencimento": {"$lt": agora}}
+    total_vencidos = sum(
+        db[col].count_documents(query_vencidos) for col in colecoes_prazo if col in nome_colecoes
+    )
     for col_extra in ["vagas", "editais"]:
         if col_extra not in nome_colecoes:
             continue
@@ -790,8 +796,38 @@ def obter_estatisticas():
             total_extra = db[col_extra].count_documents(_consulta_prazo(col_extra, {}))
             total_oportunidades_com_prazo += total_extra
             total_vigentes += db[col_extra].count_documents(_consulta_prazo(col_extra, query_vigentes))
+            total_vencidos += db[col_extra].count_documents(_consulta_prazo(col_extra, query_vencidos))
         except Exception:
             continue
+
+    def _titulo_documento(doc):
+        return (doc.get("titulo") or doc.get("nome") or "Sem título").strip()
+
+    def _coletar_lista(query, colecoes, limite, ordena_asc=True):
+        """Puxa uma amostra real de editais para o painel de prazos."""
+        itens = []
+        projection = {"titulo": 1, "nome": 1, "data_vencimento": 1}
+        for col in colecoes:
+            if col not in nome_colecoes or len(itens) >= limite:
+                continue
+            try:
+                cursor = db[col].find(query, projection).sort(
+                    "data_vencimento", 1 if ordena_asc else -1
+                ).limit(limite - len(itens))
+                for doc in cursor:
+                    venc = doc.get("data_vencimento")
+                    if isinstance(venc, datetime):
+                        itens.append({
+                            "titulo": _titulo_documento(doc),
+                            "data": venc.strftime("%d/%m/%Y"),
+                        })
+            except Exception:
+                continue
+        itens.sort(key=lambda item: datetime.strptime(item["data"], "%d/%m/%Y"), reverse=not ordena_asc)
+        return itens[:limite]
+
+    proximos_a_vencer = _coletar_lista(query_reta_final, colecoes_prazo + ["vagas", "editais"], 6, ordena_asc=True)
+    vencidos_recentes = _coletar_lista(query_vencidos, colecoes_prazo + ["vagas", "editais"], 6, ordena_asc=False)
 
     pipeline_prae = [
         {"$group": {"_id": "$categoria", "total": {"$sum": 1}}},
@@ -893,6 +929,9 @@ def obter_estatisticas():
         "total_geral": total_geral,
         "reta_final_urgente": total_reta_final,
         "vigentes": total_vigentes,
+        "vencidos": total_vencidos,
+        "proximos_a_vencer": proximos_a_vencer,
+        "vencidos_recentes": vencidos_recentes,
         "oportunidades_com_prazo": total_oportunidades_com_prazo,
         "prae_categorias": formatar(distribuicao_prae),
         "fluxo_semanal": dias_semana,
