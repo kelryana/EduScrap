@@ -1041,6 +1041,12 @@ function formatarHoraISO(iso) {
     return d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 }
 
+function escaparHTML(texto) {
+    const div = document.createElement('div');
+    div.textContent = texto == null ? '' : String(texto);
+    return div.innerHTML;
+}
+
 function animarNumero(el, alvo, duracao = 900) {
     const prefereMenosMovimento = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefereMenosMovimento || duracao <= 0) { el.textContent = alvo; return; }
@@ -1086,8 +1092,9 @@ async function carregarEstatisticas() {
         const retaFinal = dados.reta_final_urgente || 0;
         const canais = dados.canais_monitorados || 0;
         const vigentes = dados.vigentes || 0;
-        const comPrazo = dados.oportunidades_com_prazo || 0;
-        const pctVigentes = comPrazo > 0 ? Math.round((vigentes / comPrazo) * 100) : 0;
+        const vencidos = dados.vencidos || 0;
+        const proximos = dados.proximos_a_vencer || [];
+        const vencidosLista = dados.vencidos_recentes || [];
         const fluxo = dados.fluxo_semanal || [];
         const temFluxo = !!dados.tem_dados_fluxo;
         const maxFluxo = Math.max(...fluxo.map(d => d.valor), 1);
@@ -1095,7 +1102,7 @@ async function carregarEstatisticas() {
         const varredura = dados.ultima_varredura;
         const categorias = (dados.prae_categorias || []).slice(0, 6);
         const maxCat = categorias.length ? Math.max(...categorias.map(c => c.total), 1) : 1;
-        const coresCategorias = ['#FF5C00', '#38BDF8', '#8B5CF6', '#10B981', '#FACC15', '#0F172A'];
+        const coresCategorias = ['#FF5C00', '#38BDF8', '#8B5CF6', '#10B981', '#FACC15', '#E2E8F0'];
 
         // Paleta por KPI espelhando o design de referência (cor + fundo pastel da pílula)
         const PALETA_KPI = {
@@ -1107,6 +1114,10 @@ async function carregarEstatisticas() {
             azul:     { cor: '#1E3A8A', bg: '#EEF2FE' },
             grafite:  { cor: '#1E293B', bg: '#EFF3F8' }
         };
+
+        // No tema ESCURO, tudo que é escuro no tema CLARO vira CLARO
+        // (regra global do dashboard): cores escuras são clareadas via CSS.
+        window.dispatchEvent(new Event('themechange'));
 
         const kpis = [
             { rotulo: 'TOTAL NO HUB', numero: totalGeral, icone: 'ph-stack', cor: 'laranja', acao: "carregarDados('estagios')" },
@@ -1143,55 +1154,53 @@ async function carregarEstatisticas() {
                     </div>
                 </div>
 
-                <!-- LINHA DO MEIO: ANÉIS DE SAÚDE DO HUB -->
+                <!-- LINHA DO MEIO: PAINEL DE PRAZOS (ABERTOS x VENCIDOS) -->
                 <div class="dash-grid-widgets-circulares">
-                    <div class="dash-widget-circular">
-                        <div class="dash-widget-topo">
-                            <div class="dash-donut-container" style="--cor-anel: #FF5C00; --porcentagem: ${(retaFinal / Math.max(totalGeral, 1)) * 360}deg;">
-                                <div class="dash-donut-circulo">
-                                    <span class="dash-donut-valor" data-alvo="${retaFinal}">0</span>
-                                    <span class="dash-donut-sub">próximos 7 dias</span>
-                                </div>
+                    <div class="dash-card-prazos">
+                        <div class="dash-prazos-header">
+                            <div class="dash-widget-titulo-row">
+                                <span class="dash-icone-box bg-laranja"><i class="ph-bold ph-calendar-check"></i></span>
+                                <h3 class="dash-widget-titulo">Editais: Abertos x Vencidos</h3>
                             </div>
-                            <div class="dash-widget-info">
-                                <div class="dash-widget-titulo-row">
-                                    <span class="dash-icone-box bg-laranja"><i class="ph-bold ph-timer"></i></span>
-                                    <h3 class="dash-widget-titulo">Reta Final Urgente</h3>
-                                </div>
-                                <p class="dash-widget-desc">Editais que encerram as inscrições nos próximos 7 dias. Não perca nenhum prazo!</p>
-                            </div>
+                            <p class="dash-widget-desc">Acompanhe em tempo real quais editais ainda aceitam inscrições e quais já encerraram o prazo.</p>
                         </div>
-                        <div class="dash-widget-slider-box">
-                            <div class="dash-slider-trilho">
-                                <div class="dash-slider-progresso" style="width: ${Math.min((retaFinal / Math.max(totalGeral, 1)) * 100 * 4, 100)}%; background: #FF5C00;"></div>
-                                <div class="dash-slider-ponteiro" style="left: ${Math.min((retaFinal / Math.max(totalGeral, 1)) * 100 * 4, 100)}%;"></div>
-                            </div>
-                            <span class="dash-slider-tag tag-alerta">${retaFinal} vencendo em breve</span>
-                        </div>
-                    </div>
 
-                    <div class="dash-widget-circular">
-                        <div class="dash-widget-topo">
-                            <div class="dash-donut-container" style="--cor-anel: #10B981; --porcentagem: ${pctVigentes * 3.6}deg;">
-                                <div class="dash-donut-circulo">
-                                    <span class="dash-donut-valor" data-alvo="${pctVigentes}">0</span>
-                                    <span class="dash-donut-sub">% vigentes</span>
-                                </div>
-                            </div>
-                            <div class="dash-widget-info">
-                                <div class="dash-widget-titulo-row">
-                                    <span class="dash-icone-box bg-verde"><i class="ph-bold ph-heartbeat"></i></span>
-                                    <h3 class="dash-widget-titulo">Saúde do Hub</h3>
-                                </div>
-                                <p class="dash-widget-desc">${vigentes} de ${comPrazo} oportunidades ainda estão dentro do prazo de inscrição.</p>
+                        <div class="dash-prazos-resumo">
+                            <button type="button" class="dash-prazo-chip chip-aberto" onclick="carregarDados('estagios')" title="Ver oportunidades com inscrições abertas">
+                                <span class="dash-prazo-chip-numero" data-alvo="${vigentes}">0</span>
+                                <span class="dash-prazo-chip-rotulo">Abertos para inscrição</span>
+                            </button>
+                            <button type="button" class="dash-prazo-chip chip-vencendo" title="Editais que vencem nos próximos 7 dias">
+                                <span class="dash-prazo-chip-numero" data-alvo="${retaFinal}">0</span>
+                                <span class="dash-prazo-chip-rotulo">Vencem em até 7 dias</span>
+                            </button>
+                            <div class="dash-prazo-chip chip-vencido">
+                                <span class="dash-prazo-chip-numero" data-alvo="${vencidos}">0</span>
+                                <span class="dash-prazo-chip-rotulo">Editais vencidos</span>
                             </div>
                         </div>
-                        <div class="dash-widget-slider-box">
-                            <div class="dash-slider-trilho">
-                                <div class="dash-slider-progresso" style="width: ${pctVigentes}%; background: #10B981;"></div>
-                                <div class="dash-slider-ponteiro" style="left: ${pctVigentes}%;"></div>
+
+                        <div class="dash-prazos-listas">
+                            <div class="dash-prazo-coluna">
+                                <h4 class="dash-prazo-coluna-titulo titulo-aberto">
+                                    <i class="ph-bold ph-flag-banner"></i> Próximos a vencer
+                                </h4>
+                                ${proximos.length ? proximos.map(e => `
+                                <div class="dash-prazo-item item-aberto">
+                                    <span class="dash-prazo-item-titulo" title="${escaparHTML(e.titulo)}">${escaparHTML(e.titulo)}</span>
+                                    <strong class="dash-prazo-item-data">${escaparHTML(e.data)}</strong>
+                                </div>`).join('') : `<p class="dash-legenda-texto">Nenhum edital vence nos próximos 7 dias. 🎉</p>`}
                             </div>
-                            <span class="dash-slider-tag ${pctVigentes >= 60 ? 'tag-verde' : 'tag-alerta'}">${pctVigentes >= 60 ? 'Base saudável' : 'Requer varredura'}</span>
+                            <div class="dash-prazo-coluna">
+                                <h4 class="dash-prazo-coluna-titulo titulo-vencido">
+                                    <i class="ph-bold ph-prohibit"></i> Encerrados recentemente
+                                </h4>
+                                ${vencidosLista.length ? vencidosLista.map(e => `
+                                <div class="dash-prazo-item item-vencido">
+                                    <span class="dash-prazo-item-titulo" title="${escaparHTML(e.titulo)}">${escaparHTML(e.titulo)}</span>
+                                    <strong class="dash-prazo-item-data">${escaparHTML(e.data)}</strong>
+                                </div>`).join('') : `<p class="dash-legenda-texto">Nenhum edital encerrado recentemente.</p>`}
+                            </div>
                         </div>
                     </div>
                 </div>
