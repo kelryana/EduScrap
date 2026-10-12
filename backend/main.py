@@ -718,11 +718,32 @@ def obter_estatisticas():
         "noticias_ufersa": total_noticias_ufersa,
         "cursos_bolsas": db["noticias"].count_documents({"tipo": {"$in": ["capacitacao", "bolsa_estudo"]}}),
         "portal_uern": db["vagas_portal_uern"].count_documents({}),
-        "mprn": db["vagas_mprn"].count_documents({}) if "vagas_mprn" in nome_colecoes else 0,
-        "ifrn": db["vagas_ifrn"].count_documents({}) if "vagas_ifrn" in nome_colecoes else 0,
-        "iel": db["vagas_iel"].count_documents({}) if "vagas_iel" in nome_colecoes else 0,
-        "dom": db["vagas_dom"].count_documents({}) if "vagas_dom" in nome_colecoes else 0,
     }
+
+    # ---- Fontes que NÃO têm coleção dedicada ----
+    # Os scrapers de MPRN e IEL gravam na coleção "vagas"; IFRN e DOM Mossoró
+    # gravam na coleção "editais". As contagens por fonte são feitas pelo campo
+    # "fonte", espelhando exatamente os filtros dos endpoints /api/mprn, /api/iel,
+    # /api/ifrn e /api/dom. Assim o KPI "DOM Mossoró" (e MPRN/IEL/IFRN) deixa de
+    # retornar 0 por consultar coleções fantasmas ("vagas_mprn", "vagas_dom"...).
+    def _contar_por_fonte(colecao_nome, regex_fonte):
+        try:
+            return db[colecao_nome].count_documents(
+                {"fonte": {"$regex": regex_fonte, "$options": "i"}}
+            )
+        except Exception:
+            return 0
+
+    extras_fonte = {
+        "mprn": _contar_por_fonte("vagas", r"MPRN|Ministério Público"),
+        "iel": _contar_por_fonte("vagas", r"IEL"),
+        "ifrn": _contar_por_fonte("editais", r"IFRN"),
+        "dom": _contar_por_fonte("editais", r"Prefeitura de Mossoró|DOM/Mossoró"),
+    }
+    # Soma (não substitui): se um dia existirem coleções dedicadas além dos
+    # documentos compartilhados, nenhuma captação é perdida.
+    for chave, valor in extras_fonte.items():
+        totais[chave] = (totais.get(chave) or 0) + valor
 
     total_geral = sum(totais.values())
 
@@ -737,9 +758,23 @@ def obter_estatisticas():
     }
 
     colecoes_prazo = ["vagas_estagio", "vagas_bolsa", "vagas_ufersa", "vagas_ciee", "vagas_mprn", "vagas_ifrn", "vagas_iel", "vagas_dom"]
-    total_reta_final = sum(db[col].count_documents(query_reta_final) for col in colecoes_prazo if col in nome_colecoes)
 
-    # Editais vigentes (ainda dentro do prazo de inscrição) — usado no anel de saúde do hub
+    # Documentos compartilhados nas coleções genéricas "vagas" e "editais"
+    # (MPRN, IEL, IFRN, DOM Mossoró...) também têm prazo de inscrição e devem
+    # entrar na conta de reta final / saúde do hub. Filtro espelha os endpoints
+    # /api/mprn, /api/iel, /api/ifrn e /api/dom.
+    filtro_fontes_compartilhadas = {
+        "$or": [
+            {"fonte": {"$regex": r"MPRN|Ministério Público|IEL|IFRN|Prefeitura de Mossoró|DOM/Mossoró", "$options": "i"}},
+            {"titulo": {"$regex": r"\[DOM/Mossoró\]|\[MPRN\]|\[IEL", "$options": "i"}},
+        ]
+    }
+    def _consulta_prazo(colecao_nome, base_query):
+        q = dict(base_query)
+        q["$and"] = [filtro_fontes_compartilhadas]
+        return q
+
+    total_reta_final = sum(db[col].count_documents(query_reta_final) for col in colecoes_prazo if col in nome_colecoes)
     query_vigentes = {"data_vencimento": {"$gte": agora}}
     total_oportunidades_com_prazo = sum(
         db[col].count_documents({}) for col in colecoes_prazo if col in nome_colecoes
@@ -747,6 +782,16 @@ def obter_estatisticas():
     total_vigentes = sum(
         db[col].count_documents(query_vigentes) for col in colecoes_prazo if col in nome_colecoes
     )
+    for col_extra in ["vagas", "editais"]:
+        if col_extra not in nome_colecoes:
+            continue
+        try:
+            total_reta_final += db[col_extra].count_documents(_consulta_prazo(col_extra, query_reta_final))
+            total_extra = db[col_extra].count_documents(_consulta_prazo(col_extra, {}))
+            total_oportunidades_com_prazo += total_extra
+            total_vigentes += db[col_extra].count_documents(_consulta_prazo(col_extra, query_vigentes))
+        except Exception:
+            continue
 
     pipeline_prae = [
         {"$group": {"_id": "$categoria", "total": {"$sum": 1}}},
@@ -762,22 +807,46 @@ def obter_estatisticas():
     nomes_dias = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"]
     contagem_por_dia = [0] * 7
 
-    def _extrair_dt_documento(doc):
-        for campo in campos_data_captura:
-            valor = doc.get(campo)
-            if isinstance(valor, datetime):
-                return valor
+    def _normalizar_dt(valor):
+        """Aceita datetime ISO, string 'YYYY-MM-DD' (formato usado pelos
+        scrapers de DOM/Mossoró, MPRN, IEL e IFRN), string ISO com hora ou date."""
+        if isinstance(valor, datetime):
+            return valor
+        if isinstance(valor, str):
+            texto = valor.strip().replace("Z", "+00:00")
+            try:
+                return datetime.fromisoformat(texto)
+            except ValueError:
+                pass
+            try:
+                return datetime.strptime(texto[:10], "%Y-%m-%d")
+            except ValueError:
+                return None
+        # datetime.date puro (sem hora)
+        try:
+            import datetime as _dtmod
+            if isinstance(valor, _dtmod.date):
+                return datetime(valor.year, valor.month, valor.day)
+        except Exception:
+            return None
         return None
 
-    for col in colecoes_prazo + ["vagas_noticias", "noticias"]:
-        if col not in nome_colecoes:
-            continue
+    def _extrair_dt_documento(doc):
+        for campo in campos_data_captura:
+            dt = _normalizar_dt(doc.get(campo))
+            if dt:
+                return dt
+        return None
+
+    # Varre TODAS as coleções do hub — inclusive as genéricas "vagas" e
+    # "editais", onde vivem MPRN, IEL, IFRN e DOM Mossoró. Assim o fluxo
+    # semanal passa a contabilizar essas fontes também.
+    for col in nome_colecoes:
         try:
-            or_clausulas = [{campo: {"$gte": inicio_janela}} for campo in campos_data_captura]
-            cursor = db[col].find({"$or": or_clausulas})
+            cursor = db[col].find({}, projection={c: 1 for c in campos_data_captura})
             for doc in cursor:
                 dt = _extrair_dt_documento(doc)
-                if dt and dt >= inicio_janela:
+                if dt and inicio_janela <= dt <= agora + timedelta(days=1):
                     contagem_por_dia[dt.weekday()] += 1
         except Exception:
             continue
