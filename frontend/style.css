@@ -1364,7 +1364,7 @@ button.dash-prazo-chip:active {
 }
 
 .dash-prazo-coluna-titulo.titulo-aberto { color: #10B981; }
-.dash-prazo-coluna-titulo.titulo-vencido { color: #DC2626; }
+.dash-prazo-coluna-titulo.titulo-vencido { color: #FB8484; }
 
 .dash-prazo-item {
     display: flex;
@@ -3641,9 +3641,9 @@ html.dark .dash-prazo-chip-icone {
     border-color: #475569 !important;
 }
 
-html.dark .chip-aberto { background: #064E3B !important; }
-html.dark .chip-vencendo { background: #7C2D12 !important; }
-html.dark .chip-vencido { background: #7F1D1D !important; }
+html.dark .chip-aberto { background: #0b1934 !important; }
+html.dark .chip-vencendo { background: #0b1934 !important; }
+html.dark .chip-vencido { background: #0b1934 !important; }
 
 html.dark .chip-aberto .dash-prazo-chip-numero { color: #6EE7B7 !important; }
 html.dark .chip-vencendo .dash-prazo-chip-numero { color: #FDBA74 !important; }
@@ -3692,7 +3692,7 @@ html.dark .item-aberto .dash-prazo-item-data {
 
 html.dark .item-vencido .dash-prazo-item-data {
     background: #7F1D1D !important;
-    color: #FCA5A5 !important;
+    color: #FFEBEB !important;
     border-color: #B91C1C !important;
 }
 
