@@ -54,15 +54,10 @@ dump/
 
 # SCRIPTS DE SCRAPING - ARQUIVOS GERADOS
 
-*.png
 *.jpg
 *.jpeg
-screenshot-*.png
-ciee_debug.png
+ciee_erro.png
 erro.png
-pagina_atual.png
-*.html
-*.xml
 
 
 # EDITORES
