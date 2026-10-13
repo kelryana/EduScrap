@@ -141,3 +141,12 @@ output/
 frontend/*.log
 frontend/*.tmp
 !frontend/*.html
+
+
+# IMAGENS DO FRONTEND (liberas do ignore de *.png)
+
+!frontend/assets/
+!frontend/assets/**
+!*.png
+!*.jpg
+!*.jpeg

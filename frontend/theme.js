@@ -34,12 +34,26 @@
             localStorage.setItem(THEME_KEY, theme);
         }
         updateToggleUI();
+        updateLogo(theme);
         // Avisa o dashboard (script.js) para recolorir elementos inline.
         window.dispatchEvent(new Event('themechange'));
     }
 
     function toggleTheme() {
         applyTheme(isDark() ? 'light' : 'dark');
+    }
+
+    // Troca a imagem da logo conforme o tema: logos com os atributos
+    // data-logo-light / data-logo-dark usam assets/logo_temaescuro.png
+    // no tema escuro, mantendo exatamente o mesmo tamanho/CSS da logo.
+    function updateLogo(theme) {
+        const dark = theme === 'dark';
+        document.querySelectorAll('img[data-logo-dark]').forEach(function (img) {
+            const srcDark = img.getAttribute('data-logo-dark');
+            const srcLight = img.getAttribute('data-logo-light') || 'assets/logo.png';
+            const alvo = dark ? srcDark : srcLight;
+            if (img.getAttribute('src') !== alvo) img.setAttribute('src', alvo);
+        });
     }
 
     // Atualiza ícone e texto do botão (lua/sol + "Escuro"/"Claro").
@@ -57,10 +71,13 @@
     }
 
     // Aplica imediatamente (o script roda no <head>, antes do body existir;
-    // por isso updateToggleUI também é chamado no DOMContentLoaded).
+    // por isso updateToggleUI/updateLogo também são chamados no DOMContentLoaded).
     applyTheme(getPreferredTheme(), false);
 
-    document.addEventListener('DOMContentLoaded', updateToggleUI);
+    document.addEventListener('DOMContentLoaded', function () {
+        updateToggleUI();
+        updateLogo(isDark() ? 'dark' : 'light');
+    });
 
     // Expõe para o onclick="toggleTheme()" dos botões.
     window.toggleTheme = toggleTheme;
