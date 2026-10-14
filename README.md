@@ -167,24 +167,6 @@ O projeto possui um conjunto completo de diagramas atualizados em conformidade c
 | **6** | **Componentes do Sistema** | Visão modular em 4 camadas desacopladas: Apresentação (Frontend), Serviços (FastAPI), Ingestão & Processamento e Persistência NoSQL. | [PNG](diagramas_atualizados/diagrama_06_componentes_sistema.png) • [SVG](diagramas_atualizados/diagrama_06_componentes_sistema.svg) • [PUML](diagramas_atualizados/diagrama_06_componentes_sistema.puml) |
 | **7** | **Estados do Objeto Edital** | Máquina de estados: *Descoberto* ➔ *Em Extração* ➔ *Em Normalização* ➔ *Aberto / Vigente* ➔ *Prazo Crítico (≤ 3 dias)* ➔ *Encerrado* ou *Inválido*. | [PNG](diagramas_atualizados/diagrama_07_estados_edital.png) • [SVG](diagramas_atualizados/diagrama_07_estados_edital.svg) • [PUML](diagramas_atualizados/diagrama_07_estados_edital.puml) |
 
----
-
-##  Documentos Acadêmicos Oficiais
-
-Os documentos formais de entrega da disciplina de Projeto Integrador encontram-se gerados e formatados em conformidade com o padrão institucional do Departamento de Informática (DI/UERN) na pasta [`documentos_finais/`](documentos_finais/):
-
-- **Documento 1: Proposta do Projeto Integrador**
-  - [Proposta_do_Projeto_EduScrap.pdf](documentos_finais/Proposta_do_Projeto_EduScrap.pdf) (Versão para envio/impressão)
-  - [Proposta_do_Projeto_EduScrap.docx](documentos_finais/Proposta_do_Projeto_EduScrap.docx) (Versão editável Word)
-  - *Conteúdo:* Cronograma real das 6 semanas, justificativa de aderência, viabilidade técnica detalhada e plano de atividades.
-
-- **Documento 2: Modelagem de Análise e Projeto Orientado a Objetos usando UML**
-  - [Documento_Modelagem_UML_EduScrap.pdf](documentos_finais/Documento_Modelagem_UML_EduScrap.pdf) (Documento completo de 36 páginas com todas as figuras e telas)
-  - [Documento_Modelagem_UML_EduScrap.docx](documentos_finais/Documento_Modelagem_UML_EduScrap.docx) (Versão editável Word)
-  - *Conteúdo:* Histórico de revisão higienizado, especificações textuais dos casos de uso UC01 a UC09, modelo conceitual, diagramas de sequência, modelo NoSQL, classes, prints reais da interface (Donut Chart, Dark Mode, listagem e login) e análise de usabilidade de Nielsen.
-
----
-
 ## Referência Completa da API REST
 
 A API do EduScrap fornece os seguintes endpoints principais:
@@ -239,14 +221,6 @@ EduScrap/
 ├── config/
 │   ├── course_mapping.json       # Mapeamento oficial de cursos por área acadêmica
 │   └── patterns.json             # Padrões compilados de Regex para extração
-├── diagramas_atualizados/        # 7 Novos Diagramas Arquiteturais (PNG, SVG, PUML)
-│   ├── README.md                 # Guia técnico dos diagramas
-│   └── diagrama_01_* a 07_*      # Arquivos nos formatos PNG, SVG e PUML
-├── documentos_finais/            # Documentação Acadêmica Completa (PDF e DOCX)
-│   ├── Proposta_do_Projeto_EduScrap.pdf / .docx
-│   └── Documento_Modelagem_UML_EduScrap.pdf / .docx
-├── diagrams/                     # Capturas de tela e assets gráficos auxiliares
-├── logs/                         # Logs isolados de execução de cada robô de scraping
 ├── tests/                        # Bateria de testes automatizados com Pytest
 ├── normalizer/                   # Módulos de normalização textual e validação de datas
 ├── Makefile                      # Atalhos para comandos rápidos (run, scrape, test, setup)
