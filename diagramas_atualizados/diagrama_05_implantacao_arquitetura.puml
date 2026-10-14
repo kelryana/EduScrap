@@ -1,0 +1,62 @@
+@startuml Implantacao_EduScrap_Real
+skinparam node {
+    BorderColor #2B6CB0
+    BackgroundColor #F7FAFC
+}
+skinparam component {
+    BorderColor #333333
+    BackgroundColor #FFFFFF
+}
+
+node "Dispositivo do Discente / Usuário" as ClientNode {
+    artifact "Navegador Web\n[Chrome / Firefox / Edge]" as Browser
+}
+
+node "Servidor Local / Nuvem Linux (Host EduScrap)" as ServerNode {
+    
+    node "Processo Frontend (Porta 3000)" {
+        component "Servidor Web HTTP\n[Vanilla JS + CSS3 + SVG]" as WebServer
+    }
+
+    node "Processo Backend (Porta 8000)" {
+        component "FastAPI Framework\n[ASGI Uvicorn Server]" as ApiServer
+        component "OpenAPI / Swagger\n[/docs Interativo]" as Swagger
+    }
+    
+    node "Processo em Background (Batch)" {
+        component "Orquestrador Concorrente\n[run_scrapers.py]" as Runner
+        component "Módulos de Scraping\n[Requests + Selenium Headless]" as Scrapers
+    }
+    
+    folder "Armazenamento Local" {
+        file "logs/*.log\n(Logs isolados por robô)" as Logs
+        file "config/*.json\n(Mapeamento de Cursos)" as Configs
+    }
+}
+
+node "Servidor de Banco de Dados" as DBNode {
+    database "MongoDB 7.0 (Porta 27017)\n[Database: hub_estudantes]" as Mongo {
+        collections "oportunidades"
+        collections "usuarios"
+    }
+}
+
+cloud "Fontes Externas (Internet)" as ExternalCloud {
+    component "Portais Institucionais UERN" as UernSites
+    component "Diários Oficiais (JOUERN)" as Jouern
+    component "Portal UFERSA" as Ufersa
+    component "Plataforma CIEE" as Ciee
+}
+
+' Comunicações
+Browser --> WebServer : HTTP / GET :3000
+Browser --> ApiServer : REST / JSON :8000
+ApiServer --> Mongo : TCP / Driver PyMongo :27017
+ApiServer ..> Swagger : Disponibiliza documentação
+
+Runner --> Scrapers : Dispara threads paralelas
+Scrapers --> ExternalCloud : Web Scraping (HTTP/HTTPS)
+Scrapers --> Mongo : Persiste dados normalizados
+Scrapers --> Logs : Grava execuções e erros
+Scrapers ..> Configs : Lê mapeamento de áreas
+@enduml

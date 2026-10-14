@@ -1,0 +1,209 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1150 900" width="100%" height="100%">
+  <defs>
+    <filter id="shadow2" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <rect width="1150" height="900" fill="#FFFFFF"/>
+  <text x="575" y="38" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#003366" text-anchor="middle">
+    Diagrama de Classes de Software – Arquitetura do Sistema EduScrap
+  </text>
+  <text x="575" y="58" font-family="Arial, sans-serif" font-size="12" fill="#718096" text-anchor="middle">
+    Estrutura de classes orientada a objetos: API FastAPI, Ingestão Concorrente, Modelos Pydantic e Persistência NoSQL
+  </text>
+
+  <!-- PACOTE API -->
+  <rect x="40" y="80" width="480" height="340" rx="8" fill="#F0F9FF" stroke="#0284C7" stroke-width="1.5" filter="url(#shadow2)"/>
+  <rect x="40" y="80" width="180" height="25" rx="8" fill="#BAE6FD"/>
+  <text x="50" y="97" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#0369A1">API &amp; Controllers (FastAPI)</text>
+
+  <!-- Classe FastAPIApplication -->
+  <g transform="translate(60, 115)">
+    <rect width="440" height="150" fill="#FFFFFF" stroke="#0284C7" stroke-width="1.5" rx="4"/>
+    <rect width="440" height="26" fill="#E0F2FE" rx="4"/>
+    <text x="220" y="18" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#0369A1" text-anchor="middle">FastAPIApplication (main.py)</text>
+    <line x1="0" y1="26" x2="440" y2="26" stroke="#0284C7"/>
+    <text x="10" y="44" font-family="monospace" font-size="10" fill="#333">+ app: FastAPI</text>
+    <text x="10" y="58" font-family="monospace" font-size="10" fill="#333">+ router: APIRouter</text>
+    <line x1="0" y1="66" x2="440" y2="66" stroke="#E2E8F0"/>
+    <text x="10" y="82" font-family="monospace" font-size="10" fill="#333">+ listar_oportunidades(categoria, busca): List[OportunidadeModel]</text>
+    <text x="10" y="96" font-family="monospace" font-size="10" fill="#333">+ listar_editais(status): List[OportunidadeModel]</text>
+    <text x="10" y="110" font-family="monospace" font-size="10" fill="#333">+ listar_vagas(): List[OportunidadeModel]</text>
+    <text x="10" y="124" font-family="monospace" font-size="10" fill="#333">+ obter_estatisticas_prazos(): EstatisticasPrazos</text>
+    <text x="10" y="138" font-family="monospace" font-size="10" fill="#333">+ health_check(): dict</text>
+  </g>
+
+  <!-- Classe EstatisticasPrazos -->
+  <g transform="translate(60, 280)">
+    <rect width="210" height="120" fill="#FFFFFF" stroke="#0284C7" stroke-width="1.5" rx="4"/>
+    <rect width="210" height="24" fill="#E0F2FE" rx="4"/>
+    <text x="105" y="16" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#0369A1" text-anchor="middle">&lt;&lt;Pydantic&gt;&gt; EstatisticasPrazos</text>
+    <line x1="0" y1="24" x2="210" y2="24" stroke="#0284C7"/>
+    <text x="8" y="40" font-family="monospace" font-size="9.5" fill="#333">+ total: int</text>
+    <text x="8" y="54" font-family="monospace" font-size="9.5" fill="#333">+ vigentes: int</text>
+    <text x="8" y="68" font-family="monospace" font-size="9.5" fill="#333">+ encerrados: int</text>
+    <text x="8" y="82" font-family="monospace" font-size="9.5" fill="#333">+ sem_prazo: int</text>
+    <line x1="0" y1="90" x2="210" y2="90" stroke="#E2E8F0"/>
+    <text x="8" y="105" font-family="monospace" font-size="9.5" fill="#333">+ calcular_metricas_donut()</text>
+  </g>
+
+  <!-- Classe OportunidadeModel -->
+  <g transform="translate(290, 280)">
+    <rect width="210" height="120" fill="#FFFFFF" stroke="#0284C7" stroke-width="1.5" rx="4"/>
+    <rect width="210" height="24" fill="#E0F2FE" rx="4"/>
+    <text x="105" y="16" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#0369A1" text-anchor="middle">&lt;&lt;Pydantic&gt;&gt; OportunidadeModel</text>
+    <line x1="0" y1="24" x2="210" y2="24" stroke="#0284C7"/>
+    <text x="8" y="40" font-family="monospace" font-size="9.5" fill="#333">+ id: str</text>
+    <text x="8" y="54" font-family="monospace" font-size="9.5" fill="#333">+ titulo: str</text>
+    <text x="8" y="68" font-family="monospace" font-size="9.5" fill="#333">+ link: str</text>
+    <text x="8" y="82" font-family="monospace" font-size="9.5" fill="#333">+ data_publicacao: datetime</text>
+    <text x="8" y="96" font-family="monospace" font-size="9.5" fill="#333">+ data_limite: Optional[datetime]</text>
+    <text x="8" y="110" font-family="monospace" font-size="9.5" fill="#333">+ status_vigencia: str</text>
+  </g>
+
+  <!-- PACOTE SCRAPING -->
+  <rect x="560" y="80" width="550" height="480" rx="8" fill="#FDF8F6" stroke="#EA580C" stroke-width="1.5" filter="url(#shadow2)"/>
+  <rect x="560" y="80" width="230" height="25" rx="8" fill="#FFEDD5"/>
+  <text x="570" y="97" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#C2410C">Engine de Scraping Concorrente</text>
+
+  <!-- ScraperRunner -->
+  <g transform="translate(580, 115)">
+    <rect width="510" height="110" fill="#FFFFFF" stroke="#EA580C" stroke-width="1.5" rx="4"/>
+    <rect width="510" height="26" fill="#FFEDD5" rx="4"/>
+    <text x="255" y="18" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#C2410C" text-anchor="middle">ScraperRunner (run_scrapers.py)</text>
+    <line x1="0" y1="26" x2="510" y2="26" stroke="#EA580C"/>
+    <text x="10" y="44" font-family="monospace" font-size="10" fill="#333">- FONTES_DISPONIVEIS: List[str] = ['prae', 'proex', 'portal_uern', 'ufersa', 'ciee']</text>
+    <text x="10" y="58" font-family="monospace" font-size="10" fill="#333">- max_workers: int = 5</text>
+    <line x1="0" y1="66" x2="510" y2="66" stroke="#E2E8F0"/>
+    <text x="10" y="82" font-family="monospace" font-size="10" fill="#333">+ executar_paralelo(fontes_selecionadas: List[str]): void</text>
+    <text x="10" y="96" font-family="monospace" font-size="10" fill="#333">+ executar_serial(): void</text>
+    <text x="10" y="106" font-family="monospace" font-size="10" fill="#333">+ configurar_logger_isolado(nome_fonte: str): Logger</text>
+  </g>
+
+  <!-- BaseScraper -->
+  <g transform="translate(710, 245)">
+    <rect width="250" height="100" fill="#FFFFFF" stroke="#EA580C" stroke-width="1.5" rx="4"/>
+    <rect width="250" height="24" fill="#FFEDD5" rx="4"/>
+    <text x="125" y="16" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#C2410C" text-anchor="middle">&lt;&lt;Abstract&gt;&gt; BaseScraper</text>
+    <line x1="0" y1="24" x2="250" y2="24" stroke="#EA580C"/>
+    <text x="8" y="40" font-family="monospace" font-size="9.5" fill="#333"># nome_fonte: str</text>
+    <text x="8" y="54" font-family="monospace" font-size="9.5" fill="#333"># url_base: str</text>
+    <line x1="0" y1="62" x2="250" y2="62" stroke="#E2E8F0"/>
+    <text x="8" y="78" font-family="monospace" font-size="9.5" fill="#333">+ {abstract} coletar(): List[dict]</text>
+    <text x="8" y="92" font-family="monospace" font-size="9.5" fill="#333">+ salvar_no_banco(dados): int</text>
+  </g>
+
+  <!-- Especializações -->
+  <g transform="translate(580, 375)">
+    <rect width="115" height="75" fill="#FFFFFF" stroke="#EA580C" rx="4"/>
+    <rect width="115" height="20" fill="#FFEDD5" rx="4"/>
+    <text x="57" y="14" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#C2410C" text-anchor="middle">ScraperPRAE</text>
+    <line x1="0" y1="20" x2="115" y2="20" stroke="#EA580C"/>
+    <text x="5" y="36" font-family="monospace" font-size="8.5" fill="#333">+ coletar(): List</text>
+    <text x="5" y="50" font-family="monospace" font-size="8.5" fill="#333">+ ler_editais_html()</text>
+    <text x="5" y="64" font-family="monospace" font-size="8.5" fill="#333">+ extrair_bolsas()</text>
+  </g>
+
+  <g transform="translate(710, 375)">
+    <rect width="115" height="75" fill="#FFFFFF" stroke="#EA580C" rx="4"/>
+    <rect width="115" height="20" fill="#FFEDD5" rx="4"/>
+    <text x="57" y="14" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#C2410C" text-anchor="middle">ScraperUERN</text>
+    <line x1="0" y1="20" x2="115" y2="20" stroke="#EA580C"/>
+    <text x="5" y="36" font-family="monospace" font-size="8.5" fill="#333">- driver: WebDriver</text>
+    <text x="5" y="50" font-family="monospace" font-size="8.5" fill="#333">+ coletar(): List</text>
+    <text x="5" y="64" font-family="monospace" font-size="8.5" fill="#333">+ paginar_portal()</text>
+  </g>
+
+  <g transform="translate(840, 375)">
+    <rect width="115" height="75" fill="#FFFFFF" stroke="#EA580C" rx="4"/>
+    <rect width="115" height="20" fill="#FFEDD5" rx="4"/>
+    <text x="57" y="14" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#C2410C" text-anchor="middle">ScraperUFERSA</text>
+    <line x1="0" y1="20" x2="115" y2="20" stroke="#EA580C"/>
+    <text x="5" y="36" font-family="monospace" font-size="8.5" fill="#333">+ coletar(): List</text>
+    <text x="5" y="50" font-family="monospace" font-size="8.5" fill="#333">+ parse_editais()</text>
+  </g>
+
+  <g transform="translate(970, 375)">
+    <rect width="120" height="75" fill="#FFFFFF" stroke="#EA580C" rx="4"/>
+    <rect width="120" height="20" fill="#FFEDD5" rx="4"/>
+    <text x="60" y="14" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#C2410C" text-anchor="middle">ScraperCIEE</text>
+    <line x1="0" y1="20" x2="120" y2="20" stroke="#EA580C"/>
+    <text x="5" y="36" font-family="monospace" font-size="8.5" fill="#333">- driver: Firefox</text>
+    <text x="5" y="50" font-family="monospace" font-size="8.5" fill="#333">+ coletar(): List</text>
+    <text x="5" y="64" font-family="monospace" font-size="8.5" fill="#333">+ filtrar_vagas()</text>
+  </g>
+
+  <!-- Linhas herança scrapers -->
+  <path d="M 637 375 L 637 355 L 835 355 L 835 345" fill="none" stroke="#EA580C" stroke-width="1.5"/>
+  <path d="M 767 375 L 767 355" fill="none" stroke="#EA580C" stroke-width="1.5"/>
+  <path d="M 897 375 L 897 355" fill="none" stroke="#EA580C" stroke-width="1.5"/>
+  <path d="M 1030 375 L 1030 355 L 835 355" fill="none" stroke="#EA580C" stroke-width="1.5"/>
+
+  <!-- PACOTE NORMALIZAÇÃO -->
+  <rect x="40" y="460" width="480" height="240" rx="8" fill="#F0FDF4" stroke="#16A34A" stroke-width="1.5" filter="url(#shadow2)"/>
+  <rect x="40" y="460" width="220" height="25" rx="8" fill="#DCFCE7"/>
+  <text x="50" y="477" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#15803D">Processamento &amp; Normalização</text>
+
+  <!-- Normalizer -->
+  <g transform="translate(60, 495)">
+    <rect width="210" height="185" fill="#FFFFFF" stroke="#16A34A" stroke-width="1.5" rx="4"/>
+    <rect width="210" height="24" fill="#DCFCE7" rx="4"/>
+    <text x="105" y="16" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#15803D" text-anchor="middle">Normalizer (Regex Engine)</text>
+    <line x1="0" y1="24" x2="210" y2="24" stroke="#16A34A"/>
+    <text x="8" y="40" font-family="monospace" font-size="9.5" fill="#333">- PADROES_REGEX: dict</text>
+    <text x="8" y="54" font-family="monospace" font-size="9.5" fill="#333">- FORMATOS_DATA: List</text>
+    <line x1="0" y1="62" x2="210" y2="62" stroke="#E2E8F0"/>
+    <text x="8" y="78" font-family="monospace" font-size="9.5" fill="#333">+ extrair_datas(texto)</text>
+    <text x="8" y="94" font-family="monospace" font-size="9.5" fill="#333">+ validar_vigencia(data)</text>
+    <text x="8" y="110" font-family="monospace" font-size="9.5" fill="#333">+ mapear_area_curso(txt)</text>
+    <text x="8" y="126" font-family="monospace" font-size="9.5" fill="#333">+ limpar_html(bruto)</text>
+    <text x="8" y="142" font-family="monospace" font-size="9.5" fill="#333">+ padronizar_json(): dict</text>
+  </g>
+
+  <!-- PDFUtils -->
+  <g transform="translate(290, 495)">
+    <rect width="210" height="185" fill="#FFFFFF" stroke="#16A34A" stroke-width="1.5" rx="4"/>
+    <rect width="210" height="24" fill="#DCFCE7" rx="4"/>
+    <text x="105" y="16" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#15803D" text-anchor="middle">PDFUtils (Leitor JOUERN)</text>
+    <line x1="0" y1="24" x2="210" y2="24" stroke="#16A34A"/>
+    <text x="8" y="40" font-family="monospace" font-size="9.5" fill="#333">- engine_pdf: pdfplumber</text>
+    <text x="8" y="54" font-family="monospace" font-size="9.5" fill="#333">- fallback: PyPDF2</text>
+    <line x1="0" y1="62" x2="210" y2="62" stroke="#E2E8F0"/>
+    <text x="8" y="78" font-family="monospace" font-size="9.5" fill="#333">+ extrair_texto_pdf(path)</text>
+    <text x="8" y="94" font-family="monospace" font-size="9.5" fill="#333">+ ler_tabelas_jouern()</text>
+    <text x="8" y="110" font-family="monospace" font-size="9.5" fill="#333">+ extrair_metadados_doc()</text>
+  </g>
+
+  <!-- PACOTE PERSISTÊNCIA -->
+  <rect x="560" y="590" width="550" height="250" rx="8" fill="#F8FAFC" stroke="#475569" stroke-width="1.5" filter="url(#shadow2)"/>
+  <rect x="560" y="590" width="180" height="25" rx="8" fill="#E2E8F0"/>
+  <text x="570" y="607" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#334155">Persistência (MongoDB)</text>
+
+  <!-- MongoDatabase -->
+  <g transform="translate(580, 625)">
+    <rect width="510" height="195" fill="#FFFFFF" stroke="#475569" stroke-width="1.5" rx="4"/>
+    <rect width="510" height="24" fill="#E2E8F0" rx="4"/>
+    <text x="255" y="16" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#334155" text-anchor="middle">MongoDatabase (database_setup.py)</text>
+    <line x1="0" y1="24" x2="510" y2="24" stroke="#475569"/>
+    <text x="8" y="40" font-family="monospace" font-size="9.5" fill="#333">- client: MongoClient</text>
+    <text x="8" y="54" font-family="monospace" font-size="9.5" fill="#333">- db: Database = 'hub_estudantes'</text>
+    <text x="8" y="68" font-family="monospace" font-size="9.5" fill="#333">+ col_oportunidades: Collection</text>
+    <text x="8" y="82" font-family="monospace" font-size="9.5" fill="#333">+ col_usuarios: Collection</text>
+    <line x1="0" y1="90" x2="510" y2="90" stroke="#CBD5E1"/>
+    <text x="8" y="106" font-family="monospace" font-size="9.5" fill="#333">+ database_setup(): void (Aplica JSON Schema validation)</text>
+    <text x="8" y="122" font-family="monospace" font-size="9.5" fill="#333">+ criar_indices_busca(): void (Índice de texto em titulo/tags + índice data_limite)</text>
+    <text x="8" y="138" font-family="monospace" font-size="9.5" fill="#333">+ upsert_oportunidade(filtro: dict, doc: dict): UpdateResult</text>
+    <text x="8" y="154" font-family="monospace" font-size="9.5" fill="#333">+ buscar_por_filtros(categoria, busca, status): Cursor</text>
+  </g>
+
+  <!-- LIGAÇÕES ENTRE PACOTES -->
+  <path d="M 280 265 L 280 440 L 600 440 L 600 625" fill="none" stroke="#2B6CB0" stroke-width="1.5" stroke-dasharray="4,4"/>
+  <text x="380" y="435" font-family="Arial, sans-serif" font-size="10" fill="#2B6CB0">&lt;&lt;consulta e agrega&gt;&gt;</text>
+
+  <path d="M 835 450 L 835 590" fill="none" stroke="#EA580C" stroke-width="1.5"/>
+  <text x="840" y="520" font-family="Arial, sans-serif" font-size="10" fill="#EA580C">&lt;&lt;persiste dados higienizados&gt;&gt;</text>
+
+  <path d="M 580 400 L 520 400 L 520 500 L 270 500" fill="none" stroke="#16A34A" stroke-width="1.5" stroke-dasharray="4,4"/>
+  <text x="370" y="495" font-family="Arial, sans-serif" font-size="10" fill="#16A34A">&lt;&lt;normaliza dados brutos&gt;&gt;</text>
+</svg>

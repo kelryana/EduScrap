@@ -56,9 +56,6 @@ dump/
 
 *.jpg
 *.jpeg
-# coloque no gitignore os arquivos png, mas libere os arquivos de imagem do frontend (frontend/assets/)
-*.png
-*.gif
 *.svg
 
 
@@ -137,6 +134,14 @@ temp/
 scraped_data/
 output/
 
+# ARQUIVOS DE DADOS/ANEXOS
+*.pdf
+*.docx
+*.png
+*.json
+!config/*.json
+!config/**/*.json
+
 
 # FRONTEND
 
@@ -145,10 +150,10 @@ frontend/*.tmp
 !frontend/*.html
 
 
-# IMAGENS DO FRONTEND (liberas do ignore de *.png)
-
+# IMAGENS DO FRONTEND E DOCUMENTOS (liberados do ignore)
 !frontend/assets/
 !frontend/assets/**
-!*.png
-!*.jpg
-!*.jpeg
+!diagramas_atualizados/
+!diagramas_atualizados/**
+!documentos_finais/
+!documentos_finais/**

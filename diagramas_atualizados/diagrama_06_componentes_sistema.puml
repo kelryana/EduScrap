@@ -1,0 +1,57 @@
+@startuml Componentes_EduScrap_Modular
+skinparam componentStyle uml2
+skinparam backgroundColor #FFFFFF
+
+package "Frontend SPA" {
+    [UI Controller & Router] as UI_Ctrl
+    [Theme Switcher (Dark/Light)] as Theme_Mod
+    [Donut Chart Engine (SVG)] as Donut_Mod
+    [Filter & Search Engine] as Filter_Mod
+}
+
+package "Backend REST API (FastAPI)" {
+    [API Router & Endpoints] as Router_Mod
+    [Pydantic Models & Schemas] as Schema_Mod
+    [CORS & Security Middleware] as Sec_Mod
+}
+
+package "Engine de Ingestão & Processamento" {
+    [Scraper Orchestrator] as Orch_Mod
+    [Static Scrapers (BS4)] as Static_Mod
+    [Dynamic Scrapers (Selenium)] as Dyn_Mod
+    [Normalizer & Regex Engine] as Regex_Mod
+    [PDF Processing (pdfplumber)] as PDF_Mod
+}
+
+package "Camada de Dados (MongoDB)" {
+    [Database Connection Pool] as DB_Pool
+    [Schema Validation & Indexes] as DB_Index
+    database "MongoDB Cluster" as DB_Inst
+}
+
+cloud "Fontes Externas" as Ext_Sources
+
+' Ligações Frontend
+UI_Ctrl --> Filter_Mod
+UI_Ctrl --> Donut_Mod
+UI_Ctrl --> Theme_Mod
+UI_Ctrl --> Router_Mod : HTTP / JSON (Porta 8000)
+
+' Ligações Backend
+Router_Mod --> Sec_Mod
+Router_Mod --> Schema_Mod
+Router_Mod --> DB_Pool : Consultas de leitura
+
+' Ligações Ingestão
+Orch_Mod --> Static_Mod
+Orch_Mod --> Dyn_Mod
+Static_Mod --> Regex_Mod
+Dyn_Mod --> Regex_Mod
+Regex_Mod --> PDF_Mod
+Static_Mod --> Ext_Sources : Requisições HTTP
+Dyn_Mod --> Ext_Sources : Automação Headless
+
+Regex_Mod --> DB_Pool : Gravação de oportunidades
+DB_Pool --> DB_Index
+DB_Index --> DB_Inst
+@enduml

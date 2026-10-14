@@ -1,0 +1,167 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 850" width="100%" height="100%">
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.12"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2B6CB0"/>
+    </marker>
+    <marker id="arrow-dash" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#718096"/>
+    </marker>
+  </defs>
+
+  <rect width="1100" height="850" fill="#FFFFFF"/>
+  <text x="550" y="38" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#003366" text-anchor="middle">
+    Diagrama de Casos de Uso – Plataforma EduScrap (Atualizado)
+  </text>
+  <text x="550" y="58" font-family="Arial, sans-serif" font-size="12" fill="#718096" text-anchor="middle">
+    Modelagem funcional completa incluindo: Busca Textual, Filtro de Cursos, Filtro por Fontes e Gráfico Donut de Prazos
+  </text>
+
+  <rect x="230" y="80" width="640" height="740" rx="12" fill="#F8FAFC" stroke="#CBD5E0" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="230" y="80" width="640" height="35" rx="12" fill="#EDF2F7"/>
+  <text x="550" y="103" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#2D3748" text-anchor="middle">
+    Sistema EduScrap (Frontend SPA + API FastAPI)
+  </text>
+
+  <!-- ATOR: ESTUDANTE -->
+  <g transform="translate(100, 360)">
+    <circle cx="0" cy="-35" r="16" fill="#EBF8FF" stroke="#2B6CB0" stroke-width="2.5"/>
+    <line x1="0" y1="-19" x2="0" y2="25" stroke="#2B6CB0" stroke-width="2.5"/>
+    <line x1="-25" y1="-5" x2="25" y2="-5" stroke="#2B6CB0" stroke-width="2.5"/>
+    <line x1="0" y1="25" x2="-20" y2="65" stroke="#2B6CB0" stroke-width="2.5"/>
+    <line x1="0" y1="25" x2="20" y2="65" stroke="#2B6CB0" stroke-width="2.5"/>
+    <text x="0" y="88" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#1A365D" text-anchor="middle">Estudante</text>
+    <text x="0" y="104" font-family="Arial, sans-serif" font-size="10" fill="#4A5568" text-anchor="middle">(Discente UERN / UFERSA)</text>
+  </g>
+
+  <!-- ATOR: ADMINISTRADOR -->
+  <g transform="translate(1000, 360)">
+    <circle cx="0" cy="-35" r="16" fill="#FEFCBF" stroke="#D69E2E" stroke-width="2.5"/>
+    <line x1="0" y1="-19" x2="0" y2="25" stroke="#D69E2E" stroke-width="2.5"/>
+    <line x1="-25" y1="-5" x2="25" y2="-5" stroke="#D69E2E" stroke-width="2.5"/>
+    <line x1="0" y1="25" x2="-20" y2="65" stroke="#D69E2E" stroke-width="2.5"/>
+    <line x1="0" y1="25" x2="20" y2="65" stroke="#D69E2E" stroke-width="2.5"/>
+    <text x="0" y="88" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#744210" text-anchor="middle">Administrador</text>
+    <text x="0" y="104" font-family="Arial, sans-serif" font-size="10" fill="#4A5568" text-anchor="middle">(DevOps / Gestor)</text>
+  </g>
+
+  <!-- UC01 -->
+  <g transform="translate(390, 230)">
+    <ellipse cx="160" cy="0" rx="155" ry="32" fill="#EBF8FF" stroke="#3182CE" stroke-width="2.5" filter="url(#shadow)"/>
+    <text x="160" y="-5" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#1A365D" text-anchor="middle">UC01: Consultar Feed de Oportunidades</text>
+    <text x="160" y="14" font-family="Arial, sans-serif" font-size="10.5" fill="#4A5568" text-anchor="middle">(Visualização agregada de editais e vagas)</text>
+  </g>
+  <line x1="125" y1="360" x2="395" y2="235" stroke="#2B6CB0" stroke-width="2"/>
+
+  <!-- UC02 -->
+  <g transform="translate(250, 140)">
+    <ellipse cx="120" cy="0" rx="115" ry="24" fill="#FFFFFF" stroke="#4A5568" stroke-width="1.5" stroke-dasharray="3,3"/>
+    <text x="120" y="-3" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#2D3748" text-anchor="middle">UC02: Pesquisar por Palavra</text>
+    <text x="120" y="12" font-family="Arial, sans-serif" font-size="9.5" fill="#718096" text-anchor="middle">(Busca instantânea em tempo real)</text>
+  </g>
+  <path d="M 370 140 L 470 200" fill="none" stroke="#718096" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow-dash)"/>
+  <text x="440" y="165" font-family="Arial, sans-serif" font-size="10" fill="#4A5568">&lt;&lt;extend&gt;&gt;</text>
+
+  <!-- UC03 -->
+  <g transform="translate(630, 140)">
+    <ellipse cx="120" cy="0" rx="115" ry="24" fill="#FFFFFF" stroke="#4A5568" stroke-width="1.5" stroke-dasharray="3,3"/>
+    <text x="120" y="-3" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#2D3748" text-anchor="middle">UC03: Filtrar por Curso / Área</text>
+    <text x="120" y="12" font-family="Arial, sans-serif" font-size="9.5" fill="#718096" text-anchor="middle">(Seletor dinâmico de graduação)</text>
+  </g>
+  <path d="M 730 164 L 620 205" fill="none" stroke="#718096" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow-dash)"/>
+  <text x="680" y="195" font-family="Arial, sans-serif" font-size="10" fill="#4A5568">&lt;&lt;extend&gt;&gt;</text>
+
+  <!-- UC04 -->
+  <g transform="translate(250, 320)">
+    <ellipse cx="120" cy="0" rx="115" ry="24" fill="#FFFFFF" stroke="#4A5568" stroke-width="1.5" stroke-dasharray="3,3"/>
+    <text x="120" y="-3" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#2D3748" text-anchor="middle">UC04: Filtrar por Fonte Oficial</text>
+    <text x="120" y="12" font-family="Arial, sans-serif" font-size="9.5" fill="#718096" text-anchor="middle">(PRAE, PROEX, UFERSA, CIEE, UERN)</text>
+  </g>
+  <path d="M 370 320 L 460 260" fill="none" stroke="#718096" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow-dash)"/>
+  <text x="390" y="280" font-family="Arial, sans-serif" font-size="10" fill="#4A5568">&lt;&lt;extend&gt;&gt;</text>
+
+  <!-- UC05 (Donut) -->
+  <g transform="translate(630, 320)">
+    <ellipse cx="120" cy="0" rx="115" ry="24" fill="#FFF5F5" stroke="#E53E3E" stroke-width="2"/>
+    <text x="120" y="-3" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#9B2C2C" text-anchor="middle">UC05: Monitorar Prazos (Donut)</text>
+    <text x="120" y="12" font-family="Arial, sans-serif" font-size="9.5" fill="#C53030" text-anchor="middle">(Métricas de editais vigentes/encerrados)</text>
+  </g>
+  <path d="M 720 320 L 610 260" fill="none" stroke="#718096" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow-dash)"/>
+  <text x="670" y="285" font-family="Arial, sans-serif" font-size="10" fill="#4A5568">&lt;&lt;extend&gt;&gt;</text>
+
+  <!-- UC06 -->
+  <g transform="translate(390, 400)">
+    <ellipse cx="160" cy="0" rx="135" ry="24" fill="#FFFFFF" stroke="#4A5568" stroke-width="1.5" stroke-dasharray="3,3"/>
+    <text x="160" y="-3" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#2D3748" text-anchor="middle">UC06: Favoritar / Salvar Oportunidade</text>
+    <text x="160" y="12" font-family="Arial, sans-serif" font-size="9.5" fill="#718096" text-anchor="middle">(Armazenamento no perfil local/remoto)</text>
+  </g>
+  <path d="M 550 376 L 550 265" fill="none" stroke="#718096" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow-dash)"/>
+  <text x="555" y="330" font-family="Arial, sans-serif" font-size="10" fill="#4A5568">&lt;&lt;extend&gt;&gt;</text>
+
+  <!-- UC07 -->
+  <g transform="translate(390, 480)">
+    <ellipse cx="160" cy="0" rx="135" ry="24" fill="#FFFFFF" stroke="#4A5568" stroke-width="1.5" stroke-dasharray="3,3"/>
+    <text x="160" y="-3" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#2D3748" text-anchor="middle">UC07: Visualizar Edital / Detalhes</text>
+    <text x="160" y="12" font-family="Arial, sans-serif" font-size="9.5" fill="#718096" text-anchor="middle">(Redirecionamento para PDF canônico)</text>
+  </g>
+  <path d="M 550 456 L 550 425" fill="none" stroke="#718096" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow-dash)"/>
+
+  <!-- UC08 -->
+  <g transform="translate(250, 560)">
+    <ellipse cx="120" cy="0" rx="115" ry="24" fill="#EDF2F7" stroke="#4A5568" stroke-width="1.5"/>
+    <text x="120" y="-3" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#2D3748" text-anchor="middle">UC08: Alternar Tema Visual</text>
+    <text x="120" y="12" font-family="Arial, sans-serif" font-size="9.5" fill="#718096" text-anchor="middle">(Modo Claro / Modo Escuro)</text>
+  </g>
+  <line x1="125" y1="380" x2="260" y2="550" stroke="#2B6CB0" stroke-width="2"/>
+
+  <!-- UC09 -->
+  <g transform="translate(250, 640)">
+    <ellipse cx="120" cy="0" rx="115" ry="24" fill="#EDF2F7" stroke="#4A5568" stroke-width="1.5"/>
+    <text x="120" y="-3" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#2D3748" text-anchor="middle">UC09: Autenticar-se / Cadastrar</text>
+    <text x="120" y="12" font-family="Arial, sans-serif" font-size="9.5" fill="#718096" text-anchor="middle">(Login discente e preferências)</text>
+  </g>
+  <line x1="125" y1="400" x2="260" y2="630" stroke="#2B6CB0" stroke-width="2"/>
+
+  <!-- UC10 a UC13 -->
+  <g transform="translate(630, 480)">
+    <ellipse cx="130" cy="0" rx="125" ry="26" fill="#FEFCBF" stroke="#D69E2E" stroke-width="2"/>
+    <text x="130" y="-3" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#744210" text-anchor="middle">UC10: Disparar Coleta Concorrente</text>
+    <text x="130" y="12" font-family="Arial, sans-serif" font-size="9.5" fill="#975A16" text-anchor="middle">(Execução paralela via run_scrapers.py)</text>
+  </g>
+  <line x1="975" y1="360" x2="880" y2="470" stroke="#D69E2E" stroke-width="2"/>
+
+  <g transform="translate(630, 560)">
+    <ellipse cx="130" cy="0" rx="125" ry="26" fill="#FEFCBF" stroke="#D69E2E" stroke-width="2"/>
+    <text x="130" y="-3" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#744210" text-anchor="middle">UC11: Monitorar Logs Isolados</text>
+    <text x="130" y="12" font-family="Arial, sans-serif" font-size="9.5" fill="#975A16" text-anchor="middle">(Auditoria em logs/&lt;fonte&gt;.log)</text>
+  </g>
+  <line x1="975" y1="380" x2="880" y2="550" stroke="#D69E2E" stroke-width="2"/>
+
+  <g transform="translate(630, 640)">
+    <ellipse cx="130" cy="0" rx="125" ry="26" fill="#FEFCBF" stroke="#D69E2E" stroke-width="2"/>
+    <text x="130" y="-3" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#744210" text-anchor="middle">UC12: Gerenciar Regras e URLs</text>
+    <text x="130" y="12" font-family="Arial, sans-serif" font-size="9.5" fill="#975A16" text-anchor="middle">(Ajuste de seletores CSS/Regex)</text>
+  </g>
+  <line x1="975" y1="400" x2="880" y2="630" stroke="#D69E2E" stroke-width="2"/>
+
+  <g transform="translate(630, 720)">
+    <ellipse cx="130" cy="0" rx="125" ry="26" fill="#FEFCBF" stroke="#D69E2E" stroke-width="2"/>
+    <text x="130" y="-3" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#744210" text-anchor="middle">UC13: Consultar Documentação API</text>
+    <text x="130" y="12" font-family="Arial, sans-serif" font-size="9.5" fill="#975A16" text-anchor="middle">(Swagger interativo em /docs)</text>
+  </g>
+  <line x1="975" y1="420" x2="880" y2="710" stroke="#D69E2E" stroke-width="2"/>
+
+  <!-- Legenda -->
+  <g transform="translate(250, 770)">
+    <rect x="0" y="0" width="600" height="38" rx="6" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <text x="15" y="23" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#4A5568">Legenda:</text>
+    <circle cx="85" cy="19" r="6" fill="#EBF8FF" stroke="#3182CE"/>
+    <text x="96" y="23" font-family="Arial, sans-serif" font-size="10" fill="#4A5568">Caso de Uso Central</text>
+    <circle cx="230" cy="19" r="6" fill="#FFF5F5" stroke="#E53E3E"/>
+    <text x="241" y="23" font-family="Arial, sans-serif" font-size="10" fill="#4A5568">Nova Funcionalidade (Donut)</text>
+    <circle cx="410" cy="19" r="6" fill="#FEFCBF" stroke="#D69E2E"/>
+    <text x="421" y="23" font-family="Arial, sans-serif" font-size="10" fill="#4A5568">Casos de Uso de DevOps / Admin</text>
+  </g>
+</svg>

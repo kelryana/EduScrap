@@ -1,0 +1,121 @@
+@startuml DiagramaClasses_EduScrap_Software
+skinparam classAttributeIconSize 0
+skinparam packageStyle frame
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Arial"
+
+package "API & Controllers (FastAPI)" {
+    class FastAPIApplication {
+        + app: FastAPI
+        + router: APIRouter
+        + listar_oportunidades(categoria, fonte, busca): List[OportunidadeModel]
+        + listar_editais(status): List[OportunidadeModel]
+        + listar_vagas(): List[OportunidadeModel]
+        + listar_noticias(): List[OportunidadeModel]
+        + obter_estatisticas_prazos(): EstatisticasPrazos
+        + health_check(): dict
+    }
+
+    class OportunidadeModel <<Pydantic>> {
+        + id: str
+        + titulo: str
+        + link: str
+        + data_publicacao: datetime
+        + data_limite: Optional[datetime]
+        + status_vigencia: str
+        + categoria: str
+        + fonte: str
+        + tags: List[str]
+        + extra_info: dict
+    }
+
+    class EstatisticasPrazos <<Pydantic>> {
+        + total: int
+        + vigentes: int
+        + encerrados: int
+        + sem_prazo: int
+        + percentual_vigentes: float
+    }
+}
+
+package "Engine de Scraping Concorrente" {
+    class ScraperRunner {
+        - FONTES_DISPONIVEIS: List[str]
+        - max_workers: int
+        + executar_paralelo(fontes_selecionadas: List[str]): void
+        + executar_serial(): void
+        + configurar_logger_isolado(nome_fonte: str): Logger
+    }
+
+    abstract class BaseScraper {
+        # nome_fonte: str
+        # url_base: str
+        # logger: Logger
+        + {abstract} coletar(): List[dict]
+        + salvar_no_banco(oportunidades: List[dict]): int
+        + limpar_texto(texto: str): str
+    }
+
+    class ScraperPRAE {
+        + coletar(): List[dict]
+        + extrair_editais_permanencia(): void
+    }
+
+    class ScraperPortalUERN {
+        - driver: WebDriver
+        + coletar(): List[dict]
+        + navegar_paginacao(): void
+    }
+
+    class ScraperUFERSA {
+        + coletar(): List[dict]
+    }
+
+    class ScraperCIEE {
+        - driver: WebDriver
+        + coletar(): List[dict]
+        + aplicar_filtro_mossoro(): void
+    }
+}
+
+package "Processamento & Normalização" {
+    class Normalizer {
+        - PADROES_REGEX: dict
+        + extrair_datas(texto: str): Optional[datetime]
+        + validar_vigencia(data_limite: datetime): str
+        + associar_curso_area(texto: str): List[str]
+    }
+
+    class PDFUtils {
+        + extrair_texto_pdf(caminho_ou_bytes): str
+        + ler_tabelas_jouern(pdf): List[str]
+    }
+}
+
+package "Persistência (MongoDB)" {
+    class MongoDatabase {
+        - client: MongoClient
+        - db: Database
+        + oportunidades: Collection
+        + database_setup(): void
+        + criar_indices_busca(): void
+        + upsert_oportunidade(filtro: dict, doc: dict): void
+    }
+}
+
+' Relacionamentos
+FastAPIApplication ..> OportunidadeModel : retorna
+FastAPIApplication ..> EstatisticasPrazos : calcula
+FastAPIApplication --> MongoDatabase : consulta
+
+ScraperRunner --> BaseScraper : orquestra
+BaseScraper <|-- ScraperPRAE
+BaseScraper <|-- ScraperPortalUERN
+BaseScraper <|-- ScraperUFERSA
+BaseScraper <|-- ScraperCIEE
+
+BaseScraper --> Normalizer : higieniza dados
+BaseScraper --> MongoDatabase : persiste
+Normalizer --> PDFUtils : processa PDFs
+
+@enduml

@@ -1,0 +1,37 @@
+@startuml Sequencia_Consulta_Donut
+autonumber
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Arial"
+
+actor "Estudante" as User
+boundary "Frontend SPA\n[Dashboard Web]" as UI
+control "API REST\n[FastAPI / Uvicorn]" as API
+database "MongoDB\n[oportunidades]" as DB
+participant "DonutRenderer\n[SVG Chart Engine]" as Donut
+
+User -> UI: Acessa Dashboard ou seleciona Área / Curso
+activate UI
+
+UI -> API: GET /api/oportunidades?categoria=tecnologia
+activate API
+
+API -> DB: find({ categoria: "tecnologia" }).sort({ data_limite: 1 })
+activate DB
+DB --> API: Retorna documentos JSON estruturados
+deactivate DB
+
+API --> UI: HTTP 200 OK [JSON com editais e metadados]
+deactivate API
+
+UI -> UI: Itera sobre lista de oportunidades\n(calcula vigentes vs. encerrados)
+
+UI -> Donut: renderizarGraficoDonut(vigentes, encerrados, total)
+activate Donut
+Donut -> Donut: Calcula porcentagens e arcos SVG
+Donut --> UI: Insere gráfico Donut interativo no DOM
+deactivate Donut
+
+UI -> UI: Renderiza cards responsivos com badges de status
+UI --> User: Exibe tela atualizada em menos de 1 segundo!
+deactivate UI
+@enduml
