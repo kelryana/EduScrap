@@ -276,6 +276,9 @@
                 <button id="btn-analises" class="tab-origem-btn" onclick="carregarEstatisticas()">
                     <i class="ph-bold ph-chart-bar"></i> <span>Indicadores</span>
                 </button>
+                <button id="btn-portal-usuario" class="tab-origem-btn" onclick="carregarPortalUsuario()">
+                    <i class="ph-bold ph-user-circle"></i> <span>Meu Perfil</span>
+                </button>
             </div>
         </div>
 
@@ -363,15 +366,15 @@
                     <!-- BARRA DE UTILITÁRIOS E FILTROS DO ESTUDANTE -->
                     <div class="student-toolbar">
                         <div class="student-toolbar-left">
-                            <button id="btn-abrir-sidebar-filtros" class="btn-filtro-aluno" onclick="alternarSidebarPerfil()">
-                                <i class="ph-bold ph-sliders-horizontal"></i>
-                                <span>Cursos & Preferências</span>
-                            </button>
                             <button id="btn-personalizado" class="btn-filtro-aluno" onclick="carregarFeedPersonalizado()">
-                                <i class="ph-bold ph-sparkle"></i> <span>Para Você (Perfil)</span>
+                                <i class="ph-bold ph-sparkle"></i> <span>Para Você</span>
                             </button>
                             <button id="btn-favoritos" class="btn-filtro-aluno" onclick="carregarFavoritos()">
                                 <i class="ph-bold ph-star"></i> <span>Salvos (<strong id="contador-favoritos">0</strong>)</span>
+                            </button>
+                            <button id="btn-abrir-sidebar-filtros" class="btn-filtro-aluno" onclick="carregarPortalUsuario()">
+                                <i class="ph-bold ph-user-circle"></i>
+                                <span>Meu Perfil</span>
                             </button>
                         </div>
 

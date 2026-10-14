@@ -1128,10 +1128,27 @@ def atualizar_preferencias(payload: dict, usuario: dict = Depends(obter_usuario_
 @app.put("/api/auth/perfil")
 def atualizar_perfil(payload: dict, usuario: dict = Depends(obter_usuario_logado)):
     update_data = {}
-    if "nome" in payload and payload["nome"].strip():
-        update_data["nome"] = payload["nome"].strip()
+    if "nome" in payload and str(payload["nome"]).strip():
+        update_data["nome"] = str(payload["nome"]).strip()
     if "matricula" in payload:
-        update_data["matricula"] = payload["matricula"].strip()
+        update_data["matricula"] = str(payload["matricula"]).strip()
+    if "foto_perfil" in payload:
+        update_data["foto_perfil"] = payload["foto_perfil"]
+    if "curso_principal" in payload:
+        update_data["curso_principal"] = str(payload["curso_principal"]).strip()
+    if "campus" in payload:
+        update_data["campus"] = str(payload["campus"]).strip()
+    if "bio" in payload:
+        update_data["bio"] = str(payload["bio"]).strip()
+
+    # Suporte para salvar preferências simultaneamente
+    if "cursos" in payload:
+        update_data["preferencias.cursos"] = payload["cursos"] if isinstance(payload["cursos"], list) else [payload["cursos"]]
+    if "areas" in payload:
+        update_data["preferencias.areas"] = payload["areas"] if isinstance(payload["areas"], list) else [payload["areas"]]
+    if "receber_emails" in payload:
+        update_data["preferencias.receber_emails"] = bool(payload["receber_emails"])
+
     update_data["atualizado_em"] = datetime.now().isoformat()
 
     try:
@@ -1158,11 +1175,16 @@ def atualizar_perfil(payload: dict, usuario: dict = Depends(obter_usuario_logado
 @app.get("/api/favoritos")
 def listar_favoritos(usuario: dict = Depends(obter_usuario_logado)):
     fav_ids = usuario.get("favoritos", [])
-    colecoes = ["vagas_estagio", "vagas_bolsa", "vagas_ufersa", "vagas_ciee", "vagas_portal_uern", "vagas_noticias"]
+    colecoes = [
+        "vagas_estagio", "vagas_bolsa", "vagas_ufersa", "vagas_ciee",
+        "vagas_portal_uern", "vagas_noticias", "vagas", "editais", "noticias"
+    ]
     favoritos = []
 
     for fid in fav_ids:
         for cname in colecoes:
+            if cname not in db.list_collection_names():
+                continue
             doc = None
             try:
                 doc = db[cname].find_one({"_id": ObjectId(fid)})
@@ -1172,6 +1194,8 @@ def listar_favoritos(usuario: dict = Depends(obter_usuario_logado)):
                 doc = db[cname].find_one({"_id": fid})
             if doc:
                 doc["_id"] = str(doc["_id"])
+                doc["nome"] = doc.get("titulo") or doc.get("nome") or "Oportunidade Universitária"
+                doc["titulo"] = doc["nome"]
                 doc = enriquecer_prazo(doc)
                 doc = resolver_vinculo_fonte(doc)
                 doc["favorito"] = True

@@ -116,12 +116,25 @@ function atualizarInterfaceUsuario() {
         if (userDisplay) {
             userDisplay.textContent = primeiroNome;
         }
+
+        const fotoPerfil = usuarioAtual.foto_perfil || '';
+        let avatarHTML = `<i class="ph-bold ph-student"></i>`;
+        if (fotoPerfil) {
+            if (fotoPerfil.startsWith('preset:')) {
+                const presetIcone = fotoPerfil.replace('preset:', '');
+                avatarHTML = `<i class="ph-bold ${presetIcone}"></i>`;
+            } else {
+                avatarHTML = `<img src="${fotoPerfil}" alt="Avatar" class="nav-avatar-img">`;
+            }
+        }
+
         navAuth.innerHTML = `
-            <div class="nav-user-box">
-                <span class="nav-user-tag">
-                    <i class="ph-bold ph-student"></i> Olá, <strong id="user-name-display">${primeiroNome}</strong>
+            <div class="nav-user-box" onclick="carregarPortalUsuario()" title="Acessar Portal do Estudante" style="cursor: pointer;">
+                <span class="nav-user-tag" style="display: inline-flex; align-items: center; gap: 8px;">
+                    <span class="nav-avatar-mini">${avatarHTML}</span>
+                    <span>Olá, <strong id="user-name-display">${primeiroNome}</strong></span>
                 </span>
-                <button class="btn-nav-mini btn-nav-logout" onclick="fazerLogout()" title="Sair da Conta">
+                <button class="btn-nav-mini btn-nav-logout" onclick="event.stopPropagation(); fazerLogout();" title="Sair da Conta">
                     <i class="ph-bold ph-sign-out"></i>
                 </button>
             </div>
@@ -469,24 +482,33 @@ async function toggleFavorito(idOportunidade, event) {
 }
 
 async function carregarFavoritos() {
+    // Se o usuário clicar em "Salvos" quando já estiver na tela de favoritos,
+    // atua como toggle e retorna para a aba padrão 'estagios'
+    if (tipoAtual === 'favoritos') {
+        carregarDados('estagios', 1);
+        return;
+    }
+
     tipoAtual = 'favoritos';
     const container = document.getElementById('container-vagas');
     const antigo = document.getElementById('bloco-paginacao');
     if (antigo) antigo.remove();
 
     destacarBotaoAtivo('btn-favoritos');
-    liberarExibicaoCards();
 
     if (!usuarioAtual) {
         container.style.display = 'block';
         container.innerHTML = `
             <div class="status-box" style="border-color: var(--color-orange);">
                 <div class="status-box-decor"></div>
-                <h3 class="status-box-titulo">Faça Login para Ver Seus Salvos</h3>
-                <p class="status-box-texto">Você precisa estar conectado para acessar as oportunidades que favoritou.</p>
-                <div style="margin-top: 15px;">
+                <h3 class="status-box-titulo"><i class="ph-bold ph-lock-key"></i> Faça Login para Ver Seus Salvos</h3>
+                <p class="status-box-texto">Você precisa estar conectado para acessar as oportunidades que favoritou e acompanhar prazos.</p>
+                <div style="margin-top: 15px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
                     <button class="btn-hero-primary" onclick="abrirModalAuth('login')">
                         <i class="ph ph-sign-in"></i> Entrar na Minha Conta
+                    </button>
+                    <button class="btn-hero-secondary" onclick="carregarDados('estagios', 1)">
+                        <i class="ph ph-arrow-left"></i> Voltar aos Editais
                     </button>
                 </div>
             </div>
@@ -508,11 +530,17 @@ async function carregarFavoritos() {
         const lista = data.data || [];
 
         if (lista.length === 0) {
+            container.style.display = 'block';
             container.innerHTML = `
                 <div class="status-box">
                     <div class="status-box-decor"></div>
                     <h3 class="status-box-titulo"><i class="ph-bold ph-star"></i> Nenhum Edital Favoritado Ainda</h3>
                     <p class="status-box-texto">Clique na estrelinha dos editais e vagas para salvá-los e acompanhar os prazos aqui!</p>
+                    <div style="margin-top: 15px; display: flex; justify-content: center;">
+                        <button class="btn-hero-primary" onclick="carregarDados('estagios', 1)">
+                            <i class="ph ph-magnifying-glass"></i> Explorar Oportunidades
+                        </button>
+                    </div>
                 </div>
             `;
             return;
@@ -521,7 +549,18 @@ async function carregarFavoritos() {
         renderizarCards(lista);
 
     } catch (err) {
-        container.innerHTML = `<p class="carregando" style="color: red;">Erro ao consultar favoritos: ${err.message}</p>`;
+        container.style.display = 'block';
+        container.innerHTML = `
+            <div class="status-box" style="border-color: var(--color-red);">
+                <h3 class="status-box-titulo" style="color: var(--color-red);"><i class="ph-bold ph-warning-circle"></i> Falha ao Carregar Favoritos</h3>
+                <p class="status-box-texto">${err.message}. Verifique a conexão com o servidor.</p>
+                <div style="margin-top: 15px; display: flex; justify-content: center;">
+                    <button class="btn-hero-secondary" onclick="carregarDados('estagios', 1)">
+                        <i class="ph ph-arrow-left"></i> Voltar aos Editais
+                    </button>
+                </div>
+            </div>
+        `;
     }
 }
 
@@ -1033,6 +1072,70 @@ function escaparHTML(texto) {
     return div.innerHTML;
 }
 
+// Sanitização de títulos de editais e extração de órgãos
+function sanitizarItemEdital(titulo) {
+    if (!titulo) return { tag: 'GERAL', tituloLimpo: 'Edital de Oportunidade' };
+    let t = String(titulo).trim();
+    let tag = 'GERAL';
+
+    if (/\[MPRN\]|MPRN/i.test(t)) { tag = 'MPRN'; t = t.replace(/\[MPRN\]/gi, '').trim(); }
+    else if (/UFERSA/i.test(t)) { tag = 'UFERSA'; t = t.replace(/\[UFERSA\]/gi, '').trim(); }
+    else if (/UERN/i.test(t)) { tag = 'UERN'; t = t.replace(/\[UERN\]/gi, '').trim(); }
+    else if (/IFRN/i.test(t)) { tag = 'IFRN'; t = t.replace(/\[IFRN\]/gi, '').trim(); }
+    else if (/CIEE/i.test(t)) { tag = 'CIEE'; t = t.replace(/\[CIEE\]/gi, '').trim(); }
+    else if (/IEL/i.test(t)) { tag = 'IEL'; t = t.replace(/\[IEL\]/gi, '').trim(); }
+    else if (/DOM|Prefeitura de Mossoró/i.test(t)) { tag = 'DOM'; t = t.replace(/\[DOM\/Mossoró\]/gi, '').trim(); }
+    else if (/PRAE/i.test(t)) { tag = 'PRAE'; }
+    else if (/PROEX/i.test(t)) { tag = 'PROEX'; }
+
+    // Limpeza de ruídos de scraping/OCR
+    t = t.replace(/–\s*PRAETORNA\s*PÚBLICO/gi, '– PRAE Torna Público');
+    t = t.replace(/–\s*TTORNA\s*PÚBLICO/gi, '– Torna Público');
+    t = t.replace(/–\s*TORNA\s*PÚBLICO/gi, '– Torna Público');
+    t = t.replace(/PRAETORNA/gi, 'PRAE Torna');
+
+    return { tag, tituloLimpo: t };
+}
+
+function alternarAbaPrazos(aba, btn) {
+    if (!btn) {
+        btn = document.querySelector(`.dash-prazo-tab[data-aba="${aba}"]`);
+    }
+    document.querySelectorAll('.dash-prazo-tab').forEach(b => b.classList.remove('ativo'));
+    if (btn) btn.classList.add('ativo');
+
+    const colProximos = document.getElementById('col-prazos-proximos');
+    const colEncerrados = document.getElementById('col-prazos-encerrados');
+    const grid = document.getElementById('dash-prazos-listas-grid');
+    if (!colProximos || !colEncerrados) return;
+
+    if (aba === 'proximos') {
+        colProximos.style.display = 'flex';
+        colEncerrados.style.display = 'none';
+        if (grid) grid.style.gridTemplateColumns = '1fr';
+    } else if (aba === 'encerrados') {
+        colProximos.style.display = 'none';
+        colEncerrados.style.display = 'flex';
+        if (grid) grid.style.gridTemplateColumns = '1fr';
+    } else {
+        colProximos.style.display = 'flex';
+        colEncerrados.style.display = 'flex';
+        if (grid) grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(320px, 1fr))';
+    }
+}
+
+function alternarListaEncerrados(btn) {
+    const extras = document.getElementById('lista-encerrados-extras');
+    if (!extras) return;
+    const estaAberto = extras.style.display === 'flex';
+    extras.style.display = estaAberto ? 'none' : 'flex';
+    if (btn) {
+        btn.innerHTML = estaAberto
+            ? `<i class="ph-bold ph-caret-down"></i> Mostrar mais editais encerrados`
+            : `<i class="ph-bold ph-caret-up"></i> Recolher histórico de editais`;
+    }
+}
+
 // "Data → dias restantes" para o widget de prazos (retorna null se inválida)
 function calcularDiasAteData(dataStr) {
     if (!dataStr || !/^\d{2}\/\d{2}\/\d{4}$/.test(String(dataStr).trim())) return null;
@@ -1165,6 +1268,14 @@ async function carregarEstatisticas() {
         const vencidosLista = dados.vencidos_recentes || [];
         const totalPrazos = vigentes + retaFinal + vencidos;
 
+        // Ângulos proporcionais para o gráfico Donut estilo Neobrutalism (SVG / conic-gradient)
+        let degAberto = totalPrazos > 0 ? (vigentes / totalPrazos) * 360 : 0;
+        let degVencendo = totalPrazos > 0 ? (retaFinal / totalPrazos) * 360 : 0;
+        if (vigentes > 0 && degAberto < 14) degAberto = 14;
+        if (retaFinal > 0 && degVencendo < 10) degVencendo = 10;
+        const stop1 = Math.round(degAberto);
+        const stop2 = Math.min(Math.round(degAberto + degVencendo), 350);
+
         // Paleta por KPI espelhando o design de referência (cor + fundo pastel da pílula)
         const PALETA_KPI = {
             laranja:  { cor: '#FF5C00', bg: '#FFF4ED' },
@@ -1215,87 +1326,132 @@ async function carregarEstatisticas() {
                     </div>
                 </div>
 
-                <!-- LINHA DO MEIO: PAINEL DE PRAZOS (ABERTOS x VENCIDOS) -->
+                <!-- LINHA DO MEIO: PAINEL DE PRAZOS COM GRÁFICO DONUT E LISTAGEM COMPACTA -->
                 <div class="dash-grid-widgets-circulares">
                     <div class="dash-card-prazos">
-                        <div class="dash-prazos-header">
-                            <div class="dash-widget-titulo-row">
-                                <span class="dash-icone-box bg-laranja"><i class="ph-bold ph-calendar-check"></i></span>
-                                <h3 class="dash-widget-titulo">Editais: Abertos x Vencidos</h3>
+                        
+                        <!-- BLOCO SUPERIOR: GRÁFICO DE PIZZA/DONUT + LEGENDA PONTILHADA -->
+                        <div class="dash-donut-bloco-superior">
+                            <div class="dash-donut-chart-wrapper">
+                                <div class="dash-donut-chart" style="background: conic-gradient(#10B981 0deg ${stop1}deg, #FF5C00 ${stop1}deg ${stop2}deg, #EF4444 ${stop2}deg 360deg);" title="Distribuição do acervo: ${vigentes} abertos, ${retaFinal} em 7 dias, ${vencidos} vencidos">
+                                    <div class="dash-donut-center">
+                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                                        </svg>
+                                    </div>
+                                </div>
                             </div>
-                            <p class="dash-widget-desc">Acompanhe em tempo real quais editais ainda aceitam inscrições e quais já encerraram o prazo.</p>
+
+                            <div class="dash-donut-legenda-lista">
+                                <div class="dash-donut-legenda-item" onclick="carregarDados('estagios')" title="Ver oportunidades abertas" style="cursor: pointer;">
+                                    <span class="dash-donut-dot dot-aberto"></span>
+                                    <span class="dash-donut-rotulo">Abertos para inscrição</span>
+                                    <span class="dash-donut-linha-guia"></span>
+                                    <span class="dash-donut-valor" data-alvo="${vigentes}">0</span>
+                                </div>
+                                <div class="dash-donut-legenda-item" onclick="alternarAbaPrazos('proximos', document.querySelector('.dash-prazo-tab[data-aba=proximos]'))" title="Ver editais que vencem em até 7 dias" style="cursor: pointer;">
+                                    <span class="dash-donut-dot dot-vencendo"></span>
+                                    <span class="dash-donut-rotulo">Vencem em até 7 dias</span>
+                                    <span class="dash-donut-linha-guia"></span>
+                                    <span class="dash-donut-valor" data-alvo="${retaFinal}">0</span>
+                                </div>
+                                <div class="dash-donut-legenda-item" onclick="alternarAbaPrazos('encerrados', document.querySelector('.dash-prazo-tab[data-aba=encerrados]'))" title="Ver editais encerrados" style="cursor: pointer;">
+                                    <span class="dash-donut-dot dot-vencido"></span>
+                                    <span class="dash-donut-rotulo">Editais vencidos</span>
+                                    <span class="dash-donut-linha-guia"></span>
+                                    <span class="dash-donut-valor" data-alvo="${vencidos}">0</span>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="dash-prazos-resumo">
-                            <button type="button" class="dash-prazo-chip chip-aberto" onclick="carregarDados('estagios')" title="Ver oportunidades com inscrições abertas">
-                                <span class="dash-prazo-chip-icone"><i class="ph-bold ph-check-circle"></i></span>
-                                <div class="dash-prazo-chip-conteudo">
-                                    <span class="dash-prazo-chip-numero" data-alvo="${vigentes}">0</span>
-                                    <span class="dash-prazo-chip-rotulo">Abertos para inscrição</span>
-                                </div>
+                        <!-- ABAS DE NAVEGAÇÃO INTERATIVAS EM PÍLULA -->
+                        <div class="dash-prazos-nav-tabs">
+                            <button type="button" class="dash-prazo-tab ativo" data-aba="todos" onclick="alternarAbaPrazos('todos', this)">
+                                <i class="ph-bold ph-columns"></i> Visão Lado a Lado
                             </button>
-                            <button type="button" class="dash-prazo-chip chip-vencendo" title="Editais que vencem nos próximos 7 dias">
-                                <span class="dash-prazo-chip-icone"><i class="ph-bold ph-timer"></i></span>
-                                <div class="dash-prazo-chip-conteudo">
-                                    <span class="dash-prazo-chip-numero" data-alvo="${retaFinal}">0</span>
-                                    <span class="dash-prazo-chip-rotulo">Vencem em até 7 dias</span>
-                                </div>
+                            <button type="button" class="dash-prazo-tab" data-aba="proximos" onclick="alternarAbaPrazos('proximos', this)">
+                                <i class="ph-bold ph-lightning"></i> Vencendo em Breve (${proximos.length})
                             </button>
-                            <div class="dash-prazo-chip chip-vencido">
-                                <span class="dash-prazo-chip-icone"><i class="ph-bold ph-prohibit"></i></span>
-                                <div class="dash-prazo-chip-conteudo">
-                                    <span class="dash-prazo-chip-numero" data-alvo="${vencidos}">0</span>
-                                    <span class="dash-prazo-chip-rotulo">Editais vencidos</span>
-                                </div>
-                            </div>
+                            <button type="button" class="dash-prazo-tab" data-aba="encerrados" onclick="alternarAbaPrazos('encerrados', this)">
+                                <i class="ph-bold ph-archive"></i> Encerrados (${vencidosLista.length})
+                            </button>
                         </div>
 
-                        <!-- Barra proporcional: leitura visual imediata da distribuição dos editais -->
-                        <div class="dash-prazos-proporcao" role="img" aria-label="Distribuição entre abertos, vencendo em breve e vencidos">
-                            <p class="dash-proporcao-titulo">Proporção do acervo monitorado</p>
-                            <div class="dash-proporcao-track">
-                                <span class="dash-proporcao-seg seg-aberto" style="width: ${totalPrazos ? (vigentes / totalPrazos * 100) : 0}%"></span>
-                                <span class="dash-proporcao-seg seg-vencendo" style="width: ${totalPrazos ? (retaFinal / totalPrazos * 100) : 0}%"></span>
-                                <span class="dash-proporcao-seg seg-vencido" style="width: ${totalPrazos ? (vencidos / totalPrazos * 100) : 0}%"></span>
-                            </div>
-                            <div class="dash-proporcao-legenda">
-                                <span class="dash-proporcao-chave"><i class="chave-ponto ponto-aberto"></i> Abertos</span>
-                                <span class="dash-proporcao-chave"><i class="chave-ponto ponto-vencendo"></i> Vencem em 7 dias</span>
-                                <span class="dash-proporcao-chave"><i class="chave-ponto ponto-vencido"></i> Vencidos</span>
-                            </div>
-                        </div>
+                        <!-- LINHA DIVISÓRIA PONTILHADA -->
+                        <div class="dash-divisor-pontilhado"></div>
 
-                        <div class="dash-prazos-listas">
-                            <div class="dash-prazo-coluna">
-                                <h4 class="dash-prazo-coluna-titulo titulo-aberto">
-                                    <i class="ph-bold ph-flag-banner"></i> Próximos a vencer
-                                </h4>
+                        <!-- LISTAGEM EM 2 COLUNAS DE EDITAIS COM ÍCONES CIRCULARES -->
+                        <div class="dash-prazos-listas-grid" id="dash-prazos-listas-grid">
+                            <!-- COLUNA 1: ABERTOS / PRÓXIMOS A VENCER -->
+                            <div class="dash-prazo-coluna" id="col-prazos-proximos">
                                 ${proximos.length ? proximos.map(e => {
-                                    const diasRestantes = calcularDiasAteData(e.data);
+                                    const info = sanitizarItemEdital(e.titulo);
+                                    const isEstagio = /estágio|ciee|prae|bolsa/i.test(e.titulo || '');
+                                    const iconeClass = isEstagio ? 'icone-verde' : 'icone-azul';
+                                    const iconeNome = isEstagio ? 'ph-graduation-cap' : 'ph-timer';
                                     return `
-                                <button type="button" class="dash-prazo-item item-aberto" onclick="irParaEdital('${escaparHTML(e.link || '')}', '${escaparHTML(e.id || '')}')" title="Abrir este edital">
-                                    <span class="dash-prazo-item-seta"><i class="ph-bold ph-arrow-up-right"></i></span>
-                                    <span class="dash-prazo-item-titulo">${escaparHTML(e.titulo)}</span>
-                                    <span class="dash-prazo-item-badges">
-                                        ${diasRestantes !== null && diasRestantes <= 3 ? '<span class="prazo-alerta-urgente"><i class="ph-bold ph-alarm"></i> Urgente</span>' : ''}
-                                        <strong class="dash-prazo-item-data">${escaparHTML(e.data)}</strong>
-                                    </span>
-                                </button>`; }).join('') : `<p class="dash-legenda-texto">Nenhum edital vence nos próximos 7 dias. 🎉</p>`}
+                                    <div class="dash-edital-mini-card" onclick="irParaEdital('${escaparHTML(e.link || '')}', '${escaparHTML(e.id || '')}')" title="${escaparHTML(info.tituloLimpo)}">
+                                        <div class="dash-mini-icone-box ${iconeClass}">
+                                            <i class="ph-bold ${iconeNome}"></i>
+                                        </div>
+                                        <div class="dash-mini-info">
+                                            <h4 class="dash-mini-titulo">${escaparHTML(info.tituloLimpo)}</h4>
+                                            <span class="dash-mini-subtexto">Até ${escaparHTML(e.data)}</span>
+                                        </div>
+                                    </div>`;
+                                }).join('') : `
+                                    <div class="dash-edital-mini-card" style="cursor: default; opacity: 0.85;">
+                                        <div class="dash-mini-icone-box icone-verde">
+                                            <i class="ph-bold ph-check"></i>
+                                        </div>
+                                        <div class="dash-mini-info">
+                                            <h4 class="dash-mini-titulo">Prazos em dia!</h4>
+                                            <span class="dash-mini-subtexto">Nenhum edital vence nos próximos 7 dias.</span>
+                                        </div>
+                                    </div>
+                                `}
                             </div>
-                            <div class="dash-prazo-coluna">
-                                <h4 class="dash-prazo-coluna-titulo titulo-vencido">
-                                    <i class="ph-bold ph-prohibit"></i> Encerrados recentemente
-                                </h4>
-                                ${vencidosLista.length ? vencidosLista.map(e => `
-                                <button type="button" class="dash-prazo-item item-vencido" onclick="irParaEdital('${escaparHTML(e.link || '')}', '${escaparHTML(e.id || '')}')" title="Abrir este edital">
-                                    <span class="dash-prazo-item-seta"><i class="ph-bold ph-arrow-up-right"></i></span>
-                                    <span class="dash-prazo-item-titulo">${escaparHTML(e.titulo)}</span>
-                                    <span class="dash-prazo-item-badges">
-                                        <strong class="dash-prazo-item-data">${escaparHTML(e.data)}</strong>
-                                    </span>
-                                </button>`).join('') : `<p class="dash-legenda-texto">Nenhum edital encerrado recentemente.</p>`}
+
+                            <!-- COLUNA 2: ENCERRADOS RECENTEMENTE -->
+                            <div class="dash-prazo-coluna" id="col-prazos-encerrados">
+                                ${vencidosLista.length ? `
+                                    ${vencidosLista.slice(0, 4).map(e => {
+                                        const info = sanitizarItemEdital(e.titulo);
+                                        return `
+                                        <div class="dash-edital-mini-card" onclick="irParaEdital('${escaparHTML(e.link || '')}', '${escaparHTML(e.id || '')}')" title="${escaparHTML(info.tituloLimpo)}">
+                                            <div class="dash-mini-icone-box icone-coral">
+                                                <i class="ph-bold ph-clock"></i>
+                                            </div>
+                                            <div class="dash-mini-info">
+                                                <h4 class="dash-mini-titulo">${escaparHTML(info.tituloLimpo)}</h4>
+                                                <span class="dash-mini-subtexto">Encerrado em ${escaparHTML(e.data)}</span>
+                                            </div>
+                                        </div>`;
+                                    }).join('')}
+
+                                    ${vencidosLista.length > 4 ? `
+                                    <div id="lista-encerrados-extras" style="display: none; flex-direction: column; gap: 8px;">
+                                        ${vencidosLista.slice(4).map(e => {
+                                            const info = sanitizarItemEdital(e.titulo);
+                                            return `
+                                            <div class="dash-edital-mini-card" onclick="irParaEdital('${escaparHTML(e.link || '')}', '${escaparHTML(e.id || '')}')" title="${escaparHTML(info.tituloLimpo)}">
+                                                <div class="dash-mini-icone-box icone-coral">
+                                                    <i class="ph-bold ph-clock"></i>
+                                                </div>
+                                                <div class="dash-mini-info">
+                                                    <h4 class="dash-mini-titulo">${escaparHTML(info.tituloLimpo)}</h4>
+                                                    <span class="dash-mini-subtexto">Encerrado em ${escaparHTML(e.data)}</span>
+                                                </div>
+                                            </div>`;
+                                        }).join('')}
+                                    </div>
+                                    <button type="button" class="btn-toggle-encerrados" onclick="alternarListaEncerrados(this)" style="margin-top: 6px;">
+                                        <i class="ph-bold ph-caret-down"></i> Mostrar mais ${vencidosLista.length - 4} editais encerrados
+                                    </button>` : ''}
+                                ` : `<p class="dash-legenda-texto" style="padding: 10px 0;">Nenhum edital encerrado recentemente.</p>`}
                             </div>
                         </div>
+
                     </div>
                 </div>
 
@@ -1315,6 +1471,352 @@ async function carregarEstatisticas() {
                 <h3 class="status-box-titulo" style="color: var(--color-red);">Falha ao gerar painel</h3>
                 <p class="status-box-texto">${erro.message}. Verifique se a API está rodando em localhost:8000.</p>
             </div>`;
+    }
+}
+
+// ============================================================
+// PORTAL DO ESTUDANTE (ABA DE USUÁRIO & PERFIL)
+// ============================================================
+
+async function carregarPortalUsuario() {
+    tipoAtual = 'perfil';
+    // Fecha a sidebar lateral de filtros para evitar sobreposição e redundância visual
+    if (typeof fecharSidebarPerfil === 'function') {
+        fecharSidebarPerfil();
+    }
+
+    const container = document.getElementById('container-vagas');
+    const antigo = document.getElementById('bloco-paginacao');
+    if (antigo) antigo.remove();
+
+    destacarBotaoAtivo('btn-portal-usuario');
+
+    if (!usuarioAtual) {
+        container.style.display = 'block';
+        container.innerHTML = `
+            <div class="status-box" style="border-color: var(--color-orange); max-width: 600px; margin: 40px auto;">
+                <div class="status-box-decor"></div>
+                <h3 class="status-box-titulo"><i class="ph-bold ph-user-circle"></i> Portal do Estudante</h3>
+                <p class="status-box-texto">Faça login ou crie sua conta para personalizar sua foto de perfil, curso de graduação, matrícula e notificações de editais.</p>
+                <div style="margin-top: 20px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+                    <button class="btn-hero-primary" onclick="abrirModalAuth('login')">
+                        <i class="ph ph-sign-in"></i> Entrar na Minha Conta
+                    </button>
+                    <button class="btn-hero-secondary" onclick="abrirModalAuth('register')">
+                        <i class="ph ph-user-plus"></i> Criar Conta Gratuita
+                    </button>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    container.style.display = 'block';
+
+    const pref = usuarioAtual.preferencias || {};
+    const cursosSalvos = pref.cursos || [];
+    const areasSalvas = pref.areas || [];
+    const emailNotif = pref.receber_emails !== false;
+    const foto = usuarioAtual.foto_perfil || '';
+    const cursoAtual = usuarioAtual.curso_principal || (cursosSalvos[0] || '');
+    const campusAtual = usuarioAtual.campus || 'Campus Central (Mossoró)';
+    const matriculaAtual = usuarioAtual.matricula || '';
+    const bioAtual = usuarioAtual.bio || '';
+
+    let avatarHTML = `<div class="portal-avatar-placeholder" id="portal-avatar-placeholder-preview"><i class="ph-bold ph-student"></i></div>`;
+    if (foto) {
+        if (foto.startsWith('preset:')) {
+            const presetIcone = foto.replace('preset:', '');
+            avatarHTML = `<div class="portal-avatar-placeholder" id="portal-avatar-placeholder-preview"><i class="ph-bold ${presetIcone}"></i></div>`;
+        } else {
+            avatarHTML = `<img src="${foto}" class="portal-avatar-img" id="portal-avatar-img-preview" alt="Foto de perfil">`;
+        }
+    }
+
+    container.innerHTML = `
+        <div class="portal-usuario-wrapper">
+            <!-- CABEÇALHO DO PERFIL COM DADOS AMPLIADOS -->
+            <div class="portal-header-card">
+                <div class="portal-header-left" style="width: 100%;">
+                    <div class="portal-avatar-tools">
+                        <div class="portal-avatar-box" id="portal-avatar-preview-container" data-foto-data-url="${foto}">
+                            ${avatarHTML}
+                        </div>
+                        <input type="file" id="portal-foto-input" accept="image/*" onchange="processarUploadFotoPortal(event)" style="display: none;">
+                        <button type="button" class="btn-filtro-aluno" style="padding: 7px 16px; font-size: 0.9rem;" onclick="document.getElementById('portal-foto-input').click()" title="Escolha uma imagem do seu computador">
+                            <i class="ph-bold ph-camera"></i> <span>Trocar Foto</span>
+                        </button>
+                        <div class="portal-avatar-presets-row" title="Ou escolha um avatar vetorial temático">
+                            <button type="button" class="btn-avatar-preset ${foto === 'preset:ph-graduation-cap' ? 'ativo' : ''}" data-preset="ph-graduation-cap" onclick="selecionarAvatarPreset('ph-graduation-cap')" title="Estudante">
+                                <i class="ph-bold ph-graduation-cap"></i>
+                            </button>
+                            <button type="button" class="btn-avatar-preset ${foto === 'preset:ph-laptop' ? 'ativo' : ''}" data-preset="ph-laptop" onclick="selecionarAvatarPreset('ph-laptop')" title="Tecnologia">
+                                <i class="ph-bold ph-laptop"></i>
+                            </button>
+                            <button type="button" class="btn-avatar-preset ${foto === 'preset:ph-flask' ? 'ativo' : ''}" data-preset="ph-flask" onclick="selecionarAvatarPreset('ph-flask')" title="Pesquisa">
+                                <i class="ph-bold ph-flask"></i>
+                            </button>
+                            <button type="button" class="btn-avatar-preset ${foto === 'preset:ph-scales' ? 'ativo' : ''}" data-preset="ph-scales" onclick="selecionarAvatarPreset('ph-scales')" title="Direito">
+                                <i class="ph-bold ph-scales"></i>
+                            </button>
+                            <button type="button" class="btn-avatar-preset ${foto === 'preset:ph-heartbeat' ? 'ativo' : ''}" data-preset="ph-heartbeat" onclick="selecionarAvatarPreset('ph-heartbeat')" title="Saúde">
+                                <i class="ph-bold ph-heartbeat"></i>
+                            </button>
+                            <button type="button" class="btn-avatar-preset ${foto === 'preset:ph-lightning' ? 'ativo' : ''}" data-preset="ph-lightning" onclick="selecionarAvatarPreset('ph-lightning')" title="Inovação">
+                                <i class="ph-bold ph-lightning"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="portal-info-box">
+                        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                            <h2 class="portal-user-nome">${escaparHTML(usuarioAtual.nome || 'Estudante')}</h2>
+                            <span class="portal-user-tag-badge"><i class="ph-bold ph-shield-check"></i> Aluno EduScrap</span>
+                        </div>
+                        <div class="portal-user-meta">
+                            <span class="portal-meta-item"><i class="ph-bold ph-envelope"></i> ${escaparHTML(usuarioAtual.email || '')}</span>
+                            ${matriculaAtual ? `<span class="portal-meta-item"><i class="ph-bold ph-identification-card"></i> Matrícula: ${escaparHTML(matriculaAtual)}</span>` : ''}
+                            ${cursoAtual ? `<span class="portal-meta-item"><i class="ph-bold ph-graduation-cap"></i> ${escaparHTML(cursoAtual)}</span>` : ''}
+                            ${campusAtual ? `<span class="portal-meta-item"><i class="ph-bold ph-map-pin"></i> ${escaparHTML(campusAtual)}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FORMULÁRIO DE DADOS E PREFERÊNCIAS -->
+            <form id="form-portal-usuario" onsubmit="salvarPortalUsuario(event)" class="portal-corpo-card">
+                <div>
+                    <h3 class="portal-secao-titulo"><i class="ph-bold ph-identification-badge"></i> Dados Pessoais & Acadêmicos</h3>
+                    <div class="portal-grid-duas-colunas">
+                        <div class="form-group-memphis">
+                            <label class="label-memphis" for="portal-input-nome">Nome Completo:</label>
+                            <input type="text" id="portal-input-nome" class="input-memphis" value="${escaparHTML(usuarioAtual.nome || '')}" required>
+                        </div>
+
+                        <div class="form-group-memphis">
+                            <label class="label-memphis" for="portal-input-matricula">Matrícula / Registro Acadêmico:</label>
+                            <input type="text" id="portal-input-matricula" class="input-memphis" placeholder="Ex: 2024012345" value="${escaparHTML(matriculaAtual)}">
+                        </div>
+
+                        <div class="form-group-memphis">
+                            <label class="label-memphis" for="portal-select-curso">Curso Principal de Graduação:</label>
+                            <select id="portal-select-curso" class="input-memphis" style="cursor: pointer;">
+                                <option value="">Selecione seu curso...</option>
+                                ${TODOS_CURSOS.map(c => `<option value="${c}" ${c === cursoAtual ? 'selected' : ''}>${c}</option>`).join('')}
+                            </select>
+                        </div>
+
+                        <div class="form-group-memphis">
+                            <label class="label-memphis" for="portal-select-campus">Campus Universitário:</label>
+                            <select id="portal-select-campus" class="input-memphis" style="cursor: pointer;">
+                                <option value="Campus Central (Mossoró)" ${campusAtual === 'Campus Central (Mossoró)' ? 'selected' : ''}>Campus Central (Mossoró - UERN / UFERSA)</option>
+                                <option value="Campus Pau dos Ferros" ${campusAtual === 'Campus Pau dos Ferros' ? 'selected' : ''}>Campus Pau dos Ferros</option>
+                                <option value="Campus Assú" ${campusAtual === 'Campus Assú' ? 'selected' : ''}>Campus Assú</option>
+                                <option value="Campus Patu" ${campusAtual === 'Campus Patu' ? 'selected' : ''}>Campus Patu</option>
+                                <option value="Campus Caicó" ${campusAtual === 'Campus Caicó' ? 'selected' : ''}>Campus Caicó</option>
+                                <option value="Campus Natal" ${campusAtual === 'Campus Natal' ? 'selected' : ''}>Campus Natal</option>
+                                <option value="Outro" ${campusAtual === 'Outro' ? 'selected' : ''}>Outro Polo Universitário</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group-memphis" style="margin-top: 16px;">
+                        <label class="label-memphis" for="portal-input-bio">Apresentação / Interesses Acadêmicos (Bio):</label>
+                        <textarea id="portal-input-bio" class="input-memphis" rows="2" placeholder="Conte brevemente sobre seus objetivos (ex: buscando primeiro estágio em desenvolvimento web ou bolsa de pesquisa)...">${escaparHTML(bioAtual)}</textarea>
+                    </div>
+                </div>
+
+                <!-- PREFERÊNCIAS DE CURSOS PARA O FEED -->
+                <div>
+                    <h3 class="portal-secao-titulo"><i class="ph-bold ph-sparkle"></i> Cursos de Interesse para o Feed 'Para Você'</h3>
+                    <p style="color: #64748B; font-size: 0.95rem; margin-top: -8px; margin-bottom: 14px;">Selecione os cursos abaixo para personalizar suas recomendações diárias de editais:</p>
+                    <div class="chips-container" id="portal-chips-cursos">
+                        ${TODOS_CURSOS.map(curso => {
+                            const sel = cursosSalvos.includes(curso) ? 'chip-selecionado' : '';
+                            return `<button type="button" class="chip-opcao ${sel}" data-valor="${curso}"><span class="chip-check"><i class="ph-bold ph-check"></i></span> ${curso}</button>`;
+                        }).join('')}
+                    </div>
+                </div>
+
+                <!-- ÁREAS DE INTERESSE -->
+                <div>
+                    <h3 class="portal-secao-titulo"><i class="ph-bold ph-bookmarks"></i> Áreas Temáticas</h3>
+                    <div class="chips-container" id="portal-chips-areas">
+                        ${TODAS_AREAS.map(area => {
+                            const sel = areasSalvas.includes(area) ? 'chip-selecionado' : '';
+                            return `<button type="button" class="chip-opcao ${sel}" data-valor="${area}"><span class="chip-check"><i class="ph-bold ph-check"></i></span> ${area}</button>`;
+                        }).join('')}
+                    </div>
+                </div>
+
+                <!-- NOTIFICAÇÕES -->
+                <div>
+                    <label class="checkbox-memphis-container">
+                        <input type="checkbox" id="portal-receber-emails" ${emailNotif ? 'checked' : ''}>
+                        <span class="custom-checkbox"></span>
+                        <span class="label-texto">Receber alertas de editais críticos e prazos de encerramento por e-mail</span>
+                    </label>
+                </div>
+
+                <div id="portal-feedback-msg" class="msg-sucesso-memphis" style="display: none;"></div>
+
+                <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center; justify-content: space-between; border-top: 2px dashed #CBD5E1; padding-top: 20px;">
+                    <button type="submit" id="btn-salvar-portal" class="btn-submit-memphis btn-submit-primary" style="padding: 14px 28px; font-size: 1rem;">
+                        <i class="ph-bold ph-floppy-disk"></i> Salvar Alterações
+                    </button>
+
+                    <button type="button" class="btn-submit-memphis btn-submit-danger" onclick="fazerLogout()">
+                        <i class="ph-bold ph-sign-out"></i> Sair da Conta
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    // Ativa cliques dos chips do portal
+    configurarChipsClickPortal();
+}
+
+function configurarChipsClickPortal() {
+    document.querySelectorAll('#portal-chips-cursos .chip-opcao, #portal-chips-areas .chip-opcao').forEach(btn => {
+        btn.onclick = function() {
+            this.classList.toggle('chip-selecionado');
+        };
+    });
+}
+
+function processarUploadFotoPortal(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+        mostrarToast("Por favor selecione um arquivo de imagem válido.", "erro");
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const maxDim = 256;
+            let w = img.width;
+            let h = img.height;
+            if (w > h) {
+                if (w > maxDim) {
+                    h = Math.round(h * (maxDim / w));
+                    w = maxDim;
+                }
+            } else {
+                if (h > maxDim) {
+                    w = Math.round(w * (maxDim / h));
+                    h = maxDim;
+                }
+            }
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+            const previewEl = document.getElementById('portal-avatar-preview-container');
+            if (previewEl) {
+                previewEl.innerHTML = `<img src="${dataUrl}" class="portal-avatar-img" id="portal-avatar-img-preview" alt="Foto de perfil">`;
+                previewEl.dataset.fotoDataUrl = dataUrl;
+            }
+            document.querySelectorAll('.btn-avatar-preset').forEach(b => b.classList.remove('ativo'));
+            mostrarToast("Foto carregada! Clique em 'Salvar Alterações' para salvar.", "sucesso");
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function selecionarAvatarPreset(iconeNome) {
+    const previewContainer = document.getElementById('portal-avatar-preview-container');
+    if (!previewContainer) return;
+
+    previewContainer.innerHTML = `<div class="portal-avatar-placeholder" id="portal-avatar-placeholder-preview"><i class="ph-bold ${iconeNome}"></i></div>`;
+    previewContainer.dataset.fotoDataUrl = `preset:${iconeNome}`;
+
+    document.querySelectorAll('.btn-avatar-preset').forEach(b => b.classList.remove('ativo'));
+    const btnClicado = document.querySelector(`.btn-avatar-preset[data-preset="${iconeNome}"]`);
+    if (btnClicado) btnClicado.classList.add('ativo');
+
+    mostrarToast("Avatar selecionado! Clique em 'Salvar Alterações' para confirmar.", "sucesso");
+}
+
+async function salvarPortalUsuario(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!usuarioAtual) return;
+
+    const nome = document.getElementById('portal-input-nome')?.value.trim();
+    const matricula = document.getElementById('portal-input-matricula')?.value.trim();
+    const curso_principal = document.getElementById('portal-select-curso')?.value.trim();
+    const campus = document.getElementById('portal-select-campus')?.value.trim();
+    const bio = document.getElementById('portal-input-bio')?.value.trim();
+    const receber_emails = document.getElementById('portal-receber-emails')?.checked;
+
+    const cursos = obterChipsSelecionados('portal-chips-cursos');
+    const areas = obterChipsSelecionados('portal-chips-areas');
+
+    const previewContainer = document.getElementById('portal-avatar-preview-container');
+    const foto_perfil = (previewContainer && previewContainer.dataset.fotoDataUrl)
+        ? previewContainer.dataset.fotoDataUrl
+        : (usuarioAtual.foto_perfil || '');
+
+    const btnSubmit = document.getElementById('btn-salvar-portal');
+    if (btnSubmit) {
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> Salvando...`;
+    }
+
+    try {
+        const resp = await fetch(`${API_URL}/auth/perfil`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({
+                nome,
+                matricula,
+                curso_principal,
+                campus,
+                bio,
+                foto_perfil,
+                cursos,
+                areas,
+                receber_emails
+            })
+        });
+
+        if (!resp.ok) {
+            const errData = await resp.json().catch(() => ({}));
+            throw new Error(errData.detail || "Erro ao salvar perfil");
+        }
+
+        const data = await resp.json();
+        usuarioAtual = data.user;
+        localStorage.setItem('eduscrap_user', JSON.stringify(data.user));
+        atualizarInterfaceUsuario();
+
+        mostrarToast("Perfil atualizado com sucesso! 🎉", "sucesso");
+
+        const feedback = document.getElementById('portal-feedback-msg');
+        if (feedback) {
+            feedback.innerHTML = `<strong>Sucesso!</strong> Todas as alterações foram salvas.`;
+            feedback.style.display = 'block';
+            setTimeout(() => { feedback.style.display = 'none'; }, 4000);
+        }
+
+        // Recarrega o portal com os dados atualizados
+        carregarPortalUsuario();
+
+    } catch (err) {
+        mostrarToast(`Erro: ${err.message}`, "erro");
+    } finally {
+        if (btnSubmit) {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = `<i class="ph-bold ph-floppy-disk"></i> Salvar Alterações`;
+        }
     }
 }
 
