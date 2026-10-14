@@ -1335,7 +1335,7 @@ async function carregarEstatisticas() {
                             <div class="dash-donut-chart-wrapper">
                                 <div class="dash-donut-chart" style="background: conic-gradient(#10B981 0deg ${stop1}deg, #FF5C00 ${stop1}deg ${stop2}deg, #EF4444 ${stop2}deg 360deg);" title="Distribuição do acervo: ${vigentes} abertos, ${retaFinal} em 7 dias, ${vencidos} vencidos">
                                     <div class="dash-donut-center">
-                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
                                         </svg>
                                     </div>
@@ -1384,6 +1384,10 @@ async function carregarEstatisticas() {
                         <div class="dash-prazos-listas-grid" id="dash-prazos-listas-grid">
                             <!-- COLUNA 1: ABERTOS / PRÓXIMOS A VENCER -->
                             <div class="dash-prazo-coluna" id="col-prazos-proximos">
+                                <div class="dash-coluna-header header-abertos">
+                                    <span class="dash-coluna-dot dot-aberto"></span>
+                                    <h3 class="dash-coluna-titulo">Editais Abertos <span class="dash-coluna-contador">(${proximos.length})</span></h3>
+                                </div>
                                 ${proximos.length ? proximos.map(e => {
                                     const info = sanitizarItemEdital(e.titulo);
                                     const isEstagio = /estágio|ciee|prae|bolsa/i.test(e.titulo || '');
@@ -1414,6 +1418,10 @@ async function carregarEstatisticas() {
 
                             <!-- COLUNA 2: ENCERRADOS RECENTEMENTE -->
                             <div class="dash-prazo-coluna" id="col-prazos-encerrados">
+                                <div class="dash-coluna-header header-vencidos">
+                                    <span class="dash-coluna-dot dot-vencido"></span>
+                                    <h3 class="dash-coluna-titulo">Editais Vencidos <span class="dash-coluna-contador">(${vencidosLista.length})</span></h3>
+                                </div>
                                 ${vencidosLista.length ? `
                                     ${vencidosLista.slice(0, 4).map(e => {
                                         const info = sanitizarItemEdital(e.titulo);

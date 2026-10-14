@@ -1172,13 +1172,13 @@ body {
 /* Card de Prazos: Editais Abertos x Vencidos */
 .dash-card-prazos {
     background: #FFFFFF;
-    border: 3.5px solid var(--color-navy);
-    border-radius: 22px;
-    padding: 2.2rem 2rem;
-    box-shadow: 8px 8px 0px var(--color-navy);
+    border: 4px solid var(--color-navy);
+    border-radius: 30px;
+    padding: 3rem 2.8rem;
+    box-shadow: 10px 10px 0px var(--color-navy);
     display: flex;
     flex-direction: column;
-    gap: 1.6rem;
+    gap: 2rem;
 }
 
 .dash-prazos-header .dash-widget-titulo-row {
@@ -3711,9 +3711,9 @@ html.dark .text-gray-700 {
 .dash-donut-bloco-superior {
     display: flex;
     align-items: center;
-    gap: 48px;
+    gap: 56px;
     flex-wrap: wrap;
-    padding: 12px 6px 22px 6px;
+    padding: 12px 6px 24px 6px;
 }
 
 .dash-donut-chart-wrapper {
@@ -3724,11 +3724,11 @@ html.dark .text-gray-700 {
 }
 
 .dash-donut-chart {
-    width: 210px;
-    height: 210px;
+    width: 260px;
+    height: 260px;
     border-radius: 50%;
-    border: 4.5px solid var(--color-navy);
-    box-shadow: 6px 6px 0px var(--color-navy);
+    border: 5px solid var(--color-navy);
+    box-shadow: 8px 8px 0px var(--color-navy);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3741,11 +3741,11 @@ html.dark .text-gray-700 {
 }
 
 .dash-donut-center {
-    width: 118px;
-    height: 118px;
+    width: 146px;
+    height: 146px;
     border-radius: 50%;
     background: #FFFFFF;
-    border: 4.5px solid var(--color-navy);
+    border: 5px solid var(--color-navy);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3756,18 +3756,18 @@ html.dark .text-gray-700 {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 20px;
+    gap: 26px;
     flex: 1;
-    min-width: 320px;
+    min-width: 340px;
 }
 
 .dash-donut-legenda-item {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 18px;
     width: 100%;
-    padding: 8px 12px;
-    border-radius: 12px;
+    padding: 10px 14px;
+    border-radius: 14px;
     transition: background-color 0.15s ease;
 }
 
@@ -3776,10 +3776,10 @@ html.dark .text-gray-700 {
 }
 
 .dash-donut-dot {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
-    border: 3px solid var(--color-navy);
+    border: 3.5px solid var(--color-navy);
     flex-shrink: 0;
 }
 .dash-donut-dot.dot-aberto { background: #10B981; }
@@ -3787,7 +3787,7 @@ html.dark .text-gray-700 {
 .dash-donut-dot.dot-vencido { background: #DC2626; }
 
 .dash-donut-rotulo {
-    font-size: 1.25rem;
+    font-size: 1.4rem;
     font-weight: 800;
     color: var(--color-navy-text, #112244);
     white-space: nowrap;
@@ -3795,46 +3795,46 @@ html.dark .text-gray-700 {
 
 .dash-donut-linha-guia {
     flex: 1;
-    border-bottom: 2.5px dashed #CBD5E1;
-    margin: 0 16px;
+    border-bottom: 3px dashed #CBD5E1;
+    margin: 0 20px;
     min-width: 40px;
 }
 
 .dash-donut-valor {
-    font-size: 1.85rem;
+    font-size: 2.35rem;
     font-weight: 900;
     color: var(--color-navy-text, #112244);
-    min-width: 42px;
+    min-width: 48px;
     text-align: right;
 }
 
 .dash-prazos-nav-tabs {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 14px;
-    margin-bottom: 8px;
+    gap: 16px;
+    margin-top: 20px;
+    margin-bottom: 12px;
 }
 
 .dash-prazo-tab {
     background: #FFFFFF;
     color: var(--color-navy);
-    border: 2.5px solid var(--color-navy);
+    border: 3px solid var(--color-navy);
     border-radius: 9999px;
-    padding: 9px 20px;
+    padding: 12px 28px;
     font-weight: 800;
-    font-size: 0.95rem;
+    font-size: 1.12rem;
     cursor: pointer;
-    box-shadow: 3px 3px 0px var(--color-navy);
+    box-shadow: 4px 4px 0px var(--color-navy);
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dash-prazo-tab:hover {
-    transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0px var(--color-navy);
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px var(--color-navy);
     background: #FFFDE7;
 }
 
@@ -3846,31 +3846,67 @@ html.dark .text-gray-700 {
 }
 
 .dash-divisor-pontilhado {
-    border-top: 2px dashed #E2E8F0;
-    margin: 16px 0 16px 0;
+    border-top: 3px dashed #E2E8F0;
+    margin: 24px 0 24px 0;
     width: 100%;
 }
 
 .dash-prazos-listas-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 16px 32px;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 20px 40px;
     width: 100%;
 }
 
 .dash-prazo-coluna {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
     min-width: 0;
+}
+
+.dash-coluna-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 10px 12px 10px;
+    border-bottom: 2.5px solid #E2E8F0;
+    margin-bottom: 6px;
+}
+
+.dash-coluna-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2.5px solid var(--color-navy);
+    flex-shrink: 0;
+}
+.dash-coluna-dot.dot-aberto { background: #10B981; }
+.dash-coluna-dot.dot-vencido { background: #DC2626; }
+
+.dash-coluna-titulo {
+    font-size: 1.35rem;
+    font-weight: 900;
+    color: var(--color-navy-text, #112244);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: -0.3px;
+}
+
+.dash-coluna-contador {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #64748B;
 }
 
 .dash-edital-mini-card {
     display: flex;
     align-items: center;
-    gap: 14px;
-    padding: 10px 12px;
-    border-radius: 16px;
+    gap: 18px;
+    padding: 14px 18px;
+    border-radius: 20px;
     cursor: pointer;
     background: transparent;
     transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
@@ -3880,18 +3916,18 @@ html.dark .text-gray-700 {
 .dash-edital-mini-card:hover {
     background: #F8FAFC;
     border-color: #E2E8F0;
-    transform: translateX(3px);
+    transform: translateX(4px);
 }
 
 .dash-mini-icone-box {
-    width: 44px;
-    height: 44px;
+    width: 54px;
+    height: 54px;
     border-radius: 50%;
-    border: 2.5px solid var(--color-navy);
+    border: 3px solid var(--color-navy);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem;
+    font-size: 1.55rem;
     flex-shrink: 0;
 }
 
@@ -3913,17 +3949,17 @@ html.dark .text-gray-700 {
 .dash-mini-info {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 4px;
     min-width: 0;
     flex: 1;
 }
 
 .dash-mini-titulo {
-    font-size: 0.98rem;
+    font-size: 1.15rem;
     font-weight: 800;
     color: var(--color-navy-text, #112244);
     margin: 0;
-    line-height: 1.35;
+    line-height: 1.38;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -3931,25 +3967,35 @@ html.dark .text-gray-700 {
 }
 
 .dash-mini-subtexto {
-    font-size: 0.85rem;
+    font-size: 0.98rem;
     font-weight: 600;
     color: #64748B;
 }
 
 /* Dark mode adjustments para Donut e Mini Cards */
 html.dark .dash-donut-chart {
-    border: 4.5px solid #F8FAFC !important;
-    box-shadow: 6px 6px 0px #020617 !important;
+    border: 5px solid #F8FAFC !important;
+    box-shadow: 8px 8px 0px #020617 !important;
 }
 html.dark .dash-donut-center {
     background: #0F172A !important;
-    border: 4.5px solid #F8FAFC !important;
+    border: 5px solid #F8FAFC !important;
     color: #F8FAFC !important;
 }
 html.dark .dash-donut-rotulo,
 html.dark .dash-donut-valor,
-html.dark .dash-mini-titulo {
+html.dark .dash-mini-titulo,
+html.dark .dash-coluna-titulo {
     color: #F8FAFC !important;
+}
+html.dark .dash-coluna-contador {
+    color: #94A3B8 !important;
+}
+html.dark .dash-coluna-header {
+    border-bottom-color: #334155 !important;
+}
+html.dark .dash-coluna-dot {
+    border-color: #0F172A !important;
 }
 html.dark .dash-donut-linha-guia,
 html.dark .dash-divisor-pontilhado {
@@ -3964,7 +4010,7 @@ html.dark .dash-prazo-tab {
     background: #1E293B !important;
     color: #F8FAFC !important;
     border-color: #475569 !important;
-    box-shadow: 3px 3px 0px #020617 !important;
+    box-shadow: 4px 4px 0px #020617 !important;
 }
 html.dark .dash-prazo-tab:hover {
     background: #334155 !important;
@@ -4157,18 +4203,18 @@ html.dark .dash-mini-icone-box {
 .btn-toggle-encerrados {
     background: #F8FAFC;
     color: var(--color-navy-text, #112244);
-    border: 2px dashed #94A3B8;
-    border-radius: 10px;
-    padding: 10px 18px;
+    border: 2.5px dashed #94A3B8;
+    border-radius: 14px;
+    padding: 14px 22px;
     font-weight: 800;
-    font-size: 0.92rem;
+    font-size: 1.05rem;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
     width: 100%;
-    margin-top: 8px;
+    margin-top: 10px;
     transition: all 0.15s ease;
 }
 
