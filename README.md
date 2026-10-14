@@ -308,8 +308,6 @@ API_KEY=
 
 ## Equipe e Autores
 
-Projeto desenvolvido para a disciplina de **Projeto Integrador** do curso de Ciência da Computação / Informática:
-
 - **Líder da Equipe & Desenvolvedora**  
    • GitHub: [@kelryana](https://github.com/kelryana)
 - **Desenvolvedor**   
