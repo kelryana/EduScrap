@@ -310,10 +310,10 @@ API_KEY=
 
 Projeto desenvolvido para a disciplina de **Projeto Integrador** do curso de Ciência da Computação / Informática:
 
-- **Ana Kelry Fernandes Cabral do Nascimento** – Líder da Equipe & Desenvolvedora  
-  [kelryana930@gmail.com](mailto:kelryana930@gmail.com) • GitHub: [@kelryana](https://github.com/kelryana)
-- **Luiz Fernando Santos Teixeira** – Desenvolvedor  
-  Universidade do Estado do Rio Grande do Norte (UERN) – Campus Central Mossoró/RN
+- **Líder da Equipe & Desenvolvedora**  
+   • GitHub: [@kelryana](https://github.com/kelryana)
+- **Desenvolvedor**   
+   • GitHub: [@PatoDesoxigenado](https://github.com/PatoDesoxigenado)
 
 ---
 
