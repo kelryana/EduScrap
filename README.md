@@ -24,7 +24,7 @@
 
 ---
 
-## 📌 Sobre o Projeto
+## Sobre o Projeto
 
 O **EduScrap** (evolução do projeto *EstudanteHUB / TechHub*) é uma plataforma web completa desenvolvida no âmbito da disciplina de **Projeto Integrador** do Departamento de Informática (DI) da **Universidade do Estado do Rio Grande do Norte (UERN)**.
 
@@ -41,27 +41,27 @@ O **EduScrap** resolve essa dor ao atuar como um agregador e minerador automatiz
 
 ---
 
-## ✨ Funcionalidades Principais
+## Funcionalidades Principais
 
-- 🚀 **Web Scraping Paralelo Multi-Worker (`run_scrapers.py`):** Coleta automatizada simultânea em 8 fontes oficiais com isolamento de logs individuais por robô em `logs/`.
-- ⏱️ **Validação Temporal Automática de Prazos:** Cálculo heurístico contínuo (Data Limite vs. Data Atual), classificando automaticamente certames em *"Aberto / Vigente"* ou *"Encerrado"*.
-- 🍩 **Painel Analítico de Prazos com Gráfico Donut:** Componente visual interativo em SVG que sintetiza a proporção de editais abertos versus encerrados em frações de segundo.
-- 🎓 **Filtro Inteligente por Áreas e Cursos de Graduação:** Classificação semântica dos editais baseada no mapeamento institucional (`config/course_mapping.json`) para áreas como Tecnologia, Saúde, Humanas, Exatas e Sociais Aplicadas.
-- 🔍 **Busca Textual em Tempo Real:** Filtragem instantânea no feed no lado do cliente por título, órgão emissor ou palavras-chave.
-- 🌓 **Modo Escuro (Dark Mode) Dinâmico:** Alternância instantânea de tema (`theme.js`) com persistência em `localStorage` e troca automática de identidade visual para o logo de alto contraste (`assets/logo_temaescuro.png`).
-- 👤 **Área do Estudante e Favoritos:** Autenticação discente com hash seguro (`bcrypt`), seleção de cursos de interesse e possibilidade de salvar/favoritar editais no perfil.
-- 📖 **Documentação Interativa Swagger / OpenAPI:** Documentação completa e testável da API disponível nativamente em `/docs`.
-- 🛠️ **DevOps & Automação Completa:** Scripts de subida em um clique (`start.sh` e `Makefile`) e suíte de testes com `pytest`.
+- **Web Scraping Paralelo Multi-Worker (`run_scrapers.py`):** Coleta automatizada simultânea em 8 fontes oficiais com isolamento de logs individuais por robô em `logs/`.
+-  **Validação Temporal Automática de Prazos:** Cálculo heurístico contínuo (Data Limite vs. Data Atual), classificando automaticamente certames em *"Aberto / Vigente"* ou *"Encerrado"*.
+- **Painel Analítico de Prazos com Gráfico Donut:** Componente visual interativo em SVG que sintetiza a proporção de editais abertos versus encerrados em frações de segundo.
+-  **Filtro Inteligente por Áreas e Cursos de Graduação:** Classificação semântica dos editais baseada no mapeamento institucional (`config/course_mapping.json`) para áreas como Tecnologia, Saúde, Humanas, Exatas e Sociais Aplicadas.
+-  **Busca Textual em Tempo Real:** Filtragem instantânea no feed no lado do cliente por título, órgão emissor ou palavras-chave.
+-  **Modo Escuro (Dark Mode) Dinâmico:** Alternância instantânea de tema (`theme.js`) com persistência em `localStorage` e troca automática de identidade visual para o logo de alto contraste (`assets/logo_temaescuro.png`).
+-  **Área do Estudante e Favoritos:** Autenticação discente com hash seguro (`bcrypt`), seleção de cursos de interesse e possibilidade de salvar/favoritar editais no perfil.
+-  **Documentação Interativa Swagger / OpenAPI:** Documentação completa e testável da API disponível nativamente em `/docs`.
+-  **DevOps & Automação Completa:** Scripts de subida em um clique (`start.sh` e `Makefile`) e suíte de testes com `pytest`.
 
 ---
 
-## 🏗️ Arquitetura do Sistema
+##  Arquitetura do Sistema
 
 O EduScrap foi projetado sob o padrão de **Microsserviços Desacoplados** e **Coleta Assíncrona em Duas Fases**:
 
 ```mermaid
 flowchart TD
-    subgraph Fontes ["🌐 Fontes Externas"]
+    subgraph Fontes ["Fontes Externas"]
         UERN["Portal UERN / JOUERN"]
         PRAE["PRAE (Estágios/Auxílios)"]
         PROEX["PROEX (Bolsas)"]
@@ -69,24 +69,24 @@ flowchart TD
         CIEE["Plataforma CIEE"]
     end
 
-    subgraph Ingestao ["⚙️ Engine de Ingestão Concorrente"]
+    subgraph Ingestao [" Engine de Ingestão Concorrente"]
         Runner["Orquestrador run_scrapers.py (ThreadPool)"]
         Scrapers["Workers Paralelos (BS4 / Selenium Headless)"]
         Norm["Normalizador (pdfplumber + Regex Engine)"]
     end
 
-    subgraph Dados ["💾 Camada de Persistência"]
+    subgraph Dados [" Camada de Persistência"]
         Mongo[("MongoDB 7.0 (hub_estudantes)\nColeções: oportunidades, usuarios")]
         Logs["Logs Isolados (logs/<fonte>.log)"]
     end
 
-    subgraph Servicos ["⚡ Backend API"]
+    subgraph Servicos [" Backend API"]
         FastAPI["FastAPI / Uvicorn Server (:8000)\nEndpoints REST & Swagger /docs"]
     end
 
-    subgraph Cliente ["💻 Camada de Apresentação"]
+    subgraph Cliente [" Camada de Apresentação"]
         SPA["Frontend Dashboard (:3000)\nDonut Chart + Filtros + Dark Mode"]
-        User(("🎓 Estudante"))
+        User(("Estudante"))
     end
 
     Fontes -->|Download HTML / PDF| Scrapers
@@ -101,7 +101,7 @@ flowchart TD
 
 ---
 
-## ⚡ Inicialização Rápida em 1 Comando
+##  Inicialização Rápida em 1 Comando
 
 Para subir todo o ecossistema (verificar e iniciar o **MongoDB**, subir a **API FastAPI** na porta 8000, o **Frontend** na porta 3000 e abrir automaticamente seu navegador):
 
@@ -114,7 +114,7 @@ Para subir todo o ecossistema (verificar e iniciar o **MongoDB**, subir a **API 
 > make run
 > ```
 
-### 🌐 URLs da Aplicação Local:
+###  URLs da Aplicação Local:
 - **Frontend Dashboard:** [http://localhost:3000](http://localhost:3000)
 - **API REST Backend:** [http://localhost:8000](http://localhost:8000)
 - **Documentação Interativa (Swagger):** [http://localhost:8000/docs](http://localhost:8000/docs)
@@ -124,7 +124,7 @@ Para encerrar todos os serviços de uma só vez, pressione `Ctrl + C` no termina
 
 ---
 
-## 🤖 Coleta de Dados (Web Scraping Paralelo Concorrente)
+##  Coleta de Dados (Web Scraping Paralelo Concorrente)
 
 O orquestrador `run_scrapers.py` executa os robôs em threads concorrentes paralelas, garantindo que o processamento pesado ocorra em background sem degradar o tempo de resposta da API:
 
@@ -156,11 +156,11 @@ python run_scrapers.py --help
 | `cpps_ufersa` | CPPS UFERSA | Processos seletivos acadêmicos | `editais` |
 | `assecom_ufersa` | ASSECOM UFERSA | Comunicados e editais | `editais` |
 
-> 📁 **Isolamento de Logs:** Cada fonte salva seus próprios logs isoladamente em `logs/<chave>.log` (ex.: `logs/prae.log`, `logs/ciee.log`), permitindo depuração individual sem poluir o terminal.
+>  **Isolamento de Logs:** Cada fonte salva seus próprios logs isoladamente em `logs/<chave>.log` (ex.: `logs/prae.log`, `logs/ciee.log`), permitindo depuração individual sem poluir o terminal.
 
 ---
 
-## 📊 Diagramas Arquiteturais e UML
+## Diagramas Arquiteturais e UML
 
 O projeto possui um conjunto completo de diagramas atualizados em conformidade com o código-fonte, disponibilizados em formatos **PNG** (alta resolução), **SVG** (vetorial) e **PUML** (PlantUML) na pasta [`diagramas_atualizados/`](diagramas_atualizados/):
 
@@ -176,27 +176,27 @@ O projeto possui um conjunto completo de diagramas atualizados em conformidade c
 
 ---
 
-## 📑 Documentos Acadêmicos Oficiais
+##  Documentos Acadêmicos Oficiais
 
 Os documentos formais de entrega da disciplina de Projeto Integrador encontram-se gerados e formatados em conformidade com o padrão institucional do Departamento de Informática (DI/UERN) na pasta [`documentos_finais/`](documentos_finais/):
 
-- 📕 **Documento 1: Proposta do Projeto Integrador**
+- **Documento 1: Proposta do Projeto Integrador**
   - [Proposta_do_Projeto_EduScrap.pdf](documentos_finais/Proposta_do_Projeto_EduScrap.pdf) (Versão para envio/impressão)
   - [Proposta_do_Projeto_EduScrap.docx](documentos_finais/Proposta_do_Projeto_EduScrap.docx) (Versão editável Word)
   - *Conteúdo:* Cronograma real das 6 semanas, justificativa de aderência, viabilidade técnica detalhada e plano de atividades.
 
-- 📘 **Documento 2: Modelagem de Análise e Projeto Orientado a Objetos usando UML**
+- **Documento 2: Modelagem de Análise e Projeto Orientado a Objetos usando UML**
   - [Documento_Modelagem_UML_EduScrap.pdf](documentos_finais/Documento_Modelagem_UML_EduScrap.pdf) (Documento completo de 36 páginas com todas as figuras e telas)
   - [Documento_Modelagem_UML_EduScrap.docx](documentos_finais/Documento_Modelagem_UML_EduScrap.docx) (Versão editável Word)
   - *Conteúdo:* Histórico de revisão higienizado, especificações textuais dos casos de uso UC01 a UC09, modelo conceitual, diagramas de sequência, modelo NoSQL, classes, prints reais da interface (Donut Chart, Dark Mode, listagem e login) e análise de usabilidade de Nielsen.
 
 ---
 
-## 🔌 Referência Completa da API REST
+## Referência Completa da API REST
 
 A API do EduScrap fornece os seguintes endpoints principais:
 
-### 🎓 Oportunidades & Editais
+###  Oportunidades & Editais
 | Método | Endpoint | Parâmetros de Query | Descrição |
 |:---:|:---|:---|:---|
 | `GET` | `/` | — | Informações gerais e status da API |
@@ -211,7 +211,7 @@ A API do EduScrap fornece os seguintes endpoints principais:
 | `GET` | `/api/estatisticas`| — | Métricas de vigência dos editais para o Gráfico Donut |
 | `GET` | `/api/db-status` | — | Diagnóstico de latência e saúde do MongoDB |
 
-### 👤 Autenticação & Perfil do Estudante
+### Autenticação & Perfil do Estudante
 | Método | Endpoint | Cabeçalho / Body | Descrição |
 |:---:|:---|:---|:---|
 | `POST`| `/api/auth/register` | `{ nome, email, senha, curso }` | Cadastro de novo perfil de estudante |
@@ -225,7 +225,7 @@ A API do EduScrap fornece os seguintes endpoints principais:
 
 ---
 
-## 📁 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 EduScrap/
@@ -246,10 +246,10 @@ EduScrap/
 ├── config/
 │   ├── course_mapping.json       # Mapeamento oficial de cursos por área acadêmica
 │   └── patterns.json             # Padrões compilados de Regex para extração
-├── diagramas_atualizados/        # 📊 7 Novos Diagramas Arquiteturais (PNG, SVG, PUML)
+├── diagramas_atualizados/        # 7 Novos Diagramas Arquiteturais (PNG, SVG, PUML)
 │   ├── README.md                 # Guia técnico dos diagramas
 │   └── diagrama_01_* a 07_*      # Arquivos nos formatos PNG, SVG e PUML
-├── documentos_finais/            # 📑 Documentação Acadêmica Completa (PDF e DOCX)
+├── documentos_finais/            # Documentação Acadêmica Completa (PDF e DOCX)
 │   ├── Proposta_do_Projeto_EduScrap.pdf / .docx
 │   └── Documento_Modelagem_UML_EduScrap.pdf / .docx
 ├── diagrams/                     # Capturas de tela e assets gráficos auxiliares
@@ -264,7 +264,7 @@ EduScrap/
 
 ---
 
-## 💻 Instalação Passo a Passo
+## Instalação Passo a Passo
 
 ### Pré-requisitos
 - **Python 3.10 ou superior** (recomendado 3.12)
@@ -310,7 +310,7 @@ make run
 
 ---
 
-## 🧪 Testes Automatizados
+## Testes Automatizados
 
 O EduScrap conta com uma suíte de testes unitários e de integração utilizando `pytest` e `mongomock`:
 
@@ -324,7 +324,7 @@ pytest tests/ -v
 
 ---
 
-## ⚙️ Variáveis de Ambiente
+## Variáveis de Ambiente
 
 Crie ou edite o arquivo `.env` na raiz do projeto ou na pasta `backend/` caso deseje personalizar a conexão:
 
@@ -339,18 +339,18 @@ API_KEY=
 
 ---
 
-## 👥 Equipe e Autores
+## Equipe e Autores
 
 Projeto desenvolvido para a disciplina de **Projeto Integrador** do curso de Ciência da Computação / Informática:
 
 - **Ana Kelry Fernandes Cabral do Nascimento** – Líder da Equipe & Desenvolvedora  
-  📧 [kelryana930@gmail.com](mailto:kelryana930@gmail.com) • GitHub: [@kelryana](https://github.com/kelryana)
+  [kelryana930@gmail.com](mailto:kelryana930@gmail.com) • GitHub: [@kelryana](https://github.com/kelryana)
 - **Luiz Fernando Santos Teixeira** – Desenvolvedor  
   Universidade do Estado do Rio Grande do Norte (UERN) – Campus Central Mossoró/RN
 
 ---
 
-## 📄 Licença
+## Licença
 
 Este projeto é software livre distribuído sob os termos da licença **MIT**. Consulte o arquivo [LICENSE](LICENSE) para mais detalhes.
 
