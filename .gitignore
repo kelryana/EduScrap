@@ -56,8 +56,10 @@ dump/
 
 *.jpg
 *.jpeg
-ciee_erro.png
-erro.png
+# coloque no gitignore os arquivos png, mas libere os arquivos de imagem do frontend (frontend/assets/)
+*.png
+*.gif
+*.svg
 
 
 # EDITORES
