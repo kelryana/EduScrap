@@ -13,13 +13,6 @@
   <strong>Hub centralizado de mineração, curadoria e monitoramento de editais, bolsas, estágios e notícias acadêmicas para o ecossistema universitário potiguar.</strong>
 </p>
 
-[⚡ Início Rápido](#-inicialização-rápida-em-1-comando) •
-[✨ Funcionalidades](#-funcionalidades-principais) •
-[📊 Diagramas UML](#-diagramas-arquiteturais-e-uml) •
-[🔌 Endpoints da API](#-referência-completa-da-api-rest) •
-[📁 Estrutura](#-estrutura-do-projeto) •
-[👥 Equipe](#-equipe-e-autores)
-
 </div>
 
 ---
