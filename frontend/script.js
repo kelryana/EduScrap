@@ -1158,10 +1158,25 @@ function sanitizarItemEdital(titulo) {
 
 function alternarAbaPrazos(aba, btn) {
     if (!btn) {
-        btn = document.querySelector(`.dash-prazo-tab[data-aba="${aba}"]`);
+        btn = document.querySelector(`[data-purpose="tab-filters"] button[data-aba="${aba}"]`);
     }
-    document.querySelectorAll('.dash-prazo-tab').forEach(b => b.classList.remove('ativo'));
-    if (btn) btn.classList.add('ativo');
+    const todosBotoes = document.querySelectorAll('[data-purpose="tab-filters"] button');
+    todosBotoes.forEach(b => {
+        b.className = 'px-4 py-2 bg-white text-slate-800 rounded-xl text-xs sm:text-sm font-bold flex items-center space-x-2 border-2 border-slate-900 hover:bg-slate-50 transition cursor-pointer';
+        const svg = b.querySelector('svg');
+        if (svg) {
+            svg.classList.remove('text-white');
+            svg.classList.add('text-slate-700');
+        }
+    });
+    if (btn) {
+        btn.className = 'px-4 py-2 bg-slate-900 text-white rounded-xl text-xs sm:text-sm font-bold flex items-center space-x-2 border-2 border-slate-900 shadow-sm transition hover:bg-slate-800 cursor-pointer ativo';
+        const svg = btn.querySelector('svg');
+        if (svg) {
+            svg.classList.remove('text-slate-700');
+            svg.classList.add('text-white');
+        }
+    }
 
     const colProximos = document.getElementById('col-prazos-proximos');
     const colEncerrados = document.getElementById('col-prazos-encerrados');
@@ -1170,12 +1185,15 @@ function alternarAbaPrazos(aba, btn) {
     const msgSemRetaFinal = document.getElementById('dash-msg-sem-reta-final');
     if (!colProximos || !colEncerrados) return;
 
-    const cardsAbertos = colProximos.querySelectorAll('.dash-edital-mini-card[data-edital-tipo="aberto"]');
+    const cardsAbertos = colProximos.querySelectorAll('[data-edital-tipo="aberto"]');
 
     if (aba === 'proximos') {
-        colProximos.style.display = 'flex';
+        colProximos.style.display = 'block';
         colEncerrados.style.display = 'none';
-        if (grid) grid.style.gridTemplateColumns = '1fr';
+        if (grid) {
+            grid.classList.remove('md:grid-cols-2');
+            grid.classList.add('grid-cols-1');
+        }
         let visiveis = 0;
         cardsAbertos.forEach(c => {
             if (c.dataset.retaFinal === 'true') {
@@ -1186,30 +1204,39 @@ function alternarAbaPrazos(aba, btn) {
             }
         });
         if (tituloColAbertos) {
-            tituloColAbertos.innerHTML = `Vencendo em Breve <span class="dash-coluna-contador">(${visiveis})</span>`;
+            tituloColAbertos.innerHTML = `Vencendo em Breve <span class="font-normal text-slate-500">(${visiveis})</span>`;
         }
         if (msgSemRetaFinal) {
             msgSemRetaFinal.style.display = visiveis === 0 ? 'block' : 'none';
         }
     } else if (aba === 'encerrados') {
         colProximos.style.display = 'none';
-        colEncerrados.style.display = 'flex';
-        if (grid) grid.style.gridTemplateColumns = '1fr';
+        colEncerrados.style.display = 'block';
+        if (grid) {
+            grid.classList.remove('md:grid-cols-2');
+            grid.classList.add('grid-cols-1');
+        }
     } else {
         // 'todos' ou 'abertos'
-        colProximos.style.display = 'flex';
+        colProximos.style.display = 'block';
         if (aba === 'abertos') {
             colEncerrados.style.display = 'none';
-            if (grid) grid.style.gridTemplateColumns = '1fr';
+            if (grid) {
+                grid.classList.remove('md:grid-cols-2');
+                grid.classList.add('grid-cols-1');
+            }
         } else {
-            colEncerrados.style.display = 'flex';
-            if (grid) grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(320px, 1fr))';
+            colEncerrados.style.display = 'block';
+            if (grid) {
+                grid.classList.remove('grid-cols-1');
+                grid.classList.add('md:grid-cols-2');
+            }
         }
         cardsAbertos.forEach(c => {
             c.style.display = 'flex';
         });
         if (tituloColAbertos) {
-            tituloColAbertos.innerHTML = `Editais Abertos <span class="dash-coluna-contador">(${cardsAbertos.length})</span>`;
+            tituloColAbertos.innerHTML = `Editais Abertos <span class="font-normal text-slate-500">(${cardsAbertos.length})</span>`;
         }
         if (msgSemRetaFinal) {
             msgSemRetaFinal.style.display = 'none';
@@ -1220,12 +1247,14 @@ function alternarAbaPrazos(aba, btn) {
 function alternarListaEncerrados(btn) {
     const extras = document.getElementById('lista-encerrados-extras');
     if (!extras) return;
-    const estaAberto = extras.style.display === 'flex';
-    extras.style.display = estaAberto ? 'none' : 'flex';
+    const estaAberto = extras.style.display === 'block';
+    extras.style.display = estaAberto ? 'none' : 'block';
     if (btn) {
-        btn.innerHTML = estaAberto
-            ? `<i class="ph-bold ph-caret-down"></i> Mostrar mais editais encerrados`
-            : `<i class="ph-bold ph-caret-up"></i> Recolher histórico de editais`;
+        const svgIcon = estaAberto
+            ? `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19.5 8.25l-7.5 7.5-7.5-7.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>`
+            : `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M4.5 15.75l7.5-7.5 7.5 7.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>`;
+        const texto = estaAberto ? (btn.dataset.textoExpandir || 'Mostrar mais editais encerrados') : 'Recolher histórico de editais';
+        btn.innerHTML = `${svgIcon}<span>${texto}</span>`;
     }
 }
 
@@ -1363,268 +1392,389 @@ async function carregarEstatisticas() {
         const editaisAbertos = dados.editais_abertos || dados.proximos_a_vencer || [];
         const proximos = dados.proximos_a_vencer || [];
         const vencidosLista = dados.vencidos_recentes || [];
-        const totalPrazos = vigentes + retaFinal + vencidos;
+        // Configuração dos 8 KPIs de topo do dashboard com ícones e acentos idênticos ao layout solicitado
+        const kpis = [
+            {
+                rotulo: 'TOTAL NO HUB',
+                numero: totalGeral,
+                accent: 'bg-amber-500',
+                boxBg: 'bg-amber-50 border-amber-300 text-amber-600',
+                svg: `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M3.75 6.75l8.25-4.5 8.25 4.5m-16.5 0l8.25 4.5 8.25-4.5m-16.5 6l8.25 4.5 8.25-4.5m-16.5 6l8.25 4.5 8.25-4.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>`,
+                acao: "carregarDados('estagios')"
+            },
+            {
+                rotulo: 'ESTÁGIOS (PRAE / CIEE / MPRN / IEL)',
+                numero: totalEstagios,
+                accent: 'bg-orange-500',
+                boxBg: 'bg-orange-50 border-orange-300 text-orange-600',
+                svg: `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M4.26 10.147L12 5.25l7.74 4.897M4.26 10.147l7.74 4.897 7.74-4.897M4.26 10.147v4.603a7.5 7.5 0 0015.48 0v-4.603" stroke-linecap="round" stroke-linejoin="round"></path></svg>`,
+                acao: "carregarDados('estagios')"
+            },
+            {
+                rotulo: 'BOLSAS (PROEX)',
+                numero: totalBolsas,
+                accent: 'bg-cyan-500',
+                boxBg: 'bg-cyan-50 border-cyan-300 text-cyan-600',
+                svg: `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" stroke-linecap="round" stroke-linejoin="round"></path></svg>`,
+                acao: "carregarDados('bolsas')"
+            },
+            {
+                rotulo: 'EDITAIS UFERSA',
+                numero: totalUfersa,
+                accent: 'bg-purple-600',
+                boxBg: 'bg-purple-50 border-purple-300 text-purple-600',
+                svg: `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.5m-15 10.5V10.5M3 21h18" stroke-linecap="round" stroke-linejoin="round"></path></svg>`,
+                acao: "carregarDados('ufersa')"
+            },
+            {
+                rotulo: 'CURSOS & BOLSAS',
+                numero: totalCursosBolsas,
+                accent: 'bg-teal-500',
+                boxBg: 'bg-teal-50 border-teal-300 text-teal-600',
+                svg: `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" stroke-linecap="round" stroke-linejoin="round"></path></svg>`,
+                acao: "carregarDados('cursos-bolsas')"
+            },
+            {
+                rotulo: 'NOTÍCIAS (TECH, EDU, SAÚDE...)',
+                numero: totalTech,
+                accent: 'bg-emerald-500',
+                boxBg: 'bg-emerald-50 border-emerald-300 text-emerald-600',
+                svg: `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" stroke-linecap="round" stroke-linejoin="round"></path></svg>`,
+                acao: "carregarDados('noticias')"
+            },
+            {
+                rotulo: 'PORTAL UERN (MINERADO)',
+                numero: totalUern,
+                accent: 'bg-blue-600',
+                boxBg: 'bg-blue-50 border-blue-300 text-blue-700',
+                svg: `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" stroke-linecap="round" stroke-linejoin="round"></path></svg>`,
+                acao: "carregarDados('portal_uern')"
+            },
+            {
+                rotulo: 'DOM MOSSORÓ',
+                numero: totalDom,
+                accent: 'bg-pink-500',
+                boxBg: 'bg-pink-50 border-pink-300 text-pink-600',
+                svg: `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" stroke-linecap="round" stroke-linejoin="round"></path></svg>`,
+                acao: "carregarDados('dom')"
+            }
+        ];
 
-        // Categorias para o gráfico de barras vertical estilo cápsula (neobrutalista)
+        // 7 Categorias do Gráfico de Barras Vertical
         const categoriasBarras = [
-            { id: 'estagios', rotulo: 'Estágios', total: totalEstagios, cor: '#FF5C00', icone: 'ph-graduation-cap' },
-            { id: 'bolsas', rotulo: 'Bolsas', total: totalBolsas, cor: '#38BDF8', icone: 'ph-coins' },
-            { id: 'ufersa', rotulo: 'UFERSA', total: totalUfersa, cor: '#A855F7', icone: 'ph-bank' },
-            { id: 'cursos-bolsas', rotulo: 'Cursos', total: totalCursosBolsas, cor: '#FACC15', icone: 'ph-book-open' },
-            { id: 'noticias', rotulo: 'Notícias', total: totalTech, cor: '#10B981', icone: 'ph-megaphone' },
-            { id: 'portal_uern', rotulo: 'UERN', total: totalUern, cor: '#3B82F6', icone: 'ph-student' },
-            { id: 'dom', rotulo: 'DOM', total: totalDom, cor: '#F43F5E', icone: 'ph-newspaper-clipping' }
+            {
+                id: 'estagios',
+                rotulo: 'Estágios',
+                total: totalEstagios,
+                corClass: 'bg-[#f97316]',
+                svg: `<svg class="w-3.5 h-3.5 text-slate-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292" stroke-linecap="round" stroke-linejoin="round"></path></svg>`
+            },
+            {
+                id: 'bolsas',
+                rotulo: 'Bolsas',
+                total: totalBolsas,
+                corClass: 'bg-[#38bdf8]',
+                svg: `<svg class="w-3.5 h-3.5 text-slate-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round"></path></svg>`
+            },
+            {
+                id: 'ufersa',
+                rotulo: 'UFERSA',
+                total: totalUfersa,
+                corClass: 'bg-[#a855f7]',
+                svg: `<svg class="w-3.5 h-3.5 text-slate-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" stroke-linecap="round" stroke-linejoin="round"></path></svg>`
+            },
+            {
+                id: 'cursos-bolsas',
+                rotulo: 'Cursos',
+                total: totalCursosBolsas,
+                corClass: 'bg-[#facc15]',
+                svg: `<svg class="w-3.5 h-3.5 text-slate-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round"></path></svg>`
+            },
+            {
+                id: 'noticias',
+                rotulo: 'Notícias',
+                total: totalTech,
+                corClass: 'bg-[#10b981]',
+                svg: `<svg class="w-3.5 h-3.5 text-slate-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" stroke-linecap="round" stroke-linejoin="round"></path></svg>`
+            },
+            {
+                id: 'portal_uern',
+                rotulo: 'UERN',
+                total: totalUern,
+                corClass: 'bg-[#3b82f6]',
+                svg: `<svg class="w-3.5 h-3.5 text-slate-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>`
+            },
+            {
+                id: 'dom',
+                rotulo: 'DOM',
+                total: totalDom,
+                corClass: 'bg-[#f43f5e]',
+                svg: `<svg class="w-3.5 h-3.5 text-slate-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"></path></svg>`
+            }
         ];
         const maxBarraValor = Math.max(...categoriasBarras.map(c => c.total), 1);
 
-        // Ângulos proporcionais para o gráfico Donut estilo Neobrutalism (SVG / conic-gradient)
-        let degAberto = totalPrazos > 0 ? (vigentes / totalPrazos) * 360 : 0;
-        let degVencendo = totalPrazos > 0 ? (retaFinal / totalPrazos) * 360 : 0;
-        if (vigentes > 0 && degAberto < 14) degAberto = 14;
-        if (retaFinal > 0 && degVencendo < 10) degVencendo = 10;
-        const stop1 = Math.round(degAberto);
-        const stop2 = Math.min(Math.round(degAberto + degVencendo), 350);
+        // Gráfico Donut em SVG: cálculo preciso do comprimento dos arcos (r = 46, Circunferência = 289)
+        const totalPrazosCalculo = Math.max(vigentes + vencidos, 1);
+        const circ = 289;
+        let lenAbertosTotal = (vigentes / totalPrazosCalculo) * circ;
+        if (vigentes > 0 && lenAbertosTotal < 16) lenAbertosTotal = 16;
+        let lenAbertosNormais = (Math.max(vigentes - retaFinal, 0) / totalPrazosCalculo) * circ;
+        if (vigentes > retaFinal && lenAbertosNormais < 10) lenAbertosNormais = 10;
+        if (vigentes === retaFinal) lenAbertosNormais = 0;
 
-        // Paleta por KPI espelhando o design de referência (cor + fundo pastel da pílula)
-        const PALETA_KPI = {
-            laranja:  { cor: '#FF5C00', bg: '#FFF4ED' },
-            coral:    { cor: '#EA580C', bg: '#FFF4ED' },
-            ciano:    { cor: '#0284C7', bg: '#EFF9FE' },
-            roxo:     { cor: '#8B5CF6', bg: '#F5F1FD' },
-            verde:    { cor: '#10B981', bg: '#EEFDF5' },
-            azul:     { cor: '#1E3A8A', bg: '#EEF2FE' },
-            grafite:  { cor: '#1E293B', bg: '#EFF3F8' }
-        };
-
-        // No tema ESCURO, tudo que é escuro no tema CLARO vira CLARO
-        // (regra global do dashboard): cores escuras são clareadas via CSS.
-        window.dispatchEvent(new Event('themechange'));
-
-        const kpis = [
-            { rotulo: 'TOTAL NO HUB', numero: totalGeral, icone: 'ph-stack', cor: 'laranja', acao: "carregarDados('estagios')" },
-            { rotulo: 'ESTÁGIOS (PRAE / CIEE / MPRN / IEL)', numero: totalEstagios, icone: 'ph-graduation-cap', cor: 'coral', acao: "carregarDados('estagios')" },
-            { rotulo: 'BOLSAS (PROEX)', numero: totalBolsas, icone: 'ph-coins', cor: 'ciano', acao: "carregarDados('bolsas')" },
-            { rotulo: 'EDITAIS UFERSA', numero: totalUfersa, icone: 'ph-bank', cor: 'roxo', acao: "carregarDados('ufersa')" },
-            { rotulo: 'CURSOS & BOLSAS', numero: totalCursosBolsas, icone: 'ph-book-open', cor: 'ciano', acao: "carregarDados('cursos-bolsas')" },
-            { rotulo: 'NOTÍCIAS (TECH, EDU, SAÚDE...)', numero: totalTech, icone: 'ph-lightning', cor: 'verde', acao: "carregarDados('noticias')" },
-            { rotulo: 'PORTAL UERN (MINERADO)', numero: totalUern, icone: 'ph-magnifying-glass', cor: 'azul', acao: "carregarDados('portal_uern')" },
-            { rotulo: 'DOM MOSSORÓ', numero: totalDom, icone: 'ph-newspaper-clipping', cor: 'grafite', acao: "carregarDados('dom')" }
-        ];
+        const dashOffsetVencendo = Math.max(0, Math.min(289, Math.round(circ - lenAbertosTotal)));
+        const dashOffsetAberto = Math.max(0, Math.min(289, Math.round(circ - lenAbertosNormais)));
 
         let html = `
-            <div class="dashboard-neo-wrapper">
-                <div class="dash-master-unified-card">
+            <div class="w-full max-w-[1140px] bg-white rounded-3xl border-2 border-slate-900 shadow-xl overflow-hidden p-4 sm:p-6 md:p-8 space-y-6 mx-auto" data-purpose="dashboard-wrapper">
+                
+                <!-- BEGIN: HeaderSection -->
+                <header class="text-center pt-1 pb-2" data-purpose="header">
+                    <h1 class="text-xl sm:text-2xl md:text-[28px] font-black uppercase tracking-tight text-slate-900">
+                        DASHBOARD DE OPORTUNIDADES - HUB
+                    </h1>
+                </header>
+                <!-- END: HeaderSection -->
 
-                    <!-- CABEÇALHO UNIFICADO DO DASHBOARD -->
-                    <div class="dash-master-header">
-                        <h1 class="dash-master-title">DASHBOARD DE OPORTUNIDADES - HUB</h1>
-                    </div>
-                    <div class="dash-divisor-pontilhado" style="margin: 0 0 20px 0;"></div>
+                <!-- BEGIN: TopMetricCardsGrid -->
+                <section class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3" data-purpose="metric-cards">
+                    ${kpis.map(k => `
+                    <div onclick="${k.acao}" class="relative bg-white border-2 border-slate-900 rounded-2xl pt-4 pb-3 px-2 flex flex-col items-center justify-between text-center shadow-[0_2px_0_0_rgba(15,23,42,0.9)] hover:shadow-md transition-all cursor-pointer">
+                        <span class="absolute top-0 inset-x-4 h-1 ${k.accent} rounded-b-md"></span>
+                        <div class="w-8 h-8 rounded-xl ${k.boxBg} border flex items-center justify-center mb-2">
+                            ${k.svg}
+                        </div>
+                        <div class="text-[9px] font-bold tracking-tight text-slate-600 uppercase h-7 flex items-center justify-center leading-tight">${k.rotulo}</div>
+                        <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1" data-alvo="${k.numero}">0</div>
+                    </div>`).join('')}
+                </section>
+                <!-- END: TopMetricCardsGrid -->
 
-                    <!-- LINHA DE 8 KPIS EM GRID COMPACTO -->
-                    <div class="dash-grid-top-kpis">
-                        ${kpis.map(k => {
-                            const paleta = PALETA_KPI[k.cor] || PALETA_KPI.laranja;
-                            return `
-                        <button type="button" class="dash-kpi-card card-cor-${k.cor}" style="--kpi-cor: ${paleta.cor}; --kpi-bg: ${paleta.bg};" onclick="${k.acao}" title="Ver ${k.rotulo}">
-                            <span class="dash-kpi-icone"><i class="ph-bold ${k.icone}"></i></span>
-                            <span class="dash-kpi-badge-label">${k.rotulo}</span>
-                            <div class="dash-kpi-numero" data-alvo="${k.numero}">0</div>
-                        </button>`; }).join('')}
-                    </div>
-
-                    <!-- SEÇÃO DO MEIO: 2 COLUNAS LADO A LADO -->
-                    <div class="dash-middle-row-grid">
-                        
-                        <!-- COLUNA ESQUERDA: DONUT + LEGENDA + ABAS DE NAVEGAÇÃO -->
-                        <div class="dash-middle-left-col">
-                            <div class="dash-donut-bloco-superior">
-                                <div class="dash-donut-chart-wrapper">
-                                    <div class="dash-donut-chart" style="background: conic-gradient(#10B981 0deg ${stop1}deg, #FF5C00 ${stop1}deg ${stop2}deg, #EF4444 ${stop2}deg 360deg);" title="Distribuição do acervo: ${vigentes} abertos, ${retaFinal} em 7 dias, ${vencidos} vencidos">
-                                        <div class="dash-donut-center">
-                                            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="dash-donut-legenda-lista">
-                                    <div class="dash-donut-legenda-item" onclick="alternarAbaPrazos('abertos', document.querySelector('.dash-prazo-tab[data-aba=abertos]'))" title="Ver todos os editais com inscrições abertas" style="cursor: pointer;">
-                                        <span class="dash-donut-dot dot-aberto"></span>
-                                        <span class="dash-donut-rotulo">Abertos para inscrição</span>
-                                        <span class="dash-donut-linha-guia"></span>
-                                        <span class="dash-donut-valor" data-alvo="${vigentes}">0</span>
-                                    </div>
-                                    <div class="dash-donut-legenda-item" onclick="alternarAbaPrazos('proximos', document.querySelector('.dash-prazo-tab[data-aba=proximos]'))" title="Ver editais que vencem em até 7 dias" style="cursor: pointer;">
-                                        <span class="dash-donut-dot dot-vencendo"></span>
-                                        <span class="dash-donut-rotulo">Vencem em até 7 dias</span>
-                                        <span class="dash-donut-linha-guia"></span>
-                                        <span class="dash-donut-valor" data-alvo="${retaFinal}">0</span>
-                                    </div>
-                                    <div class="dash-donut-legenda-item" onclick="alternarAbaPrazos('encerrados', document.querySelector('.dash-prazo-tab[data-aba=encerrados]'))" title="Ver editais encerrados" style="cursor: pointer;">
-                                        <span class="dash-donut-dot dot-vencido"></span>
-                                        <span class="dash-donut-rotulo">Editais vencidos</span>
-                                        <span class="dash-donut-linha-guia"></span>
-                                        <span class="dash-donut-valor" data-alvo="${vencidos}">0</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- ABAS DE NAVEGAÇÃO INTERATIVAS EM PÍLULA -->
-                            <div class="dash-prazos-nav-tabs">
-                                <button type="button" class="dash-prazo-tab ativo" data-aba="todos" onclick="alternarAbaPrazos('todos', this)">
-                                    <i class="ph-bold ph-columns"></i> Visão Lado a Lado
-                                </button>
-                                <button type="button" class="dash-prazo-tab" data-aba="abertos" onclick="alternarAbaPrazos('abertos', this)">
-                                    <i class="ph-bold ph-check-circle"></i> Todos Abertos (${editaisAbertos.length})
-                                </button>
-                                <button type="button" class="dash-prazo-tab" data-aba="proximos" onclick="alternarAbaPrazos('proximos', this)">
-                                    <i class="ph-bold ph-lightning"></i> Vencendo em Breve (${retaFinal || proximos.length})
-                                </button>
-                                <button type="button" class="dash-prazo-tab" data-aba="encerrados" onclick="alternarAbaPrazos('encerrados', this)">
-                                    <i class="ph-bold ph-archive"></i> Encerrados (${vencidosLista.length})
-                                </button>
+                <!-- BEGIN: MiddleChartsSection -->
+                <section class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch" data-purpose="charts-row">
+                    <!-- Left Chart: Donut and Status breakdown -->
+                    <div class="lg:col-span-5 flex flex-col sm:flex-row items-center justify-around p-5 bg-white border border-slate-200 rounded-2xl gap-6">
+                        <!-- Donut Chart representation -->
+                        <div class="relative w-40 h-40 flex items-center justify-center shrink-0">
+                            <svg class="w-40 h-40 transform -rotate-90" viewBox="0 0 120 120">
+                                <!-- Background base circle (Edital Vencido - Red) -->
+                                <circle cx="60" cy="60" fill="transparent" r="46" stroke="#ef4444" stroke-width="18"></circle>
+                                <!-- Vencem em breve - Orange arc -->
+                                <circle cx="60" cy="60" fill="transparent" r="46" stroke="#f97316" stroke-dasharray="289" stroke-dashoffset="${dashOffsetVencendo}" stroke-width="18"></circle>
+                                <!-- Abertos para Inscrição - Emerald Green arc -->
+                                <circle cx="60" cy="60" fill="transparent" r="46" stroke="#10b981" stroke-dasharray="289" stroke-dashoffset="${dashOffsetAberto}" stroke-linecap="round" stroke-width="18"></circle>
+                                <!-- Inner dark circle ring for border definition -->
+                                <circle cx="60" cy="60" fill="none" r="37" stroke="#0f172a" stroke-width="2"></circle>
+                                <circle cx="60" cy="60" fill="none" r="55" stroke="#0f172a" stroke-width="2"></circle>
+                            </svg>
+                            <!-- Inner Pulse Badge -->
+                            <div class="absolute inset-0 m-auto w-16 h-16 bg-white rounded-full flex items-center justify-center border-2 border-slate-900 shadow-sm">
+                                <svg class="w-7 h-7 text-slate-900" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <path d="M3 12h4.5l3-7 4.5 14 3-7H21" stroke-linecap="round" stroke-linejoin="round"></path>
+                                </svg>
                             </div>
                         </div>
-
-                        <!-- COLUNA DIREITA: WIDGET DE BARRAS POR CATEGORIA -->
-                        <div class="dash-middle-right-col">
-                            <div class="dash-barras-widget">
-                                <div class="dash-barras-header">
-                                    <div class="dash-barras-titulo-row">
-                                        <h4 class="dash-barras-titulo">
-                                            <i class="ph-bold ph-chart-bar"></i> Oportunidades por Categoria
-                                        </h4>
-                                        <span class="dash-barras-badge">${totalGeral} Coletadas</span>
-                                    </div>
-                                    <p class="dash-barras-subtitulo">Distribuição de vagas e editais no acervo</p>
+                        <!-- Donut Legend & Values -->
+                        <div class="w-full space-y-4 text-sm">
+                            <div class="flex items-center justify-between cursor-pointer" onclick="alternarAbaPrazos('abertos')" title="Ver todos os editais com inscrições abertas">
+                                <div class="flex items-center space-x-2">
+                                    <span class="w-3.5 h-3.5 rounded-full bg-[#10b981] border border-slate-900 shrink-0"></span>
+                                    <span class="font-bold text-slate-800 text-xs sm:text-sm">Abertos para inscrição</span>
                                 </div>
-
-                                <div class="dash-barras-chart-area">
-                                    ${categoriasBarras.map(cat => {
-                                        let pct = Math.round((cat.total / maxBarraValor) * 100);
-                                        if (pct < 24 && cat.total > 0) pct = 24;
-                                        if (cat.total === 0) pct = 16;
-                                        return `
-                                        <div class="dash-barra-col" onclick="carregarDados('${cat.id}')" title="${cat.rotulo}: ${cat.total} oportunidades (Clique para abrir a categoria)">
-                                            <div class="dash-barra-valor">${cat.total}</div>
-                                            <div class="dash-barra-track">
-                                                <div class="dash-barra-pilula" style="--cor-barra: ${cat.cor}; height: ${pct}%;"></div>
-                                            </div>
-                                            <div class="dash-barra-label">
-                                                <i class="ph-bold ${cat.icone}"></i>
-                                                <span class="dash-barra-sigla">${cat.rotulo}</span>
-                                            </div>
-                                        </div>`;
-                                    }).join('')}
+                                <span class="text-base sm:text-lg font-black text-slate-900 ml-4" data-alvo="${vigentes}">0</span>
+                            </div>
+                            <div class="flex items-center justify-between cursor-pointer" onclick="alternarAbaPrazos('proximos')" title="Ver editais que vencem em até 7 dias">
+                                <div class="flex items-center space-x-2">
+                                    <span class="w-3.5 h-3.5 rounded-full bg-[#f97316] border border-slate-900 shrink-0"></span>
+                                    <span class="font-bold text-slate-800 text-xs sm:text-sm">Vencem em até 7 dias</span>
                                 </div>
+                                <span class="text-base sm:text-lg font-black text-slate-900 ml-4" data-alvo="${retaFinal}">0</span>
+                            </div>
+                            <div class="flex items-center justify-between cursor-pointer" onclick="alternarAbaPrazos('encerrados')" title="Ver editais encerrados">
+                                <div class="flex items-center space-x-2">
+                                    <span class="w-3.5 h-3.5 rounded-full bg-[#ef4444] border border-slate-900 shrink-0"></span>
+                                    <span class="font-bold text-slate-800 text-xs sm:text-sm">Editais vencidos</span>
+                                </div>
+                                <span class="text-base sm:text-lg font-black text-slate-900 ml-4" data-alvo="${vencidos}">0</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- LINHA DIVISÓRIA PONTILHADA -->
-                    <div class="dash-divisor-pontilhado"></div>
-
-                    <!-- LISTAGEM EM 2 COLUNAS DE EDITAIS COM ÍCONES CIRCULARES -->
-                    <div class="dash-prazos-listas-grid" id="dash-prazos-listas-grid">
-                        
-                        <!-- COLUNA 1: ABERTOS -->
-                        <div class="dash-prazo-coluna" id="col-prazos-proximos">
-                            <div class="dash-coluna-header header-abertos">
-                                <span class="dash-coluna-dot dot-aberto"></span>
-                                <h3 class="dash-coluna-titulo" id="dash-titulo-col-abertos">Editais Abertos <span class="dash-coluna-contador">(${editaisAbertos.length})</span></h3>
+                    <!-- Right Chart: Category Bar Distribution -->
+                    <div class="lg:col-span-7 bg-white border-2 border-slate-900 rounded-2xl p-5 flex flex-col justify-between" data-purpose="bar-chart-card">
+                        <!-- Header of Bar Chart -->
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <svg class="w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path></svg>
+                                    <h2 class="font-black text-slate-900 text-base sm:text-lg">Oportunidades por Categoria</h2>
+                                </div>
+                                <p class="text-xs text-slate-500 font-medium">Distribuição de vagas e editais no acervo</p>
                             </div>
-                            <div id="dash-lista-abertos-container" style="display: flex; flex-direction: column; gap: 6px;">
+                            <span class="text-xs font-bold border border-slate-900 rounded-full px-3 py-1 bg-white text-slate-800">
+                                ${totalGeral} Coletadas
+                            </span>
+                        </div>
+                        <!-- Vertical Bars Area -->
+                        <div class="h-44 w-full flex items-end justify-between px-2 pt-6 pb-1">
+                            ${categoriasBarras.map(cat => {
+                                let hPx = Math.round((cat.total / maxBarraValor) * 120);
+                                if (cat.total > 0 && hPx < 26) hPx = 26;
+                                if (cat.total === 0) hPx = 14;
+                                return `
+                                <div class="flex flex-col items-center w-10 sm:w-12 group cursor-pointer" onclick="carregarDados('${cat.id}')" title="${cat.rotulo}: ${cat.total} oportunidades (Clique para abrir)">
+                                    <span class="text-xs font-bold text-slate-900 mb-1">${cat.total}</span>
+                                    <div class="w-6 sm:w-7 ${cat.corClass} rounded-full border-2 border-slate-900 transition-all hover:scale-105" style="height: ${hPx}px;"></div>
+                                    <div class="w-6 h-6 rounded-full border border-slate-900 flex items-center justify-center bg-white mt-2">
+                                        ${cat.svg}
+                                    </div>
+                                    <span class="text-[9px] sm:text-[10px] font-bold text-slate-700 mt-1">${cat.rotulo}</span>
+                                </div>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                </section>
+                <!-- END: MiddleChartsSection -->
+
+                <!-- BEGIN: FilterTabs -->
+                <nav class="flex flex-wrap items-center gap-2 pt-1" data-purpose="tab-filters">
+                    <button class="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs sm:text-sm font-bold flex items-center space-x-2 border-2 border-slate-900 shadow-sm transition hover:bg-slate-800 cursor-pointer ativo" type="button" data-aba="todos" onclick="alternarAbaPrazos('todos', this)">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 4.5v15m6-15v15m-10.5 0h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        <span>Visão Lado a Lado</span>
+                    </button>
+                    <button class="px-4 py-2 bg-white text-slate-800 rounded-xl text-xs sm:text-sm font-bold flex items-center space-x-2 border-2 border-slate-900 hover:bg-slate-50 transition cursor-pointer" type="button" data-aba="abertos" onclick="alternarAbaPrazos('abertos', this)">
+                        <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M4.5 12.75l6 6 9-13.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        <span>Todos Abertos (${editaisAbertos.length})</span>
+                    </button>
+                    <button class="px-4 py-2 bg-white text-slate-800 rounded-xl text-xs sm:text-sm font-bold flex items-center space-x-2 border-2 border-slate-900 hover:bg-slate-50 transition cursor-pointer" type="button" data-aba="proximos" onclick="alternarAbaPrazos('proximos', this)">
+                        <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        <span>Vencendo em Breve (${retaFinal || proximos.length})</span>
+                    </button>
+                    <button class="px-4 py-2 bg-white text-slate-800 rounded-xl text-xs sm:text-sm font-bold flex items-center space-x-2 border-2 border-slate-900 hover:bg-slate-50 transition cursor-pointer" type="button" data-aba="encerrados" onclick="alternarAbaPrazos('encerrados', this)">
+                        <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        <span>Encerrados (${vencidosLista.length})</span>
+                    </button>
+                </nav>
+                <!-- END: FilterTabs -->
+
+                <!-- Horizontal divider line -->
+                <div class="border-t border-slate-200 -mx-4 sm:-mx-6 md:-mx-8"></div>
+
+                <!-- BEGIN: SideBySideNoticeColumns -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-1" data-purpose="columns-container" id="dash-prazos-listas-grid">
+                    <!-- COLUMN 1: Editais Abertos -->
+                    <section class="space-y-4" data-purpose="open-notices-column" id="col-prazos-proximos">
+                        <div class="flex items-center space-x-2 pb-1 border-b border-slate-100">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-200"></span>
+                            <h3 class="font-extrabold text-sm sm:text-base text-slate-900 tracking-tight" id="dash-titulo-col-abertos">Editais Abertos <span class="font-normal text-slate-500">(${editaisAbertos.length})</span></h3>
+                        </div>
+                        <div class="space-y-3.5" id="dash-lista-abertos-container">
                             ${editaisAbertos.length ? editaisAbertos.map(e => {
                                 const info = sanitizarItemEdital(e.titulo);
                                 const diasRestantes = calcularDiasAteData(e.data);
                                 const isRetaFinal = diasRestantes !== null && diasRestantes >= 0 && diasRestantes <= 7;
                                 const isEstagio = /estágio|ciee|prae|bolsa/i.test(e.titulo || '');
-                                const iconeClass = isRetaFinal ? 'icone-coral' : (isEstagio ? 'icone-verde' : 'icone-azul');
-                                const iconeNome = isRetaFinal ? 'ph-lightning' : (isEstagio ? 'ph-graduation-cap' : 'ph-timer');
+                                const badgeCor = isRetaFinal ? 'bg-red-500' : (isEstagio ? 'bg-teal-600' : 'bg-emerald-500');
+                                const svgIcone = isRetaFinal
+                                    ? `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" stroke-linecap="round" stroke-linejoin="round"></path></svg>`
+                                    : (isEstagio
+                                        ? `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M4.26 10.147L12 5.25l7.74 4.897M4.26 10.147l7.74 4.897 7.74-4.897M4.26 10.147v4.603a7.5 7.5 0 0015.48 0v-4.603" stroke-linecap="round" stroke-linejoin="round"></path></svg>`
+                                        : `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>`);
                                 let badgeRetaFinal = '';
                                 if (isRetaFinal) {
                                     const txtBadge = diasRestantes === 0 ? 'Vence HOJE!' : (diasRestantes === 1 ? 'Vence amanhã!' : `Vence em ${diasRestantes} dias`);
-                                    badgeRetaFinal = `<span class="dash-badge-reta-final" style="display: inline-flex; align-items: center; gap: 3px; background: #FF5C00; color: #FFFFFF; font-size: 0.68rem; font-weight: 800; padding: 2px 7px; border-radius: 4px; margin-left: 6px; border: 1.5px solid #000; letter-spacing: 0.3px;">⚡ ${txtBadge}</span>`;
+                                    badgeRetaFinal = `
+                                        <span class="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500 text-white tracking-tight">
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                            <span>${txtBadge}</span>
+                                        </span>`;
                                 }
                                 return `
-                                <div class="dash-edital-mini-card" data-edital-tipo="aberto" data-reta-final="${isRetaFinal ? 'true' : 'false'}" onclick="irParaEdital('${escaparHTML(e.link || '')}', '${escaparHTML(e.id || '')}')" title="${escaparHTML(info.tituloLimpo)}">
-                                    <div class="dash-mini-icone-box ${iconeClass}">
-                                        <i class="ph-bold ${iconeNome}"></i>
+                                <article class="flex items-start space-x-3 group cursor-pointer" data-edital-tipo="aberto" data-reta-final="${isRetaFinal ? 'true' : 'false'}" onclick="irParaEdital('${escaparHTML(e.link || '')}', '${escaparHTML(e.id || '')}')" title="${escaparHTML(info.tituloLimpo)}">
+                                    <div class="w-8 h-8 rounded-full ${badgeCor} text-white flex items-center justify-center shrink-0 border border-slate-900 shadow-sm mt-0.5">
+                                        ${svgIcone}
                                     </div>
-                                    <div class="dash-mini-info">
-                                        <h4 class="dash-mini-titulo">${escaparHTML(info.tituloLimpo)}</h4>
-                                        <div style="display: flex; align-items: center; flex-wrap: wrap;">
-                                            <span class="dash-mini-subtexto">Até ${escaparHTML(e.data)}</span>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="text-xs sm:text-[13px] font-extrabold text-slate-900 leading-snug group-hover:text-blue-600 transition truncate">
+                                            ${escaparHTML(info.tituloLimpo)}
+                                        </h4>
+                                        <div class="flex items-center space-x-2 mt-0.5">
+                                            <span class="text-[11px] font-medium text-slate-500">Até ${escaparHTML(e.data)}</span>
                                             ${badgeRetaFinal}
                                         </div>
                                     </div>
-                                </div>`;
+                                </article>`;
                             }).join('') : `
-                                <div class="dash-edital-mini-card" style="cursor: default; opacity: 0.85;">
-                                    <div class="dash-mini-icone-box icone-verde">
-                                        <i class="ph-bold ph-check"></i>
-                                    </div>
-                                    <div class="dash-mini-info">
-                                        <h4 class="dash-mini-titulo">Nenhum edital com inscrição aberta</h4>
-                                        <span class="dash-mini-subtexto">Novos editais e vagas serão listados aqui assim que publicados.</span>
-                                    </div>
+                                <div class="p-4 rounded-xl border border-dashed border-slate-300 text-center">
+                                    <p class="text-xs font-semibold text-slate-600">Nenhum edital com inscrição aberta no momento.</p>
                                 </div>
                             `}
-                            <div id="dash-msg-sem-reta-final" style="display: none; padding: 14px; background: var(--bg-hover, #F8FAFC); border: 2px dashed var(--borda, #CBD5E1); border-radius: 8px; text-align: center;">
-                                <p class="dash-mini-subtexto" style="margin: 0; font-weight: 600;">Nenhum edital vencendo nos próximos 7 dias.</p>
-                            </div>
+                            <div id="dash-msg-sem-reta-final" style="display: none;" class="p-4 rounded-xl border border-dashed border-slate-300 text-center">
+                                <p class="text-xs font-semibold text-slate-600">Nenhum edital vencendo nos próximos 7 dias.</p>
                             </div>
                         </div>
+                    </section>
 
-                        <!-- COLUNA 2: ENCERRADOS -->
-                        <div class="dash-prazo-coluna" id="col-prazos-encerrados">
-                            <div class="dash-coluna-header header-vencidos">
-                                <span class="dash-coluna-dot dot-vencido"></span>
-                                <h3 class="dash-coluna-titulo">Editais Vencidos <span class="dash-coluna-contador">(${vencidosLista.length})</span></h3>
-                            </div>
-                            ${vencidosLista.length ? `
-                                <div style="display: flex; flex-direction: column; gap: 6px;">
-                                ${vencidosLista.slice(0, 4).map(e => {
+                    <!-- COLUMN 2: Editais Vencidos -->
+                    <section class="space-y-4" data-purpose="closed-notices-column" id="col-prazos-encerrados">
+                        <div class="flex items-center space-x-2 pb-1 border-b border-slate-100">
+                            <span class="w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-red-200"></span>
+                            <h3 class="font-extrabold text-sm sm:text-base text-slate-900 tracking-tight">Editais Vencidos <span class="font-normal text-slate-500">(${vencidosLista.length})</span></h3>
+                        </div>
+                        ${vencidosLista.length ? `
+                        <div class="space-y-3.5">
+                            ${vencidosLista.slice(0, 4).map(e => {
+                                const info = sanitizarItemEdital(e.titulo);
+                                return `
+                                <article class="flex items-start space-x-3 group cursor-pointer" onclick="irParaEdital('${escaparHTML(e.link || '')}', '${escaparHTML(e.id || '')}')" title="${escaparHTML(info.tituloLimpo)}">
+                                    <div class="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center shrink-0 border border-slate-900 shadow-sm mt-0.5">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="text-xs sm:text-[13px] font-extrabold text-slate-900 leading-snug group-hover:text-red-700 transition truncate">
+                                            ${escaparHTML(info.tituloLimpo)}
+                                        </h4>
+                                        <div class="text-[11px] font-medium text-slate-500 mt-0.5">
+                                            Encerrado em ${escaparHTML(e.data)}
+                                        </div>
+                                    </div>
+                                </article>`;
+                            }).join('')}
+
+                            ${vencidosLista.length > 4 ? `
+                            <div id="lista-encerrados-extras" style="display: none;" class="space-y-3.5 pt-1">
+                                ${vencidosLista.slice(4).map(e => {
                                     const info = sanitizarItemEdital(e.titulo);
                                     return `
-                                    <div class="dash-edital-mini-card" onclick="irParaEdital('${escaparHTML(e.link || '')}', '${escaparHTML(e.id || '')}')" title="${escaparHTML(info.tituloLimpo)}">
-                                        <div class="dash-mini-icone-box icone-coral">
-                                            <i class="ph-bold ph-clock"></i>
+                                    <article class="flex items-start space-x-3 group cursor-pointer" onclick="irParaEdital('${escaparHTML(e.link || '')}', '${escaparHTML(e.id || '')}')" title="${escaparHTML(info.tituloLimpo)}">
+                                        <div class="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center shrink-0 border border-slate-900 shadow-sm mt-0.5">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                                         </div>
-                                        <div class="dash-mini-info">
-                                            <h4 class="dash-mini-titulo">${escaparHTML(info.tituloLimpo)}</h4>
-                                            <span class="dash-mini-subtexto">Encerrado em ${escaparHTML(e.data)}</span>
+                                        <div class="flex-1 min-w-0">
+                                            <h4 class="text-xs sm:text-[13px] font-extrabold text-slate-900 leading-snug group-hover:text-red-700 transition truncate">
+                                                ${escaparHTML(info.tituloLimpo)}
+                                            </h4>
+                                            <div class="text-[11px] font-medium text-slate-500 mt-0.5">
+                                                Encerrado em ${escaparHTML(e.data)}
+                                            </div>
                                         </div>
-                                    </div>`;
+                                    </article>`;
                                 }).join('')}
-
-                                ${vencidosLista.length > 4 ? `
-                                <div id="lista-encerrados-extras" style="display: none; flex-direction: column; gap: 6px;">
-                                    ${vencidosLista.slice(4).map(e => {
-                                        const info = sanitizarItemEdital(e.titulo);
-                                        return `
-                                        <div class="dash-edital-mini-card" onclick="irParaEdital('${escaparHTML(e.link || '')}', '${escaparHTML(e.id || '')}')" title="${escaparHTML(info.tituloLimpo)}">
-                                            <div class="dash-mini-icone-box icone-coral">
-                                                <i class="ph-bold ph-clock"></i>
-                                            </div>
-                                            <div class="dash-mini-info">
-                                                <h4 class="dash-mini-titulo">${escaparHTML(info.tituloLimpo)}</h4>
-                                                <span class="dash-mini-subtexto">Encerrado em ${escaparHTML(e.data)}</span>
-                                            </div>
-                                        </div>`;
-                                    }).join('')}
-                                </div>
-                                <button type="button" class="btn-toggle-encerrados" onclick="alternarListaEncerrados(this)" style="margin-top: 10px;">
-                                    <i class="ph-bold ph-caret-down"></i> Mostrar mais ${vencidosLista.length - 4} editais encerrados
-                                </button>` : ''}
-                                </div>
-                            ` : `<p class="dash-legenda-texto" style="padding: 10px 0;">Nenhum edital encerrado recentemente.</p>`}
-                        </div>
-                    </div>
-
+                            </div>
+                            <div class="pt-2">
+                                <button class="w-full py-2 px-4 rounded-xl border border-dashed border-slate-400 hover:border-slate-700 text-xs font-bold text-slate-700 hover:text-slate-900 flex items-center justify-center space-x-1.5 transition bg-slate-50/50 cursor-pointer" type="button" data-texto-expandir="Mostrar mais ${vencidosLista.length - 4} editais encerrados" onclick="alternarListaEncerrados(this)">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19.5 8.25l-7.5 7.5-7.5-7.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                    <span>Mostrar mais ${vencidosLista.length - 4} editais encerrados</span>
+                                </button>
+                            </div>` : ''}
+                        </div>` : `
+                            <p class="text-xs font-semibold text-slate-500 py-3">Nenhum edital encerrado recentemente.</p>
+                        `}
+                    </section>
                 </div>
+                <!-- END: SideBySideNoticeColumns -->
+
             </div>
         `;
         container.innerHTML = html;

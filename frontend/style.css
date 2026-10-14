@@ -2845,13 +2845,11 @@ button.dash-prazo-chip:active {
 }
 
 .btn-submit-primary {
-    background: #FA6015;
     color: #0F172A;
 }
 
 .btn-submit-danger {
-    background: #EF4444;
-    color: #FFFFFF;
+    background: #FFC6C6D4;
 }
 
 /* Rede de proteção */
@@ -3670,20 +3668,6 @@ html.dark .toast-item-memphis {
     border-color: #334155 !important;
     box-shadow: 5px 5px 0px #020617 !important;
     color: #000000 !important;
-}
-
-/* Regras globais para fontes 100% brancas no modo escuro.
-   FIX CONTRASTE: exclui spans/ícones que vivem dentro de elementos com fundo
-   claro/pastel (botões .card-link-btn/.btn-favoritar-card, chips e itens do
-   widget "Editais: Abertos x Vencidos", pílula do usuário na navbar), pois o
-   branco sobre fundo claro deixava o texto ilegível. Esses componentes têm
-   overrides próprios de cor logo abaixo. */
-html.dark p:not(.toast-item-memphis p),
-html.dark span:not(.chip-check):not(.badge-status):not(.meta-icone):not(.toast-item-memphis span):not(.text-brand-orange):not(.text-brand-yellow):not(.card-link-btn span):not(.btn-favoritar-card span):not(.dash-prazo-chip span):not(.dash-prazo-item span):not(.dash-prazo-item strong):not(.nav-user-tag span):not(.nav-user-tag strong),
-html.dark label,
-html.dark small,
-html.dark li {
-    color: #FFFFFF;
 }
 
 /* A barra proporcional é texto de apoio em fundo escuro: tintas próprias */
@@ -4885,4 +4869,115 @@ html.dark .dash-barra-label {
 
 html.dark .dash-barra-label i {
     color: #F8FAFC;
+}
+
+/* ============================================================
+   DARK MODE SUPORTE PARA O DASHBOARD UNIFICADO
+   ============================================================ */
+html.dark [data-purpose="dashboard-wrapper"] {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+html.dark [data-purpose="dashboard-wrapper"] h1,
+html.dark [data-purpose="dashboard-wrapper"] h2,
+html.dark [data-purpose="dashboard-wrapper"] h3,
+html.dark [data-purpose="dashboard-wrapper"] h4 {
+    color: #f8fafc !important;
+}
+
+html.dark [data-purpose="dashboard-wrapper"] .text-slate-900 {
+    color: #f8fafc !important;
+}
+
+html.dark [data-purpose="dashboard-wrapper"] .text-slate-800 {
+    color: #e2e8f0 !important;
+}
+
+html.dark [data-purpose="dashboard-wrapper"] .text-slate-700 {
+    color: #cbd5e1 !important;
+}
+
+html.dark [data-purpose="dashboard-wrapper"] .text-slate-600 {
+    color: #94a3b8 !important;
+}
+
+html.dark [data-purpose="dashboard-wrapper"] .text-slate-500 {
+    color: #64748b !important;
+}
+
+html.dark [data-purpose="metric-cards"] > div {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.6) !important;
+}
+
+html.dark [data-purpose="charts-row"] > div {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+html.dark [data-purpose="bar-chart-card"] {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+html.dark [data-purpose="bar-chart-card"] span.border-slate-900 {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+    border-color: #475569 !important;
+}
+
+html.dark [data-purpose="bar-chart-card"] .bg-white {
+    background-color: #0f172a !important;
+    border-color: #475569 !important;
+}
+
+html.dark [data-purpose="bar-chart-card"] svg {
+    color: #cbd5e1 !important;
+}
+
+html.dark [data-purpose="tab-filters"] button {
+    background-color: #1e293b !important;
+    border-color: #475569 !important;
+    color: #f8fafc !important;
+}
+
+html.dark [data-purpose="tab-filters"] button svg {
+    color: #cbd5e1 !important;
+}
+
+html.dark [data-purpose="tab-filters"] button.ativo {
+    background-color: #38bdf8 !important;
+    border-color: #38bdf8 !important;
+    color: #0f172a !important;
+}
+
+html.dark [data-purpose="tab-filters"] button.ativo svg {
+    color: #0f172a !important;
+}
+
+html.dark [data-purpose="dashboard-wrapper"] .border-slate-200,
+html.dark [data-purpose="dashboard-wrapper"] .border-slate-100 {
+    border-color: #334155 !important;
+}
+
+html.dark [data-purpose="dashboard-wrapper"] .bg-white.rounded-full {
+    background-color: #0f172a !important;
+    border-color: #475569 !important;
+}
+
+html.dark [data-purpose="dashboard-wrapper"] .bg-white.rounded-full svg {
+    color: #f8fafc !important;
+}
+
+html.dark [data-purpose="dashboard-wrapper"] circle[stroke="#0f172a"] {
+    stroke: #334155 !important;
+}
+
+html.dark [data-purpose="closed-notices-column"] button {
+    background-color: #1e293b !important;
+    border-color: #475569 !important;
+    color: #cbd5e1 !important;
 }
