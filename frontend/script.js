@@ -490,6 +490,7 @@ async function carregarFavoritos() {
     }
 
     tipoAtual = 'favoritos';
+    alternarExibicaoFiltroVigentes(true);
     const container = document.getElementById('container-vagas');
     const antigo = document.getElementById('bloco-paginacao');
     if (antigo) antigo.remove();
@@ -527,7 +528,16 @@ async function carregarFavoritos() {
         if (!resp.ok) throw new Error("Erro ao carregar favoritos");
 
         const data = await resp.json();
-        const lista = data.data || [];
+        let lista = data.data || [];
+
+        if (filtroVigentesAtivo) {
+            const agora = new Date();
+            lista = lista.filter(item => {
+                if (!item.data_vencimento) return true;
+                const dv = new Date(item.data_vencimento);
+                return isNaN(dv.getTime()) || dv >= agora;
+            });
+        }
 
         if (lista.length === 0) {
             container.style.display = 'block';
@@ -566,6 +576,7 @@ async function carregarFavoritos() {
 
 async function carregarFeedPersonalizado() {
     tipoAtual = 'personalizado';
+    alternarExibicaoFiltroVigentes(true);
     const container = document.getElementById('container-vagas');
     const antigo = document.getElementById('bloco-paginacao');
     if (antigo) antigo.remove();
@@ -600,7 +611,16 @@ async function carregarFeedPersonalizado() {
         if (!resp.ok) throw new Error("Erro ao buscar recomendações");
 
         const data = await resp.json();
-        const lista = data.data || [];
+        let lista = data.data || [];
+
+        if (filtroVigentesAtivo) {
+            const agora = new Date();
+            lista = lista.filter(item => {
+                if (!item.data_vencimento) return true;
+                const dv = new Date(item.data_vencimento);
+                return isNaN(dv.getTime()) || dv >= agora;
+            });
+        }
 
         renderizarCards(lista);
 
@@ -613,6 +633,10 @@ function destacarBotaoAtivo(idBotao) {
     document.querySelectorAll('.tab-origem-btn, .btn-filtro-aluno').forEach(btn => btn.classList.remove('ativo'));
     const btn = document.getElementById(idBotao);
     if (btn) btn.classList.add('ativo');
+
+    if (idBotao === 'btn-analises' || idBotao === 'btn-portal-usuario' || idBotao === 'btn-abrir-sidebar-filtros') {
+        alternarExibicaoFiltroVigentes(false);
+    }
 }
 
 function formatarTituloEdital(texto) {
@@ -800,15 +824,47 @@ function sintetizarTituloEdital(textoOriginal) {
     };
 }
 
+function alternarExibicaoFiltroVigentes(visivel) {
+    const elId = document.getElementById('toolbar-filtro-vigentes');
+    const right = document.querySelector('.student-toolbar-right');
+    const toggle = document.querySelector('.toggle-vigentes-container');
+
+    [elId, right, toggle].forEach(el => {
+        if (!el) return;
+        if (visivel) {
+            el.classList.remove('escondido');
+            el.style.removeProperty('display');
+        } else {
+            el.classList.add('escondido');
+            el.style.setProperty('display', 'none', 'important');
+        }
+    });
+
+    if (visivel) {
+        document.body.classList.remove('filtro-vigentes-oculto');
+    } else {
+        document.body.classList.add('filtro-vigentes-oculto');
+    }
+}
+
 function toggleFiltroVigentes() {
     const checkbox = document.getElementById('filtroVigentes');
+    if (!checkbox) return;
     filtroVigentesAtivo = checkbox.checked;
+
+    // Não executa requisições de editais se estiver no perfil ou indicadores (evita 404)
+    if (tipoAtual === 'perfil' || tipoAtual === 'indicadores' || tipoAtual === 'analises') {
+        return;
+    }
+
     if (tipoAtual === 'favoritos') {
         carregarFavoritos();
     } else if (tipoAtual === 'personalizado') {
         carregarFeedPersonalizado();
-    } else {
+    } else if (tipoAtual) {
         carregarDados(tipoAtual, 1);
+    } else {
+        carregarDados('estagios', 1);
     }
 }
 
@@ -816,6 +872,7 @@ async function carregarDados(tipo, novaPagina = 1) {
     tipoAtual = tipo;
     paginaAtual = novaPagina;
 
+    alternarExibicaoFiltroVigentes(true);
     destacarBotaoAtivo(`btn-${tipo}`);
 
     const container = document.getElementById('container-vagas');
@@ -1039,6 +1096,8 @@ async function realizarPesquisa() {
     const termo = document.getElementById('input-busca').value;
     if (!termo) return;
 
+    alternarExibicaoFiltroVigentes(true);
+
     const container = document.getElementById('container-vagas');
     container.innerHTML = '<p class="carregando">Consultando índices no MongoDB...</p>';
 
@@ -1107,20 +1166,54 @@ function alternarAbaPrazos(aba, btn) {
     const colProximos = document.getElementById('col-prazos-proximos');
     const colEncerrados = document.getElementById('col-prazos-encerrados');
     const grid = document.getElementById('dash-prazos-listas-grid');
+    const tituloColAbertos = document.getElementById('dash-titulo-col-abertos');
+    const msgSemRetaFinal = document.getElementById('dash-msg-sem-reta-final');
     if (!colProximos || !colEncerrados) return;
+
+    const cardsAbertos = colProximos.querySelectorAll('.dash-edital-mini-card[data-edital-tipo="aberto"]');
 
     if (aba === 'proximos') {
         colProximos.style.display = 'flex';
         colEncerrados.style.display = 'none';
         if (grid) grid.style.gridTemplateColumns = '1fr';
+        let visiveis = 0;
+        cardsAbertos.forEach(c => {
+            if (c.dataset.retaFinal === 'true') {
+                c.style.display = 'flex';
+                visiveis++;
+            } else {
+                c.style.display = 'none';
+            }
+        });
+        if (tituloColAbertos) {
+            tituloColAbertos.innerHTML = `Vencendo em Breve <span class="dash-coluna-contador">(${visiveis})</span>`;
+        }
+        if (msgSemRetaFinal) {
+            msgSemRetaFinal.style.display = visiveis === 0 ? 'block' : 'none';
+        }
     } else if (aba === 'encerrados') {
         colProximos.style.display = 'none';
         colEncerrados.style.display = 'flex';
         if (grid) grid.style.gridTemplateColumns = '1fr';
     } else {
+        // 'todos' ou 'abertos'
         colProximos.style.display = 'flex';
-        colEncerrados.style.display = 'flex';
-        if (grid) grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(320px, 1fr))';
+        if (aba === 'abertos') {
+            colEncerrados.style.display = 'none';
+            if (grid) grid.style.gridTemplateColumns = '1fr';
+        } else {
+            colEncerrados.style.display = 'flex';
+            if (grid) grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(320px, 1fr))';
+        }
+        cardsAbertos.forEach(c => {
+            c.style.display = 'flex';
+        });
+        if (tituloColAbertos) {
+            tituloColAbertos.innerHTML = `Editais Abertos <span class="dash-coluna-contador">(${cardsAbertos.length})</span>`;
+        }
+        if (msgSemRetaFinal) {
+            msgSemRetaFinal.style.display = 'none';
+        }
     }
 }
 
@@ -1232,6 +1325,9 @@ function animarNumero(el, alvo, duracao = 900) {
 }
 
 async function carregarEstatisticas() {
+    tipoAtual = 'indicadores';
+    alternarExibicaoFiltroVigentes(false);
+
     const antigo = document.getElementById('bloco-paginacao');
     if (antigo) antigo.remove();
 
@@ -1264,9 +1360,22 @@ async function carregarEstatisticas() {
         const canais = dados.canais_monitorados || 0;
         const vigentes = dados.vigentes || 0;
         const vencidos = dados.vencidos || 0;
+        const editaisAbertos = dados.editais_abertos || dados.proximos_a_vencer || [];
         const proximos = dados.proximos_a_vencer || [];
         const vencidosLista = dados.vencidos_recentes || [];
         const totalPrazos = vigentes + retaFinal + vencidos;
+
+        // Categorias para o gráfico de barras vertical estilo cápsula (neobrutalista)
+        const categoriasBarras = [
+            { id: 'estagios', rotulo: 'Estágios', total: totalEstagios, cor: '#FF5C00', icone: 'ph-graduation-cap' },
+            { id: 'bolsas', rotulo: 'Bolsas', total: totalBolsas, cor: '#38BDF8', icone: 'ph-coins' },
+            { id: 'ufersa', rotulo: 'UFERSA', total: totalUfersa, cor: '#A855F7', icone: 'ph-bank' },
+            { id: 'cursos-bolsas', rotulo: 'Cursos', total: totalCursosBolsas, cor: '#FACC15', icone: 'ph-book-open' },
+            { id: 'noticias', rotulo: 'Notícias', total: totalTech, cor: '#10B981', icone: 'ph-megaphone' },
+            { id: 'portal_uern', rotulo: 'UERN', total: totalUern, cor: '#3B82F6', icone: 'ph-student' },
+            { id: 'dom', rotulo: 'DOM', total: totalDom, cor: '#F43F5E', icone: 'ph-newspaper-clipping' }
+        ];
+        const maxBarraValor = Math.max(...categoriasBarras.map(c => c.total), 1);
 
         // Ângulos proporcionais para o gráfico Donut estilo Neobrutalism (SVG / conic-gradient)
         let degAberto = totalPrazos > 0 ? (vigentes / totalPrazos) * 360 : 0;
@@ -1304,17 +1413,16 @@ async function carregarEstatisticas() {
 
         let html = `
             <div class="dashboard-neo-wrapper">
-                <!-- LINHA SUPERIOR: INDICADORES GLOBAIS -->
-                <div class="dash-bloco-superior">
-                    <div class="dash-bloco-header">
-                        <div class="dash-bloco-titulo-row">
-                            <h2 class="dash-neo-titulo">Indicadores Globais</h2>
-                            <span class="dash-tag-tempo-real">Tempo Real</span>
-                        </div>
-                        <p class="dash-neo-subtitulo">Panorama das oportunidades coletadas pelos robôs em ${canais} canais monitorados. Clique em um indicador para explorar os editais.</p>
-                    </div>
+                <div class="dash-master-unified-card">
 
-                    <div class="dash-grid-top-cards">
+                    <!-- CABEÇALHO UNIFICADO DO DASHBOARD -->
+                    <div class="dash-master-header">
+                        <h1 class="dash-master-title">DASHBOARD DE OPORTUNIDADES - HUB</h1>
+                    </div>
+                    <div class="dash-divisor-pontilhado" style="margin: 0 0 20px 0;"></div>
+
+                    <!-- LINHA DE 8 KPIS EM GRID COMPACTO -->
+                    <div class="dash-grid-top-kpis">
                         ${kpis.map(k => {
                             const paleta = PALETA_KPI[k.cor] || PALETA_KPI.laranja;
                             return `
@@ -1324,106 +1432,177 @@ async function carregarEstatisticas() {
                             <div class="dash-kpi-numero" data-alvo="${k.numero}">0</div>
                         </button>`; }).join('')}
                     </div>
-                </div>
 
-                <!-- LINHA DO MEIO: PAINEL DE PRAZOS COM GRÁFICO DONUT E LISTAGEM COMPACTA -->
-                <div class="dash-grid-widgets-circulares">
-                    <div class="dash-card-prazos">
+                    <!-- SEÇÃO DO MEIO: 2 COLUNAS LADO A LADO -->
+                    <div class="dash-middle-row-grid">
                         
-                        <!-- BLOCO SUPERIOR: GRÁFICO DE PIZZA/DONUT + LEGENDA PONTILHADA -->
-                        <div class="dash-donut-bloco-superior">
-                            <div class="dash-donut-chart-wrapper">
-                                <div class="dash-donut-chart" style="background: conic-gradient(#10B981 0deg ${stop1}deg, #FF5C00 ${stop1}deg ${stop2}deg, #EF4444 ${stop2}deg 360deg);" title="Distribuição do acervo: ${vigentes} abertos, ${retaFinal} em 7 dias, ${vencidos} vencidos">
-                                    <div class="dash-donut-center">
-                                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                                        </svg>
+                        <!-- COLUNA ESQUERDA: DONUT + LEGENDA + ABAS DE NAVEGAÇÃO -->
+                        <div class="dash-middle-left-col">
+                            <div class="dash-donut-bloco-superior">
+                                <div class="dash-donut-chart-wrapper">
+                                    <div class="dash-donut-chart" style="background: conic-gradient(#10B981 0deg ${stop1}deg, #FF5C00 ${stop1}deg ${stop2}deg, #EF4444 ${stop2}deg 360deg);" title="Distribuição do acervo: ${vigentes} abertos, ${retaFinal} em 7 dias, ${vencidos} vencidos">
+                                        <div class="dash-donut-center">
+                                            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="dash-donut-legenda-lista">
+                                    <div class="dash-donut-legenda-item" onclick="alternarAbaPrazos('abertos', document.querySelector('.dash-prazo-tab[data-aba=abertos]'))" title="Ver todos os editais com inscrições abertas" style="cursor: pointer;">
+                                        <span class="dash-donut-dot dot-aberto"></span>
+                                        <span class="dash-donut-rotulo">Abertos para inscrição</span>
+                                        <span class="dash-donut-linha-guia"></span>
+                                        <span class="dash-donut-valor" data-alvo="${vigentes}">0</span>
+                                    </div>
+                                    <div class="dash-donut-legenda-item" onclick="alternarAbaPrazos('proximos', document.querySelector('.dash-prazo-tab[data-aba=proximos]'))" title="Ver editais que vencem em até 7 dias" style="cursor: pointer;">
+                                        <span class="dash-donut-dot dot-vencendo"></span>
+                                        <span class="dash-donut-rotulo">Vencem em até 7 dias</span>
+                                        <span class="dash-donut-linha-guia"></span>
+                                        <span class="dash-donut-valor" data-alvo="${retaFinal}">0</span>
+                                    </div>
+                                    <div class="dash-donut-legenda-item" onclick="alternarAbaPrazos('encerrados', document.querySelector('.dash-prazo-tab[data-aba=encerrados]'))" title="Ver editais encerrados" style="cursor: pointer;">
+                                        <span class="dash-donut-dot dot-vencido"></span>
+                                        <span class="dash-donut-rotulo">Editais vencidos</span>
+                                        <span class="dash-donut-linha-guia"></span>
+                                        <span class="dash-donut-valor" data-alvo="${vencidos}">0</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="dash-donut-legenda-lista">
-                                <div class="dash-donut-legenda-item" onclick="carregarDados('estagios')" title="Ver oportunidades abertas" style="cursor: pointer;">
-                                    <span class="dash-donut-dot dot-aberto"></span>
-                                    <span class="dash-donut-rotulo">Abertos para inscrição</span>
-                                    <span class="dash-donut-linha-guia"></span>
-                                    <span class="dash-donut-valor" data-alvo="${vigentes}">0</span>
-                                </div>
-                                <div class="dash-donut-legenda-item" onclick="alternarAbaPrazos('proximos', document.querySelector('.dash-prazo-tab[data-aba=proximos]'))" title="Ver editais que vencem em até 7 dias" style="cursor: pointer;">
-                                    <span class="dash-donut-dot dot-vencendo"></span>
-                                    <span class="dash-donut-rotulo">Vencem em até 7 dias</span>
-                                    <span class="dash-donut-linha-guia"></span>
-                                    <span class="dash-donut-valor" data-alvo="${retaFinal}">0</span>
-                                </div>
-                                <div class="dash-donut-legenda-item" onclick="alternarAbaPrazos('encerrados', document.querySelector('.dash-prazo-tab[data-aba=encerrados]'))" title="Ver editais encerrados" style="cursor: pointer;">
-                                    <span class="dash-donut-dot dot-vencido"></span>
-                                    <span class="dash-donut-rotulo">Editais vencidos</span>
-                                    <span class="dash-donut-linha-guia"></span>
-                                    <span class="dash-donut-valor" data-alvo="${vencidos}">0</span>
-                                </div>
+                            <!-- ABAS DE NAVEGAÇÃO INTERATIVAS EM PÍLULA -->
+                            <div class="dash-prazos-nav-tabs">
+                                <button type="button" class="dash-prazo-tab ativo" data-aba="todos" onclick="alternarAbaPrazos('todos', this)">
+                                    <i class="ph-bold ph-columns"></i> Visão Lado a Lado
+                                </button>
+                                <button type="button" class="dash-prazo-tab" data-aba="abertos" onclick="alternarAbaPrazos('abertos', this)">
+                                    <i class="ph-bold ph-check-circle"></i> Todos Abertos (${editaisAbertos.length})
+                                </button>
+                                <button type="button" class="dash-prazo-tab" data-aba="proximos" onclick="alternarAbaPrazos('proximos', this)">
+                                    <i class="ph-bold ph-lightning"></i> Vencendo em Breve (${retaFinal || proximos.length})
+                                </button>
+                                <button type="button" class="dash-prazo-tab" data-aba="encerrados" onclick="alternarAbaPrazos('encerrados', this)">
+                                    <i class="ph-bold ph-archive"></i> Encerrados (${vencidosLista.length})
+                                </button>
                             </div>
                         </div>
 
-                        <!-- ABAS DE NAVEGAÇÃO INTERATIVAS EM PÍLULA -->
-                        <div class="dash-prazos-nav-tabs">
-                            <button type="button" class="dash-prazo-tab ativo" data-aba="todos" onclick="alternarAbaPrazos('todos', this)">
-                                <i class="ph-bold ph-columns"></i> Visão Lado a Lado
-                            </button>
-                            <button type="button" class="dash-prazo-tab" data-aba="proximos" onclick="alternarAbaPrazos('proximos', this)">
-                                <i class="ph-bold ph-lightning"></i> Vencendo em Breve (${proximos.length})
-                            </button>
-                            <button type="button" class="dash-prazo-tab" data-aba="encerrados" onclick="alternarAbaPrazos('encerrados', this)">
-                                <i class="ph-bold ph-archive"></i> Encerrados (${vencidosLista.length})
-                            </button>
+                        <!-- COLUNA DIREITA: WIDGET DE BARRAS POR CATEGORIA -->
+                        <div class="dash-middle-right-col">
+                            <div class="dash-barras-widget">
+                                <div class="dash-barras-header">
+                                    <div class="dash-barras-titulo-row">
+                                        <h4 class="dash-barras-titulo">
+                                            <i class="ph-bold ph-chart-bar"></i> Oportunidades por Categoria
+                                        </h4>
+                                        <span class="dash-barras-badge">${totalGeral} Coletadas</span>
+                                    </div>
+                                    <p class="dash-barras-subtitulo">Distribuição de vagas e editais no acervo</p>
+                                </div>
+
+                                <div class="dash-barras-chart-area">
+                                    ${categoriasBarras.map(cat => {
+                                        let pct = Math.round((cat.total / maxBarraValor) * 100);
+                                        if (pct < 24 && cat.total > 0) pct = 24;
+                                        if (cat.total === 0) pct = 16;
+                                        return `
+                                        <div class="dash-barra-col" onclick="carregarDados('${cat.id}')" title="${cat.rotulo}: ${cat.total} oportunidades (Clique para abrir a categoria)">
+                                            <div class="dash-barra-valor">${cat.total}</div>
+                                            <div class="dash-barra-track">
+                                                <div class="dash-barra-pilula" style="--cor-barra: ${cat.cor}; height: ${pct}%;"></div>
+                                            </div>
+                                            <div class="dash-barra-label">
+                                                <i class="ph-bold ${cat.icone}"></i>
+                                                <span class="dash-barra-sigla">${cat.rotulo}</span>
+                                            </div>
+                                        </div>`;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LINHA DIVISÓRIA PONTILHADA -->
+                    <div class="dash-divisor-pontilhado"></div>
+
+                    <!-- LISTAGEM EM 2 COLUNAS DE EDITAIS COM ÍCONES CIRCULARES -->
+                    <div class="dash-prazos-listas-grid" id="dash-prazos-listas-grid">
+                        
+                        <!-- COLUNA 1: ABERTOS -->
+                        <div class="dash-prazo-coluna" id="col-prazos-proximos">
+                            <div class="dash-coluna-header header-abertos">
+                                <span class="dash-coluna-dot dot-aberto"></span>
+                                <h3 class="dash-coluna-titulo" id="dash-titulo-col-abertos">Editais Abertos <span class="dash-coluna-contador">(${editaisAbertos.length})</span></h3>
+                            </div>
+                            <div id="dash-lista-abertos-container" style="display: flex; flex-direction: column; gap: 6px;">
+                            ${editaisAbertos.length ? editaisAbertos.map(e => {
+                                const info = sanitizarItemEdital(e.titulo);
+                                const diasRestantes = calcularDiasAteData(e.data);
+                                const isRetaFinal = diasRestantes !== null && diasRestantes >= 0 && diasRestantes <= 7;
+                                const isEstagio = /estágio|ciee|prae|bolsa/i.test(e.titulo || '');
+                                const iconeClass = isRetaFinal ? 'icone-coral' : (isEstagio ? 'icone-verde' : 'icone-azul');
+                                const iconeNome = isRetaFinal ? 'ph-lightning' : (isEstagio ? 'ph-graduation-cap' : 'ph-timer');
+                                let badgeRetaFinal = '';
+                                if (isRetaFinal) {
+                                    const txtBadge = diasRestantes === 0 ? 'Vence HOJE!' : (diasRestantes === 1 ? 'Vence amanhã!' : `Vence em ${diasRestantes} dias`);
+                                    badgeRetaFinal = `<span class="dash-badge-reta-final" style="display: inline-flex; align-items: center; gap: 3px; background: #FF5C00; color: #FFFFFF; font-size: 0.68rem; font-weight: 800; padding: 2px 7px; border-radius: 4px; margin-left: 6px; border: 1.5px solid #000; letter-spacing: 0.3px;">⚡ ${txtBadge}</span>`;
+                                }
+                                return `
+                                <div class="dash-edital-mini-card" data-edital-tipo="aberto" data-reta-final="${isRetaFinal ? 'true' : 'false'}" onclick="irParaEdital('${escaparHTML(e.link || '')}', '${escaparHTML(e.id || '')}')" title="${escaparHTML(info.tituloLimpo)}">
+                                    <div class="dash-mini-icone-box ${iconeClass}">
+                                        <i class="ph-bold ${iconeNome}"></i>
+                                    </div>
+                                    <div class="dash-mini-info">
+                                        <h4 class="dash-mini-titulo">${escaparHTML(info.tituloLimpo)}</h4>
+                                        <div style="display: flex; align-items: center; flex-wrap: wrap;">
+                                            <span class="dash-mini-subtexto">Até ${escaparHTML(e.data)}</span>
+                                            ${badgeRetaFinal}
+                                        </div>
+                                    </div>
+                                </div>`;
+                            }).join('') : `
+                                <div class="dash-edital-mini-card" style="cursor: default; opacity: 0.85;">
+                                    <div class="dash-mini-icone-box icone-verde">
+                                        <i class="ph-bold ph-check"></i>
+                                    </div>
+                                    <div class="dash-mini-info">
+                                        <h4 class="dash-mini-titulo">Nenhum edital com inscrição aberta</h4>
+                                        <span class="dash-mini-subtexto">Novos editais e vagas serão listados aqui assim que publicados.</span>
+                                    </div>
+                                </div>
+                            `}
+                            <div id="dash-msg-sem-reta-final" style="display: none; padding: 14px; background: var(--bg-hover, #F8FAFC); border: 2px dashed var(--borda, #CBD5E1); border-radius: 8px; text-align: center;">
+                                <p class="dash-mini-subtexto" style="margin: 0; font-weight: 600;">Nenhum edital vencendo nos próximos 7 dias.</p>
+                            </div>
+                            </div>
                         </div>
 
-                        <!-- LINHA DIVISÓRIA PONTILHADA -->
-                        <div class="dash-divisor-pontilhado"></div>
-
-                        <!-- LISTAGEM EM 2 COLUNAS DE EDITAIS COM ÍCONES CIRCULARES -->
-                        <div class="dash-prazos-listas-grid" id="dash-prazos-listas-grid">
-                            <!-- COLUNA 1: ABERTOS / PRÓXIMOS A VENCER -->
-                            <div class="dash-prazo-coluna" id="col-prazos-proximos">
-                                <div class="dash-coluna-header header-abertos">
-                                    <span class="dash-coluna-dot dot-aberto"></span>
-                                    <h3 class="dash-coluna-titulo">Editais Abertos <span class="dash-coluna-contador">(${proximos.length})</span></h3>
-                                </div>
-                                ${proximos.length ? proximos.map(e => {
+                        <!-- COLUNA 2: ENCERRADOS -->
+                        <div class="dash-prazo-coluna" id="col-prazos-encerrados">
+                            <div class="dash-coluna-header header-vencidos">
+                                <span class="dash-coluna-dot dot-vencido"></span>
+                                <h3 class="dash-coluna-titulo">Editais Vencidos <span class="dash-coluna-contador">(${vencidosLista.length})</span></h3>
+                            </div>
+                            ${vencidosLista.length ? `
+                                <div style="display: flex; flex-direction: column; gap: 6px;">
+                                ${vencidosLista.slice(0, 4).map(e => {
                                     const info = sanitizarItemEdital(e.titulo);
-                                    const isEstagio = /estágio|ciee|prae|bolsa/i.test(e.titulo || '');
-                                    const iconeClass = isEstagio ? 'icone-verde' : 'icone-azul';
-                                    const iconeNome = isEstagio ? 'ph-graduation-cap' : 'ph-timer';
                                     return `
                                     <div class="dash-edital-mini-card" onclick="irParaEdital('${escaparHTML(e.link || '')}', '${escaparHTML(e.id || '')}')" title="${escaparHTML(info.tituloLimpo)}">
-                                        <div class="dash-mini-icone-box ${iconeClass}">
-                                            <i class="ph-bold ${iconeNome}"></i>
+                                        <div class="dash-mini-icone-box icone-coral">
+                                            <i class="ph-bold ph-clock"></i>
                                         </div>
                                         <div class="dash-mini-info">
                                             <h4 class="dash-mini-titulo">${escaparHTML(info.tituloLimpo)}</h4>
-                                            <span class="dash-mini-subtexto">Até ${escaparHTML(e.data)}</span>
+                                            <span class="dash-mini-subtexto">Encerrado em ${escaparHTML(e.data)}</span>
                                         </div>
                                     </div>`;
-                                }).join('') : `
-                                    <div class="dash-edital-mini-card" style="cursor: default; opacity: 0.85;">
-                                        <div class="dash-mini-icone-box icone-verde">
-                                            <i class="ph-bold ph-check"></i>
-                                        </div>
-                                        <div class="dash-mini-info">
-                                            <h4 class="dash-mini-titulo">Prazos em dia!</h4>
-                                            <span class="dash-mini-subtexto">Nenhum edital vence nos próximos 7 dias.</span>
-                                        </div>
-                                    </div>
-                                `}
-                            </div>
+                                }).join('')}
 
-                            <!-- COLUNA 2: ENCERRADOS RECENTEMENTE -->
-                            <div class="dash-prazo-coluna" id="col-prazos-encerrados">
-                                <div class="dash-coluna-header header-vencidos">
-                                    <span class="dash-coluna-dot dot-vencido"></span>
-                                    <h3 class="dash-coluna-titulo">Editais Vencidos <span class="dash-coluna-contador">(${vencidosLista.length})</span></h3>
-                                </div>
-                                ${vencidosLista.length ? `
-                                    ${vencidosLista.slice(0, 4).map(e => {
+                                ${vencidosLista.length > 4 ? `
+                                <div id="lista-encerrados-extras" style="display: none; flex-direction: column; gap: 6px;">
+                                    ${vencidosLista.slice(4).map(e => {
                                         const info = sanitizarItemEdital(e.titulo);
                                         return `
                                         <div class="dash-edital-mini-card" onclick="irParaEdital('${escaparHTML(e.link || '')}', '${escaparHTML(e.id || '')}')" title="${escaparHTML(info.tituloLimpo)}">
@@ -1436,33 +1615,16 @@ async function carregarEstatisticas() {
                                             </div>
                                         </div>`;
                                     }).join('')}
-
-                                    ${vencidosLista.length > 4 ? `
-                                    <div id="lista-encerrados-extras" style="display: none; flex-direction: column; gap: 8px;">
-                                        ${vencidosLista.slice(4).map(e => {
-                                            const info = sanitizarItemEdital(e.titulo);
-                                            return `
-                                            <div class="dash-edital-mini-card" onclick="irParaEdital('${escaparHTML(e.link || '')}', '${escaparHTML(e.id || '')}')" title="${escaparHTML(info.tituloLimpo)}">
-                                                <div class="dash-mini-icone-box icone-coral">
-                                                    <i class="ph-bold ph-clock"></i>
-                                                </div>
-                                                <div class="dash-mini-info">
-                                                    <h4 class="dash-mini-titulo">${escaparHTML(info.tituloLimpo)}</h4>
-                                                    <span class="dash-mini-subtexto">Encerrado em ${escaparHTML(e.data)}</span>
-                                                </div>
-                                            </div>`;
-                                        }).join('')}
-                                    </div>
-                                    <button type="button" class="btn-toggle-encerrados" onclick="alternarListaEncerrados(this)" style="margin-top: 6px;">
-                                        <i class="ph-bold ph-caret-down"></i> Mostrar mais ${vencidosLista.length - 4} editais encerrados
-                                    </button>` : ''}
-                                ` : `<p class="dash-legenda-texto" style="padding: 10px 0;">Nenhum edital encerrado recentemente.</p>`}
-                            </div>
+                                </div>
+                                <button type="button" class="btn-toggle-encerrados" onclick="alternarListaEncerrados(this)" style="margin-top: 10px;">
+                                    <i class="ph-bold ph-caret-down"></i> Mostrar mais ${vencidosLista.length - 4} editais encerrados
+                                </button>` : ''}
+                                </div>
+                            ` : `<p class="dash-legenda-texto" style="padding: 10px 0;">Nenhum edital encerrado recentemente.</p>`}
                         </div>
-
                     </div>
-                </div>
 
+                </div>
             </div>
         `;
         container.innerHTML = html;
@@ -1488,6 +1650,7 @@ async function carregarEstatisticas() {
 
 async function carregarPortalUsuario() {
     tipoAtual = 'perfil';
+    alternarExibicaoFiltroVigentes(false);
     // Fecha a sidebar lateral de filtros para evitar sobreposição e redundância visual
     if (typeof fecharSidebarPerfil === 'function') {
         fecharSidebarPerfil();

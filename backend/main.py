@@ -390,6 +390,7 @@ def listar_mprn(
 def listar_ifrn(
     pagina: int = Query(1, ge=1),
     limite: int = Query(6, ge=1),
+    apenas_vigentes: bool = False,
     authorization: str = Header(default=None)
 ):
     usuario = obter_usuario_opcional(authorization)
@@ -397,6 +398,8 @@ def listar_ifrn(
     pulo = (pagina - 1) * limite
 
     filtro = {"fonte": {"$regex": "IFRN", "$options": "i"}}
+    if apenas_vigentes:
+        filtro["data_vencimento"] = {"$gte": datetime.now()}
     total_docs = colecao.count_documents(filtro)
     lista_ifrn = []
     for edital in colecao.find(filtro).skip(pulo).limit(limite):
@@ -417,6 +420,7 @@ def listar_ifrn(
 def listar_iel(
     pagina: int = Query(1, ge=1),
     limite: int = Query(6, ge=1),
+    apenas_vigentes: bool = False,
     authorization: str = Header(default=None)
 ):
     usuario = obter_usuario_opcional(authorization)
@@ -424,6 +428,8 @@ def listar_iel(
     pulo = (pagina - 1) * limite
 
     filtro = {"fonte": {"$regex": "IEL", "$options": "i"}}
+    if apenas_vigentes:
+        filtro["data_vencimento"] = {"$gte": datetime.now()}
     total_docs = colecao.count_documents(filtro)
     lista_iel = []
     for vaga in colecao.find(filtro).skip(pulo).limit(limite):
@@ -444,6 +450,7 @@ def listar_iel(
 def listar_dom(
     pagina: int = Query(1, ge=1),
     limite: int = Query(6, ge=1),
+    apenas_vigentes: bool = False,
     authorization: str = Header(default=None)
 ):
     usuario = obter_usuario_opcional(authorization)
@@ -456,6 +463,8 @@ def listar_dom(
             {"titulo": {"$regex": r"\[DOM/Mossoró\]", "$options": "i"}}
         ]
     }
+    if apenas_vigentes:
+        filtro["data_vencimento"] = {"$gte": datetime.now()}
     total_docs = colecao.count_documents(filtro)
     lista_dom = []
     for edital in colecao.find(filtro).skip(pulo).limit(limite):
@@ -811,15 +820,18 @@ def obter_estatisticas():
             if col not in nome_colecoes or len(itens) >= limite:
                 continue
             try:
-                cursor = db[col].find(query, projection).sort(
+                filtro_busca = _consulta_prazo(col, query) if col in ["vagas", "editais"] else query
+                cursor = db[col].find(filtro_busca, projection).sort(
                     "data_vencimento", 1 if ordena_asc else -1
                 ).limit(limite - len(itens))
                 for doc in cursor:
                     venc = doc.get("data_vencimento")
                     if isinstance(venc, datetime):
                         itens.append({
+                            "id": str(doc.get("_id", "")),
                             "titulo": _titulo_documento(doc),
                             "data": venc.strftime("%d/%m/%Y"),
+                            "data_iso": venc.isoformat(),
                             "link": (doc.get("link") or doc.get("url") or doc.get("link_edital") or ""),
                         })
             except Exception:
@@ -827,8 +839,9 @@ def obter_estatisticas():
         itens.sort(key=lambda item: datetime.strptime(item["data"], "%d/%m/%Y"), reverse=not ordena_asc)
         return itens[:limite]
 
-    proximos_a_vencer = _coletar_lista(query_reta_final, colecoes_prazo + ["vagas", "editais"], 6, ordena_asc=True)
-    vencidos_recentes = _coletar_lista(query_vencidos, colecoes_prazo + ["vagas", "editais"], 10, ordena_asc=False)
+    editais_abertos = _coletar_lista(query_vigentes, colecoes_prazo + ["vagas", "editais"], 20, ordena_asc=True)
+    proximos_a_vencer = _coletar_lista(query_reta_final, colecoes_prazo + ["vagas", "editais"], 10, ordena_asc=True)
+    vencidos_recentes = _coletar_lista(query_vencidos, colecoes_prazo + ["vagas", "editais"], 15, ordena_asc=False)
 
     # ---- Distribuição por CATEGORIA em TODO o hub (não apenas PRAE) ----
     # Antes este bloco agrupava somente a coleção "vagas_estagio" (estágios PRAE).
@@ -950,6 +963,7 @@ def obter_estatisticas():
         "reta_final_urgente": total_reta_final,
         "vigentes": total_vigentes,
         "vencidos": total_vencidos,
+        "editais_abertos": editais_abertos,
         "proximos_a_vencer": proximos_a_vencer,
         "vencidos_recentes": vencidos_recentes,
         "oportunidades_com_prazo": total_oportunidades_com_prazo,
