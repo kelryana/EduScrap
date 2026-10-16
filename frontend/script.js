@@ -1797,10 +1797,6 @@ async function carregarEstatisticas() {
     }
 }
 
-// ============================================================
-// PORTAL DO ESTUDANTE (ABA DE USUÁRIO & PERFIL)
-// ============================================================
-
 async function carregarPortalUsuario() {
     tipoAtual = 'perfil';
     alternarExibicaoFiltroVigentes(false);
