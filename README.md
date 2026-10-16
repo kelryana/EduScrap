@@ -1,4 +1,4 @@
-# EduScrap UERN – Plataforma Inteligente de Oportunidades Acadêmicas
+# EduScrap UERN – Plataforma de Oportunidades Acadêmicas
 
 <div align="center">
 
@@ -8,6 +8,12 @@
 ![MongoDB](https://img.shields.io/badge/MongoDB-7.0+-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
 ![Pytest](https://img.shields.io/badge/Pytest-9.0+-0A9EDC?style=for-the-badge&logo=pytest&logoColor=white)
 ![Licença](https://img.shields.io/badge/Licen%C3%A7a-MIT-yellow?style=for-the-badge)
+
+<img width="1782" height="980" alt="image" src="https://github.com/user-attachments/assets/0b8f6859-3fc3-409b-8c11-96956ca0a8de" />
+<img width="1213" height="843" alt="image" src="https://github.com/user-attachments/assets/ec12ce21-4f4c-4302-ba32-57673db64070" />
+<img width="1134" height="900" alt="image" src="https://github.com/user-attachments/assets/6a988c1f-3b23-441d-afd6-5c6e6767c731" />
+
+
 
 <p align="center">
   <strong>Hub centralizado de mineração, curadoria e monitoramento de editais, bolsas, estágios e notícias acadêmicas para o ecossistema universitário potiguar.</strong>
