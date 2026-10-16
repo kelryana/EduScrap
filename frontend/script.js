@@ -1162,7 +1162,7 @@ function alternarAbaPrazos(aba, btn) {
     }
     const todosBotoes = document.querySelectorAll('[data-purpose="tab-filters"] button');
     todosBotoes.forEach(b => {
-        b.className = 'px-4 py-2 bg-white text-slate-800 rounded-xl text-xs sm:text-sm font-bold flex items-center space-x-2 border-2 border-slate-900 hover:bg-slate-50 transition cursor-pointer';
+        b.className = 'px-4 sm:px-5 py-2.5 bg-white text-slate-800 rounded-xl text-xs sm:text-sm md:text-base font-extrabold flex items-center space-x-2 border-2 border-slate-900 hover:bg-slate-50 transition cursor-pointer';
         const svg = b.querySelector('svg');
         if (svg) {
             svg.classList.remove('text-white');
@@ -1170,7 +1170,7 @@ function alternarAbaPrazos(aba, btn) {
         }
     });
     if (btn) {
-        btn.className = 'px-4 py-2 bg-slate-900 text-white rounded-xl text-xs sm:text-sm font-bold flex items-center space-x-2 border-2 border-slate-900 shadow-sm transition hover:bg-slate-800 cursor-pointer ativo';
+        btn.className = 'px-4 sm:px-5 py-2.5 bg-slate-900 text-white rounded-xl text-xs sm:text-sm md:text-base font-extrabold flex items-center space-x-2 border-2 border-slate-900 shadow-sm transition hover:bg-slate-800 cursor-pointer ativo';
         const svg = btn.querySelector('svg');
         if (svg) {
             svg.classList.remove('text-slate-700');
@@ -1527,7 +1527,7 @@ async function carregarEstatisticas() {
         const dashOffsetAberto = Math.max(0, Math.min(289, Math.round(circ - lenAbertosNormais)));
 
         let html = `
-            <div class="w-full max-w-[1140px] bg-white rounded-3xl border-2 border-slate-900 shadow-xl overflow-hidden p-4 sm:p-6 md:p-8 space-y-6 mx-auto" data-purpose="dashboard-wrapper">
+            <div class="w-full max-w-[1380px] 2xl:max-w-[1440px] bg-white rounded-3xl border-2 border-slate-900 shadow-xl overflow-hidden p-4 sm:p-6 md:p-8 space-y-6 mx-auto" data-purpose="dashboard-wrapper">
                 
                 <!-- BEGIN: HeaderSection -->
                 <header class="text-center pt-1 pb-2" data-purpose="header">
@@ -1538,26 +1538,26 @@ async function carregarEstatisticas() {
                 <!-- END: HeaderSection -->
 
                 <!-- BEGIN: TopMetricCardsGrid -->
-                <section class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3" data-purpose="metric-cards">
+                <section class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 sm:gap-3.5" data-purpose="metric-cards">
                     ${kpis.map(k => `
-                    <div onclick="${k.acao}" class="relative bg-white border-2 border-slate-900 rounded-2xl pt-4 pb-3 px-2 flex flex-col items-center justify-between text-center shadow-[0_2px_0_0_rgba(15,23,42,0.9)] hover:shadow-md transition-all cursor-pointer">
-                        <span class="absolute top-0 inset-x-4 h-1 ${k.accent} rounded-b-md"></span>
-                        <div class="w-8 h-8 rounded-xl ${k.boxBg} border flex items-center justify-center mb-2">
+                    <div onclick="${k.acao}" class="relative bg-white border-2 border-slate-900 rounded-2xl pt-4 pb-3.5 px-2.5 flex flex-col items-center justify-between text-center shadow-[0_2px_0_0_rgba(15,23,42,0.9)] hover:shadow-md transition-all cursor-pointer group">
+                        <span class="absolute top-0 inset-x-3 h-1.5 ${k.accent} rounded-b-md"></span>
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl ${k.boxBg} border-2 flex items-center justify-center mb-2 shadow-sm group-hover:scale-105 transition-transform">
                             ${k.svg}
                         </div>
-                        <div class="text-[9px] font-bold tracking-tight text-slate-600 uppercase h-7 flex items-center justify-center leading-tight">${k.rotulo}</div>
-                        <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1" data-alvo="${k.numero}">0</div>
+                        <div class="text-[11px] sm:text-xs font-black tracking-tight text-slate-700 uppercase min-h-[38px] flex items-center justify-center text-center leading-snug px-1">${k.rotulo}</div>
+                        <div class="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 mt-1" data-alvo="${k.numero}">0</div>
                     </div>`).join('')}
                 </section>
                 <!-- END: TopMetricCardsGrid -->
 
                 <!-- BEGIN: MiddleChartsSection -->
-                <section class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch" data-purpose="charts-row">
-                    <!-- Left Chart: Donut and Status breakdown -->
-                    <div class="lg:col-span-5 flex flex-col sm:flex-row items-center justify-around p-5 bg-white border border-slate-200 rounded-2xl gap-6">
+                <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch" data-purpose="charts-row">
+                    <!-- Left Chart: Donut and Status breakdown (Separado com respiro confortável) -->
+                    <div class="lg:col-span-5 flex flex-col sm:flex-row items-center justify-between p-5 sm:p-6 md:p-7 bg-white border-2 border-slate-900 rounded-2xl gap-8 sm:gap-10 md:gap-12 shadow-sm">
                         <!-- Donut Chart representation -->
-                        <div class="relative w-40 h-40 flex items-center justify-center shrink-0">
-                            <svg class="w-40 h-40 transform -rotate-90" viewBox="0 0 120 120">
+                        <div class="relative w-44 h-44 sm:w-48 sm:h-48 md:w-52 md:h-52 flex items-center justify-center shrink-0">
+                            <svg class="w-44 h-44 sm:w-48 sm:h-48 md:w-52 md:h-52 transform -rotate-90" viewBox="0 0 120 120">
                                 <!-- Background base circle (Edital Vencido - Red) -->
                                 <circle cx="60" cy="60" fill="transparent" r="46" stroke="#ef4444" stroke-width="18"></circle>
                                 <!-- Vencem em breve - Orange arc -->
@@ -1565,71 +1565,74 @@ async function carregarEstatisticas() {
                                 <!-- Abertos para Inscrição - Emerald Green arc -->
                                 <circle cx="60" cy="60" fill="transparent" r="46" stroke="#10b981" stroke-dasharray="289" stroke-dashoffset="${dashOffsetAberto}" stroke-linecap="round" stroke-width="18"></circle>
                                 <!-- Inner dark circle ring for border definition -->
-                                <circle cx="60" cy="60" fill="none" r="37" stroke="#0f172a" stroke-width="2"></circle>
-                                <circle cx="60" cy="60" fill="none" r="55" stroke="#0f172a" stroke-width="2"></circle>
+                                <circle cx="60" cy="60" fill="none" r="37" stroke="#0f172a" stroke-width="2.5"></circle>
+                                <circle cx="60" cy="60" fill="none" r="55" stroke="#0f172a" stroke-width="2.5"></circle>
                             </svg>
                             <!-- Inner Pulse Badge -->
-                            <div class="absolute inset-0 m-auto w-16 h-16 bg-white rounded-full flex items-center justify-center border-2 border-slate-900 shadow-sm">
-                                <svg class="w-7 h-7 text-slate-900" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <div class="absolute inset-0 m-auto w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 bg-white rounded-full flex items-center justify-center border-2 sm:border-3 border-slate-900 shadow-md">
+                                <svg class="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 text-slate-900" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                     <path d="M3 12h4.5l3-7 4.5 14 3-7H21" stroke-linecap="round" stroke-linejoin="round"></path>
                                 </svg>
                             </div>
                         </div>
                         <!-- Donut Legend & Values -->
-                        <div class="w-full space-y-4 text-sm">
-                            <div class="flex items-center justify-between cursor-pointer" onclick="alternarAbaPrazos('abertos')" title="Ver todos os editais com inscrições abertas">
-                                <div class="flex items-center space-x-2">
-                                    <span class="w-3.5 h-3.5 rounded-full bg-[#10b981] border border-slate-900 shrink-0"></span>
-                                    <span class="font-bold text-slate-800 text-xs sm:text-sm">Abertos para inscrição</span>
+                        <div class="flex-1 w-full space-y-4 sm:space-y-5 sm:pl-2">
+                            <div class="flex items-center justify-between cursor-pointer group" onclick="alternarAbaPrazos('abertos')" title="Ver todos os editais com inscrições abertas">
+                                <div class="flex items-center space-x-3">
+                                    <span class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#10b981] border-2 border-slate-900 shrink-0"></span>
+                                    <span class="font-black text-slate-800 text-sm sm:text-base md:text-[17px] group-hover:text-emerald-700 transition-colors leading-snug">Abertos para inscrição</span>
                                 </div>
-                                <span class="text-base sm:text-lg font-black text-slate-900 ml-4" data-alvo="${vigentes}">0</span>
+                                <span class="text-2xl sm:text-3xl font-black text-slate-900 ml-4 shrink-0" data-alvo="${vigentes}">0</span>
                             </div>
-                            <div class="flex items-center justify-between cursor-pointer" onclick="alternarAbaPrazos('proximos')" title="Ver editais que vencem em até 7 dias">
-                                <div class="flex items-center space-x-2">
-                                    <span class="w-3.5 h-3.5 rounded-full bg-[#f97316] border border-slate-900 shrink-0"></span>
-                                    <span class="font-bold text-slate-800 text-xs sm:text-sm">Vencem em até 7 dias</span>
+                            <div class="flex items-center justify-between cursor-pointer group" onclick="alternarAbaPrazos('proximos')" title="Ver editais que vencem em até 7 dias">
+                                <div class="flex items-center space-x-3">
+                                    <span class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#f97316] border-2 border-slate-900 shrink-0"></span>
+                                    <span class="font-black text-slate-800 text-sm sm:text-base md:text-[17px] group-hover:text-orange-700 transition-colors leading-snug">Vencem em até 7 dias</span>
                                 </div>
-                                <span class="text-base sm:text-lg font-black text-slate-900 ml-4" data-alvo="${retaFinal}">0</span>
+                                <span class="text-2xl sm:text-3xl font-black text-slate-900 ml-4 shrink-0" data-alvo="${retaFinal}">0</span>
                             </div>
-                            <div class="flex items-center justify-between cursor-pointer" onclick="alternarAbaPrazos('encerrados')" title="Ver editais encerrados">
-                                <div class="flex items-center space-x-2">
-                                    <span class="w-3.5 h-3.5 rounded-full bg-[#ef4444] border border-slate-900 shrink-0"></span>
-                                    <span class="font-bold text-slate-800 text-xs sm:text-sm">Editais vencidos</span>
+                            <div class="flex items-center justify-between cursor-pointer group" onclick="alternarAbaPrazos('encerrados')" title="Ver editais encerrados">
+                                <div class="flex items-center space-x-3">
+                                    <span class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#ef4444] border-2 border-slate-900 shrink-0"></span>
+                                    <span class="font-black text-slate-800 text-sm sm:text-base md:text-[17px] group-hover:text-red-700 transition-colors leading-snug">Editais vencidos</span>
                                 </div>
-                                <span class="text-base sm:text-lg font-black text-slate-900 ml-4" data-alvo="${vencidos}">0</span>
+                                <span class="text-2xl sm:text-3xl font-black text-slate-900 ml-4 shrink-0" data-alvo="${vencidos}">0</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Right Chart: Category Bar Distribution -->
-                    <div class="lg:col-span-7 bg-white border-2 border-slate-900 rounded-2xl p-5 flex flex-col justify-between" data-purpose="bar-chart-card">
+                    <!-- Right Chart: Category Bar Distribution (Ampliado nos eixos X e Y) -->
+                    <div class="lg:col-span-7 bg-white border-2 border-slate-900 rounded-2xl p-5 sm:p-6 md:p-7 flex flex-col justify-between" data-purpose="bar-chart-card">
                         <!-- Header of Bar Chart -->
-                        <div class="flex items-center justify-between mb-4">
+                        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
                             <div>
-                                <div class="flex items-center space-x-2">
-                                    <svg class="w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path></svg>
-                                    <h2 class="font-black text-slate-900 text-base sm:text-lg">Oportunidades por Categoria</h2>
+                                <div class="flex items-center space-x-2.5">
+                                    <svg class="w-6 h-6 sm:w-7 sm:h-7 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path></svg>
+                                    <h2 class="font-black text-slate-900 text-xl sm:text-2xl tracking-tight">Oportunidades por Categoria</h2>
                                 </div>
-                                <p class="text-xs text-slate-500 font-medium">Distribuição de vagas e editais no acervo</p>
+                                <p class="text-xs sm:text-sm md:text-base text-slate-600 font-semibold mt-0.5">Distribuição de vagas e editais no acervo</p>
                             </div>
-                            <span class="text-xs font-bold border border-slate-900 rounded-full px-3 py-1 bg-white text-slate-800">
+                            <span class="text-xs sm:text-sm md:text-base font-black border-2 border-slate-900 rounded-full px-4 py-1.5 bg-white text-slate-900 shadow-[2px_2px_0px_0px_rgba(15,23,42,0.9)]">
                                 ${totalGeral} Coletadas
                             </span>
                         </div>
-                        <!-- Vertical Bars Area -->
-                        <div class="h-44 w-full flex items-end justify-between px-2 pt-6 pb-1">
+                        <!-- Vertical Bars Area: Deslocado mais à direita e distribuído sem corte -->
+                        <div class="h-64 sm:h-72 md:h-80 w-full flex items-end justify-between sm:justify-around pl-6 sm:pl-10 md:pl-12 pr-4 sm:pr-8 md:pr-10 pt-6 pb-2 gap-2 sm:gap-3 md:gap-4">
                             ${categoriasBarras.map(cat => {
-                                let hPx = Math.round((cat.total / maxBarraValor) * 120);
-                                if (cat.total > 0 && hPx < 26) hPx = 26;
-                                if (cat.total === 0) hPx = 14;
+                                let hPx = 0;
+                                if (cat.total > 0) {
+                                    hPx = Math.round(36 + (cat.total / maxBarraValor) * 174);
+                                } else {
+                                    hPx = 18;
+                                }
                                 return `
-                                <div class="flex flex-col items-center w-10 sm:w-12 group cursor-pointer" onclick="carregarDados('${cat.id}')" title="${cat.rotulo}: ${cat.total} oportunidades (Clique para abrir)">
-                                    <span class="text-xs font-bold text-slate-900 mb-1">${cat.total}</span>
-                                    <div class="w-6 sm:w-7 ${cat.corClass} rounded-full border-2 border-slate-900 transition-all hover:scale-105" style="height: ${hPx}px;"></div>
-                                    <div class="w-6 h-6 rounded-full border border-slate-900 flex items-center justify-center bg-white mt-2">
+                                <div class="flex-1 max-w-[95px] flex flex-col items-center group cursor-pointer" onclick="carregarDados('${cat.id}')" title="${cat.rotulo}: ${cat.total} oportunidades (Clique para abrir)">
+                                    <span class="text-sm sm:text-base md:text-lg font-black text-slate-900 mb-2 tracking-tight group-hover:scale-110 transition-transform">${cat.total}</span>
+                                    <div class="w-7 sm:w-8 md:w-8.5 ${cat.corClass} rounded-full border-2 border-slate-900 shadow-[2px_2px_0px_0px_rgba(15,23,42,0.9)] transition-all duration-200 group-hover:scale-105 group-hover:shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]" style="height: ${hPx}px;"></div>
+                                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-slate-900 flex items-center justify-center bg-white mt-2.5 shadow-[1px_1px_0px_0px_rgba(15,23,42,0.8)] group-hover:bg-slate-50 transition-colors">
                                         ${cat.svg}
                                     </div>
-                                    <span class="text-[9px] sm:text-[10px] font-bold text-slate-700 mt-1">${cat.rotulo}</span>
+                                    <span class="text-xs sm:text-sm font-black text-slate-800 mt-2 text-center truncate max-w-full leading-tight">${cat.rotulo}</span>
                                 </div>`;
                             }).join('')}
                         </div>
@@ -1638,21 +1641,21 @@ async function carregarEstatisticas() {
                 <!-- END: MiddleChartsSection -->
 
                 <!-- BEGIN: FilterTabs -->
-                <nav class="flex flex-wrap items-center gap-2 pt-1" data-purpose="tab-filters">
-                    <button class="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs sm:text-sm font-bold flex items-center space-x-2 border-2 border-slate-900 shadow-sm transition hover:bg-slate-800 cursor-pointer ativo" type="button" data-aba="todos" onclick="alternarAbaPrazos('todos', this)">
-                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 4.5v15m6-15v15m-10.5 0h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                <nav class="flex flex-wrap items-center gap-2.5 pt-1" data-purpose="tab-filters">
+                    <button class="px-4 sm:px-5 py-2.5 bg-slate-900 text-white rounded-xl text-xs sm:text-sm md:text-base font-extrabold flex items-center space-x-2 border-2 border-slate-900 shadow-sm transition hover:bg-slate-800 cursor-pointer ativo" type="button" data-aba="todos" onclick="alternarAbaPrazos('todos', this)">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 4.5v15m6-15v15m-10.5 0h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                         <span>Visão Lado a Lado</span>
                     </button>
-                    <button class="px-4 py-2 bg-white text-slate-800 rounded-xl text-xs sm:text-sm font-bold flex items-center space-x-2 border-2 border-slate-900 hover:bg-slate-50 transition cursor-pointer" type="button" data-aba="abertos" onclick="alternarAbaPrazos('abertos', this)">
-                        <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M4.5 12.75l6 6 9-13.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <button class="px-4 sm:px-5 py-2.5 bg-white text-slate-800 rounded-xl text-xs sm:text-sm md:text-base font-extrabold flex items-center space-x-2 border-2 border-slate-900 hover:bg-slate-50 transition cursor-pointer" type="button" data-aba="abertos" onclick="alternarAbaPrazos('abertos', this)">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-slate-700" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M4.5 12.75l6 6 9-13.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                         <span>Todos Abertos (${editaisAbertos.length})</span>
                     </button>
-                    <button class="px-4 py-2 bg-white text-slate-800 rounded-xl text-xs sm:text-sm font-bold flex items-center space-x-2 border-2 border-slate-900 hover:bg-slate-50 transition cursor-pointer" type="button" data-aba="proximos" onclick="alternarAbaPrazos('proximos', this)">
-                        <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <button class="px-4 sm:px-5 py-2.5 bg-white text-slate-800 rounded-xl text-xs sm:text-sm md:text-base font-extrabold flex items-center space-x-2 border-2 border-slate-900 hover:bg-slate-50 transition cursor-pointer" type="button" data-aba="proximos" onclick="alternarAbaPrazos('proximos', this)">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-slate-700" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                         <span>Vencendo em Breve (${retaFinal || proximos.length})</span>
                     </button>
-                    <button class="px-4 py-2 bg-white text-slate-800 rounded-xl text-xs sm:text-sm font-bold flex items-center space-x-2 border-2 border-slate-900 hover:bg-slate-50 transition cursor-pointer" type="button" data-aba="encerrados" onclick="alternarAbaPrazos('encerrados', this)">
-                        <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <button class="px-4 sm:px-5 py-2.5 bg-white text-slate-800 rounded-xl text-xs sm:text-sm md:text-base font-extrabold flex items-center space-x-2 border-2 border-slate-900 hover:bg-slate-50 transition cursor-pointer" type="button" data-aba="encerrados" onclick="alternarAbaPrazos('encerrados', this)">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-slate-700" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                         <span>Encerrados (${vencidosLista.length})</span>
                     </button>
                 </nav>
@@ -1665,11 +1668,11 @@ async function carregarEstatisticas() {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-1" data-purpose="columns-container" id="dash-prazos-listas-grid">
                     <!-- COLUMN 1: Editais Abertos -->
                     <section class="space-y-4" data-purpose="open-notices-column" id="col-prazos-proximos">
-                        <div class="flex items-center space-x-2 pb-1 border-b border-slate-100">
-                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-200"></span>
-                            <h3 class="font-extrabold text-sm sm:text-base text-slate-900 tracking-tight" id="dash-titulo-col-abertos">Editais Abertos <span class="font-normal text-slate-500">(${editaisAbertos.length})</span></h3>
+                        <div class="flex items-center space-x-2.5 pb-1.5 border-b border-slate-200">
+                            <span class="w-3 h-3 rounded-full bg-emerald-500 ring-4 ring-emerald-200"></span>
+                            <h3 class="font-black text-base sm:text-lg md:text-xl text-slate-900 tracking-tight" id="dash-titulo-col-abertos">Editais Abertos <span class="font-bold text-slate-500 text-sm sm:text-base">(${editaisAbertos.length})</span></h3>
                         </div>
-                        <div class="space-y-3.5" id="dash-lista-abertos-container">
+                        <div class="space-y-4" id="dash-lista-abertos-container">
                             ${editaisAbertos.length ? editaisAbertos.map(e => {
                                 const info = sanitizarItemEdital(e.titulo);
                                 const diasRestantes = calcularDiasAteData(e.data);
@@ -1677,65 +1680,65 @@ async function carregarEstatisticas() {
                                 const isEstagio = /estágio|ciee|prae|bolsa/i.test(e.titulo || '');
                                 const badgeCor = isRetaFinal ? 'bg-red-500' : (isEstagio ? 'bg-teal-600' : 'bg-emerald-500');
                                 const svgIcone = isRetaFinal
-                                    ? `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" stroke-linecap="round" stroke-linejoin="round"></path></svg>`
+                                    ? `<svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" stroke-linecap="round" stroke-linejoin="round"></path></svg>`
                                     : (isEstagio
-                                        ? `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M4.26 10.147L12 5.25l7.74 4.897M4.26 10.147l7.74 4.897 7.74-4.897M4.26 10.147v4.603a7.5 7.5 0 0015.48 0v-4.603" stroke-linecap="round" stroke-linejoin="round"></path></svg>`
-                                        : `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>`);
+                                        ? `<svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M4.26 10.147L12 5.25l7.74 4.897M4.26 10.147l7.74 4.897 7.74-4.897M4.26 10.147v4.603a7.5 7.5 0 0015.48 0v-4.603" stroke-linecap="round" stroke-linejoin="round"></path></svg>`
+                                        : `<svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>`);
                                 let badgeRetaFinal = '';
                                 if (isRetaFinal) {
                                     const txtBadge = diasRestantes === 0 ? 'Vence HOJE!' : (diasRestantes === 1 ? 'Vence amanhã!' : `Vence em ${diasRestantes} dias`);
                                     badgeRetaFinal = `
-                                        <span class="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500 text-white tracking-tight">
-                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                        <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded text-xs font-black bg-amber-500 text-white tracking-tight border border-amber-600 shadow-sm ml-2">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                                             <span>${txtBadge}</span>
                                         </span>`;
                                 }
                                 return `
-                                <article class="flex items-start space-x-3 group cursor-pointer" data-edital-tipo="aberto" data-reta-final="${isRetaFinal ? 'true' : 'false'}" onclick="irParaEdital('${escaparHTML(e.link || '')}', '${escaparHTML(e.id || '')}')" title="${escaparHTML(info.tituloLimpo)}">
-                                    <div class="w-8 h-8 rounded-full ${badgeCor} text-white flex items-center justify-center shrink-0 border border-slate-900 shadow-sm mt-0.5">
+                                <article class="flex items-start space-x-3.5 group cursor-pointer" data-edital-tipo="aberto" data-reta-final="${isRetaFinal ? 'true' : 'false'}" onclick="irParaEdital('${escaparHTML(e.link || '')}', '${escaparHTML(e.id || '')}')" title="${escaparHTML(info.tituloLimpo)}">
+                                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full ${badgeCor} text-white flex items-center justify-center shrink-0 border-2 border-slate-900 shadow-sm mt-0.5 group-hover:scale-105 transition-transform">
                                         ${svgIcone}
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <h4 class="text-xs sm:text-[13px] font-extrabold text-slate-900 leading-snug group-hover:text-blue-600 transition truncate">
+                                        <h4 class="text-sm sm:text-[15px] md:text-base font-black text-slate-900 leading-snug group-hover:text-blue-600 transition truncate">
                                             ${escaparHTML(info.tituloLimpo)}
                                         </h4>
-                                        <div class="flex items-center space-x-2 mt-0.5">
-                                            <span class="text-[11px] font-medium text-slate-500">Até ${escaparHTML(e.data)}</span>
+                                        <div class="flex items-center space-x-2 mt-1">
+                                            <span class="text-xs sm:text-sm font-semibold text-slate-500">Até ${escaparHTML(e.data)}</span>
                                             ${badgeRetaFinal}
                                         </div>
                                     </div>
                                 </article>`;
                             }).join('') : `
-                                <div class="p-4 rounded-xl border border-dashed border-slate-300 text-center">
-                                    <p class="text-xs font-semibold text-slate-600">Nenhum edital com inscrição aberta no momento.</p>
+                                <div class="p-5 rounded-xl border-2 border-dashed border-slate-300 text-center">
+                                    <p class="text-sm font-bold text-slate-600">Nenhum edital com inscrição aberta no momento.</p>
                                 </div>
                             `}
-                            <div id="dash-msg-sem-reta-final" style="display: none;" class="p-4 rounded-xl border border-dashed border-slate-300 text-center">
-                                <p class="text-xs font-semibold text-slate-600">Nenhum edital vencendo nos próximos 7 dias.</p>
+                            <div id="dash-msg-sem-reta-final" style="display: none;" class="p-5 rounded-xl border-2 border-dashed border-slate-300 text-center">
+                                <p class="text-sm font-bold text-slate-600">Nenhum edital vencendo nos próximos 7 dias.</p>
                             </div>
                         </div>
                     </section>
 
                     <!-- COLUMN 2: Editais Vencidos -->
                     <section class="space-y-4" data-purpose="closed-notices-column" id="col-prazos-encerrados">
-                        <div class="flex items-center space-x-2 pb-1 border-b border-slate-100">
-                            <span class="w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-red-200"></span>
-                            <h3 class="font-extrabold text-sm sm:text-base text-slate-900 tracking-tight">Editais Vencidos <span class="font-normal text-slate-500">(${vencidosLista.length})</span></h3>
+                        <div class="flex items-center space-x-2.5 pb-1.5 border-b border-slate-200">
+                            <span class="w-3 h-3 rounded-full bg-red-500 ring-4 ring-red-200"></span>
+                            <h3 class="font-black text-base sm:text-lg md:text-xl text-slate-900 tracking-tight">Editais Vencidos <span class="font-bold text-slate-500 text-sm sm:text-base">(${vencidosLista.length})</span></h3>
                         </div>
                         ${vencidosLista.length ? `
-                        <div class="space-y-3.5">
+                        <div class="space-y-4">
                             ${vencidosLista.slice(0, 4).map(e => {
                                 const info = sanitizarItemEdital(e.titulo);
                                 return `
-                                <article class="flex items-start space-x-3 group cursor-pointer" onclick="irParaEdital('${escaparHTML(e.link || '')}', '${escaparHTML(e.id || '')}')" title="${escaparHTML(info.tituloLimpo)}">
-                                    <div class="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center shrink-0 border border-slate-900 shadow-sm mt-0.5">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                <article class="flex items-start space-x-3.5 group cursor-pointer" onclick="irParaEdital('${escaparHTML(e.link || '')}', '${escaparHTML(e.id || '')}')" title="${escaparHTML(info.tituloLimpo)}">
+                                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-red-600 text-white flex items-center justify-center shrink-0 border-2 border-slate-900 shadow-sm mt-0.5 group-hover:scale-105 transition-transform">
+                                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <h4 class="text-xs sm:text-[13px] font-extrabold text-slate-900 leading-snug group-hover:text-red-700 transition truncate">
+                                        <h4 class="text-sm sm:text-[15px] md:text-base font-black text-slate-900 leading-snug group-hover:text-red-700 transition truncate">
                                             ${escaparHTML(info.tituloLimpo)}
                                         </h4>
-                                        <div class="text-[11px] font-medium text-slate-500 mt-0.5">
+                                        <div class="text-xs sm:text-sm font-semibold text-slate-500 mt-1">
                                             Encerrado em ${escaparHTML(e.data)}
                                         </div>
                                     </div>
@@ -1743,19 +1746,19 @@ async function carregarEstatisticas() {
                             }).join('')}
 
                             ${vencidosLista.length > 4 ? `
-                            <div id="lista-encerrados-extras" style="display: none;" class="space-y-3.5 pt-1">
+                            <div id="lista-encerrados-extras" style="display: none;" class="space-y-4 pt-1">
                                 ${vencidosLista.slice(4).map(e => {
                                     const info = sanitizarItemEdital(e.titulo);
                                     return `
-                                    <article class="flex items-start space-x-3 group cursor-pointer" onclick="irParaEdital('${escaparHTML(e.link || '')}', '${escaparHTML(e.id || '')}')" title="${escaparHTML(info.tituloLimpo)}">
-                                        <div class="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center shrink-0 border border-slate-900 shadow-sm mt-0.5">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                    <article class="flex items-start space-x-3.5 group cursor-pointer" onclick="irParaEdital('${escaparHTML(e.link || '')}', '${escaparHTML(e.id || '')}')" title="${escaparHTML(info.tituloLimpo)}">
+                                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-red-600 text-white flex items-center justify-center shrink-0 border-2 border-slate-900 shadow-sm mt-0.5 group-hover:scale-105 transition-transform">
+                                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <h4 class="text-xs sm:text-[13px] font-extrabold text-slate-900 leading-snug group-hover:text-red-700 transition truncate">
+                                            <h4 class="text-sm sm:text-[15px] md:text-base font-black text-slate-900 leading-snug group-hover:text-red-700 transition truncate">
                                                 ${escaparHTML(info.tituloLimpo)}
                                             </h4>
-                                            <div class="text-[11px] font-medium text-slate-500 mt-0.5">
+                                            <div class="text-xs sm:text-sm font-semibold text-slate-500 mt-1">
                                                 Encerrado em ${escaparHTML(e.data)}
                                             </div>
                                         </div>
@@ -1763,13 +1766,13 @@ async function carregarEstatisticas() {
                                 }).join('')}
                             </div>
                             <div class="pt-2">
-                                <button class="w-full py-2 px-4 rounded-xl border border-dashed border-slate-400 hover:border-slate-700 text-xs font-bold text-slate-700 hover:text-slate-900 flex items-center justify-center space-x-1.5 transition bg-slate-50/50 cursor-pointer" type="button" data-texto-expandir="Mostrar mais ${vencidosLista.length - 4} editais encerrados" onclick="alternarListaEncerrados(this)">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19.5 8.25l-7.5 7.5-7.5-7.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                <button class="w-full py-3 px-4 rounded-xl border-2 border-dashed border-slate-400 hover:border-slate-800 text-xs sm:text-sm md:text-base font-black text-slate-800 hover:text-slate-950 flex items-center justify-center space-x-2 transition bg-slate-50 hover:bg-slate-100 cursor-pointer" type="button" data-texto-expandir="Mostrar mais ${vencidosLista.length - 4} editais encerrados" onclick="alternarListaEncerrados(this)">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19.5 8.25l-7.5 7.5-7.5-7.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                                     <span>Mostrar mais ${vencidosLista.length - 4} editais encerrados</span>
                                 </button>
                             </div>` : ''}
                         </div>` : `
-                            <p class="text-xs font-semibold text-slate-500 py-3">Nenhum edital encerrado recentemente.</p>
+                            <p class="text-sm font-bold text-slate-500 py-3">Nenhum edital encerrado recentemente.</p>
                         `}
                     </section>
                 </div>

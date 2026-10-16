@@ -2455,8 +2455,7 @@ button.dash-prazo-chip:active {
     width: 100%;
 }
 
-/* SIDEBAR STYLES — Gaveta local que expande lateralmente à esquerda de toda a seção
-   Fechada = largura 0 (não ocupa nada no fluxo); Aberta = largura confortável sem empurrar para além da tela. */
+
 .sidebar-perfil {
     flex: 0 0 auto;
     width: 0;               /* fechado: não ocupa espaço */
@@ -2863,9 +2862,9 @@ body.sidebar-aberta {
     transform: none !important;
 }
 
-/* ==========================================================================
+/* ==============
    MODO ESCURO / DARK MODE (TEMA RETRO-NEOBRUTALISTA & MEMPHIS)
-   ========================================================================== */
+   ============== */
 
 /* --- Inversão global do tema escuro: o que é ESCURO no tema claro
        passa a ser CLARO no tema escuro (bordas, sombras e textos "navy").
@@ -3684,13 +3683,7 @@ html.dark .ponto-vencido { opacity: 0.85; }
 html.dark .seg-vencendo { background: #FDBA74; }
 html.dark .seg-vencido { background: #B91C1C; opacity: 0.9; }
 
-/* ==========================================================================
-   FIXES DE CONTRASTE NO MODO ESCURO (fundo claro + texto branco ilegível)
-   ========================================================================== */
 
-/* Pílula "Olá, <usuário>" da navbar: mantém o fundo branco do card claro e
-   garante texto navy ESCURO legível (a regra global de span branco foi
-   neutralizada com :not() acima). */
 html.dark .nav-user-tag {
     background-color: #FFFFFF !important;
     color: var(--color-navy-text, #112244) !important;
@@ -3703,8 +3696,6 @@ html.dark .nav-user-tag strong {
     color: var(--color-navy-text, #112244) !important;
 }
 
-/* Widget "Editais: Abertos x Vencidos": card, chips e itens ganham fundos
-   escuros com textos claros/contrastantes (cores vivas nos números/títulos). */
 html.dark .dash-card-prazos {
     background: #111C2E !important;
     border-color: #334155 !important;
@@ -3794,9 +3785,6 @@ html.dark .text-gray-700 {
     color: #FFFFFF !important;
 }
 
-/* ============================================================
-   REDESIGN DA SEÇÃO DE PRAZOS: GRÁFICO DONUT + LISTAGEM COMPACTA
-   ============================================================ */
 
 .dash-donut-bloco-superior {
     display: flex;
@@ -4313,9 +4301,6 @@ html.dark .dash-mini-icone-box {
     border-color: var(--color-navy);
 }
 
-/* ============================================================
-   PORTAL DO ESTUDANTE (ABA DE USUÁRIO & PERFIL)
-   ============================================================ */
 
 .portal-usuario-wrapper {
     display: flex;
@@ -4519,10 +4504,6 @@ html.dark .dash-mini-icone-box {
     object-fit: cover;
 }
 
-/* ============================================================
-   DARK MODE PARA O REDESIGN DE PRAZOS & PORTAL DO ALUNO
-   ============================================================ */
-
 html.dark .dash-prazo-tab {
     background: #1E293B !important;
     color: #F8FAFC !important;
@@ -4639,9 +4620,7 @@ html.dark .btn-avatar-preset {
     }
 }
 
-/* ============================================================
-   OCULTAÇÃO DO FILTRO DE VIGENTES (INDICADORES & MEU PERFIL)
-   ============================================================ */
+
 .filtro-vigentes-oculto #toolbar-filtro-vigentes,
 .filtro-vigentes-oculto .student-toolbar-right,
 .filtro-vigentes-oculto .toggle-vigentes-container,
@@ -4650,9 +4629,7 @@ html.dark .btn-avatar-preset {
     display: none !important;
 }
 
-/* ============================================================
-   WIDGET NEOBRUTALISTA: GRÁFICO DE BARRAS VERTICAIS POR CATEGORIA
-   ============================================================ */
+
 .dash-barras-widget {
     background: #FFFFFF;
     border: 2px solid var(--color-navy, #0F172A);
@@ -4871,9 +4848,9 @@ html.dark .dash-barra-label i {
     color: #F8FAFC;
 }
 
-/* ============================================================
+/* 
    DARK MODE SUPORTE PARA O DASHBOARD UNIFICADO
-   ============================================================ */
+    */
 html.dark [data-purpose="dashboard-wrapper"] {
     background-color: #0f172a !important;
     border-color: #334155 !important;
