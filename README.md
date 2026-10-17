@@ -17,7 +17,7 @@
 <img width="1134" height="900" alt="Filtros e Cursos" src="https://github.com/user-attachments/assets/6a988c1f-3b23-441d-afd6-5c6e6767c731" />
 
 <p align="center">
-  <strong>Hub centralizado de mineração, curadoria e monitoramento de editais, bolsas, estágios e notícias acadêmicas para o ecossistema universitário potiguar.</strong>
+  <strong>Hub centralizado de mineração, curadoria e monitoramento de editais, bolsas, estágios e notícias acadêmicas para o ecossistema universitário potiguar.</strong>
 </p>
 
 </div>
@@ -39,18 +39,18 @@ O **EduScrap** resolve essa dor ao atuar como um agregador e minerador automatiz
 
 ---
 
-##  Funcionalidades Principais
+##  Funcionalidades Principais
 
 - ⚡ **Web Scraping Concorrente Multi-Worker (`run_scrapers.py`):** Coleta paralela em múltiplas fontes com isolamento de logs individuais por robô em `logs/<fonte>.log`.
 
--  **Validação Temporal Automática de Prazos (RN01 a RN03):** Cálculo dinâmico comparando a data do servidor com os prazos de inscrição, gerando badges de alerta para prazos críticos ($\le$ 3 dias) e marcação de certames vencidos.
--  **Painel Analítico com Gráfico Donut (UC05):** Visualização interativa em SVG que renderiza em tempo real a proporção de editais abertos, vencendo em até 7 dias e encerrados.
--  **Filtro Inteligente por Áreas e Cursos (UC03):** Seletor dinâmico baseado em `config/course_mapping.json` contemplando 15 cursos e áreas temáticas (Tecnologia, Saúde, Humanas, Exatas, etc.).
--  **Feed Unificado e Busca Textual (UC01 / UC02 / Figura 4):** Endpoint consolidado `GET /api/oportunidades` para busca por palavra-chave, categoria, fonte e vigência.
--  **Modo Escuro (Dark Mode) Nativo (UC08):** Alternância instantânea de tema sem recarregar a página, com persistência no `localStorage` e troca de logo.
--  **Área do Estudante e Favoritos (UC06 / UC09):** Cadastro com termo de consentimento LGPD, autenticação com hash criptográfico (PBKDF2/SHA256) e gerenciamento de favoritos.
--  **Painel Administrativo de Governança Técnica (UC11 / UC12 / RF12):** Interface web (`admin.html`) para monitoramento de logs de robôs e ajuste de URLs e expressões de extração (`patterns.json`) em tempo de execução sem recompilar, com proteção contra SSRF.
--  **Portabilidade Total com Docker (RNF08 / Seção 12):** Empacotamento completo com `Dockerfile.backend`, `Dockerfile.frontend` e `docker-compose.yml`.
+-  **Validação Temporal Automática de Prazos (RN01 a RN03):** Cálculo dinâmico comparando a data do servidor com os prazos de inscrição, gerando badges de alerta para prazos críticos ($\le$ 3 dias) e marcação de certames vencidos.
+-  **Painel Analítico com Gráfico Donut (UC05):** Visualização interativa em SVG que renderiza em tempo real a proporção de editais abertos, vencendo em até 7 dias e encerrados.
+-  **Filtro Inteligente por Áreas e Cursos (UC03):** Seletor dinâmico baseado em `config/course_mapping.json` contemplando 15 cursos e áreas temáticas (Tecnologia, Saúde, Humanas, Exatas, etc.).
+-  **Feed Unificado e Busca Textual (UC01 / UC02 / Figura 4):** Endpoint consolidado `GET /api/oportunidades` para busca por palavra-chave, categoria, fonte e vigência.
+-  **Modo Escuro (Dark Mode) Nativo (UC08):** Alternância instantânea de tema sem recarregar a página, com persistência no `localStorage` e troca de logo.
+-  **Área do Estudante e Favoritos (UC06 / UC09):** Cadastro com termo de consentimento LGPD, autenticação com hash criptográfico (PBKDF2/SHA256) e gerenciamento de favoritos.
+-  **Painel Administrativo de Governança Técnica (UC11 / UC12 / RF12):** Interface web (`admin.html`) para monitoramento de logs de robôs e ajuste de URLs e expressões de extração (`patterns.json`) em tempo de execução sem recompilar, com proteção contra SSRF.
+-  **Portabilidade Total com Docker (RNF08 / Seção 12):** Empacotamento completo com `Dockerfile.backend`, `Dockerfile.frontend` e `docker-compose.yml`.
 
 ---
 
@@ -58,48 +58,48 @@ O **EduScrap** resolve essa dor ao atuar como um agregador e minerador automatiz
 
 ```mermaid
 flowchart TD
-    subgraph Fontes ["Fontes Oficiais Externas"]
-        UERN["Portal UERN / JOUERN"]
-        PRAE["PRAE - Estágios e Auxílios"]
-        PROEX["PROEX - Bolsas e Projetos"]
-        UFERSA["Portal Editais UFERSA"]
-        CIEE["Plataforma CIEE"]
-        OUTRAS["MPRN / IFRN / IEL / DOM"]
-    end
+    subgraph Fontes ["Fontes Oficiais Externas"]
+        UERN["Portal UERN / JOUERN"]
+        PRAE["PRAE - Estágios e Auxílios"]
+        PROEX["PROEX - Bolsas e Projetos"]
+        UFERSA["Portal Editais UFERSA"]
+        CIEE["Plataforma CIEE"]
+        OUTRAS["MPRN / IFRN / IEL / DOM"]
+    end
 
-    subgraph Ingestao ["Engine de Ingestão Concorrente - POO"]
-        Runner["ScraperRunner - ThreadPoolExecutor"]
-        Scrapers["Scrapers Concretos - herdam BaseScraper"]
-        Norm["Normalizer - RegexEngine + PDF Extraction"]
-    end
+    subgraph Ingestao ["Engine de Ingestão Concorrente - POO"]
+        Runner["ScraperRunner - ThreadPoolExecutor"]
+        Scrapers["Scrapers Concretos - herdam BaseScraper"]
+        Norm["Normalizer - RegexEngine + PDF Extraction"]
+    end
 
-    subgraph Dados ["Camada de Persistência - NoSQL"]
-        Mongo[("MongoDB 7.0 - hub_estudantes")]
-        Logs["Logs Isolados por Robô"]
-        Config["Regras Dinâmicas - patterns.json"]
-    end
+    subgraph Dados ["Camada de Persistência - NoSQL"]
+        Mongo[("MongoDB 7.0 - hub_estudantes")]
+        Logs["Logs Isolados por Robô"]
+        Config["Regras Dinâmicas - patterns.json"]
+    end
 
-    subgraph Servicos ["Backend API - FastAPI"]
-        FastAPI["FastAPI porta 8000\nEndpoints REST e Swagger /docs\nModels Pydantic - OportunidadeModel"]
-    end
+    subgraph Servicos ["Backend API - FastAPI"]
+        FastAPI["FastAPI porta 8000\nEndpoints REST e Swagger /docs\nModels Pydantic - OportunidadeModel"]
+    end
 
-    subgraph Cliente ["Camada de Apresentação - Frontend"]
-        SPA["Dashboard Discente porta 3000\nDonut SVG + Filtros + Dark Mode"]
-        AdminUI["Painel de Governança admin.html\nGestão de Regras e Monitor de Logs"]
-        User(["Estudante / Administrador"])
-    end
+    subgraph Cliente ["Camada de Apresentação - Frontend"]
+        SPA["Dashboard Discente porta 3000\nDonut SVG + Filtros + Dark Mode"]
+        AdminUI["Painel de Governança admin.html\nGestão de Regras e Monitor de Logs"]
+        User(["Estudante / Administrador"])
+    end
 
-    Fontes -->|Download HTML e PDF| Scrapers
-    Runner --> Scrapers
-    Scrapers --> Norm
-    Config -.->|Leitura e Ajuste de Regras| Norm
-    Norm -->|Upsert pelo Link Canônico - RN04| Mongo
-    Scrapers -->|Gravação Isolada de Logs - UC11| Logs
-    Mongo -->|Consultas Indexadas sub-segundo| FastAPI
-    FastAPI -->|JSON REST| SPA
-    FastAPI -->|APIs de Governança - UC12| AdminUI
-    User <--> SPA
-    User <--> AdminUI
+    Fontes -->|Download HTML e PDF| Scrapers
+    Runner --> Scrapers
+    Scrapers --> Norm
+    Config -.->|Leitura e Ajuste de Regras| Norm
+    Norm -->|Upsert pelo Link Canônico - RN04| Mongo
+    Scrapers -->|Gravação Isolada de Logs - UC11| Logs
+    Mongo -->|Consultas Indexadas sub-segundo| FastAPI
+    FastAPI -->|JSON REST| SPA
+    FastAPI -->|APIs de Governança - UC12| AdminUI
+    User <--> SPA
+    User <--> AdminUI
 ```
 
 ---
@@ -315,49 +315,49 @@ pytest -v
 ```
 EduScrap/
 ├── backend/
-│   ├── base_scraper.py           # Classe abstrata BaseScraper (RNF05 / Figura 11)
-│   ├── models.py                 # Modelos Pydantic de domínio (OportunidadeModel, etc.)
-│   ├── mongo_database.py         # Classe MongoDatabase para persistência NoSQL
-│   ├── main.py                   # API RESTful FastAPI (MFA, Logs, Snapshots, Oportunidades)
-│   ├── database_setup.py         # Criação de índices e validação de schema
-│   ├── scraper_*.py              # Classes e scripts dos robôs de coleta
-│   └── pdf_utils.py              # Extração de datas e snapshots via GridFS
+│   ├── base_scraper.py           # Classe abstrata BaseScraper (RNF05 / Figura 11)
+│   ├── models.py                 # Modelos Pydantic de domínio (OportunidadeModel, etc.)
+│   ├── mongo_database.py         # Classe MongoDatabase para persistência NoSQL
+│   ├── main.py                   # API RESTful FastAPI (MFA, Logs, Snapshots, Oportunidades)
+│   ├── database_setup.py         # Criação de índices e validação de schema
+│   ├── scraper_*.py              # Classes e scripts dos robôs de coleta
+│   └── pdf_utils.py              # Extração de datas e snapshots via GridFS
 ├── frontend/
-│   ├── index.html                # Interface principal do estudante (Dashboard SPA)
-│   ├── admin.html                # Painel de governança técnica (UC11 / UC12 / MFA)
-│   ├── login.html                # Autenticação e cadastro
-│   ├── script.js                 # Lógica de filtros, .ics e consumo da API
-│   ├── theme.js                  # Controle dinâmico de Modo Claro e Escuro
-│   └── style.css                 # Estilização Tailwind e regras de contraste WCAG 2.1
+│   ├── index.html                # Interface principal do estudante (Dashboard SPA)
+│   ├── admin.html                # Painel de governança técnica (UC11 / UC12 / MFA)
+│   ├── login.html                # Autenticação e cadastro
+│   ├── script.js                 # Lógica de filtros, .ics e consumo da API
+│   ├── theme.js                  # Controle dinâmico de Modo Claro e Escuro
+│   └── style.css                 # Estilização Tailwind e regras de contraste WCAG 2.1
 ├── systemd/
-│   ├── eduscrap-scraper.service  # Unit de coleta concorrente
-│   ├── eduscrap-notify.service   # Unit de notificação de prazos
-│   ├── eduscrap-notify.timer     # Timer de disparo de notificações
-│   ├── eduscrap-cleanup.service  # Unit de limpeza de snapshots GridFS
-│   ├── eduscrap-cleanup.timer    # Timer semanal de purga de retenção
-│   └── install_systemd.sh        # Script de instalação e ativação no SO
-├── notify_users.py               # Notificador autônomo multicanal (SMTP + Telegram)
-├── cleanup_snapshots.py          # Script de retenção de snapshots GridFS (> 12 meses)
+│   ├── eduscrap-scraper.service  # Unit de coleta concorrente
+│   ├── eduscrap-notify.service   # Unit de notificação de prazos
+│   ├── eduscrap-notify.timer     # Timer de disparo de notificações
+│   ├── eduscrap-cleanup.service  # Unit de limpeza de snapshots GridFS
+│   ├── eduscrap-cleanup.timer    # Timer semanal de purga de retenção
+│   └── install_systemd.sh        # Script de instalação e ativação no SO
+├── notify_users.py               # Notificador autônomo multicanal (SMTP + Telegram)
+├── cleanup_snapshots.py          # Script de retenção de snapshots GridFS (> 12 meses)
 ├── config/
-│   ├── course_mapping.json       # Mapeamento oficial de 15 cursos e áreas
-│   └── patterns.json             # Regras compiladas de Regex para extração
+│   ├── course_mapping.json       # Mapeamento oficial de 15 cursos e áreas
+│   └── patterns.json             # Regras compiladas de Regex para extração
 ├── tests/
-│   ├── test_novas_funcionalidades.py # Testes de MFA, logs, GridFS, .ics e notificações
-│   ├── test_fastapi_endpoints.py # Testes dos endpoints FastAPI e admin
-│   ├── test_performance.py       # Teste de latência do feed < 1s (RNF01)
-│   ├── test_auth_favoritos.py    # Testes de autenticação e favoritos
-│   ├── test_database_mongomock.py# Testes de persistência NoSQL
-│   ├── test_pdf_utils.py         # Testes de extração de PDF e vigência
-│   ├── test_regex.py             # Testes do motor de expressões regulares
-│   └── test_scraper.py           # Testes dos coletores HTML e PDF
-├── Dockerfile.backend            # Container para a API FastAPI
-├── Dockerfile.frontend           # Container para o Frontend SPA
-├── docker-compose.yml            # Orquestração com limites de RAM e healthcheck
-├── run_scrapers.py               # Orquestrador ScraperRunner com pkill zombie cleanup
-├── start.sh                      # Script de inicialização automática local
-├── Makefile                      # Atalhos úteis de desenvolvimento
-├── requirements.txt              # Dependências Python (com pyotp e responses)
-└── README.md                     # Este documento
+│   ├── test_novas_funcionalidades.py # Testes de MFA, logs, GridFS, .ics e notificações
+│   ├── test_fastapi_endpoints.py # Testes dos endpoints FastAPI e admin
+│   ├── test_performance.py       # Teste de latência do feed < 1s (RNF01)
+│   ├── test_auth_favoritos.py    # Testes de autenticação e favoritos
+│   ├── test_database_mongomock.py# Testes de persistência NoSQL
+│   ├── test_pdf_utils.py         # Testes de extração de PDF e vigência
+│   ├── test_regex.py             # Testes do motor de expressões regulares
+│   └── test_scraper.py           # Testes dos coletores HTML e PDF
+├── Dockerfile.backend            # Container para a API FastAPI
+├── Dockerfile.frontend           # Container para o Frontend SPA
+├── docker-compose.yml            # Orquestração com limites de RAM e healthcheck
+├── run_scrapers.py               # Orquestrador ScraperRunner com pkill zombie cleanup
+├── start.sh                      # Script de inicialização automática local
+├── Makefile                      # Atalhos úteis de desenvolvimento
+├── requirements.txt              # Dependências Python (com pyotp e responses)
+└── README.md                     # Este documento
 ```
 
 ---
@@ -366,8 +366,8 @@ EduScrap/
 
 Projeto acadêmico desenvolvido para a **Universidade do Estado do Rio Grande do Norte (UERN)**:
 
-  GitHub: [@kelryana](https://github.com/kelryana)
-  GitHub: [@PatoDesoxigenado](https://github.com/PatoDesoxigenado)
+  GitHub: [@kelryana](https://github.com/kelryana)
+  GitHub: [@PatoDesoxigenado](https://github.com/PatoDesoxigenado)
 
 ---
 
