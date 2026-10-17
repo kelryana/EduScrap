@@ -811,9 +811,10 @@ function sintetizarTituloEdital(textoOriginal) {
     t = t.replace(/^resultado\s+final\s+d[oe]\s+/i, 'Resultado Final: ');
     t = t.replace(/^resultado\s+preliminar\s+d[oe]\s+/i, 'Resultado Preliminar: ');
     t = t.replace(/^resultado\s+parcial\s+d[oe]\s+/i, 'Resultado Parcial: ');
-    t = t.replace(/^convoca\s*(?:os\s+estudantes|candidatos)?\s*/i, 'Convocação: ');
-    t = t.replace(/^homologa\s*(?:os\s+estudantes|candidatos|inscrições)?\s*/i, 'Homologação: ');
-    t = t.replace(/^retifica\s*(?:o\s+edital|a\s+publicação)?\s*/i, 'Retificação: ');
+    t = t.replace(/^(?:convoca[çc][ãa]o|convoca)\s*(?:d[oe]s?|os|as)?\s*(?:estudantes|candidatos|benefici[áa]rios?(?:\(as\))?)?\s*(?:d[oe]\s+)?/i, 'Convocação: ');
+    t = t.replace(/^(?:homologa[çc][ãa]o|homologa)\s*(?:d[oe]s?|os|as)?\s*(?:estudantes|candidatos|inscrições)?\s*/i, 'Homologação: ');
+    t = t.replace(/^(?:retifica[çc][ãa]o|retifica)\s*(?:d[oe]s?|os|as)?\s*(?:o\s+edital|a\s+publicação)?\s*/i, 'Retificação: ');
+    t = t.replace(/\bparapresta[çc][ãa]o\b/gi, 'para prestação');
 
     // 4. Encurta fórmulas longas do objeto
     t = t.replace(/processo\s+seletivo\s+para\s+preenchimento\s+de\s+vagas\s+remanescentes\s+d[oe]\s+/gi, 'Vagas Remanescentes – ');
@@ -1031,7 +1032,9 @@ function renderizarCards(listaDeVagas) {
             textoAcao = 'Ver Curso / Inscrever-se';
         }
 
-        const btnCalendarioHTML = (vaga.data_vencimento || vaga.data_vencimento_formatada) ? `
+        // Botão de calendário apenas para editais/vagas VIGENTES (não faz sentido lembrete para edital encerrado ou notícia)
+        const podeExibirLembrete = !ehNoticia && status === "vigente" && (vaga.data_vencimento || vaga.data_vencimento_formatada);
+        const btnCalendarioHTML = podeExibirLembrete ? `
             <button class="btn-calendario-card" onclick="exportarCalendarioICS('${escaparHTML(tituloFinal).replace(/'/g, "\\'")}', '${vaga.data_vencimento_formatada || vaga.data_vencimento}', '${escaparHTML(linkDestino).replace(/'/g, "\\'")}', '${escaparHTML(vaga.fonte || 'Universidade').replace(/'/g, "\\'")}', event)" title="Adicionar prazo ao seu Calendário (.ics)">
                 <i class="ph-bold ph-calendar-plus"></i>
                 <span>Lembrete</span>
@@ -1220,9 +1223,13 @@ async function realizarPesquisa() {
 
 // 2. Indicadores e Métricas
 function escaparHTML(texto) {
-    const div = document.createElement('div');
-    div.textContent = texto == null ? '' : String(texto);
-    return div.innerHTML;
+    if (texto == null) return '';
+    return String(texto)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
 // Sanitização de títulos de editais e extração de órgãos

@@ -34,12 +34,12 @@
         }
       }
     </script>
-    <link rel="stylesheet" href="style.css?v=20261014_v9">
+    <link rel="stylesheet" href="style.css?v=20261017_v4">
 </head>
-<body class="bg-[#FAFBFD] dark:bg-slate-900 text-brand-dark dark:text-slate-100 min-h-screen font-sans antialiased p-4 md:p-8">
+<body class="bg-[#FAFBFD] dark:bg-slate-900 text-brand-dark dark:text-slate-100 min-h-screen font-sans antialiased p-6 md:p-10 lg:p-12">
 
-    <header class="max-w-7xl mx-auto flex flex-wrap items-center justify-between pb-6 mb-8 border-b-2 border-slate-900 dark:border-slate-700">
-        <div class="flex items-center space-x-4">
+    <header class="max-w-7xl mx-auto pb-8 mb-10 border-b-2 border-slate-900 dark:border-slate-700" style="display: flex !important; flex-wrap: wrap !important; align-items: center !important; justify-content: space-between !important; gap: 32px !important; width: 100% !important;">
+        <div class="flex items-center space-x-4" style="display: flex !important; align-items: center !important; gap: 16px !important;">
             <a href="index.html">
                 <img src="assets/logo.png" data-logo-light="assets/logo.png" data-logo-dark="assets/logo_temaescuro.png" alt="EduScrap Logo" class="h-12 w-auto">
             </a>
@@ -49,19 +49,19 @@
             </div>
         </div>
 
-        <div class="flex items-center space-x-3 mt-4 sm:mt-0">
-            <button onclick="alternarTema()" class="px-3.5 py-2 rounded-xl border-2 border-slate-900 dark:border-slate-600 bg-white dark:bg-slate-800 font-bold text-xs flex items-center space-x-2 shadow-sm">
-                <i class="ph ph-moon-stars text-base"></i>
-                <span>Tema</span>
+        <div style="display: flex !important; align-items: center !important; gap: 20px !important; margin-left: auto !important;">
+            <button id="btn-theme-toggle" onclick="toggleTheme()" class="px-5 py-2.5 rounded-xl border-2 border-slate-900 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-black text-xs flex items-center gap-2.5 shadow-sm hover:bg-slate-100 dark:hover:bg-slate-700 transition-all cursor-pointer" title="Alternar Modo Claro / Escuro">
+                <i id="theme-toggle-icon" class="ph-bold ph-moon-stars text-base"></i>
+                <span id="theme-toggle-text">Tema</span>
             </button>
-            <a href="index.html" class="px-4 py-2 rounded-xl border-2 border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold text-xs flex items-center space-x-1.5 hover:bg-slate-50 transition-colors">
-                <i class="ph ph-arrow-left font-bold"></i>
+            <a href="index.html" class="px-5 py-2.5 rounded-xl border-2 border-slate-900 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-black text-xs flex items-center gap-2 hover:bg-brand-orange hover:text-white dark:hover:bg-brand-orange transition-all shadow-sm">
+                <i class="ph-bold ph-arrow-left text-base"></i>
                 <span>Voltar ao Portal</span>
             </a>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto space-y-8">
+    <main class="max-w-7xl mx-auto space-y-12">
         
         <!-- Notificação de status -->
         <div id="status-alerta" class="hidden p-4 rounded-xl border-2 font-bold text-sm"></div>
@@ -239,10 +239,30 @@
                         badgeTexto = "Alerta";
                     }
 
+                    // Ícones Phosphor específicos por fonte em vez de emojis
+                    const iconesMap = {
+                        prae: "ph-student",
+                        proex: "ph-currency-circle-dollar",
+                        ufersa: "ph-bank",
+                        noticias: "ph-newspaper",
+                        portal_uern: "ph-globe-hemisphere-west",
+                        ciee: "ph-briefcase",
+                        cpps_ufersa: "ph-chalkboard-teacher",
+                        assecom_ufersa: "ph-megaphone",
+                        mprn: "ph-scales",
+                        ifrn: "ph-graduation-cap",
+                        iel_rn: "ph-buildings",
+                        capacitacao_bolsas: "ph-certificate",
+                        dom_mossoro: "ph-scroll"
+                    };
+                    const iconeClasse = iconesMap[s.chave] || "ph-robot";
+
                     return `
                         <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                            <td class="p-3.5 font-bold flex items-center gap-2">
-                                <span class="text-lg">${s.icone}</span>
+                            <td class="p-4 font-bold flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-800 dark:text-slate-200 text-lg border border-slate-300 dark:border-slate-600">
+                                    <i class="ph-bold ${iconeClasse}"></i>
+                                </div>
                                 <div>
                                     <div class="text-slate-900 dark:text-white font-extrabold">${s.nome}</div>
                                     <div class="text-[10px] font-mono text-slate-500">${s.chave}</div>
@@ -306,22 +326,24 @@
                 if (!data.fontes) throw new Error("Erro ao carregar fontes");
 
                 grid.innerHTML = Object.entries(data.fontes).map(([chave, info]) => `
-                    <div class="p-4 border-2 border-slate-900 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900/60 flex flex-col justify-between">
-                        <div class="flex items-center gap-3 mb-2">
-                            <span class="text-2xl">${info.icone || '🌐'}</span>
+                    <div class="p-5 border-2 border-slate-900 dark:border-slate-700 rounded-2xl bg-slate-50 dark:bg-slate-900/60 flex flex-col justify-between shadow-sm">
+                        <div class="flex items-center gap-3.5 mb-3">
+                            <div class="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border-2 border-slate-900 dark:border-slate-700 flex items-center justify-center text-brand-orange text-xl shadow-sm">
+                                <i class="ph-bold ph-robot"></i>
+                            </div>
                             <div>
                                 <h3 class="font-black text-sm text-slate-900 dark:text-white">${info.nome}</h3>
                                 <span class="text-[10px] font-mono font-bold text-slate-500 uppercase">Coleção: ${info.colecao}</span>
                             </div>
                         </div>
-                        <div class="text-xs text-slate-600 dark:text-slate-400 font-mono truncate mb-3">
+                        <div class="text-xs text-slate-600 dark:text-slate-400 font-mono truncate mb-4 bg-white dark:bg-slate-800/80 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700">
                             Script: ${info.script}
                         </div>
-                        <div class="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-700 text-xs">
-                            <span class="inline-flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Conectado
+                        <div class="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-slate-700 text-xs">
+                            <span class="inline-flex items-center gap-1.5 font-bold text-emerald-600 dark:text-emerald-400">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span> Conectado
                             </span>
-                            <span class="font-bold text-slate-400 text-[11px]">ID: ${chave}</span>
+                            <span class="font-bold text-slate-500 text-[11px] font-mono">ID: ${chave}</span>
                         </div>
                     </div>
                 `).join('');

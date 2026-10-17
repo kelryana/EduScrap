@@ -79,7 +79,8 @@
         updateLogo(isDark() ? 'dark' : 'light');
     });
 
-    // Expõe para o onclick="toggleTheme()" dos botões.
+    // Expõe para o onclick="toggleTheme()" e alternarTema() dos botões.
     window.toggleTheme = toggleTheme;
+    window.alternarTema = toggleTheme;
     window.getTheme = function () { return isDark() ? 'dark' : 'light'; };
 })();

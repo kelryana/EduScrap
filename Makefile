@@ -12,6 +12,7 @@ run:
 
 test:
 	./venv/bin/pytest tests/
+	node --test tests/*.test.js
 
 scrape:
 	./venv/bin/python run_scrapers.py $(fontes)

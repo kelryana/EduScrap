@@ -1415,7 +1415,9 @@ def login_administrador(payload: dict):
 
     # Validação via chave mestre de governança
     chave_esperada = API_KEY or "admin123"
-    if chave and (chave == chave_esperada or chave == "admin123"):
+    # Se uma API_KEY real estiver configurada no .env, não aceita mais a senha padrão insegura 'admin123'
+    chave_valida = (chave == chave_esperada) if API_KEY else (chave == "admin123")
+    if chave and chave_valida:
         if mfa_ativo and not validar_totp_codigo(totp_code):
             raise HTTPException(
                 status_code=401,
