@@ -65,3 +65,46 @@ def test_fastapi_admin_logs(client):
     data = response.json()
     assert data["sucesso"] is True
     assert "logs" in data
+
+
+def test_fastapi_auth_verificar_email(client):
+    """Testa verificação de email existente e novo"""
+    with patch("backend.main.db") as mock_db:
+        mock_col = MagicMock()
+        # Primeiro caso: não existe
+        mock_col.find_one.return_value = None
+        mock_db.__getitem__.return_value = mock_col
+
+        resp = client.get("/api/auth/verificar-email?email=novo@aluno.uern.br")
+        assert resp.status_code == 200
+        assert resp.json()["existe"] is False
+        assert resp.json()["valido"] is True
+
+        # Segundo caso: já existe
+        mock_col.find_one.return_value = {"email": "existe@aluno.uern.br"}
+        resp2 = client.get("/api/auth/verificar-email?email=existe@aluno.uern.br")
+        assert resp2.status_code == 200
+        assert resp2.json()["existe"] is True
+
+
+def test_fastapi_auth_redefinir_senha(client):
+    """Testa endpoint de redefinição de senha"""
+    with patch("backend.main.db") as mock_db:
+        mock_col = MagicMock()
+        mock_col.find_one.return_value = {
+            "_id": "607f1f77bcf86cd799439011",
+            "email": "aluno@uern.br",
+            "senha_hash": "antigo_hash"
+        }
+        mock_db.__getitem__.return_value = mock_col
+
+        resp = client.post("/api/auth/redefinir-senha", json={
+            "email": "aluno@uern.br",
+            "nova_senha": "nova_senha_forte123"
+        })
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["success"] is True
+        assert "sucesso" in data["message"].lower()
+        mock_col.update_one.assert_called_once()
+

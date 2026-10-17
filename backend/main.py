@@ -1176,6 +1176,31 @@ def obter_status_do_banco():
 # ROTAS DE AUTENTICAÇÃO E PERFIL DO ALUNO
 # ==========================================
 
+@app.get("/api/auth/verificar-email")
+def verificar_email_disponivel(email: str = Query(..., description="E-mail para consulta")):
+    """Verifica se o e-mail informado já está cadastrado no sistema."""
+    email_limpo = email.strip().lower()
+    if not email_limpo or "@" not in email_limpo or "." not in email_limpo.split("@")[-1]:
+        return {
+            "valido": False,
+            "existe": False,
+            "mensagem": "Formato de e-mail inválido."
+        }
+    
+    usuario_existente = db["usuarios"].find_one({"email": email_limpo})
+    if usuario_existente:
+        return {
+            "valido": True,
+            "existe": True,
+            "mensagem": "Este e-mail já está cadastrado no EduScrap. Faça login ou redefina sua senha."
+        }
+    return {
+        "valido": True,
+        "existe": False,
+        "mensagem": "E-mail disponível para cadastro!"
+    }
+
+
 @app.post("/api/auth/register")
 def register_usuario(payload: dict):
     nome = payload.get("nome", "").strip()
@@ -1186,15 +1211,18 @@ def register_usuario(payload: dict):
     areas = payload.get("areas", [])
     receber_emails = payload.get("receber_emails", True)
 
-    if not nome:
-        raise HTTPException(status_code=400, detail="Nome é obrigatório")
-    if not email or "@" not in email:
-        raise HTTPException(status_code=400, detail="Email válido é obrigatório")
+    if not nome or len(nome) < 2:
+        raise HTTPException(status_code=400, detail="Por favor, informe seu nome completo (mínimo 2 caracteres).")
+    if not email or "@" not in email or "." not in email.split("@")[-1]:
+        raise HTTPException(status_code=400, detail="Por favor, informe um endereço de e-mail válido (ex: seu.email@gmail.com ou aluno@uern.br).")
     if not senha or len(senha) < 6:
-        raise HTTPException(status_code=400, detail="Senha deve ter no mínimo 6 caracteres")
+        raise HTTPException(status_code=400, detail="A senha de acesso deve possuir no mínimo 6 caracteres.")
 
     if db["usuarios"].find_one({"email": email}):
-        raise HTTPException(status_code=409, detail="Já existe uma conta cadastrada com este email.")
+        raise HTTPException(
+            status_code=409,
+            detail="Este e-mail já está cadastrado no EduScrap. Faça login com suas credenciais ou utilize a opção 'Esqueceu sua senha?'."
+        )
 
     novo_usuario = {
         "nome": nome,
@@ -1220,7 +1248,7 @@ def register_usuario(payload: dict):
 
     return {
         "success": True,
-        "message": "Conta criada com sucesso!",
+        "message": "Conta de estudante criada com sucesso!",
         "token": token,
         "user": novo_usuario
     }
@@ -1232,14 +1260,20 @@ def login_usuario(payload: dict):
     senha = payload.get("senha", "")
 
     if not email or not senha:
-        raise HTTPException(status_code=400, detail="Email e senha são obrigatórios")
+        raise HTTPException(status_code=400, detail="E-mail e senha são obrigatórios para acessar a conta.")
 
     user = db["usuarios"].find_one({"email": email})
     if not user:
-        raise HTTPException(status_code=401, detail="Email ou senha incorretos")
+        raise HTTPException(
+            status_code=401,
+            detail="Nenhuma conta encontrada para o e-mail informado. Verifique a digitação ou cadastre-se gratuitamente."
+        )
 
     if not verify_password(senha, user.get("senha_hash", "")):
-        raise HTTPException(status_code=401, detail="Email ou senha incorretos")
+        raise HTTPException(
+            status_code=401,
+            detail="Senha incorreta para este e-mail. Se esqueceu sua senha, clique em 'Esqueceu a senha?' para redefini-la."
+        )
 
     user_id = str(user["_id"])
     token = generate_auth_token(user_id, email)
@@ -1253,6 +1287,37 @@ def login_usuario(payload: dict):
         "token": token,
         "user": user
     }
+
+
+@app.post("/api/auth/redefinir-senha")
+def redefinir_senha_estudante(payload: dict):
+    """Permite redefinir a senha informando o e-mail cadastrado."""
+    email = payload.get("email", "").strip().lower()
+    nova_senha = payload.get("nova_senha", "")
+
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="Informe um e-mail válido para redefinir a senha.")
+    if not nova_senha or len(nova_senha) < 6:
+        raise HTTPException(status_code=400, detail="A nova senha deve possuir no mínimo 6 caracteres.")
+
+    user = db["usuarios"].find_one({"email": email})
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="Nenhuma conta cadastrada com este e-mail no EduScrap. Crie sua conta gratuitamente."
+        )
+
+    novo_hash = hash_password(nova_senha)
+    db["usuarios"].update_one(
+        {"_id": user["_id"]},
+        {"$set": {"senha_hash": novo_hash, "atualizado_em": datetime.now().isoformat()}}
+    )
+
+    return {
+        "success": True,
+        "message": "Senha atualizada com sucesso! Agora você já pode entrar na sua conta com a nova senha."
+    }
+
 
 
 @app.get("/api/auth/me")

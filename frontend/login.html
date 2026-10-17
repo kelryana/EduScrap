@@ -662,7 +662,7 @@
                 </div>
             </div>
 
-            <!-- Seletor de Abas (Login / Cadastro) -->
+            <!-- Seletor de Abas (Login / Cadastro / Redefinir Senha) -->
             <div class="auth-tabs-wrapper">
                 <div class="auth-tabs-row" role="tablist">
                     <button id="tab-login" class="auth-tab-btn ativo" onclick="alternarAba('login')" role="tab">
@@ -671,20 +671,23 @@
                     <button id="tab-register" class="auth-tab-btn" onclick="alternarAba('register')" role="tab">
                         <i class="ph-bold ph-user-plus"></i> Novo Cadastro
                     </button>
+                    <button id="tab-reset" class="auth-tab-btn" onclick="alternarAba('reset')" role="tab">
+                        <i class="ph-bold ph-key"></i> Redefinir Senha
+                    </button>
                 </div>
             </div>
 
             <div class="modal-body-memphis">
                 <!-- FORMULÁRIO DE LOGIN -->
                 <form id="form-login" onsubmit="executarLogin(event)">
-                    <div class="form-group-memphis mb-5">
+                    <div class="form-group-memphis mb-4">
                         <label class="label-memphis" for="login-email">
                             <i class="ph-bold ph-envelope-simple text-brand-orange"></i> E-mail Institucional ou Pessoal:
                         </label>
-                        <input type="email" id="login-email" class="input-memphis" placeholder="exemplo@uern.br" autocomplete="username" required>
+                        <input type="email" id="login-email" class="input-memphis" placeholder="exemplo@uern.br ou seu.email@gmail.com" autocomplete="username" required>
                     </div>
 
-                    <div class="form-group-memphis mb-5">
+                    <div class="form-group-memphis mb-2">
                         <label class="label-memphis" for="login-senha">
                             <i class="ph-bold ph-lock-key text-brand-orange"></i> Senha de Acesso:
                         </label>
@@ -696,9 +699,15 @@
                         </div>
                     </div>
 
+                    <div class="flex justify-end items-center mb-4 mt-1">
+                        <a href="javascript:void(0)" onclick="alternarAba('reset')" class="text-sm font-extrabold text-slate-500 hover:text-brand-orange underline transition-colors">
+                            Esqueceu sua senha? Redefinir senha
+                        </a>
+                    </div>
+
                     <div id="login-erro" class="msg-erro-memphis mb-4" style="display: none;"></div>
 
-                    <div class="form-actions-memphis mt-7">
+                    <div class="form-actions-memphis mt-6">
                         <button type="submit" id="btn-submit-login" class="btn-submit-memphis btn-submit-primary w-full">
                             <span>Entrar na Minha Conta</span>
                             <i class="ph-bold ph-arrow-right"></i>
@@ -733,14 +742,15 @@
                             <label class="label-memphis" for="reg-email">
                                 <i class="ph-bold ph-envelope-simple text-brand-orange"></i> E-mail Institucional ou Pessoal:
                             </label>
-                            <input type="email" id="reg-email" class="input-memphis" placeholder="aluno@uern.br" autocomplete="email" required>
+                            <input type="email" id="reg-email" class="input-memphis" placeholder="aluno@uern.br ou seu.email@gmail.com" autocomplete="email" oninput="verificarDisponibilidadeEmail()" onblur="verificarDisponibilidadeEmail()" required>
+                            <div id="email-feedback" class="mt-2 text-xs font-bold p-2.5 rounded-lg transition-all" style="display: none;"></div>
                         </div>
                         <div class="form-group-memphis">
                             <label class="label-memphis" for="reg-senha">
                                 <i class="ph-bold ph-lock-key text-brand-orange"></i> Criar Senha Forte:
                             </label>
                             <div class="input-password-wrapper">
-                                <input type="password" id="reg-senha" class="input-memphis" placeholder="Crie uma senha segura" autocomplete="new-password" oninput="avaliarForcaSenha()" required>
+                                <input type="password" id="reg-senha" class="input-memphis" placeholder="Crie uma senha segura (mínimo 6 dígitos)" autocomplete="new-password" oninput="avaliarForcaSenha()" required>
                                 <button type="button" class="btn-toggle-senha" onclick="toggleSenhaVisibilidade('reg-senha', 'icon-toggle-reg')" aria-label="Mostrar ou ocultar senha" title="Mostrar ou ocultar senha">
                                     <i class="ph-bold ph-eye" id="icon-toggle-reg"></i>
                                 </button>
@@ -761,7 +771,7 @@
                         <div class="senha-requisitos-grid">
                             <div id="req-tamanho" class="senha-req-item">
                                 <i class="ph-bold ph-circle req-icon" id="icon-req-tamanho"></i>
-                                <span>Mínimo de 8 caracteres</span>
+                                <span>Mínimo de 6 caracteres</span>
                             </div>
                             <div id="req-maiuscula" class="senha-req-item">
                                 <i class="ph-bold ph-circle req-icon" id="icon-req-maiuscula"></i>
@@ -776,6 +786,14 @@
                                 <span>1 caractere especial (!@#$...)</span>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Termo LGPD e Notificações por Email -->
+                    <div class="flex items-start gap-3 my-4 p-3.5 bg-slate-50 dark:bg-slate-800/80 rounded-xl border-2 border-slate-900/10 dark:border-slate-700">
+                        <input type="checkbox" id="reg-receber-emails" checked class="w-5 h-5 accent-brand-orange cursor-pointer mt-0.5">
+                        <label for="reg-receber-emails" class="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                            Desejo receber avisos de novos editais e alertas de prazos críticos por e-mail (opcional)
+                        </label>
                     </div>
 
                     <!-- Aviso amigável sobre preferências de cursos pós-cadastro -->
@@ -801,6 +819,67 @@
                     <p class="text-center mt-7 text-slate-600 dark:text-slate-400 font-semibold text-lg">
                         Já possui cadastro?
                         <a href="javascript:void(0)" onclick="alternarAba('login')" class="text-brand-orange font-extrabold underline hover:text-orange-700 ml-1">Fazer login</a>
+                    </p>
+                </form>
+
+                <!-- FORMULÁRIO DE REDEFINIÇÃO DE SENHA -->
+                <form id="form-reset" style="display: none;" onsubmit="executarRedefinicaoSenha(event)">
+                    <div class="mb-5 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200 text-sm">
+                        <div class="flex items-center gap-2 font-bold mb-1">
+                            <i class="ph-bold ph-info text-lg"></i>
+                            <span>Redefinir Senha de Acesso</span>
+                        </div>
+                        <p class="text-xs leading-relaxed">
+                            Esqueceu sua senha? Informe o e-mail cadastrado e digite sua nova senha de acesso (mínimo 6 caracteres).
+                        </p>
+                    </div>
+
+                    <div class="form-group-memphis mb-5">
+                        <label class="label-memphis" for="reset-email">
+                            <i class="ph-bold ph-envelope-simple text-brand-orange"></i> E-mail Cadastrado:
+                        </label>
+                        <input type="email" id="reset-email" class="input-memphis" placeholder="exemplo@gmail.com ou aluno@uern.br" autocomplete="email" required>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                        <div class="form-group-memphis">
+                            <label class="label-memphis" for="reset-senha">
+                                <i class="ph-bold ph-lock-key text-brand-orange"></i> Nova Senha:
+                            </label>
+                            <div class="input-password-wrapper">
+                                <input type="password" id="reset-senha" class="input-memphis" placeholder="Mínimo 6 caracteres" autocomplete="new-password" required>
+                                <button type="button" class="btn-toggle-senha" onclick="toggleSenhaVisibilidade('reset-senha', 'icon-toggle-reset1')">
+                                    <i class="ph-bold ph-eye" id="icon-toggle-reset1"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group-memphis">
+                            <label class="label-memphis" for="reset-confirma">
+                                <i class="ph-bold ph-check-circle text-brand-orange"></i> Confirmar Nova Senha:
+                            </label>
+                            <div class="input-password-wrapper">
+                                <input type="password" id="reset-confirma" class="input-memphis" placeholder="Repita a nova senha" autocomplete="new-password" required>
+                                <button type="button" class="btn-toggle-senha" onclick="toggleSenhaVisibilidade('reset-confirma', 'icon-toggle-reset2')">
+                                    <i class="ph-bold ph-eye" id="icon-toggle-reset2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="reset-erro" class="msg-erro-memphis mb-4" style="display: none;"></div>
+                    <div id="reset-sucesso" class="p-4 rounded-xl border-2 border-emerald-900 bg-emerald-50 text-emerald-800 font-bold text-sm mb-4" style="display: none;"></div>
+
+                    <div class="form-actions-memphis mt-7">
+                        <button type="submit" id="btn-submit-reset" class="btn-submit-memphis btn-submit-primary w-full">
+                            <span>Confirmar Nova Senha</span>
+                            <i class="ph-bold ph-arrow-right"></i>
+                        </button>
+                    </div>
+
+                    <p class="text-center mt-7 text-slate-600 dark:text-slate-400 font-semibold text-lg">
+                        Lembrou da sua senha?
+                        <a href="javascript:void(0)" onclick="alternarAba('login')" class="text-brand-orange font-extrabold underline hover:text-orange-700 ml-1">Voltar para o Login</a>
                     </p>
                 </form>
             </div>
@@ -889,11 +968,13 @@
         window.addEventListener('DOMContentLoaded', () => {
             configurarChipsClick();
 
-            // Detectar parâmetro na URL (ex: login.html?aba=register)
+            // Detectar parâmetro na URL (ex: login.html?aba=register ou login.html?aba=reset)
             const urlParams = new URLSearchParams(window.location.search);
             const aba = urlParams.get('aba') || urlParams.get('tab');
             if (aba === 'register' || aba === 'cadastro') {
                 alternarAba('register');
+            } else if (aba === 'reset' || aba === 'redefinir' || aba === 'recuperar') {
+                alternarAba('reset');
             } else {
                 alternarAba('login');
             }
@@ -902,22 +983,42 @@
         function alternarAba(aba) {
             const tabLogin = document.getElementById('tab-login');
             const tabReg = document.getElementById('tab-register');
+            const tabReset = document.getElementById('tab-reset');
             const formLogin = document.getElementById('form-login');
             const formReg = document.getElementById('form-register');
+            const formReset = document.getElementById('form-reset');
             const pageTitle = document.getElementById('page-auth-title');
 
+            // Limpa mensagens de erro ao alternar
+            ['login-erro', 'register-erro', 'reset-erro', 'reset-sucesso'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+
             if (aba === 'login') {
-                tabLogin.classList.add('ativo');
-                tabReg.classList.remove('ativo');
-                formLogin.style.display = 'block';
-                formReg.style.display = 'none';
+                tabLogin?.classList.add('ativo');
+                tabReg?.classList.remove('ativo');
+                tabReset?.classList.remove('ativo');
+                if (formLogin) formLogin.style.display = 'block';
+                if (formReg) formReg.style.display = 'none';
+                if (formReset) formReset.style.display = 'none';
                 if (pageTitle) pageTitle.innerText = "Entrar no EduScrap";
-            } else {
-                tabLogin.classList.remove('ativo');
-                tabReg.classList.add('ativo');
-                formLogin.style.display = 'none';
-                formReg.style.display = 'block';
+            } else if (aba === 'register') {
+                tabLogin?.classList.remove('ativo');
+                tabReg?.classList.add('ativo');
+                tabReset?.classList.remove('ativo');
+                if (formLogin) formLogin.style.display = 'none';
+                if (formReg) formReg.style.display = 'block';
+                if (formReset) formReset.style.display = 'none';
                 if (pageTitle) pageTitle.innerText = "Criar Perfil de Estudante";
+            } else if (aba === 'reset') {
+                tabLogin?.classList.remove('ativo');
+                tabReg?.classList.remove('ativo');
+                tabReset?.classList.add('ativo');
+                if (formLogin) formLogin.style.display = 'none';
+                if (formReg) formReg.style.display = 'none';
+                if (formReset) formReset.style.display = 'block';
+                if (pageTitle) pageTitle.innerText = "Redefinir Senha de Acesso";
             }
         }
 
@@ -957,7 +1058,7 @@
         // Regras de validação de segurança da senha
         function verificarRequisitosSenha(senha) {
             return {
-                tamanho: (senha || '').length >= 8,
+                tamanho: (senha || '').length >= 6,
                 maiuscula: /[A-Z]/.test(senha || ''),
                 numero: /[0-9]/.test(senha || ''),
                 especial: /[^a-zA-Z0-9]/.test(senha || '')
@@ -994,19 +1095,19 @@
                 case 1:
                     barra.style.width = '25%';
                     barra.style.backgroundColor = '#EF4444';
-                    texto.innerText = 'Muito fraca (1/4)';
+                    texto.innerText = 'Básica (1/4)';
                     texto.style.color = '#EF4444';
                     break;
                 case 2:
                     barra.style.width = '50%';
                     barra.style.backgroundColor = '#F97316';
-                    texto.innerText = 'Fraca (2/4)';
+                    texto.innerText = 'Razoável (2/4)';
                     texto.style.color = '#F97316';
                     break;
                 case 3:
                     barra.style.width = '75%';
                     barra.style.backgroundColor = '#EAB308';
-                    texto.innerText = 'Média (3/4)';
+                    texto.innerText = 'Boa (3/4)';
                     texto.style.color = '#EAB308';
                     break;
                 case 4:
@@ -1016,9 +1117,9 @@
                     texto.style.color = '#16A34A';
                     break;
                 default:
-                    barra.style.width = '10%';
+                    barra.style.width = '15%';
                     barra.style.backgroundColor = '#EF4444';
-                    texto.innerText = 'Muito fraca';
+                    texto.innerText = 'Muito curta';
                     texto.style.color = '#EF4444';
             }
         }
@@ -1037,6 +1138,82 @@
             }
         }
 
+        // ==========================================
+        // VERIFICAÇÃO DE DISPONIBILIDADE DE E-MAIL
+        // ==========================================
+        let emailDebounceTimer = null;
+        async function verificarDisponibilidadeEmail() {
+            clearTimeout(emailDebounceTimer);
+            const feedbackEl = document.getElementById('email-feedback');
+            const emailInput = document.getElementById('reg-email');
+            if (!feedbackEl || !emailInput) return;
+
+            const email = emailInput.value.trim();
+            if (!email || !email.includes('@') || !email.includes('.')) {
+                feedbackEl.style.display = 'none';
+                feedbackEl.innerHTML = '';
+                return;
+            }
+
+            emailDebounceTimer = setTimeout(async () => {
+                feedbackEl.style.display = 'block';
+                feedbackEl.className = 'mt-2 text-xs font-bold p-2.5 rounded-lg border flex items-center gap-2 bg-slate-100 text-slate-700 border-slate-300';
+                feedbackEl.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-sm"></i> <span>Verificando e-mail...</span>';
+
+                try {
+                    const resp = await fetch(`${API_URL}/auth/verificar-email?email=${encodeURIComponent(email)}`);
+                    const data = await resp.json();
+
+                    if (!data.valido) {
+                        feedbackEl.className = 'mt-2 text-xs font-bold p-2.5 rounded-lg border flex items-center gap-2 bg-red-50 text-red-700 border-red-300';
+                        feedbackEl.innerHTML = `<i class="ph-bold ph-x-circle text-base text-red-600"></i> <span>${data.mensagem || 'E-mail inválido.'}</span>`;
+                        return;
+                    }
+
+                    if (data.existe) {
+                        feedbackEl.className = 'mt-2 text-xs font-bold p-2.5 rounded-lg border flex flex-col gap-1.5 bg-amber-50 text-amber-900 border-amber-300';
+                        feedbackEl.innerHTML = `
+                            <div class="flex items-center gap-2 text-amber-800">
+                                <i class="ph-bold ph-warning-circle text-base text-amber-600"></i>
+                                <span>Este e-mail já está cadastrado no EduScrap!</span>
+                            </div>
+                            <div class="flex items-center gap-3 pt-1 text-xs">
+                                <button type="button" onclick="irParaLoginComEmail('${email}')" class="underline font-extrabold text-brand-orange hover:text-orange-700">Fazer login agora</button>
+                                <span class="text-slate-400">•</span>
+                                <button type="button" onclick="irParaResetComEmail('${email}')" class="underline font-extrabold text-blue-600 hover:text-blue-800">Esqueceu a senha?</button>
+                            </div>
+                        `;
+                    } else {
+                        feedbackEl.className = 'mt-2 text-xs font-bold p-2.5 rounded-lg border flex items-center gap-2 bg-emerald-50 text-emerald-800 border-emerald-300';
+                        feedbackEl.innerHTML = `<i class="ph-bold ph-check-circle text-base text-emerald-600"></i> <span>E-mail disponível para cadastro!</span>`;
+                    }
+                } catch (err) {
+                    feedbackEl.style.display = 'none';
+                }
+            }, 300);
+        }
+
+        function irParaLoginComEmail(email) {
+            alternarAba('login');
+            const loginEmail = document.getElementById('login-email');
+            if (loginEmail) {
+                loginEmail.value = email;
+                document.getElementById('login-senha')?.focus();
+            }
+        }
+
+        function irParaResetComEmail(email) {
+            alternarAba('reset');
+            const resetEmail = document.getElementById('reset-email');
+            if (resetEmail) {
+                resetEmail.value = email;
+                document.getElementById('reset-senha')?.focus();
+            }
+        }
+
+        // ==========================================
+        // FLUXO DE LOGIN COM FEEDBACK INTELIGENTE
+        // ==========================================
         async function executarLogin(e) {
             e.preventDefault();
             const email = document.getElementById('login-email').value.trim();
@@ -1045,6 +1222,7 @@
             const btnSubmit = document.getElementById('btn-submit-login');
 
             erroDiv.style.display = 'none';
+            erroDiv.innerHTML = '';
             btnSubmit.disabled = true;
             btnSubmit.innerHTML = '<span>Verificando credenciais...</span> <i class="ph-bold ph-spinner animate-spin"></i>';
 
@@ -1057,7 +1235,28 @@
 
                 const data = await resp.json();
                 if (!resp.ok || !data.success) {
-                    throw new Error(data.error || data.detail || 'Email ou senha inválidos.');
+                    const msg = data.detail || data.error || 'Email ou senha inválidos.';
+                    if (msg.includes('Nenhuma conta encontrada') || msg.includes('cadastre-se')) {
+                        erroDiv.innerHTML = `
+                            <span>${msg}</span>
+                            <div class="mt-2 text-sm">
+                                <button type="button" onclick="alternarAba('register')" class="underline font-bold text-brand-orange hover:text-orange-700">Criar cadastro gratuito agora</button>
+                            </div>
+                        `;
+                    } else if (msg.includes('Senha incorreta') || msg.includes('redefini-la')) {
+                        erroDiv.innerHTML = `
+                            <span>${msg}</span>
+                            <div class="mt-2 text-sm">
+                                <button type="button" onclick="irParaResetComEmail('${email}')" class="underline font-bold text-brand-orange hover:text-orange-700">Clique aqui para Redefinir sua Senha</button>
+                            </div>
+                        `;
+                    } else {
+                        erroDiv.innerText = msg;
+                    }
+                    erroDiv.style.display = 'block';
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = '<span>Entrar na Minha Conta</span> <i class="ph-bold ph-arrow-right"></i>';
+                    return;
                 }
 
                 // Salva a sessão no localStorage
@@ -1066,35 +1265,37 @@
 
                 btnSubmit.innerHTML = '<span>Sucesso! Redirecionando...</span> <i class="ph-bold ph-check"></i>';
 
-                // Redireciona para a página principal
                 setTimeout(() => {
                     window.location.href = "index.html";
                 }, 400);
 
             } catch (err) {
-                erroDiv.innerText = err.message;
+                erroDiv.innerText = err.message || 'Erro de comunicação com o servidor.';
                 erroDiv.style.display = 'block';
                 btnSubmit.disabled = false;
                 btnSubmit.innerHTML = '<span>Entrar na Minha Conta</span> <i class="ph-bold ph-arrow-right"></i>';
             }
         }
 
+        // ==========================================
+        // FLUXO DE CADASTRO COM FEEDBACK PRECISO
+        // ==========================================
         async function executarCadastro(e) {
             e.preventDefault();
             const nome = document.getElementById('reg-nome').value.trim();
             const matricula = document.getElementById('reg-matricula').value.trim();
             const email = document.getElementById('reg-email').value.trim();
             const senha = document.getElementById('reg-senha').value;
-            const receber_emails = document.getElementById('reg-receber-emails').checked;
+            const receber_emails = document.getElementById('reg-receber-emails')?.checked ?? true;
             const erroDiv = document.getElementById('register-erro');
             const btnSubmit = document.getElementById('btn-submit-reg');
 
             erroDiv.style.display = 'none';
+            erroDiv.innerHTML = '';
 
-            // Validação rigorosa dos 4 requisitos de segurança de senha
-            const reqs = verificarRequisitosSenha(senha);
-            if (!reqs.tamanho || !reqs.maiuscula || !reqs.numero || !reqs.especial) {
-                erroDiv.innerText = 'A senha precisa cumprir todos os 4 requisitos de proteção indicados acima (mínimo 8 dígitos, maiúscula, número e caractere especial).';
+            // Validação de tamanho mínimo
+            if (senha.length < 6) {
+                erroDiv.innerText = 'A senha de acesso precisa possuir pelo menos 6 caracteres.';
                 erroDiv.style.display = 'block';
                 document.getElementById('reg-senha').focus();
                 return;
@@ -1120,12 +1321,27 @@
 
                 const data = await resp.json();
                 if (!resp.ok || !data.success) {
-                    throw new Error(data.error || data.detail || 'Falha ao cadastrar estudante.');
+                    const msg = data.detail || data.error || 'Falha ao cadastrar estudante.';
+                    if (resp.status === 409 || msg.includes('já está cadastrado')) {
+                        erroDiv.innerHTML = `
+                            <span>${msg}</span>
+                            <div class="mt-2 flex gap-3 text-sm">
+                                <button type="button" onclick="irParaLoginComEmail('${email}')" class="underline font-bold text-brand-orange hover:text-orange-700">Fazer Login</button>
+                                <span>•</span>
+                                <button type="button" onclick="irParaResetComEmail('${email}')" class="underline font-bold text-blue-600 hover:text-blue-800">Redefinir Senha</button>
+                            </div>
+                        `;
+                    } else {
+                        erroDiv.innerText = msg;
+                    }
+                    erroDiv.style.display = 'block';
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = '<span>Concluir Cadastro & Acessar Vagas</span> <i class="ph-bold ph-check"></i>';
+                    return;
                 }
 
                 localStorage.setItem('eduscrap_token', data.token);
                 localStorage.setItem('eduscrap_user', JSON.stringify(data.user));
-                // Marca que é um novo estudante cadastrado para incentivar o onboarding amigável
                 localStorage.setItem('eduscrap_novo_usuario', 'true');
 
                 btnSubmit.innerHTML = '<span>Conta criada! Redirecionando...</span> <i class="ph-bold ph-check"></i>';
@@ -1135,10 +1351,85 @@
                 }, 400);
 
             } catch (err) {
-                erroDiv.innerText = err.message;
+                erroDiv.innerText = err.message || 'Erro ao conectar ao servidor.';
                 erroDiv.style.display = 'block';
                 btnSubmit.disabled = false;
                 btnSubmit.innerHTML = '<span>Concluir Cadastro & Acessar Vagas</span> <i class="ph-bold ph-check"></i>';
+            }
+        }
+
+        // ==========================================
+        // FLUXO DE REDEFINIÇÃO DE SENHA
+        // ==========================================
+        async function executarRedefinicaoSenha(e) {
+            e.preventDefault();
+            const email = document.getElementById('reset-email').value.trim();
+            const novaSenha = document.getElementById('reset-senha').value;
+            const confirmaSenha = document.getElementById('reset-confirma').value;
+            const erroDiv = document.getElementById('reset-erro');
+            const sucessoDiv = document.getElementById('reset-sucesso');
+            const btnSubmit = document.getElementById('btn-submit-reset');
+
+            erroDiv.style.display = 'none';
+            erroDiv.innerHTML = '';
+            sucessoDiv.style.display = 'none';
+            sucessoDiv.innerHTML = '';
+
+            if (!email || !email.includes('@')) {
+                erroDiv.innerText = 'Informe um endereço de e-mail válido.';
+                erroDiv.style.display = 'block';
+                return;
+            }
+
+            if (novaSenha.length < 6) {
+                erroDiv.innerText = 'A nova senha deve possuir no mínimo 6 caracteres.';
+                erroDiv.style.display = 'block';
+                return;
+            }
+
+            if (novaSenha !== confirmaSenha) {
+                erroDiv.innerText = 'As duas senhas digitadas não coincidem. Digite-as novamente.';
+                erroDiv.style.display = 'block';
+                return;
+            }
+
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<span>Atualizando senha...</span> <i class="ph-bold ph-spinner animate-spin"></i>';
+
+            try {
+                const resp = await fetch(`${API_URL}/auth/redefinir-senha`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, nova_senha: novaSenha })
+                });
+
+                const data = await resp.json();
+                if (!resp.ok || !data.success) {
+                    throw new Error(data.detail || data.error || 'Falha ao redefinir senha.');
+                }
+
+                sucessoDiv.innerHTML = `
+                    <div class="flex items-center gap-2 mb-1">
+                        <i class="ph-bold ph-check-circle text-lg text-emerald-600"></i>
+                        <span>${data.message || 'Senha alterada com sucesso!'}</span>
+                    </div>
+                    <p class="text-xs text-emerald-700">Preenchendo login com sua nova senha em instantes...</p>
+                `;
+                sucessoDiv.style.display = 'block';
+                btnSubmit.innerHTML = '<span>Senha Atualizada!</span> <i class="ph-bold ph-check"></i>';
+
+                setTimeout(() => {
+                    irParaLoginComEmail(email);
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = '<span>Confirmar Nova Senha</span> <i class="ph-bold ph-arrow-right"></i>';
+                    sucessoDiv.style.display = 'none';
+                }, 1800);
+
+            } catch (err) {
+                erroDiv.innerText = err.message || 'Erro ao redefinir senha.';
+                erroDiv.style.display = 'block';
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = '<span>Confirmar Nova Senha</span> <i class="ph-bold ph-arrow-right"></i>';
             }
         }
     </script>
