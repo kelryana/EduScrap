@@ -175,6 +175,58 @@ def executar_scraper(chave, info):
         "total_itens": itens
     }
 
+
+class ScraperRunner:
+    """
+    Orquestrador Concorrente de Scrapers conforme modelado no Diagrama de Classes UML (Figura 11).
+    Atributos:
+        FONTES_DISPONIVEIS: List[str]
+        max_workers: int
+    Métodos:
+        executar_paralelo(fontes_selecionadas: List[str]): List[dict]
+        executar_no_banco(chave: str): dict
+        configurar_logger_subsistema(nome_fonte: str): Path
+    """
+    FONTES_DISPONIVEIS = list(SCRAPERS.keys())
+
+    def __init__(self, max_workers: int = 6):
+        self.max_workers = max_workers
+        self.scrapers = SCRAPERS
+
+    def configurar_logger_subsistema(self, nome_fonte: str) -> Path:
+        return LOGS_DIR / f"{nome_fonte}.log"
+
+    def executar_no_banco(self, chave: str) -> dict:
+        info = self.scrapers.get(chave)
+        if not info:
+            raise ValueError(f"Fonte '{chave}' não encontrada")
+        return executar_scraper(chave, info)
+
+    def executar_paralelo(self, fontes_selecionadas: list = None) -> list:
+        alvos = {}
+        if fontes_selecionadas:
+            for f in fontes_selecionadas:
+                f_l = f.lower()
+                if f_l in self.scrapers:
+                    alvos[f_l] = self.scrapers[f_l]
+        else:
+            alvos = self.scrapers
+
+        total = len(alvos)
+        if total == 0:
+            return []
+
+        resultados = []
+        with ThreadPoolExecutor(max_workers=min(total, self.max_workers)) as executor:
+            futuros = {
+                executor.submit(executar_scraper, chave, info): chave
+                for chave, info in alvos.items()
+            }
+            for futuro in as_completed(futuros):
+                resultados.append(futuro.result())
+        return resultados
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="EduScrap - Orquestrador Paralelo de Coleta de Dados",

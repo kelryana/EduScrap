@@ -10,6 +10,7 @@ import os
 
 from dotenv import load_dotenv
 from pdf_utils import extrair_data_vencimento_datetime
+from base_scraper import BaseScraper
 # Carrega variáveis de ambiente do .env na raiz do projeto
 load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"))
 
@@ -18,6 +19,64 @@ logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
 )
 logger = logging.getLogger(__name__)
+
+class ScraperPROEX(BaseScraper):
+    """Scraper oficial da PROEX/UERN em conformidade com BaseScraper (RNF05)"""
+    def __init__(self):
+        super().__init__(
+            nome_fonte="PROEX/UERN",
+            url_base="https://portal.uern.br/proex/",
+            nome_colecao="vagas_bolsa"
+        )
+        self.paginas_alvo = [
+            "https://portal.uern.br/proex/2026-2/",
+            "https://portal.uern.br/proex/",
+            "https://portal.uern.br/proex/2026/",
+            "https://portal.uern.br/proex/editais/"
+        ]
+
+    def coletar(self):
+        itens_totais = []
+        for url in self.paginas_alvo:
+            try:
+                headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+                res = requests.get(url, headers=headers, timeout=20)
+                if res.status_code != 200:
+                    continue
+                soup = BeautifulSoup(res.text, 'html.parser')
+                for ul in soup.find_all('ul'):
+                    if ul.find_parent(['nav', 'aside', 'footer', 'header']):
+                        continue
+                    elemento_cat = ul.find_previous_sibling(['p', 'h2', 'h3', 'h4', 'strong'])
+                    cat_texto = elemento_cat.get_text(strip=True) if elemento_cat else "Categoria Geral"
+                    for li in ul.find_all('li'):
+                        tag_a = li.find('a')
+                        if not tag_a:
+                            continue
+                        bruto = li.get_text(strip=True)
+                        href = tag_a.get('href')
+                        if not bruto.lower().startswith("edital") or not href or not href.startswith("http"):
+                            continue
+                        nome = self.limpar_texto(bruto.replace("(Clique Aqui)", "").replace("(Clique aqui)", ""))
+                        if nome.endswith("-"):
+                            nome = nome[:-1].strip()
+                        dt = extrair_data_vencimento(bruto) or extrair_data_vencimento(f"{nome} {cat_texto}")
+                        if not dt:
+                            dt = extrair_data_vencimento_datetime(bruto, href)
+                        doc = {
+                            "nome": nome,
+                            "titulo": nome,
+                            "link": href,
+                            "categoria": cat_texto,
+                            "fonte": "PROEX/UERN"
+                        }
+                        if dt:
+                            doc["data_vencimento"] = dt
+                        itens_totais.append(doc)
+            except Exception as e:
+                self.logger.warning(f"Erro ao coletar {url}: {e}")
+        return itens_totais
+
 
 MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
 MONGODB_DB = os.getenv("MONGODB_DB", "hub_estudantes")

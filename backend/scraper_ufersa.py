@@ -10,6 +10,7 @@ import os
 
 from dotenv import load_dotenv
 from pdf_utils import extrair_data_vencimento_datetime
+from base_scraper import BaseScraper
 # Carrega variáveis de ambiente do .env na raiz do projeto
 load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"))
 
@@ -18,6 +19,53 @@ logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
 )
 logger = logging.getLogger(__name__)
+
+class ScraperUFERSA(BaseScraper):
+    """Scraper oficial da UFERSA em conformidade com BaseScraper (RNF05)"""
+    def __init__(self):
+        super().__init__(
+            nome_fonte="UFERSA",
+            url_base="https://proae.ufersa.edu.br/",
+            nome_colecao="vagas_ufersa"
+        )
+        self.paginas_alvo = [
+            "https://proae.ufersa.edu.br/editais/",
+            "https://proae.ufersa.edu.br/categoria/editais-abertos/"
+        ]
+
+    def coletar(self):
+        itens_totais = []
+        for url in self.paginas_alvo:
+            try:
+                headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+                res = requests.get(url, headers=headers, timeout=20)
+                if res.status_code != 200:
+                    continue
+                soup = BeautifulSoup(res.text, 'html.parser')
+                artigos = soup.find_all(['article', 'div'], class_=re.compile(r'post|entry|edital'))
+                for art in artigos:
+                    tag_a = art.find('a')
+                    if not tag_a:
+                        continue
+                    nome = self.limpar_texto(tag_a.get_text(strip=True))
+                    href = tag_a.get('href')
+                    if not href or not href.startswith("http") or len(nome) < 5:
+                        continue
+                    dt = extrair_data_vencimento(nome) or extrair_data_vencimento_datetime(nome, href)
+                    doc = {
+                        "nome": nome,
+                        "titulo": nome,
+                        "link": href,
+                        "categoria": "Assistência Estudantil",
+                        "fonte": "UFERSA"
+                    }
+                    if dt:
+                        doc["data_vencimento"] = dt
+                    itens_totais.append(doc)
+            except Exception as e:
+                self.logger.warning(f"Erro ao coletar {url}: {e}")
+        return itens_totais
+
 
 MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
 MONGODB_DB = os.getenv("MONGODB_DB", "hub_estudantes")

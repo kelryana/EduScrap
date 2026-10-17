@@ -4,14 +4,18 @@ import os
 import subprocess
 import sys
 import re
+import json
 from datetime import datetime, timedelta
 
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Header, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
+BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+if BACKEND_DIR not in sys.path:
+    sys.path.insert(0, BACKEND_DIR)
 
-load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"))
+load_dotenv(os.path.join(BACKEND_DIR, "..", ".env"))
 
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO").upper(),
@@ -26,8 +30,23 @@ from api.auth import (
     generate_auth_token,
     decode_auth_token
 )
+from models import (
+    OportunidadeModel,
+    EditalModel,
+    VagaEstagioModel,
+    NoticiaModel,
+    EstatisticasPrazos,
+    UsuarioRegistroModel,
+    UsuarioLoginModel,
+    UsuarioRespostaModel
+)
+from mongo_database import MongoDatabase, get_mongo_database
 
-app = FastAPI(title="API TechHub UERN")
+app = FastAPI(
+    title="API EduScrap",
+    description="API RESTful oficial da plataforma EduScrap para agregação e consulta de oportunidades acadêmicas e editais.",
+    version="1.3"
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -51,6 +70,32 @@ def verificar_api_key(x_api_key: str = Header(default=None)):
             detail="Acesso negado: informe o cabeçalho X-API-Key válido.",
         )
     return True
+
+def verificar_admin(
+    authorization: str = Header(default=None),
+    x_api_key: str = Header(default=None)
+):
+    """
+    Validação de credencial de administrador conforme RNF03 e UC12.
+    Aceita chave administrativa X-API-Key ou token JWT de usuário com privilégio admin.
+    """
+    if x_api_key and (not API_KEY or x_api_key == API_KEY):
+        return {"tipo": "api_key", "is_admin": True, "nome": "Admin (API Key)"}
+    if authorization:
+        try:
+            usuario = obter_usuario_logado(authorization)
+            if usuario.get("is_admin", False) or usuario.get("role") == "admin":
+                return usuario
+        except Exception:
+            pass
+    # Se não houver API_KEY configurada em dev, permite fallback informativo
+    if not API_KEY and not authorization:
+        return {"tipo": "dev_default", "is_admin": True, "nome": "Admin Local"}
+    raise HTTPException(
+        status_code=403,
+        detail="Acesso restrito: credencial de Administrador requerida (UC12)."
+    )
+
 
 MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
 MONGODB_DB = os.getenv("MONGODB_DB", "hub_estudantes")
@@ -230,7 +275,111 @@ def enriquecer_doc(documento: dict, usuario: dict = None):
 # Rota de teste
 @app.get("/")
 def raiz():
-    return {"mensagem": "A API do TechHub está online! Acesse /docs para testar."}
+    return {
+        "mensagem": "A API do EduScrap está online! Acesse /docs para testar.",
+        "versao": "1.3",
+        "docs": "/docs"
+    }
+
+@app.get("/api/oportunidades")
+def listar_todas_oportunidades(
+    categoria: str = Query(None, description="Filtro por categoria (ex: estagio, bolsa, edital, noticia)"),
+    fonte: str = Query(None, description="Filtro por fonte oficial (ex: PRAE, PROEX, UFERSA, CIEE)"),
+    busca: str = Query(None, description="Termo para busca textual por palavra-chave"),
+    apenas_vigentes: bool = Query(False, description="Filtrar apenas certames com inscrições vigentes"),
+    pagina: int = Query(1, ge=1),
+    limite: int = Query(10, ge=1, le=100),
+    authorization: str = Header(default=None)
+):
+    """
+    UC01, UC02, UC03, UC04 & Figura 4:
+    Consulta unificada e consolidada de oportunidades com ordenação temporal, busca e filtros.
+    """
+    usuario = obter_usuario_opcional(authorization)
+    todas_colecoes = [
+        "vagas_estagio", "vagas_bolsa", "vagas_ufersa",
+        "vagas_ciee", "vagas_portal_uern", "editais", "vagas",
+        "noticias", "vagas_noticias", "oportunidades"
+    ]
+    nomes_existentes = set(db.list_collection_names())
+    colecoes_para_buscar = [c for c in todas_colecoes if c in nomes_existentes]
+
+    # Mapeamento opcional de categoria para coleções específicas
+    mapa_categorias = {
+        "estagio": ["vagas_estagio", "vagas_ciee", "vagas"],
+        "estagios": ["vagas_estagio", "vagas_ciee", "vagas"],
+        "bolsa": ["vagas_bolsa", "vagas_ufersa"],
+        "bolsas": ["vagas_bolsa", "vagas_ufersa"],
+        "edital": ["editais", "vagas_ufersa", "vagas_bolsa"],
+        "editais": ["editais", "vagas_ufersa", "vagas_bolsa"],
+        "noticia": ["noticias", "vagas_noticias"],
+        "noticias": ["noticias", "vagas_noticias"]
+    }
+    if categoria and categoria.lower() in mapa_categorias:
+        colecoes_para_buscar = [c for c in mapa_categorias[categoria.lower()] if c in nomes_existentes]
+
+    filtro_base = {}
+    if fonte:
+        filtro_base["fonte"] = {"$regex": re.escape(fonte), "$options": "i"}
+    if apenas_vigentes:
+        filtro_base["data_vencimento"] = {"$gte": datetime.now()}
+
+    documentos = []
+    links_vistos = set()
+
+    for col_name in colecoes_para_buscar:
+        try:
+            col = db[col_name]
+            f = dict(filtro_base)
+            if busca:
+                f["$or"] = [
+                    {"nome": {"$regex": re.escape(busca), "$options": "i"}},
+                    {"titulo": {"$regex": re.escape(busca), "$options": "i"}},
+                    {"descricao": {"$regex": re.escape(busca), "$options": "i"}},
+                    {"tags": {"$regex": re.escape(busca), "$options": "i"}}
+                ]
+
+            for doc in col.find(f).limit(limite * 5):
+                link = doc.get("link")
+                if link and link in links_vistos:
+                    continue
+                if link:
+                    links_vistos.add(link)
+
+                doc["_id"] = str(doc["_id"])
+                # Normaliza titulo/nome
+                if "titulo" not in doc and "nome" in doc:
+                    doc["titulo"] = doc["nome"]
+                doc = enriquecer_doc(doc, usuario)
+
+                if apenas_vigentes and doc.get("status_prazo") == "vencido":
+                    continue
+
+                documentos.append(doc)
+        except Exception as e:
+            logger.warning(f"Erro ao consultar coleção {col_name}: {e}")
+
+    # Ordenação: vigentes com prazo mais próximo primeiro, depois sem prazo, depois vencidos
+    def ordenar_chave(d):
+        v = d.get("data_vencimento")
+        if isinstance(v, datetime):
+            return (0 if v >= datetime.now() else 2, v)
+        return (1, datetime.max)
+
+    documentos.sort(key=ordenar_chave)
+    total = len(documentos)
+    inicio = (pagina - 1) * limite
+    fim = inicio + limite
+    itens_paginados = documentos[inicio:fim]
+
+    return {
+        "sucesso": True,
+        "pagina_atual": pagina,
+        "limite_por_pagina": limite,
+        "total_documentos": total,
+        "dados": itens_paginados
+    }
+
 
 @app.get("/api/estagios")
 def listar_estagios(
@@ -1418,6 +1567,100 @@ def acionar_todos_os_robos():
         return {"erro": detalhe_erro}
 
     return {"mensagem": "Varredura global concluída e normatizada com sucesso!"}
+
+
+# =====================================================================
+# Módulo de Governança Técnica e Painel Administrativo (UC11, UC12, RF12)
+# =====================================================================
+
+CONFIG_DIR = os.path.join(BACKEND_DIR, "..", "config")
+PATTERNS_FILE = os.path.join(CONFIG_DIR, "patterns.json")
+COURSE_MAPPING_FILE = os.path.join(CONFIG_DIR, "course_mapping.json")
+
+def _validar_url_segura(url: str) -> bool:
+    """
+    Mitigação de SSRF (Seção 16 do Documento):
+    Valida se a URL usa protocolo seguro http/https e não aponta para endereços internos restritos.
+    """
+    if not url or not isinstance(url, str):
+        return False
+    url_l = url.strip().lower()
+    if not (url_l.startswith("http://") or url_l.startswith("https://")):
+        return False
+    proibidos = ["localhost", "127.0.0.1", "0.0.0.0", "169.254.", "10.", "192.168."]
+    for p in proibidos:
+        if p in url_l:
+            return False
+    return True
+
+@app.get("/api/admin/regras")
+def obter_regras_extracao(admin: dict = Depends(verificar_admin)):
+    """UC12 / RF12: Consulta regras de extração (Regex e padrões) sem recompilar."""
+    try:
+        with open(PATTERNS_FILE, "r", encoding="utf-8") as f:
+            conteudo = json.load(f)
+        return {"sucesso": True, "regras": conteudo}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao ler regras: {e}")
+
+@app.put("/api/admin/regras")
+def atualizar_regras_extracao(payload: dict, admin: dict = Depends(verificar_admin)):
+    """UC12 / RF12: Atualiza regras de extração no disco para efeito imediato na próxima coleta."""
+    if not payload:
+        raise HTTPException(status_code=400, detail="Payload inválido")
+    try:
+        with open(PATTERNS_FILE, "w", encoding="utf-8") as f:
+            json.dump(payload, f, indent=2, ensure_ascii=False)
+        logger.info(f"Regras de extração atualizadas pelo administrador ({admin.get('nome', 'admin')}).")
+        return {"sucesso": True, "mensagem": "Regras atualizadas com sucesso! Válidas a partir da próxima coleta."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao gravar regras: {e}")
+
+@app.get("/api/admin/fontes")
+def listar_fontes_configuradas(admin: dict = Depends(verificar_admin)):
+    """UC12: Lista fontes cadastradas e seus parâmetros de varredura."""
+    from run_scrapers import SCRAPERS
+    return {
+        "sucesso": True,
+        "total_fontes": len(SCRAPERS),
+        "fontes": SCRAPERS
+    }
+
+@app.get("/api/admin/logs")
+def listar_logs_robos(admin: dict = Depends(verificar_admin)):
+    """UC11: Consulta logs isolados de cada robô de coleta."""
+    logs_dir = os.path.join(BACKEND_DIR, "..", "logs")
+    if not os.path.exists(logs_dir):
+        return {"sucesso": True, "logs": []}
+    arquivos = []
+    for nome in os.listdir(logs_dir):
+        if nome.endswith(".log"):
+            caminho = os.path.join(logs_dir, nome)
+            tamanho_kb = round(os.path.getsize(caminho) / 1024, 1)
+            mtime = datetime.fromtimestamp(os.path.getmtime(caminho)).strftime("%Y-%m-%d %H:%M:%S")
+            arquivos.append({
+                "arquivo": nome,
+                "tamanho_kb": tamanho_kb,
+                "ultima_modificacao": mtime
+            })
+    return {"sucesso": True, "logs": arquivos}
+
+@app.get("/api/admin/logs/{arquivo}")
+def visualizar_conteudo_log(arquivo: str, admin: dict = Depends(verificar_admin)):
+    """UC11: Exibe o conteúdo das últimas linhas do log do robô."""
+    if ".." in arquivo or "/" in arquivo or "\\" in arquivo:
+        raise HTTPException(status_code=400, detail="Nome de arquivo inválido.")
+    caminho = os.path.join(BACKEND_DIR, "..", "logs", arquivo)
+    if not os.path.exists(caminho):
+        raise HTTPException(status_code=404, detail="Arquivo de log não encontrado.")
+    try:
+        with open(caminho, "r", encoding="utf-8", errors="replace") as f:
+            linhas = f.readlines()
+        ultimas_linhas = "".join(linhas[-200:])
+        return {"sucesso": True, "arquivo": arquivo, "linhas": ultimas_linhas}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao ler log: {e}")
+
 
 
 if __name__ == "__main__":

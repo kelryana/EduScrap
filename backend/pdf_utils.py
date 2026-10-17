@@ -164,6 +164,9 @@ def extrair_data_de_texto(texto: str) -> Optional[str]:
 
         # Padrão 6: Data simples isolada (menos prioritário)
         (r"\b(\d{1,2})/(\d{1,2})/(\d{4})\b", "normal"),
+
+        # Padrão 7: Formato ISO (YYYY/MM/DD, YYYY-MM-DD, YYYY.MM.DD)
+        (r"\b(\d{4})[/\.-](\d{1,2})[/\.-](\d{1,2})\b", "iso"),
     ]
 
     for padrao, tipo in padroes:
@@ -197,6 +200,11 @@ def extrair_data_de_texto(texto: str) -> Optional[str]:
                     dia, mes, ano = int(grupos[0]), int(grupos[1]), int(grupos[2])
                     
                     ano_completo = 2000 + ano if ano < 50 else 1900 + ano
+                except:
+                    continue
+            elif tipo == "iso":
+                try:
+                    ano, mes, dia = int(grupos[0]), int(grupos[1]), int(grupos[2])
                 except:
                     continue
             else:

@@ -27,7 +27,7 @@ class RegexEngine:
         """Carrega padrões padrão do sistema"""
         return {
             'dates': {
-                'br_full': r'\d{1,2}\s+de\s+(janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)\s+de\s+\d{4}',
+                'br_full': r'\d{1,2}\s+de\s+(?:janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)\s+de\s+\d{4}',
                 'br_numeric': r'\d{1,2}/\d{1,2}/\d{4}',
                 'iso': r'\d{4}-\d{2}-\d{2}'
             },

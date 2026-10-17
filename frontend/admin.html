@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduScrap - Painel Administrativo de Governança Técnica</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="theme.js?v=20261012_v2"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+              display: ['"Space Grotesk"', 'sans-serif'],
+            },
+            colors: {
+              brand: {
+                orange: '#FF5C00',
+                'orange-hover': '#E05000',
+                yellow: '#FACC15',
+                dark: '#0F172A',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <link rel="stylesheet" href="style.css?v=20261014_v9">
+</head>
+<body class="bg-[#FAFBFD] dark:bg-slate-900 text-brand-dark dark:text-slate-100 min-h-screen font-sans antialiased p-4 md:p-8">
+
+    <header class="max-w-7xl mx-auto flex flex-wrap items-center justify-between pb-6 mb-8 border-b-2 border-slate-900 dark:border-slate-700">
+        <div class="flex items-center space-x-4">
+            <a href="index.html">
+                <img src="assets/logo.png" data-logo-light="assets/logo.png" data-logo-dark="assets/logo_temaescuro.png" alt="EduScrap Logo" class="h-12 w-auto">
+            </a>
+            <div>
+                <h1 class="text-2xl font-black font-display tracking-tight text-slate-900 dark:text-white">Painel de Governança Técnica</h1>
+                <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold">Administração de Scrapers, Regras Regex e Logs (UC11 / UC12)</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3 mt-4 sm:mt-0">
+            <button onclick="alternarTema()" class="px-3.5 py-2 rounded-xl border-2 border-slate-900 dark:border-slate-600 bg-white dark:bg-slate-800 font-bold text-xs flex items-center space-x-2 shadow-sm">
+                <i class="ph ph-moon-stars text-base"></i>
+                <span>Tema</span>
+            </button>
+            <a href="index.html" class="px-4 py-2 rounded-xl border-2 border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold text-xs flex items-center space-x-1.5 hover:bg-slate-50 transition-colors">
+                <i class="ph ph-arrow-left font-bold"></i>
+                <span>Voltar ao Portal</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto space-y-8">
+        
+        <!-- Notificação de status -->
+        <div id="status-alerta" class="hidden p-4 rounded-xl border-2 font-bold text-sm"></div>
+
+        <!-- Seção 1: Fontes Oficiais e Robôs de Coleta -->
+        <section class="bg-white dark:bg-slate-800 border-2 border-slate-900 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <div>
+                    <h2 class="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="ph ph-robot text-brand-orange text-2xl"></i>
+                        <span>Fontes e Robôs Cadastrados (UC10)</span>
+                    </h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">Fontes multi-worker orquestradas pelo ScraperRunner</p>
+                </div>
+                <button onclick="carregarFontes()" class="px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-xl border-2 border-slate-900 flex items-center gap-2">
+                    <i class="ph ph-arrows-clockwise text-base"></i>
+                    <span>Atualizar Lista</span>
+                </button>
+            </div>
+
+            <div id="grid-fontes" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <p class="text-sm text-slate-500 col-span-full">Carregando fontes...</p>
+            </div>
+        </section>
+
+        <!-- Seção 2: Editor de Regras de Extração e Padrões Regex (UC12 / RF12) -->
+        <section class="bg-white dark:bg-slate-800 border-2 border-slate-900 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+                <div>
+                    <h2 class="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="ph ph-code text-amber-500 text-2xl"></i>
+                        <span>Regras de Extração e Regex Dinâmicas (UC12 / RF12)</span>
+                    </h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">Ajuste os seletores e expressões regulares sem recompilar a aplicação</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="carregarRegras()" class="px-3.5 py-2 bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-xl border-2 border-slate-900 flex items-center gap-1.5">
+                        <i class="ph ph-arrow-counter-clockwise"></i>
+                        <span>Recarregar</span>
+                    </button>
+                    <button onclick="salvarRegras()" class="px-5 py-2 bg-brand-orange hover:bg-brand-orange-hover text-white text-xs font-black rounded-xl border-2 border-slate-900 shadow-sm flex items-center gap-1.5">
+                        <i class="ph ph-floppy-disk text-base"></i>
+                        <span>Salvar Regras (patterns.json)</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <label class="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">Configuração JSON de Expressões:</label>
+                <textarea id="editor-regras" rows="12" class="w-full p-4 font-mono text-xs bg-slate-950 text-emerald-400 border-2 border-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-orange" spellcheck="false"></textarea>
+            </div>
+        </section>
+
+        <!-- Seção 3: Monitor de Logs Isolados por Robô (UC11) -->
+        <section class="bg-white dark:bg-slate-800 border-2 border-slate-900 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+                <div>
+                    <h2 class="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="ph ph-file-text text-sky-500 text-2xl"></i>
+                        <span>Monitor de Logs Isolados por Robô (UC11)</span>
+                    </h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">Histórico e diagnóstico de sucesso/falha individual por fonte</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <select id="seletor-log" onchange="lerLogSelecionado()" class="px-3.5 py-2 rounded-xl border-2 border-slate-900 dark:border-slate-600 bg-white dark:bg-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200">
+                        <option value="">Selecione um arquivo de log...</option>
+                    </select>
+                    <button onclick="carregarListaLogs()" class="px-3.5 py-2 bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-xl border-2 border-slate-900">
+                        <i class="ph ph-arrows-clockwise"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="relative">
+                <pre id="visualizador-log" class="p-4 h-64 overflow-y-auto font-mono text-xs bg-slate-950 text-slate-300 border-2 border-slate-900 rounded-xl whitespace-pre-wrap">Selecione um arquivo de log acima para inspecionar.</pre>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const API_URL = "http://localhost:8000/api";
+
+        function exibirAlerta(msg, tipo = "sucesso") {
+            const el = document.getElementById("status-alerta");
+            el.className = tipo === "sucesso"
+                ? "p-4 rounded-xl border-2 border-emerald-900 bg-emerald-50 text-emerald-800 font-bold text-sm block"
+                : "p-4 rounded-xl border-2 border-red-900 bg-red-50 text-red-800 font-bold text-sm block";
+            el.innerText = msg;
+            setTimeout(() => { el.className = "hidden"; }, 5000);
+        }
+
+        async function carregarFontes() {
+            const grid = document.getElementById("grid-fontes");
+            try {
+                const res = await fetch(`${API_URL}/admin/fontes`);
+                const data = await res.json();
+                if (!data.fontes) throw new Error("Erro ao carregar fontes");
+
+                grid.innerHTML = Object.entries(data.fontes).map(([chave, info]) => `
+                    <div class="p-4 border-2 border-slate-900 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900/60 flex flex-col justify-between">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="text-2xl">${info.icone || '🌐'}</span>
+                            <div>
+                                <h3 class="font-black text-sm text-slate-900 dark:text-white">${info.nome}</h3>
+                                <span class="text-[10px] font-mono font-bold text-slate-500 uppercase">Coleção: ${info.colecao}</span>
+                            </div>
+                        </div>
+                        <div class="text-xs text-slate-600 dark:text-slate-400 font-mono truncate mb-3">
+                            Script: ${info.script}
+                        </div>
+                        <div class="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-700 text-xs">
+                            <span class="inline-flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Conectado
+                            </span>
+                            <span class="font-bold text-slate-400 text-[11px]">ID: ${chave}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                grid.innerHTML = `<p class="text-xs text-red-500 font-bold">Erro ao carregar fontes da API: ${e.message}</p>`;
+            }
+        }
+
+        async function carregarRegras() {
+            const textarea = document.getElementById("editor-regras");
+            try {
+                const res = await fetch(`${API_URL}/admin/regras`);
+                const data = await res.json();
+                if (data.regras) {
+                    textarea.value = JSON.stringify(data.regras, null, 2);
+                }
+            } catch (e) {
+                exibirAlerta("Erro ao carregar regras: " + e.message, "erro");
+            }
+        }
+
+        async function salvarRegras() {
+            const textarea = document.getElementById("editor-regras");
+            try {
+                const json = JSON.parse(textarea.value);
+                const res = await fetch(`${API_URL}/admin/regras`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(json)
+                });
+                const data = await res.json();
+                if (res.ok && data.sucesso) {
+                    exibirAlerta("Regras salvas com sucesso! Efeito imediato na próxima coleta (sem recompilar).", "sucesso");
+                } else {
+                    throw new Error(data.detail || "Erro na gravação");
+                }
+            } catch (e) {
+                exibirAlerta("Erro ao salvar regras: " + e.message, "erro");
+            }
+        }
+
+        async function carregarListaLogs() {
+            const select = document.getElementById("seletor-log");
+            try {
+                const res = await fetch(`${API_URL}/admin/logs`);
+                const data = await res.json();
+                select.innerHTML = '<option value="">Selecione um arquivo de log...</option>' +
+                    (data.logs || []).map(l => `<option value="${l.arquivo}">${l.arquivo} (${l.tamanho_kb} KB)</option>`).join('');
+            } catch (e) {
+                console.error("Erro ao listar logs", e);
+            }
+        }
+
+        async function lerLogSelecionado() {
+            const select = document.getElementById("seletor-log");
+            const visualizador = document.getElementById("visualizador-log");
+            const arquivo = select.value;
+            if (!arquivo) return;
+
+            visualizador.innerText = "Carregando linhas do log...";
+            try {
+                const res = await fetch(`${API_URL}/admin/logs/${arquivo}`);
+                const data = await res.json();
+                visualizador.innerText = data.linhas || "Log vazio.";
+            } catch (e) {
+                visualizador.innerText = "Erro ao ler arquivo de log: " + e.message;
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            carregarFontes();
+            carregarRegras();
+            carregarListaLogs();
+        });
+    </script>
+</body>
+</html>
