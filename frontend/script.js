@@ -987,15 +987,17 @@ function renderizarCards(listaDeVagas) {
                     </div>
                 `;
             } else {
-                const complemento = dias === 0 ? " (último dia!)" : ` (${dias}d restantes)`;
+                const [dl, ml, al] = vaga.data_vencimento_formatada.split("/").map(Number);
+                const limiteISO = new Date(al, ml - 1, dl, 23, 59, 59).toISOString();
                 badgeStatusHTML = `
                     <div class="badge-status badge-status-vigente" title="Inscrições abertas até ${vaga.data_vencimento_formatada}">
-                        <i class="ph-bold ph-check-circle"></i>
-                        <span>Até ${vaga.data_vencimento_formatada}${complemento}</span>
+                        <i class="ph-bold ph-timer"></i>
+                        <span class="contador-prazo" data-limite="${limiteISO}">${formatarContagemRegressiva(limiteISO)}</span>
                     </div>
                 `;
             }
         }
+
 
         const classeVencido = status === "vencido" ? "card-vencido" : "";
         const tituloBruto = vaga.titulo || vaga.nome || vaga.nome_completo || 'Oportunidade';
@@ -2266,3 +2268,24 @@ document.addEventListener('keydown', function(event) {
         }
     }
 });
+
+
+/* ============================================================
+   Contador regressivo do prazo (RN03/RN09)
+   ============================================================ */
+function formatarContagemRegressiva(limiteISO) {
+    const restante = new Date(limiteISO).getTime() - Date.now();
+    if (isNaN(restante)) return '';
+    if (restante <= 0) return 'Encerrado';
+    const d = Math.floor(restante / 86400000);
+    const h = Math.floor((restante % 86400000) / 3600000);
+    const m = Math.floor((restante % 3600000) / 60000);
+    return d > 0 ? `Encerra em ${d}d ${h}h ${m}m` : `Encerra em ${h}h ${m}m`;
+}
+
+function atualizarContadores() {
+    document.querySelectorAll('.contador-prazo[data-limite]').forEach(el => {
+        el.textContent = formatarContagemRegressiva(el.dataset.limite);
+    });
+}
+setInterval(atualizarContadores, 60000);

@@ -1,4 +1,3 @@
-
 {
   "dates": {
     "br_full": "\\d{1,2}\\s+de\\s+(?:janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)\\s+de\\s+\\d{4}",
@@ -10,7 +9,15 @@
     "title": "(?<=\"|\").*?(?=\")"
   },
   "status_keywords": {
-    "open": ["inscrições abertas", "período de inscrição", "prazo"],
-    "closed": ["encerrado", "prazo encerrado", "inscrições encerradas"]
+    "open": [
+      "inscrições abertas",
+      "período de inscrição",
+      "prazo"
+    ],
+    "closed": [
+      "encerrado",
+      "prazo encerrado",
+      "inscrições encerradas"
+    ]
   }
 }

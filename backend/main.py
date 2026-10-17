@@ -12,10 +12,13 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
 import pyotp
-from pdf_utils import obter_snapshot_gridfs
 BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
 if BACKEND_DIR not in sys.path:
     sys.path.insert(0, BACKEND_DIR)
+PROJECT_ROOT_DIR = os.path.abspath(os.path.join(BACKEND_DIR, ".."))
+if PROJECT_ROOT_DIR not in sys.path:
+    sys.path.append(PROJECT_ROOT_DIR)
+from pdf_utils import obter_snapshot_gridfs
 
 load_dotenv(os.path.join(BACKEND_DIR, "..", ".env"))
 
