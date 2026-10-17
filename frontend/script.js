@@ -640,8 +640,23 @@ async function carregarFeedPersonalizado() {
 
 function destacarBotaoAtivo(idBotao) {
     document.querySelectorAll('.tab-origem-btn, .btn-filtro-aluno').forEach(btn => btn.classList.remove('ativo'));
+    const seletorFonte = document.getElementById('seletor-fonte-institucional');
+
     const btn = document.getElementById(idBotao);
-    if (btn) btn.classList.add('ativo');
+    if (btn) {
+        btn.classList.add('ativo');
+        if (seletorFonte) {
+            seletorFonte.classList.remove('ativo');
+            seletorFonte.value = "";
+        }
+    } else if (seletorFonte) {
+        const valorTipo = idBotao.replace(/^btn-/, '');
+        const optionExiste = Array.from(seletorFonte.options).some(opt => opt.value === valorTipo);
+        if (optionExiste) {
+            seletorFonte.value = valorTipo;
+            seletorFonte.classList.add('ativo');
+        }
+    }
 
     if (idBotao === 'btn-analises' || idBotao === 'btn-portal-usuario' || idBotao === 'btn-abrir-sidebar-filtros') {
         alternarExibicaoFiltroVigentes(false);
@@ -887,7 +902,7 @@ async function carregarDados(tipo, novaPagina = 1) {
 
     const container = document.getElementById('container-vagas');
     container.style.display = 'grid';
-    container.innerHTML = '<p class="carregando">Buscando oportunidades oficiais...</p>';
+    renderizarSkeletons(6);
 
     try {
         let url = `${API_URL}/${tipo}?pagina=${paginaAtual}&limite=6`;
@@ -1075,6 +1090,12 @@ function renderizarCards(listaDeVagas) {
                         title="${ehFavorito ? 'Remover dos favoritos' : 'Salvar oportunidade'}">
                         <i class="${ehFavorito ? 'ph-fill ph-star' : 'ph-bold ph-star'}"></i>
                         <span>${ehFavorito ? 'Salvo' : 'Salvar'}</span>
+                    </button>
+
+                    <button class="btn-compartilhar-card"
+                        onclick="compartilharLinkEdital('${escaparHTML(tituloFinal).replace(/'/g, "\\'")}', '${escaparHTML(linkDestino).replace(/'/g, "\\'")}', event)"
+                        title="Copiar link para compartilhar">
+                        <i class="ph-bold ph-share-network"></i>
                     </button>
                 </div>
             </div>
@@ -2296,3 +2317,60 @@ function atualizarContadores() {
     });
 }
 setInterval(atualizarContadores, 60000);
+
+
+/* ==============================================================================
+   FUNÇÕES DE SKELETON E COMPARTILHAMENTO RÁPIDO (Micro-Interactions)
+   ============================================================================== */
+
+function renderizarSkeletons(quantidade = 6) {
+    const container = document.getElementById('container-vagas');
+    if (!container) return;
+
+    let skeletonsHTML = '';
+    for (let i = 0; i < quantidade; i++) {
+        skeletonsHTML += `
+            <div class="skeleton-card" aria-hidden="true">
+                <div>
+                    <div class="skeleton-box skeleton-badge"></div>
+                    <div class="skeleton-box skeleton-title"></div>
+                    <div class="skeleton-box skeleton-subtitle"></div>
+                    <div class="skeleton-box skeleton-meta"></div>
+                </div>
+                <div class="skeleton-actions">
+                    <div class="skeleton-box skeleton-btn-main"></div>
+                    <div class="skeleton-box skeleton-btn-side"></div>
+                    <div class="skeleton-box skeleton-btn-side"></div>
+                </div>
+            </div>
+        `;
+    }
+    container.innerHTML = skeletonsHTML;
+}
+
+async function compartilharLinkEdital(titulo, link, event) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+
+    const urlParaCopiar = link && link !== '#' ? link : window.location.href;
+
+    try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(urlParaCopiar);
+            mostrarToast("Link do edital copiado para a área de transferência!", "sucesso");
+        } else {
+            // Fallback para navegadores legados
+            const inputTemp = document.createElement("input");
+            inputTemp.value = urlParaCopiar;
+            document.body.appendChild(inputTemp);
+            inputTemp.select();
+            document.execCommand("copy");
+            document.body.removeChild(inputTemp);
+            mostrarToast("Link copiado!", "sucesso");
+        }
+    } catch (err) {
+        mostrarToast("Não foi possível copiar o link automaticamente.", "info");
+    }
+}

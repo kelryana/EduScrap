@@ -49,7 +49,7 @@
       }
     </script>
 
-    <link rel="stylesheet" href="style.css?v=20261017_v2">
+    <link rel="stylesheet" href="style.css?v=20261017_v7">
 </head>
 <body class="bg-[#FAFBFD] text-brand-dark min-h-screen bg-grid-pattern font-sans antialiased selection:bg-brand-yellow selection:text-brand-dark">
 
@@ -235,51 +235,37 @@
             </button>
         </div>
 
-        <!-- BARRA DE CATEGORIAS (SEGMENTED CATEGORY TABS) -->
+        <!-- BARRA DE CATEGORIAS ORGANIZADA (Hick's Law & Neobrutalism Design) -->
         <div class="categoria-tabs-wrapper">
             <div class="categoria-tabs-scroll" role="tablist">
+                <!-- 1. Categorias Principais de Oportunidades -->
                 <button id="btn-estagios" class="tab-origem-btn ativo" onclick="carregarDados('estagios')">
                     <i class="ph-bold ph-student"></i> <span>Estágios (PRAE)</span>
                 </button>
                 <button id="btn-bolsas" class="tab-origem-btn" onclick="carregarDados('bolsas')">
                     <i class="ph-bold ph-coins"></i> <span>Bolsas (PROEX)</span>
                 </button>
-                <button id="btn-ufersa" class="tab-origem-btn" onclick="carregarDados('ufersa')">
-                    <i class="ph-bold ph-buildings"></i> <span>Editais UFERSA</span>
-                </button>
-                <button id="btn-noticias-ufersa" class="tab-origem-btn" onclick="carregarDados('noticias-ufersa')">
-                    <i class="ph-bold ph-megaphone"></i> <span>Notícias UFERSA</span>
-                </button>
-                <button id="btn-ciee" class="tab-origem-btn" onclick="carregarDados('ciee')">
-                    <i class="ph-bold ph-briefcase"></i> <span>Vagas CIEE</span>
-                </button>
-                <button id="btn-mprn" class="tab-origem-btn" onclick="carregarDados('mprn')">
-                    <i class="ph-bold ph-scales"></i> <span>Estágios MPRN</span>
-                </button>
-                <button id="btn-ifrn" class="tab-origem-btn" onclick="carregarDados('ifrn')">
-                    <i class="ph-bold ph-tree-evergreen"></i> <span>IFRN</span>
-                </button>
-                <button id="btn-iel" class="tab-origem-btn" onclick="carregarDados('iel')">
-                    <i class="ph-bold ph-factory"></i> <span>IEL / FIERN</span>
-                </button>
-                <button id="btn-dom" class="tab-origem-btn" onclick="carregarDados('dom')">
-                    <i class="ph-bold ph-newspaper-clipping"></i> <span>DOM Mossoró</span>
-                </button>
-                <button id="btn-portal_uern" class="tab-origem-btn" onclick="carregarDados('portal_uern')">
-                    <i class="ph-bold ph-graduation-cap"></i> <span>Portal UERN</span>
-                </button>
                 <button id="btn-cursos-bolsas" class="tab-origem-btn" onclick="carregarDados('cursos-bolsas')">
-                    <i class="ph-bold ph-book-open"></i> <span>Cursos & Bolsas</span>
+                    <i class="ph-bold ph-book-open"></i> <span>Cursos & Capacitação</span>
                 </button>
                 <button id="btn-noticias" class="tab-origem-btn" onclick="carregarDados('noticias')">
-                    <i class="ph-bold ph-newspaper"></i> <span>Notícias</span>
+                    <i class="ph-bold ph-newspaper"></i> <span>Notícias Universitárias</span>
                 </button>
-                <button id="btn-analises" class="tab-origem-btn" onclick="carregarEstatisticas()">
-                    <i class="ph-bold ph-chart-bar"></i> <span>Indicadores</span>
-                </button>
-                <button id="btn-portal-usuario" class="tab-origem-btn" onclick="carregarPortalUsuario()">
-                    <i class="ph-bold ph-user-circle"></i> <span>Meu Perfil</span>
-                </button>
+
+                <!-- 2. Seletor de Instituições e Fontes Específicas (Elimina a rolagem infinita) -->
+                <div class="dropdown-fontes-wrapper">
+                    <select id="seletor-fonte-institucional" class="tab-origem-select" onchange="if(this.value) carregarDados(this.value)">
+                        <option value="" disabled selected>🏛️ Filtrar por Instituição / Órgão...</option>
+                        <option value="ufersa">🏛️ Editais UFERSA</option>
+                        <option value="noticias-ufersa">📢 Notícias UFERSA</option>
+                        <option value="ciee">💼 Vagas CIEE</option>
+                        <option value="mprn">⚖️ Estágios MPRN</option>
+                        <option value="ifrn">🌲 Editais IFRN</option>
+                        <option value="iel">🏭 Estágios IEL / FIERN</option>
+                        <option value="dom">📜 DOM Mossoró</option>
+                        <option value="portal_uern">🎓 Portal UERN Geral</option>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -496,7 +482,7 @@
         </div>
     </footer>
 
-    <script src="script.js?v=20261017_v3"></script>
+    <script src="script.js?v=20261017_v7"></script>
     <script>
         function scrollParaBusca() {
             const target = document.getElementById('area-oportunidades');
