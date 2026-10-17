@@ -142,3 +142,35 @@ def test_payload_usuario_nao_expoe_hash():
     assert "senha_hash" not in doc_sanitizado
     assert "senha" not in doc_sanitizado
     assert doc_sanitizado["email"] == "maria@uern.br"
+
+
+# ---------------------------------------------------------------------------
+# 6. Proteção Ativa Anti-SSRF em Downloads de Arquivos e PDFs (OWASP / Monney)
+# ---------------------------------------------------------------------------
+def test_validacao_anti_ssrf_em_downloads():
+    """Garante que a função baixar_pdf bloqueia IPs locais, cloud metadata e esquemas arbitrários."""
+    from backend.pdf_utils import validar_url_segura_ssrf
+
+    # Ataques clássicos de SSRF descritos nos artigos
+    urls_ataque = [
+        "http://169.254.169.254/latest/meta-data/iam/security-credentials/", # Cloud Metadata (AWS/GCP/Azure)
+        "http://127.0.0.1:8000/api/admin/regras",                           # Loopback interno
+        "http://localhost:6379",                                            # Redis interno
+        "http://10.0.0.5:27017",                                            # IP privado classe A
+        "http://192.168.1.1/admin",                                         # Roteador / IP privado classe C
+        "file:///etc/passwd",                                               # Leitura arbitrária de arquivo local
+        "gopher://127.0.0.1:25",                                            # Protocolo abusivo
+        "http://metadata.google.internal/computeMetadata/v1/"               # Cloud internal hostname
+    ]
+
+    for url in urls_ataque:
+        assert validar_url_segura_ssrf(url) is False, f"A URL maliciosa '{url}' deveria ter sido bloqueada pelo filtro Anti-SSRF!"
+
+    # URLs públicas legítimas devem ser aceitas normalmente
+    urls_legitimas = [
+        "https://portal.uern.br/editais/edital_01_2026.pdf",
+        "https://uern.br/prae/selecao.pdf",
+        "https://ufersa.edu.br/documentos/edital.pdf"
+    ]
+    for url in urls_legitimas:
+        assert validar_url_segura_ssrf(url) is True, f"A URL legítima '{url}' deveria ter sido aceita!"

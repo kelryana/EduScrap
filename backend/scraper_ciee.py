@@ -83,9 +83,15 @@ class ScraperCIEEHibrido:
             options.add_argument("--disable-gpu")
             options.add_argument("--window-size=1920,1080")
 
+            # Endurecimento de Segurança do Navegador Headless (Recomendações ASIA CCS '22 - Musch et al.)
+            # Desativa plugins legados, WebRTC e protocolos vulneráveis
             options.set_preference("general.useragent.override",
                 "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0")
             options.set_preference("permissions.default.image", 2)
+            options.set_preference("media.peerconnection.enabled", False) # Desativa WebRTC (evita vazamento de IP real)
+            options.set_preference("dom.serviceWorkers.enabled", False)   # Desativa ServiceWorkers maliciosos
+            options.set_preference("network.http.redirection-limit", 5)   # Limita saltos de redirecionamento HTTP
+            options.set_preference("security.fileuri.strict_origin_policy", True) # Bloqueia leitura de file:// arbitrário
         
             if GECKODRIVER_PATH and Path(GECKODRIVER_PATH).exists():
                 service = Service(GECKODRIVER_PATH)
