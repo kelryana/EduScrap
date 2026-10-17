@@ -1,0 +1,15 @@
+[Unit]
+Description=EduScrap - Orquestrador de Coleta de Scrapers (ScraperRunner)
+After=network.target docker.service
+
+[Service]
+Type=oneshot
+User=ana
+WorkingDirectory=/home/ana/projetos/EduScrap
+ExecStart=/home/ana/projetos/EduScrap/venv/bin/python /home/ana/projetos/EduScrap/run_scrapers.py
+TimeoutStartSec=600
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

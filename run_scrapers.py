@@ -227,6 +227,22 @@ class ScraperRunner:
         return resultados
 
 
+def matar_processos_chrome():
+    """
+    Elimina processos órfãos do Chrome e ChromeDriver após a coleta.
+    Suporta multiplataforma: Windows (taskkill) e Linux/macOS (pkill).
+    """
+    try:
+        if sys.platform == "win32":
+            subprocess.run(["taskkill", "/F", "/IM", "chrome.exe"], capture_output=True)
+            subprocess.run(["taskkill", "/F", "/IM", "chromedriver.exe"], capture_output=True)
+        else:
+            subprocess.run(["pkill", "-f", "chrome"], capture_output=True)
+            subprocess.run(["pkill", "-f", "chromedriver"], capture_output=True)
+    except Exception as e:
+        print(f"  ⚠️ Aviso ao limpar processos órfãos: {e}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="EduScrap - Orquestrador Paralelo de Coleta de Dados",
@@ -306,9 +322,11 @@ def main():
 
     tempo_total = round(time.time() - inicio_global, 1)
 
-
     sucessos = sum(1 for r in resultados if r["sucesso"])
     falhas = total - sucessos
+
+    # Elimina processos órfãos do Chrome e drivers após a coleta (multiplataforma)
+    matar_processos_chrome()
 
     print("\n" + "=" * 65)
     print("                  RESUMO DA OPERAÇÃO")

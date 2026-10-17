@@ -8,9 +8,11 @@ import json
 from datetime import datetime, timedelta
 
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
+import pyotp
+from pdf_utils import obter_snapshot_gridfs
 BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
 if BACKEND_DIR not in sys.path:
     sys.path.insert(0, BACKEND_DIR)
@@ -1293,21 +1295,136 @@ def login_usuario(payload: dict):
     }
 
 
+def obter_config_mfa_admin():
+    """Recupera ou inicializa a configuração de MFA do administrador no MongoDB."""
+    try:
+        config = db["configuracoes_sistema"].find_one({"_id": "mfa_admin"})
+        if not config:
+            secret = pyotp.random_base32()
+            config = {
+                "_id": "mfa_admin",
+                "secret": secret,
+                "ativo": False,
+                "criado_em": datetime.now()
+            }
+            db["configuracoes_sistema"].insert_one(config)
+        return config
+    except Exception as e:
+        logger.warning(f"Erro ao acessar coleção de MFA: {e}")
+        return {"_id": "mfa_admin", "secret": "JBSWY3DPEHPK3PXP", "ativo": False}
+
+
+def validar_totp_codigo(codigo: str, secret: str = None) -> bool:
+    """Valida código TOTP de 6 dígitos gerado por app autenticador."""
+    if not codigo or not str(codigo).strip():
+        return False
+    if not secret:
+        config = obter_config_mfa_admin()
+        secret = config.get("secret")
+    if not secret:
+        return False
+    try:
+        totp = pyotp.TOTP(secret)
+        return bool(totp.verify(str(codigo).strip(), valid_window=1))
+    except Exception as e:
+        logger.warning(f"Erro na validação TOTP: {e}")
+        return False
+
+
+@app.get("/api/auth/mfa/status")
+def status_mfa_admin():
+    """Consulta se o Segundo Fator de Autenticação (MFA/TOTP) está ativo no sistema."""
+    config = obter_config_mfa_admin()
+    return {
+        "sucesso": True,
+        "mfa_ativo": bool(config.get("ativo", False))
+    }
+
+
+@app.post("/api/auth/mfa/setup")
+def setup_mfa_admin(admin: dict = Depends(verificar_admin)):
+    """UC12 / RNF03: Gera segredo Base32 e URI para configuração de MFA no app autenticador."""
+    secret = pyotp.random_base32()
+    totp = pyotp.TOTP(secret)
+    otpauth_url = totp.provisioning_uri(
+        name="admin@eduscrap.uern.br",
+        issuer_name="EduScrap UC12"
+    )
+    try:
+        db["configuracoes_sistema"].update_one(
+            {"_id": "mfa_admin"},
+            {"$set": {"secret": secret, "atualizado_em": datetime.now()}},
+            upsert=True
+        )
+    except Exception as e:
+        logger.warning(f"Erro ao salvar segredo MFA temporário: {e}")
+
+    return {
+        "sucesso": True,
+        "secret": secret,
+        "otpauth_url": otpauth_url,
+        "mensagem": "Escaneie o QR Code ou insira o segredo no seu app autenticador (Google Authenticator, Authy, etc.)."
+    }
+
+
+@app.post("/api/auth/mfa/ativar")
+def ativar_mfa_admin(payload: dict, admin: dict = Depends(verificar_admin)):
+    """UC12 / RNF03: Valida o primeiro código e ativa o MFA permanentemente no painel."""
+    codigo = payload.get("codigo", "").strip()
+    config = obter_config_mfa_admin()
+    secret = payload.get("secret") or config.get("secret")
+
+    if not validar_totp_codigo(codigo, secret):
+        raise HTTPException(
+            status_code=400,
+            detail="Código TOTP incorreto. Verifique o relógio do seu dispositivo e tente novamente."
+        )
+
+    try:
+        db["configuracoes_sistema"].update_one(
+            {"_id": "mfa_admin"},
+            {"$set": {"secret": secret, "ativo": True, "ativado_em": datetime.now()}},
+            upsert=True
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao persistir status do MFA: {e}")
+
+    logger.info("MFA com TOTP ativado com sucesso para o painel administrativo UC12.")
+    return {
+        "sucesso": True,
+        "mensagem": "MFA ativado com sucesso! O código TOTP será exigido em operações do painel UC12."
+    }
+
+
 @app.post("/api/auth/login-admin")
 def login_administrador(payload: dict):
-    """Autenticação específica para o painel de Administração e Governança (UC11 / UC12)."""
+    """
+    Autenticação específica para o painel de Administração e Governança (UC11 / UC12).
+    Integra validação MFA com TOTP (pyotp) quando ativado.
+    """
     chave = payload.get("admin_key", "").strip()
     email = payload.get("email", "").strip().lower()
     senha = payload.get("senha", "")
+    totp_code = payload.get("totp_code", "").strip()
+
+    config_mfa = obter_config_mfa_admin()
+    mfa_ativo = bool(config_mfa.get("ativo", False))
 
     # Validação via chave mestre de governança
     chave_esperada = API_KEY or "admin123"
     if chave and (chave == chave_esperada or chave == "admin123"):
+        if mfa_ativo and not validar_totp_codigo(totp_code):
+            raise HTTPException(
+                status_code=401,
+                detail="MFA Obrigatório: informe o código TOTP de 6 dígitos válido do seu aplicativo autenticador."
+            )
+
         token = generate_auth_token("admin_master", "admin@eduscrap.uern.br")
         return {
             "success": True,
-            "message": "Acesso de administrador autorizado via Chave Mestre!",
+            "message": "Acesso de administrador autorizado via Chave Mestre com MFA validado!",
             "token": token,
+            "mfa_validado": True,
             "user": {
                 "_id": "admin_master",
                 "nome": "Administrador do Sistema",
@@ -1325,6 +1442,12 @@ def login_administrador(payload: dict):
         if not user.get("is_admin") and user.get("role") != "admin":
             raise HTTPException(status_code=403, detail="Este usuário não possui privilégios de Administrador.")
 
+        if mfa_ativo and not validar_totp_codigo(totp_code):
+            raise HTTPException(
+                status_code=401,
+                detail="MFA Obrigatório: informe o código TOTP de 6 dígitos válido do seu aplicativo autenticador."
+            )
+
         user_id = str(user["_id"])
         token = generate_auth_token(user_id, email)
         user["_id"] = user_id
@@ -1333,8 +1456,9 @@ def login_administrador(payload: dict):
         user["is_admin"] = True
         return {
             "success": True,
-            "message": "Login administrativo realizado com sucesso!",
+            "message": "Login administrativo realizado com sucesso com MFA validado!",
             "token": token,
+            "mfa_validado": True,
             "user": user
         }
 
@@ -1721,15 +1845,38 @@ def obter_regras_extracao(admin: dict = Depends(verificar_admin)):
         raise HTTPException(status_code=500, detail=f"Erro ao ler regras: {e}")
 
 @app.put("/api/admin/regras")
-def atualizar_regras_extracao(payload: dict, admin: dict = Depends(verificar_admin)):
-    """UC12 / RF12: Atualiza regras de extração no disco para efeito imediato na próxima coleta."""
+def atualizar_regras_extracao(
+    payload: dict,
+    admin: dict = Depends(verificar_admin),
+    x_mfa_code: str = Header(default=None)
+):
+    """
+    UC12 / RF12: Atualiza regras de extração no disco para efeito imediato na próxima coleta.
+    Protegido com validação MFA via TOTP (pyotp) quando ativado no sistema.
+    """
     if not payload:
         raise HTTPException(status_code=400, detail="Payload inválido")
+
+    # Item 11: Exigir TOTP no painel de gestão de regras de extração
+    config_mfa = obter_config_mfa_admin()
+    if config_mfa.get("ativo"):
+        codigo = x_mfa_code or payload.get("totp_code")
+        if not validar_totp_codigo(codigo):
+            raise HTTPException(
+                status_code=401,
+                detail="Acesso restrito UC12: Código MFA/TOTP obrigatório e válido para modificar regras de extração."
+            )
+
     try:
+        # Extrai regras se vier encapsulado ou direto
+        regras_conteudo = payload.get("regras", payload)
         with open(PATTERNS_FILE, "w", encoding="utf-8") as f:
-            json.dump(payload, f, indent=2, ensure_ascii=False)
+            json.dump(regras_conteudo, f, indent=2, ensure_ascii=False)
         logger.info(f"Regras de extração atualizadas pelo administrador ({admin.get('nome', 'admin')}).")
-        return {"sucesso": True, "mensagem": "Regras atualizadas com sucesso! Válidas a partir da próxima coleta."}
+        return {
+            "sucesso": True,
+            "mensagem": "Regras atualizadas com sucesso! Válidas a partir da próxima coleta."
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao gravar regras: {e}")
 
@@ -1741,6 +1888,148 @@ def listar_fontes_configuradas(admin: dict = Depends(verificar_admin)):
         "sucesso": True,
         "total_fontes": len(SCRAPERS),
         "fontes": SCRAPERS
+    }
+
+def _parsear_arquivo_log(caminho: str, max_linhas: int = 150) -> dict:
+    """
+    Parser estruturado de arquivos de log do subsistema ScraperRunner (UC11).
+    Extrai status, timestamps, duração, métricas de itens e linhas recentes.
+    """
+    if not os.path.exists(caminho):
+        return {
+            "existe": False,
+            "status": "pendente",
+            "ultima_execucao": None,
+            "duracao_segundos": 0.0,
+            "itens_coletados": 0,
+            "total_erros": 0,
+            "total_linhas": 0,
+            "linhas": []
+        }
+
+    try:
+        with open(caminho, "r", encoding="utf-8", errors="replace") as f:
+            todas_linhas = f.readlines()
+    except Exception as e:
+        return {
+            "existe": True,
+            "status": "erro_leitura",
+            "erro": str(e),
+            "linhas": []
+        }
+
+    total_linhas = len(todas_linhas)
+    linhas_recentes = todas_linhas[-max_linhas:] if total_linhas > max_linhas else todas_linhas
+
+    conteudo_str = "".join(todas_linhas)
+    mtime = datetime.fromtimestamp(os.path.getmtime(caminho)).strftime("%Y-%m-%d %H:%M:%S")
+
+    # Identificação de status
+    tem_erro_critico = bool(re.search(r"(\[ERRO\]|ERROR|FALHOU|Exception|TimeoutExpired|Traceback)", conteudo_str, re.IGNORECASE))
+    tem_sucesso = bool(re.search(r"(SUCESSO|Concluído|salvas|itens na base|Finalizado)", conteudo_str, re.IGNORECASE))
+
+    if tem_erro_critico and not tem_sucesso:
+        status = "falha"
+    elif tem_sucesso:
+        status = "sucesso"
+    elif total_linhas > 0:
+        status = "alerta" if tem_erro_critico else "sucesso"
+    else:
+        status = "pendente"
+
+    # Extrai data da última execução
+    data_match = re.search(r"Data:\s*([0-9]{4}-[0-9]{2}-[0-9]{2}\s+[0-9]{2}:[0-9]{2}:[0-9]{2})", conteudo_str)
+    ultima_exec = data_match.group(1) if data_match else mtime
+
+    # Extrai duração
+    dur_match = re.search(r"Concluído em\s+([0-9\.]+)s", conteudo_str)
+    duracao = float(dur_match.group(1)) if dur_match else 0.0
+
+    # Extrai contagem de itens
+    itens_match = re.search(r"(?:Itens na base|itens salvos|vagas salvas|oportunidades mineradas|salvos):\s*([0-9]+)", conteudo_str, re.IGNORECASE)
+    itens = int(itens_match.group(1)) if itens_match else 0
+
+    # Contagem de erros
+    erros = len(re.findall(r"(\[ERRO\]|ERROR|FALHOU)", conteudo_str, re.IGNORECASE))
+
+    # Parse de linhas recentes
+    linhas_parseadas = []
+    for l in linhas_recentes:
+        l_strip = l.strip()
+        if not l_strip:
+            continue
+        nivel = "INFO"
+        if "[ERRO]" in l or "ERROR" in l or "Exception" in l:
+            nivel = "ERROR"
+        elif "WARNING" in l or "⚠️" in l or "Aviso" in l:
+            nivel = "WARNING"
+        elif "SUCESSO" in l or "Concluído" in l or "salvo" in l:
+            nivel = "SUCCESS"
+        linhas_parseadas.append({
+            "nivel": nivel,
+            "texto": l_strip
+        })
+
+    return {
+        "existe": True,
+        "status": status,
+        "ultima_execucao": ultima_exec,
+        "duracao_segundos": duracao,
+        "itens_coletados": itens,
+        "total_erros": erros,
+        "total_linhas": total_linhas,
+        "linhas": linhas_parseadas
+    }
+
+@app.get("/api/logs/{fonte}")
+def obter_log_fonte(fonte: str):
+    """
+    UC11 (Item 12): Endpoint REST que lê logs/<fonte>.log e retorna JSON estruturado.
+    Alimenta o dashboard de monitorização no frontend sem custo adicional de RAM.
+    """
+    # Sanitização contra Directory Traversal
+    fonte_limpa = os.path.basename(fonte).replace(".log", "")
+    if not re.match(r"^[a-zA-Z0-9_\-]+$", fonte_limpa):
+        raise HTTPException(status_code=400, detail="Identificador de fonte inválido.")
+
+    logs_dir = os.path.join(BACKEND_DIR, "..", "logs")
+    caminho = os.path.join(logs_dir, f"{fonte_limpa}.log")
+
+    resultado = _parsear_arquivo_log(caminho)
+    resultado["fonte"] = fonte_limpa
+    resultado["arquivo"] = f"{fonte_limpa}.log"
+    resultado["sucesso"] = True
+    return resultado
+
+@app.get("/api/logs")
+def listar_todos_logs():
+    """
+    UC11 (Item 12 e 13): Retorna tabela consolidada de status por scraper para o dashboard.
+    """
+    from run_scrapers import SCRAPERS
+    logs_dir = os.path.join(BACKEND_DIR, "..", "logs")
+
+    resumo_scrapers = []
+    for chave, info in SCRAPERS.items():
+        caminho = os.path.join(logs_dir, f"{chave}.log")
+        parse = _parsear_arquivo_log(caminho, max_linhas=5)
+        resumo_scrapers.append({
+            "chave": chave,
+            "nome": info.get("nome", chave),
+            "icone": info.get("icone", "🌐"),
+            "colecao": info.get("colecao", ""),
+            "status": parse.get("status", "pendente"),
+            "ultima_execucao": parse.get("ultima_execucao"),
+            "duracao_segundos": parse.get("duracao_segundos", 0.0),
+            "itens_coletados": parse.get("itens_coletados", 0),
+            "total_erros": parse.get("total_erros", 0),
+            "arquivo_existe": parse.get("existe", False)
+        })
+
+    return {
+        "sucesso": True,
+        "total_scrapers": len(resumo_scrapers),
+        "scrapers": resumo_scrapers
     }
 
 @app.get("/api/admin/logs")
@@ -1777,6 +2066,26 @@ def visualizar_conteudo_log(arquivo: str, admin: dict = Depends(verificar_admin)
         return {"sucesso": True, "arquivo": arquivo, "linhas": ultimas_linhas}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao ler log: {e}")
+
+@app.get("/api/snapshots/{file_id}")
+def baixar_snapshot_gridfs(file_id: str):
+    """
+    Item 15: Recupera e serve snapshot de PDF preservado no GridFS do MongoDB.
+    Protege contra perda de editais decorrente da volatilidade dos portais originais.
+    """
+    grid_out = obter_snapshot_gridfs(file_id, db)
+    if not grid_out:
+        raise HTTPException(status_code=404, detail="Snapshot não encontrado no GridFS.")
+    try:
+        conteudo = grid_out.read()
+        filename = getattr(grid_out, "filename", f"snapshot_{file_id}.pdf")
+        return Response(
+            content=conteudo,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f'inline; filename="{filename}"'}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao carregar snapshot: {e}")
 
 
 

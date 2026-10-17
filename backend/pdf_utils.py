@@ -27,6 +27,69 @@ except ImportError:
     PDFMINER_AVAILABLE = False
     logger.warning("pdfminer.six não disponível. Instale com: pip install pdfminer.six")
 
+try:
+    import gridfs
+    from pymongo import MongoClient
+    GRIDFS_AVAILABLE = True
+except ImportError:
+    GRIDFS_AVAILABLE = False
+    logger.warning("gridfs/pymongo não disponível para snapshots.")
+
+def obter_gridfs(db=None):
+    """Retorna instância de GridFS conectada ao MongoDB."""
+    if not GRIDFS_AVAILABLE:
+        return None
+    if db is not None:
+        return gridfs.GridFS(db)
+    try:
+        uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
+        db_name = os.getenv("MONGODB_DB", "hub_estudantes")
+        client = MongoClient(uri, serverSelectionTimeoutMS=1000)
+        return gridfs.GridFS(client[db_name])
+    except Exception as e:
+        logger.debug(f"Não foi possível conectar ao GridFS: {e}")
+        return None
+
+def salvar_snapshot_gridfs(pdf_bytes: bytes, filename: str, url_origem: str = "", metadata: dict = None, db = None) -> Optional[str]:
+    """
+    Item 15: Salva snapshot do PDF baixado no GridFS do MongoDB.
+    Protege contra volatilidade e expiração dos portais originais.
+    Retorna o ID do arquivo salvo ou None em caso de falha.
+    """
+    try:
+        fs = obter_gridfs(db)
+        if not fs:
+            return None
+        meta = metadata.copy() if metadata else {}
+        meta["url_origem"] = url_origem
+        meta["data_captura"] = datetime.now()
+        meta["tamanho_bytes"] = len(pdf_bytes)
+
+        file_id = fs.put(
+            pdf_bytes,
+            filename=filename,
+            content_type="application/pdf",
+            **meta
+        )
+        logger.info(f"Snapshot PDF salvo no GridFS: {filename} (id={file_id})")
+        return str(file_id)
+    except Exception as e:
+        logger.warning(f"Falha ao salvar snapshot no GridFS ({filename}): {e}")
+        return None
+
+def obter_snapshot_gridfs(file_id: str, db = None):
+    """Recupera os bytes e metadados de um snapshot PDF do GridFS pelo ID."""
+    from bson import ObjectId
+    try:
+        fs = obter_gridfs(db)
+        if not fs:
+            return None
+        grid_out = fs.get(ObjectId(file_id))
+        return grid_out
+    except Exception as e:
+        logger.warning(f"Erro ao recuperar snapshot GridFS {file_id}: {e}")
+        return None
+
 
 _CACHE_PDF = {}
 _MAX_CACHE = 50  

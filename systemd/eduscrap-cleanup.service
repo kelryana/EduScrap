@@ -1,0 +1,15 @@
+[Unit]
+Description=EduScrap - Retenção e Limpeza de Snapshots GridFS (Item 16)
+After=network.target
+
+[Service]
+Type=oneshot
+User=ana
+WorkingDirectory=/home/ana/projetos/EduScrap
+ExecStart=/home/ana/projetos/EduScrap/venv/bin/python /home/ana/projetos/EduScrap/cleanup_snapshots.py --dias 365
+TimeoutStartSec=300
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -9,6 +9,10 @@ services:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     networks:
       - eduscrap-network
 
@@ -27,6 +31,36 @@ services:
       - MONGODB_DB=hub_estudantes
       - FASTAPI_HOST=0.0.0.0
       - FASTAPI_PORT=8000
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    depends_on:
+      - mongodb
+    networks:
+      - eduscrap-network
+
+  scraper-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: eduscrap-scraper-runner
+    command: python run_scrapers.py
+    restart: "on-failure:3"
+    volumes:
+      - .:/app
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/
+      - MONGODB_DB=hub_estudantes
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "run_scrapers.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     depends_on:
       - mongodb
     networks:
@@ -42,6 +76,10 @@ services:
       - "3000:3000"
     volumes:
       - ./frontend:/usr/share/app
+    deploy:
+      resources:
+        limits:
+          memory: 256M
     depends_on:
       - backend
     networks:

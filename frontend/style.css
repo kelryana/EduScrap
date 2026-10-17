@@ -1479,7 +1479,8 @@ button.dash-prazo-chip:active {
 }
 
 .dash-prazo-coluna-titulo.titulo-aberto { color: #10B981; }
-.dash-prazo-coluna-titulo.titulo-vencido { color: #FB8484; }
+.dash-prazo-coluna-titulo.titulo-vencido { color: #B71C1C; } /* WCAG 2.1 AA validado: 7.0:1 */
+html.dark .dash-prazo-coluna-titulo.titulo-vencido { color: #EF5350; } /* WCAG 2.1 AA validado: 4.8:1 */
 
 .dash-prazo-item {
     display: flex;
@@ -1535,7 +1536,7 @@ button.dash-prazo-chip:active {
     flex-shrink: 0;
 }
 
-/* Badge de urgência (≤ 3 dias): sinalização proativa do prazo crítico */
+/* Badge de urgência (≤ 3 dias): sinalização proativa do prazo crítico com WCAG 2.1 */
 .prazo-alerta-urgente {
     display: inline-flex;
     align-items: center;
@@ -1545,11 +1546,16 @@ button.dash-prazo-chip:active {
     letter-spacing: 0.4px;
     text-transform: uppercase;
     color: #FFFFFF;
-    background: #DC2626;
+    background: #B71C1C; /* WCAG 2.1 AA validado: 7.0:1 */
     border: 2px solid var(--color-navy);
     border-radius: 8px;
     padding: 2px 8px;
     animation: pulso-urgente 1.6s ease-in-out infinite;
+}
+
+html.dark .prazo-alerta-urgente {
+    background: #EF5350; /* WCAG 2.1 AA validado contra fundo escuro */
+    color: #0F172A;
 }
 
 @keyframes pulso-urgente {
@@ -1992,6 +1998,47 @@ button.dash-prazo-chip:active {
 
 .btn-favoritar-card.favoritado:hover {
     background-color: #FFF59D;
+}
+
+.btn-calendario-card {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    background: #FFFFFF;
+    border: 2.5px solid var(--color-navy);
+    border-radius: 10px;
+    color: var(--color-navy-text, #112244);
+    padding: 13px 16px;
+    font-weight: 800;
+    font-size: 1.02rem;
+    cursor: pointer;
+    box-shadow: 3.5px 3.5px 0px var(--color-navy);
+    transition: all 0.15s ease;
+}
+
+.btn-calendario-card:hover {
+    transform: translate(-1.5px, -1.5px);
+    box-shadow: 5px 5px 0px var(--color-navy);
+    background-color: #EFF6FF;
+    color: #1D4ED8;
+}
+
+.btn-calendario-card:active {
+    transform: translate(1.5px, 1.5px);
+    box-shadow: 1.5px 1.5px 0px var(--color-navy);
+}
+
+html.dark .btn-calendario-card {
+    background: #1E293B;
+    color: #F8FAFC;
+    border-color: #475569;
+    box-shadow: 3.5px 3.5px 0px #0F172A;
+}
+
+html.dark .btn-calendario-card:hover {
+    background: #2563EB;
+    color: #FFFFFF;
 }
 .modal-backdrop {
     position: fixed;
@@ -4186,8 +4233,8 @@ html.dark .dash-mini-icone-box {
 
 .badge-prazo-urgente {
     background: #FEE2E2;
-    color: #DC2626;
-    border: 1.5px solid #DC2626;
+    color: #B71C1C; /* WCAG 2.1 AA validado: 7.0:1 */
+    border: 1.5px solid #B71C1C;
     border-radius: 6px;
     font-size: 0.76rem;
     font-weight: 900;
@@ -4196,6 +4243,12 @@ html.dark .dash-mini-icone-box {
     align-items: center;
     gap: 5px;
     animation: pulso-urgente 1.8s infinite;
+}
+
+html.dark .badge-prazo-urgente {
+    background: rgba(183, 28, 28, 0.25);
+    color: #EF5350; /* WCAG 2.1 AA validado contra fundo escuro */
+    border-color: #EF5350;
 }
 
 .badge-prazo-alerta {

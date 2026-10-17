@@ -1029,6 +1029,13 @@ function renderizarCards(listaDeVagas) {
             textoAcao = 'Ver Curso / Inscrever-se';
         }
 
+        const btnCalendarioHTML = (vaga.data_vencimento || vaga.data_vencimento_formatada) ? `
+            <button class="btn-calendario-card" onclick="exportarCalendarioICS('${escaparHTML(tituloFinal).replace(/'/g, "\\'")}', '${vaga.data_vencimento_formatada || vaga.data_vencimento}', '${escaparHTML(linkDestino).replace(/'/g, "\\'")}', '${escaparHTML(vaga.fonte || 'Universidade').replace(/'/g, "\\'")}', event)" title="Adicionar prazo ao seu Calendário (.ics)">
+                <i class="ph-bold ph-calendar-plus"></i>
+                <span>Lembrete</span>
+            </button>
+        ` : '';
+
         const cardHTML = `
             <div class="card ${classeVencido}">
                 <div class="card-topo">
@@ -1055,6 +1062,8 @@ function renderizarCards(listaDeVagas) {
                         <i class="ph-bold ph-arrow-up-right"></i>
                     </a>
 
+                    ${btnCalendarioHTML}
+
                     <button id="fav-btn-${idStr}"
                         class="btn-favoritar-card ${ehFavorito ? 'favoritado' : ''}"
                         onclick="toggleFavorito('${idStr}', event)"
@@ -1067,6 +1076,80 @@ function renderizarCards(listaDeVagas) {
         `;
         container.innerHTML += cardHTML;
     });
+}
+
+function exportarCalendarioICS(titulo, dataVencimento, link, fonte, event) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    if (!dataVencimento || dataVencimento === 'null' || dataVencimento === 'undefined') {
+        alert("Este edital não possui data limite de inscrição definida.");
+        return;
+    }
+
+    let ano, mes, dia;
+    if (String(dataVencimento).includes('/')) {
+        const partes = dataVencimento.split('/');
+        dia = partes[0].padStart(2, '0');
+        mes = partes[1].padStart(2, '0');
+        ano = partes[2];
+    } else {
+        const dtMatch = String(dataVencimento).match(/(\d{4})-(\d{2})-(\d{2})/);
+        if (dtMatch) {
+            ano = dtMatch[1]; mes = dtMatch[2]; dia = dtMatch[3];
+        } else {
+            const dt = new Date(dataVencimento);
+            if (isNaN(dt.getTime())) {
+                alert("Data limite em formato não reconhecido.");
+                return;
+            }
+            ano = dt.getFullYear();
+            mes = String(dt.getMonth() + 1).padStart(2, '0');
+            dia = String(dt.getDate()).padStart(2, '0');
+        }
+    }
+
+    const dtStart = `${ano}${mes}${dia}T080000`;
+    const dtEnd = `${ano}${mes}${dia}T235959`;
+    const nowStr = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    const uid = `eduscrap-${Date.now()}@eduscrap.uern.br`;
+    const cleanTitle = (titulo || 'Edital').replace(/[\r\n]+/g, ' ').trim();
+    const cleanDesc = `Prazo final de inscrições para o certame: ${cleanTitle}\\nOrigem: ${fonte || 'Universidade'}\\nLink oficial: ${link || ''}`;
+
+    const icsLines = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//EduScrap//Calendario de Editais//PT-BR',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        'BEGIN:VEVENT',
+        `UID:${uid}`,
+        `DTSTAMP:${nowStr}`,
+        `DTSTART:${dtStart}`,
+        `DTEND:${dtEnd}`,
+        `SUMMARY:🚨 Prazo Limite: ${cleanTitle}`,
+        `DESCRIPTION:${cleanDesc}`,
+        `URL:${link || ''}`,
+        'STATUS:CONFIRMED',
+        'BEGIN:VALARM',
+        'TRIGGER:-P1D',
+        'ACTION:DISPLAY',
+        `DESCRIPTION:Lembrete: Inscrições encerram amanhã para ${cleanTitle}`,
+        'END:VALARM',
+        'END:VEVENT',
+        'END:VCALENDAR'
+    ];
+
+    const icsBlob = new Blob([icsLines.join('\r\n')], { type: 'text/calendar;charset=utf-8;' });
+    const downloadUrl = URL.createObjectURL(icsBlob);
+    const linkElem = document.createElement('a');
+    linkElem.href = downloadUrl;
+    linkElem.download = `edital_${cleanTitle.substring(0, 25).toLowerCase().replace(/[^a-z0-9]/g, '_')}.ics`;
+    document.body.appendChild(linkElem);
+    linkElem.click();
+    document.body.removeChild(linkElem);
+    URL.revokeObjectURL(downloadUrl);
 }
 
 function renderizarControlesPaginacao(atual, total, limite) {

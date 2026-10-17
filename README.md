@@ -7,8 +7,10 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-009688?style=for-the-badge&logo=fastapi&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-7.0+-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Pytest](https://img.shields.io/badge/Pytest-68%20Passed-0A9EDC?style=for-the-badge&logo=pytest&logoColor=white)
+![Pytest](https://img.shields.io/badge/Pytest-85%20Passed-0A9EDC?style=for-the-badge&logo=pytest&logoColor=white)
 ![UML](https://img.shields.io/badge/UML%20v1.3-100%25%20Conforme-brightgreen?style=for-the-badge)
+![MFA](https://img.shields.io/badge/MFA-TOTP%20pyotp-orange?style=for-the-badge)
+![WCAG](https://img.shields.io/badge/WCAG%202.1-AA%20Conforme-green?style=for-the-badge)
 ![Licença](https://img.shields.io/badge/Licen%C3%A7a-MIT-yellow?style=for-the-badge)
 
 <img width="1782" height="980" alt="Dashboard EduScrap" src="https://github.com/user-attachments/assets/0b8f6859-3fc3-409b-8c11-96956ca0a8de" />
@@ -215,29 +217,96 @@ python run_scrapers.py --serial
 | `DELETE`| `/api/favoritos/{id}`| `Bearer <token>` | Remove oportunidade dos favoritos |
 | `GET` | `/api/feed/personalizado`| `Bearer <token>` | Feed customizado por cursos de interesse |
 
-### Governança Técnica & Administração (UC11 / UC12)
+### Governança Técnica, Monitoramento e Logs (UC11 / UC12)
 | Método | Endpoint | Header / Payload | Descrição |
 |:---:|:---|:---|:---|
 | `GET` | `/api/admin/regras` | `X-API-Key` ou `Bearer <token>` | Consulta regras de extração do `patterns.json` |
-| `PUT` | `/api/admin/regras` | JSON com novos seletores/padrões | Atualiza regras em tempo de execução sem recompilar |
-| `GET` | `/api/admin/fontes` | `X-API-Key` ou `Bearer <token>` | Lista parâmetros e fontes ativas |
-| `GET` | `/api/admin/logs` | `X-API-Key` ou `Bearer <token>` | Lista arquivos de log dos robôs |
-| `GET` | `/api/admin/logs/{arquivo}`| `X-API-Key` ou `Bearer <token>` | Lê as últimas linhas do log do robô |
+| `PUT` | `/api/admin/regras` | `X-MFA-Code`, JSON com regras | Atualiza regras em tempo de execução com proteção MFA (TOTP) |
+| `GET` | `/api/admin/fontes` | `X-API-Key` ou `Bearer <token>` | Lista parâmetros e fontes ativas cadastradas |
+| `GET` | `/api/logs` | — | Dashboard consolidado com status, duração e itens de todos os scrapers |
+| `GET` | `/api/logs/{fonte}` | — | Parser estruturado em JSON do log individual do scraper (`logs/<fonte>.log`) |
+| `GET` | `/api/snapshots/{id}`| — | Download e visualização do snapshot do PDF armazenado no GridFS |
+| `GET` | `/api/auth/mfa/status`| — | Consulta se o Segundo Fator de Autenticação (MFA) está ativo |
+| `POST`| `/api/auth/mfa/setup` | `X-API-Key` ou `Bearer <token>` | Gera segredo Base32 e URI para app autenticador |
+| `POST`| `/api/auth/mfa/ativar`| `{ codigo, secret }` | Valida código TOTP e ativa o MFA permanentemente |
 
 ---
 
-## Testes Automatizados (Pytest)
+## Deploy e Infraestrutura Multiplataforma
 
-A suíte de testes contempla testes unitários, de integração com `mongomock`, testes de API e teste de desempenho (< 1s):
+### Compatibilidade: Desenvolvimento (Windows) vs. Implantação (Linux Mint)
+
+O EduScrap foi arquitetado para permitir desenvolvimento fluido em máquinas **Windows** e implantação estável em servidores ou estações **Linux Mint**:
+
+| Recurso / Componente | Ambiente de Desenvolvimento (Windows) | Ambiente de Implantação (Linux Mint) | Comportamento / Ação Técnica |
+|:---|:---:|:---:|:---|
+| **Eliminação de Zombies Chrome** | `taskkill /F /IM chrome.exe` | `pkill -f chrome` | **Multiplataforma automático:** `matar_processos_chrome()` detecta `sys.platform == "win32"` e executa o utilitário nativo correspondente. |
+| **Swappiness de Memória** | Gerenciado pelo `pagefile.sys` | `vm.swappiness=10` no `/etc/sysctl.conf` | `swappiness` é exclusivo do kernel Linux. No Windows, a memória virtual é tratada nativamente sem parâmetros adicionais. |
+| **Agendamento de Notificações e Limpeza** | Execução direta manual ou Agendador de Tarefas (`schtasks`) | **Systemd Timers** (`.service` + `.timer`) | No Linux Mint, os timers garantem dependência estrita (`After=eduscrap-scraper.service`). No Windows, os scripts são executados via `python notify_users.py` ou `schtasks`. |
+| **Docker Compose Limits** | Docker Desktop (WSL2) | Docker Engine (cgroups nativos) | No Windows, o WSL2 introduz uma leve camada de overhead. Se a máquina host possuir 8 GB de RAM, os limites de containers podem ser ajustados para 512 MB durante o desenvolvimento local. |
+
+### 1. Limites de Recursos no Docker Compose
+Para impedir que um container monopolize a memória RAM e cause travamento no sistema (OOM Killer), o `docker-compose.yml` define limites estritos e políticas de reinicialização resilientes:
+
+- **MongoDB 7.0:** Limite de 1 GB de RAM (`deploy.resources.limits.memory: 1G`).
+- **Backend FastAPI:** Limite de 1 GB de RAM (`deploy.resources.limits.memory: 1G`).
+- **ScraperRunner:** Limite de 1 GB de RAM, `restart: on-failure:3` (evita restart loops em caso de OOM) e `healthcheck` ativo monitorando o processo (`pgrep -f run_scrapers.py`).
+- **Frontend SPA:** Limite de 256 MB de RAM (`deploy.resources.limits.memory: 256M`).
 
 ```bash
-# Executar toda a suíte:
-pytest -v
-# ou:
-make test
+# Inicializar todo o ecossistema com limites aplicados:
+docker compose up -d --build
 ```
 
-**Resultado:** `68 passed, 0 failed`.
+### 2. Automação e Orquestração com Systemd Timers (Exclusivo Linux Mint)
+O EduScrap substitui o CRON tradicional por **Systemd Timers**, garantindo que notificações só rodam após a coleta terminar (`After=eduscrap-scraper.service`) com integração nativa ao `journalctl`:
+
+- `eduscrap-scraper.service`: Executa a coleta paralela `run_scrapers.py`.
+- `eduscrap-notify.service` e `eduscrap-notify.timer`: Script autônomo `notify_users.py` que varre editais com vencimento em até 3 dias ($\le$ 3 dias), consulta usuários interessados e dispara alertas por E-mail (SMTP) e Telegram Bot Webhook.
+- `eduscrap-cleanup.service` e `eduscrap-cleanup.timer`: Script de retenção `cleanup_snapshots.py` que remove snapshots de PDFs no GridFS com mais de 12 meses (365 dias), preservando o armazenamento SSD.
+
+```bash
+# Instalação automatizada das units do systemd (apenas no Linux):
+sudo ./systemd/install_systemd.sh
+```
+
+> **Nota para o Desenvolvimento no Windows:**
+> Como o `systemd` é exclusivo do ecossistema Linux, durante o desenvolvimento no Windows você pode testar as notificações e limpeza executando os scripts diretamente no terminal:
+> ```cmd
+> python notify_users.py
+> python cleanup_snapshots.py --dias 365
+> ```
+> Para agendamento local automatizado no Windows, use o Agendador de Tarefas (`schtasks /create /tn "EduScrapNotify" /tr "python notify_users.py" /sc daily /st 07:00`).
+
+### 3. Preservação de Documentos com Snapshots no GridFS
+Para proteger a plataforma contra a volatilidade e expiração de links nos portais institucionais externos, os scrapers armazenam os PDFs originais no **GridFS do MongoDB**:
+- Gravação via `gridfs.GridFS(db).put(pdf_bytes, filename=...)`;
+- Recuperação via endpoint streaming `/api/snapshots/{file_id}`;
+- Purga automática após 12 meses via script `cleanup_snapshots.py`.
+
+### 4. Acessibilidade e Contraste WCAG 2.1 AA
+O frontend adota paleta de cores estritamente validada pelo **WebAIM Contrast Checker** (mínimo 4.5:1):
+- Texto em fundo claro: `#B71C1C` (relação de contraste 7.0:1 contra branco).
+- Badges e textos em fundo escuro: `#EF5350` (relação de contraste 4.8:1 contra `#0F172A`).
+- Redundância visual: ícones de estado aliados a cores e textos explícitos (WCAG 1.4.1).
+
+### 5. Exportação para Calendário iCalendar (.ics)
+Todo edital com data limite possui o botão **"Adicionar ao Calendário"** no card, gerando arquivos `.ics` em formato padrão **RFC 5545** diretamente no navegador via `Blob`, permitindo sincronização instantânea com Google Agenda, Outlook e Apple Calendar com zero sobrecarga de RAM no backend.
+
+---
+
+## Testes Automatizados (Pytest) & CI
+
+A suíte de testes cobre 100% dos módulos do sistema, incluindo integração NoSQL, Regex, extração de PDFs, MFA (pyotp), logs REST, snapshots GridFS e testes de desempenho:
+
+```bash
+# Executar toda a suíte de testes:
+pytest -v
+# ou:
+./venv/bin/pytest tests/ -v
+```
+
+**Resultado:** `85 passed, 0 failed` (100% de sucesso).
 
 ---
 
@@ -249,21 +318,31 @@ EduScrap/
 │   ├── base_scraper.py           # Classe abstrata BaseScraper (RNF05 / Figura 11)
 │   ├── models.py                 # Modelos Pydantic de domínio (OportunidadeModel, etc.)
 │   ├── mongo_database.py         # Classe MongoDatabase para persistência NoSQL
-│   ├── main.py                   # API RESTful FastAPI (porta 8000)
+│   ├── main.py                   # API RESTful FastAPI (MFA, Logs, Snapshots, Oportunidades)
 │   ├── database_setup.py         # Criação de índices e validação de schema
 │   ├── scraper_*.py              # Classes e scripts dos robôs de coleta
-│   └── pdf_utils.py              # Extração de datas e prazos de PDFs oficiais
+│   └── pdf_utils.py              # Extração de datas e snapshots via GridFS
 ├── frontend/
 │   ├── index.html                # Interface principal do estudante (Dashboard SPA)
-│   ├── admin.html                # Painel de governança técnica (UC11 / UC12)
+│   ├── admin.html                # Painel de governança técnica (UC11 / UC12 / MFA)
 │   ├── login.html                # Autenticação e cadastro
-│   ├── script.js                 # Lógica do Donut Chart, filtros e consumo da API
+│   ├── script.js                 # Lógica de filtros, .ics e consumo da API
 │   ├── theme.js                  # Controle dinâmico de Modo Claro e Escuro
-│   └── style.css                 # Estilização com Tailwind e custom CSS
+│   └── style.css                 # Estilização Tailwind e regras de contraste WCAG 2.1
+├── systemd/
+│   ├── eduscrap-scraper.service  # Unit de coleta concorrente
+│   ├── eduscrap-notify.service   # Unit de notificação de prazos
+│   ├── eduscrap-notify.timer     # Timer de disparo de notificações
+│   ├── eduscrap-cleanup.service  # Unit de limpeza de snapshots GridFS
+│   ├── eduscrap-cleanup.timer    # Timer semanal de purga de retenção
+│   └── install_systemd.sh        # Script de instalação e ativação no SO
+├── notify_users.py               # Notificador autônomo multicanal (SMTP + Telegram)
+├── cleanup_snapshots.py          # Script de retenção de snapshots GridFS (> 12 meses)
 ├── config/
 │   ├── course_mapping.json       # Mapeamento oficial de 15 cursos e áreas
 │   └── patterns.json             # Regras compiladas de Regex para extração
 ├── tests/
+│   ├── test_novas_funcionalidades.py # Testes de MFA, logs, GridFS, .ics e notificações
 │   ├── test_fastapi_endpoints.py # Testes dos endpoints FastAPI e admin
 │   ├── test_performance.py       # Teste de latência do feed < 1s (RNF01)
 │   ├── test_auth_favoritos.py    # Testes de autenticação e favoritos
@@ -273,11 +352,11 @@ EduScrap/
 │   └── test_scraper.py           # Testes dos coletores HTML e PDF
 ├── Dockerfile.backend            # Container para a API FastAPI
 ├── Dockerfile.frontend           # Container para o Frontend SPA
-├── docker-compose.yml            # Orquestração de MongoDB + Backend + Frontend
-├── run_scrapers.py               # Orquestrador ScraperRunner multi-worker
+├── docker-compose.yml            # Orquestração com limites de RAM e healthcheck
+├── run_scrapers.py               # Orquestrador ScraperRunner com pkill zombie cleanup
 ├── start.sh                      # Script de inicialização automática local
 ├── Makefile                      # Atalhos úteis de desenvolvimento
-├── requirements.txt              # Dependências Python
+├── requirements.txt              # Dependências Python (com pyotp e responses)
 └── README.md                     # Este documento
 ```
 
