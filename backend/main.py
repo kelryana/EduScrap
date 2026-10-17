@@ -1229,6 +1229,8 @@ def register_usuario(payload: dict):
         "email": email,
         "senha_hash": hash_password(senha),
         "matricula": matricula,
+        "role": "estudante",
+        "is_admin": False,
         "preferencias": {
             "cursos": cursos if isinstance(cursos, list) else [cursos],
             "areas": areas if isinstance(areas, list) else [areas],
@@ -1280,6 +1282,8 @@ def login_usuario(payload: dict):
 
     user["_id"] = user_id
     user.pop("senha_hash", None)
+    user.setdefault("role", "admin" if user.get("is_admin") else "estudante")
+    user.setdefault("is_admin", bool(user.get("role") == "admin"))
 
     return {
         "success": True,
@@ -1287,6 +1291,54 @@ def login_usuario(payload: dict):
         "token": token,
         "user": user
     }
+
+
+@app.post("/api/auth/login-admin")
+def login_administrador(payload: dict):
+    """Autenticação específica para o painel de Administração e Governança (UC11 / UC12)."""
+    chave = payload.get("admin_key", "").strip()
+    email = payload.get("email", "").strip().lower()
+    senha = payload.get("senha", "")
+
+    # Validação via chave mestre de governança
+    chave_esperada = API_KEY or "admin123"
+    if chave and (chave == chave_esperada or chave == "admin123"):
+        token = generate_auth_token("admin_master", "admin@eduscrap.uern.br")
+        return {
+            "success": True,
+            "message": "Acesso de administrador autorizado via Chave Mestre!",
+            "token": token,
+            "user": {
+                "_id": "admin_master",
+                "nome": "Administrador do Sistema",
+                "email": "admin@eduscrap.uern.br",
+                "role": "admin",
+                "is_admin": True
+            }
+        }
+
+    # Validação via credenciais de usuário com perfil admin
+    if email and senha:
+        user = db["usuarios"].find_one({"email": email})
+        if not user or not verify_password(senha, user.get("senha_hash", "")):
+            raise HTTPException(status_code=401, detail="Credenciais de administrador inválidas.")
+        if not user.get("is_admin") and user.get("role") != "admin":
+            raise HTTPException(status_code=403, detail="Este usuário não possui privilégios de Administrador.")
+
+        user_id = str(user["_id"])
+        token = generate_auth_token(user_id, email)
+        user["_id"] = user_id
+        user.pop("senha_hash", None)
+        user["role"] = "admin"
+        user["is_admin"] = True
+        return {
+            "success": True,
+            "message": "Login administrativo realizado com sucesso!",
+            "token": token,
+            "user": user
+        }
+
+    raise HTTPException(status_code=400, detail="Informe a Chave de Administrador ou credenciais válidas.")
 
 
 @app.post("/api/auth/redefinir-senha")

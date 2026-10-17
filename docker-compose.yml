@@ -20,6 +20,8 @@ services:
     restart: always
     ports:
       - "8000:8000"
+    volumes:
+      - .:/app
     environment:
       - MONGODB_URI=mongodb://mongodb:27017/
       - MONGODB_DB=hub_estudantes
@@ -38,6 +40,8 @@ services:
     restart: always
     ports:
       - "3000:3000"
+    volumes:
+      - ./frontend:/usr/share/app
     depends_on:
       - backend
     networks:

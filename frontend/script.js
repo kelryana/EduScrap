@@ -76,6 +76,8 @@ function limparSessao() {
     localStorage.removeItem('eduscrap_token');
     localStorage.removeItem('eduscrap_user');
     usuarioAtual = null;
+    const navAdmin = document.getElementById('nav-link-admin');
+    if (navAdmin) navAdmin.style.display = 'none';
     atualizarInterfaceUsuario();
 }
 
@@ -104,6 +106,13 @@ function atualizarInterfaceUsuario() {
     const bannerUsuario = document.getElementById('banner-usuario');
     const bannerTexto = document.getElementById('banner-usuario-texto');
     const contadorFav = document.getElementById('contador-favoritos');
+    const navAdmin = document.getElementById('nav-link-admin');
+
+    // Link de Admin visível APENAS para contas com permissão de administrador
+    if (navAdmin) {
+        const isAdmin = Boolean(usuarioAtual && (usuarioAtual.role === 'admin' || usuarioAtual.is_admin === true));
+        navAdmin.style.display = isAdmin ? 'inline-block' : 'none';
+    }
 
     const totalFavs = (usuarioAtual && usuarioAtual.favoritos) ? usuarioAtual.favoritos.length : 0;
     if (contadorFav) contadorFav.innerText = totalFavs;

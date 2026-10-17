@@ -123,6 +123,15 @@
             letter-spacing: -1px;
         }
 
+        .brand-edu {
+            color: #0F172A;
+            transition: color 0.15s ease;
+        }
+
+        html.dark .brand-edu {
+            color: #FFFFFF !important;
+        }
+
         .brand-subtitle {
             margin-top: 10px;
             font-size: 1.18rem;
@@ -408,6 +417,43 @@
             margin-bottom: 24px;
         }
 
+        /* Mensagens de feedback ampliadas e confortáveis */
+        .login-card .msg-erro-memphis {
+            background: #FEF2F2;
+            border: 2.5px solid #EF4444;
+            border-radius: 14px;
+            color: #991B1B;
+            padding: 16px 20px;
+            font-size: 1.08rem;
+            font-weight: 700;
+            line-height: 1.55;
+            margin-bottom: 20px;
+        }
+
+        .login-card .msg-sucesso-memphis {
+            background: #F0FDF4;
+            border: 2.5px solid #22C55E;
+            border-radius: 14px;
+            color: #14532D;
+            padding: 16px 20px;
+            font-size: 1.08rem;
+            font-weight: 700;
+            line-height: 1.55;
+            margin-bottom: 20px;
+        }
+
+        html.dark .login-card .msg-erro-memphis {
+            background: #450A0A;
+            border-color: #EF4444;
+            color: #FEE2E2;
+        }
+
+        html.dark .login-card .msg-sucesso-memphis {
+            background: #052E16;
+            border-color: #22C55E;
+            color: #DCFCE7;
+        }
+
         /* Dark mode para novos elementos */
         html.dark .btn-toggle-senha {
             color: #94A3B8;
@@ -424,16 +470,20 @@
         }
 
         html.dark .senha-requisitos-grid {
-            background: #0B1120;
-            border-color: #334155;
+            background: #0B1120 !important;
+            border-color: #334155 !important;
         }
 
         html.dark .senha-req-item {
-            color: #FFFFFF !important;
+            color: #F8FAFC !important;
+        }
+
+        html.dark .senha-req-item .req-icon {
+            color: #94A3B8 !important;
         }
 
         html.dark .senha-req-item.atendido {
-            color: #FFFFFF !important;
+            color: #F8FAFC !important;
         }
 
         html.dark .senha-req-item.atendido .req-icon {
@@ -443,12 +493,12 @@
         html.dark .card-info-preferencias {
             background: #0B1120 !important;
             border-color: #334155 !important;
-            color: #FFFFFF !important;
         }
 
+        html.dark .card-info-preferencias span,
         html.dark .card-info-preferencias p,
-        html.dark .card-info-preferencias span {
-            color: #FFFFFF !important;
+        html.dark .card-info-preferencias div {
+            color: #F8FAFC !important;
         }
 
         /* Estilo do Sidebar de Perfil */
@@ -639,7 +689,7 @@
             <a href="index.html" class="brand-link" title="Voltar ao início">
                 <img src="assets/logo.png" data-logo-light="assets/logo.png" data-logo-dark="assets/logo_temaescuro.png" alt="EduScrap Logo" class="brand-logo-img">
                 <span class="brand-title-text">
-                    <span style="color: #FFFF;">Edu</span><span style="color: #FF5C00;">Scrap</span>
+                    <span class="brand-edu">Edu</span><span class="brand-scrap" style="color: #FF5C00;">Scrap</span>
                 </span>
             </a>
             <p class="brand-subtitle">Portal Universitário de Vagas & Oportunidades</p>
@@ -699,9 +749,10 @@
                         </div>
                     </div>
 
-                    <div class="flex justify-end items-center mb-4 mt-1">
-                        <a href="javascript:void(0)" onclick="alternarAba('reset')" class="text-sm font-extrabold text-slate-500 hover:text-brand-orange underline transition-colors">
-                            Esqueceu sua senha? Redefinir senha
+                    <div class="flex justify-end items-center mb-5 mt-2">
+                        <a href="javascript:void(0)" onclick="alternarAba('reset')" class="inline-flex items-center gap-2 text-base sm:text-lg font-black text-slate-700 dark:text-slate-200 hover:text-brand-orange underline decoration-2 transition-colors">
+                            <i class="ph-bold ph-key text-brand-orange text-xl"></i>
+                            <span>Esqueceu sua senha? Redefinir senha</span>
                         </a>
                     </div>
 
@@ -743,7 +794,7 @@
                                 <i class="ph-bold ph-envelope-simple text-brand-orange"></i> E-mail Institucional ou Pessoal:
                             </label>
                             <input type="email" id="reg-email" class="input-memphis" placeholder="aluno@uern.br ou seu.email@gmail.com" autocomplete="email" oninput="verificarDisponibilidadeEmail()" onblur="verificarDisponibilidadeEmail()" required>
-                            <div id="email-feedback" class="mt-2 text-xs font-bold p-2.5 rounded-lg transition-all" style="display: none;"></div>
+                            <div id="email-feedback" class="mt-3 text-base font-bold p-3.5 rounded-xl transition-all" style="display: none;"></div>
                         </div>
                         <div class="form-group-memphis">
                             <label class="label-memphis" for="reg-senha">
@@ -760,9 +811,9 @@
 
                     <!-- Medidor Visual de Força da Senha & Checklist -->
                     <div class="mb-6">
-                        <div class="flex justify-between items-center text-sm font-bold mb-1.5">
-                            <span class="text-slate-700 dark:text-slate-200">Força da Senha:</span>
-                            <span id="senha-forca-texto" class="font-extrabold text-slate-600 dark:text-slate-300">Aguardando senha...</span>
+                        <div class="flex justify-between items-center text-base sm:text-lg font-black mb-2">
+                            <span class="text-slate-800 dark:text-slate-100">Força da Senha:</span>
+                            <span id="senha-forca-texto" class="font-black text-slate-700 dark:text-slate-300">Aguardando senha...</span>
                         </div>
                         <div class="senha-forca-track">
                             <div id="senha-forca-barra" class="senha-forca-barra"></div>
@@ -789,9 +840,9 @@
                     </div>
 
                     <!-- Termo LGPD e Notificações por Email -->
-                    <div class="flex items-start gap-3 my-4 p-3.5 bg-slate-50 dark:bg-slate-800/80 rounded-xl border-2 border-slate-900/10 dark:border-slate-700">
-                        <input type="checkbox" id="reg-receber-emails" checked class="w-5 h-5 accent-brand-orange cursor-pointer mt-0.5">
-                        <label for="reg-receber-emails" class="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                    <div class="flex items-center gap-3.5 my-5 p-4 bg-slate-50 dark:bg-slate-800/90 rounded-xl border-2 border-slate-900/20 dark:border-slate-700">
+                        <input type="checkbox" id="reg-receber-emails" checked class="w-6 h-6 accent-brand-orange cursor-pointer flex-shrink-0">
+                        <label for="reg-receber-emails" class="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-200 cursor-pointer select-none">
                             Desejo receber avisos de novos editais e alertas de prazos críticos por e-mail (opcional)
                         </label>
                     </div>
@@ -824,12 +875,12 @@
 
                 <!-- FORMULÁRIO DE REDEFINIÇÃO DE SENHA -->
                 <form id="form-reset" style="display: none;" onsubmit="executarRedefinicaoSenha(event)">
-                    <div class="mb-5 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200 text-sm">
-                        <div class="flex items-center gap-2 font-bold mb-1">
-                            <i class="ph-bold ph-info text-lg"></i>
+                    <div class="mb-6 p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-3 border-amber-300 dark:border-amber-700 text-amber-950 dark:text-amber-100">
+                        <div class="flex items-center gap-3 font-black text-lg sm:text-xl mb-2 text-amber-900 dark:text-amber-300">
+                            <i class="ph-bold ph-key text-2xl text-brand-orange"></i>
                             <span>Redefinir Senha de Acesso</span>
                         </div>
-                        <p class="text-xs leading-relaxed">
+                        <p class="text-base sm:text-lg font-medium leading-relaxed text-slate-700 dark:text-slate-200">
                             Esqueceu sua senha? Informe o e-mail cadastrado e digite sua nova senha de acesso (mínimo 6 caracteres).
                         </p>
                     </div>
@@ -1165,27 +1216,30 @@
                     const data = await resp.json();
 
                     if (!data.valido) {
-                        feedbackEl.className = 'mt-2 text-xs font-bold p-2.5 rounded-lg border flex items-center gap-2 bg-red-50 text-red-700 border-red-300';
-                        feedbackEl.innerHTML = `<i class="ph-bold ph-x-circle text-base text-red-600"></i> <span>${data.mensagem || 'E-mail inválido.'}</span>`;
+                        feedbackEl.className = 'mt-3 text-base font-bold p-3.5 rounded-xl border-2 flex items-center gap-3 bg-red-50 text-red-800 border-red-300 dark:bg-red-950/60 dark:text-red-200 dark:border-red-700';
+                        feedbackEl.innerHTML = `<i class="ph-bold ph-x-circle text-2xl text-red-600 flex-shrink-0"></i> <span>${data.mensagem || 'E-mail inválido.'}</span>`;
                         return;
                     }
 
                     if (data.existe) {
-                        feedbackEl.className = 'mt-2 text-xs font-bold p-2.5 rounded-lg border flex flex-col gap-1.5 bg-amber-50 text-amber-900 border-amber-300';
+                        feedbackEl.className = 'mt-3 text-base font-bold p-4 rounded-xl border-2 flex flex-col gap-2.5 bg-amber-50 text-amber-950 border-amber-300 dark:bg-amber-950/60 dark:text-amber-100 dark:border-amber-700 shadow-sm';
                         feedbackEl.innerHTML = `
-                            <div class="flex items-center gap-2 text-amber-800">
-                                <i class="ph-bold ph-warning-circle text-base text-amber-600"></i>
-                                <span>Este e-mail já está cadastrado no EduScrap!</span>
+                            <div class="flex items-center gap-3 text-base sm:text-lg font-extrabold text-amber-900 dark:text-amber-200">
+                                <i class="ph-bold ph-warning-circle text-2xl text-amber-600 flex-shrink-0"></i>
+                                <span>Este e-mail já possui cadastro no EduScrap!</span>
                             </div>
-                            <div class="flex items-center gap-3 pt-1 text-xs">
-                                <button type="button" onclick="irParaLoginComEmail('${email}')" class="underline font-extrabold text-brand-orange hover:text-orange-700">Fazer login agora</button>
-                                <span class="text-slate-400">•</span>
-                                <button type="button" onclick="irParaResetComEmail('${email}')" class="underline font-extrabold text-blue-600 hover:text-blue-800">Esqueceu a senha?</button>
+                            <div class="flex flex-wrap items-center gap-3 pt-1 text-base">
+                                <button type="button" onclick="irParaLoginComEmail('${email}')" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-brand-orange text-white font-extrabold text-sm hover:bg-orange-600 transition-all shadow-sm">
+                                    <i class="ph-bold ph-sign-in"></i> Fazer login agora
+                                </button>
+                                <button type="button" onclick="irParaResetComEmail('${email}')" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-blue-600 text-white font-extrabold text-sm hover:bg-blue-700 transition-all shadow-sm">
+                                    <i class="ph-bold ph-key"></i> Redefinir senha
+                                </button>
                             </div>
                         `;
                     } else {
-                        feedbackEl.className = 'mt-2 text-xs font-bold p-2.5 rounded-lg border flex items-center gap-2 bg-emerald-50 text-emerald-800 border-emerald-300';
-                        feedbackEl.innerHTML = `<i class="ph-bold ph-check-circle text-base text-emerald-600"></i> <span>E-mail disponível para cadastro!</span>`;
+                        feedbackEl.className = 'mt-3 text-base font-bold p-3.5 rounded-xl border-2 flex items-center gap-3 bg-emerald-50 text-emerald-900 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-100 dark:border-emerald-700 shadow-sm';
+                        feedbackEl.innerHTML = `<i class="ph-bold ph-check-circle text-2xl text-emerald-600 flex-shrink-0"></i> <span class="text-base sm:text-lg">E-mail disponível para cadastro!</span>`;
                     }
                 } catch (err) {
                     feedbackEl.style.display = 'none';
@@ -1238,20 +1292,22 @@
                     const msg = data.detail || data.error || 'Email ou senha inválidos.';
                     if (msg.includes('Nenhuma conta encontrada') || msg.includes('cadastre-se')) {
                         erroDiv.innerHTML = `
-                            <span>${msg}</span>
-                            <div class="mt-2 text-sm">
-                                <button type="button" onclick="alternarAba('register')" class="underline font-bold text-brand-orange hover:text-orange-700">Criar cadastro gratuito agora</button>
-                            </div>
+                            <div class="text-base sm:text-lg font-bold leading-relaxed mb-3">${msg}</div>
+                            <button type="button" onclick="alternarAba('register')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-orange text-white font-black text-base hover:bg-orange-600 transition-all shadow-sm">
+                                <i class="ph-bold ph-user-plus text-lg"></i>
+                                <span>Criar cadastro gratuito agora</span>
+                            </button>
                         `;
                     } else if (msg.includes('Senha incorreta') || msg.includes('redefini-la')) {
                         erroDiv.innerHTML = `
-                            <span>${msg}</span>
-                            <div class="mt-2 text-sm">
-                                <button type="button" onclick="irParaResetComEmail('${email}')" class="underline font-bold text-brand-orange hover:text-orange-700">Clique aqui para Redefinir sua Senha</button>
-                            </div>
+                            <div class="text-base sm:text-lg font-bold leading-relaxed mb-3">${msg}</div>
+                            <button type="button" onclick="irParaResetComEmail('${email}')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-orange text-white font-black text-base hover:bg-orange-600 transition-all shadow-sm">
+                                <i class="ph-bold ph-key text-lg"></i>
+                                <span>Clique aqui para Redefinir sua Senha</span>
+                            </button>
                         `;
                     } else {
-                        erroDiv.innerText = msg;
+                        erroDiv.innerHTML = `<div class="text-base sm:text-lg font-bold leading-relaxed">${msg}</div>`;
                     }
                     erroDiv.style.display = 'block';
                     btnSubmit.disabled = false;
@@ -1295,7 +1351,7 @@
 
             // Validação de tamanho mínimo
             if (senha.length < 6) {
-                erroDiv.innerText = 'A senha de acesso precisa possuir pelo menos 6 caracteres.';
+                erroDiv.innerHTML = '<div class="text-base sm:text-lg font-bold leading-relaxed">A senha de acesso precisa possuir pelo menos 6 caracteres.</div>';
                 erroDiv.style.display = 'block';
                 document.getElementById('reg-senha').focus();
                 return;
@@ -1324,15 +1380,20 @@
                     const msg = data.detail || data.error || 'Falha ao cadastrar estudante.';
                     if (resp.status === 409 || msg.includes('já está cadastrado')) {
                         erroDiv.innerHTML = `
-                            <span>${msg}</span>
-                            <div class="mt-2 flex gap-3 text-sm">
-                                <button type="button" onclick="irParaLoginComEmail('${email}')" class="underline font-bold text-brand-orange hover:text-orange-700">Fazer Login</button>
-                                <span>•</span>
-                                <button type="button" onclick="irParaResetComEmail('${email}')" class="underline font-bold text-blue-600 hover:text-blue-800">Redefinir Senha</button>
+                            <div class="text-base sm:text-lg font-bold leading-relaxed mb-3">${msg}</div>
+                            <div class="flex flex-wrap gap-3">
+                                <button type="button" onclick="irParaLoginComEmail('${email}')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-orange text-white font-black text-base hover:bg-orange-600 transition-all shadow-sm">
+                                    <i class="ph-bold ph-sign-in text-lg"></i>
+                                    <span>Fazer Login</span>
+                                </button>
+                                <button type="button" onclick="irParaResetComEmail('${email}')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 text-white font-black text-base hover:bg-blue-700 transition-all shadow-sm">
+                                    <i class="ph-bold ph-key text-lg"></i>
+                                    <span>Redefinir Senha</span>
+                                </button>
                             </div>
                         `;
                     } else {
-                        erroDiv.innerText = msg;
+                        erroDiv.innerHTML = `<div class="text-base sm:text-lg font-bold leading-relaxed">${msg}</div>`;
                     }
                     erroDiv.style.display = 'block';
                     btnSubmit.disabled = false;

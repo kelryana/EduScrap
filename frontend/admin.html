@@ -247,11 +247,93 @@
             }
         }
 
+        function verificarAcessoAdmin() {
+            const userStr = localStorage.getItem('eduscrap_user');
+            const adminKey = localStorage.getItem('eduscrap_admin_key');
+            if (userStr) {
+                try {
+                    const u = JSON.parse(userStr);
+                    if (u.role === 'admin' || u.is_admin === true) {
+                        carregarFontes();
+                        carregarRegras();
+                        carregarListaLogs();
+                        return;
+                    }
+                } catch (e) {}
+            }
+            if (adminKey) {
+                carregarFontes();
+                carregarRegras();
+                carregarListaLogs();
+                return;
+            }
+            // Exibe modal de autenticação restrita
+            const modal = document.getElementById('modal-admin-auth');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        async function autenticarAdmin() {
+            const key = document.getElementById('input-admin-key').value.trim();
+            const erroEl = document.getElementById('admin-auth-erro');
+            erroEl.classList.add('hidden');
+            if (!key) {
+                erroEl.innerText = "Por favor, informe a chave mestre de administrador.";
+                erroEl.classList.remove('hidden');
+                return;
+            }
+            try {
+                const resp = await fetch(`${API_URL}/auth/login-admin`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ admin_key: key })
+                });
+                const data = await resp.json();
+                if (!resp.ok || !data.success) {
+                    throw new Error(data.detail || "Chave administrativa inválida.");
+                }
+                localStorage.setItem('eduscrap_admin_key', key);
+                localStorage.setItem('eduscrap_token', data.token);
+                localStorage.setItem('eduscrap_user', JSON.stringify(data.user));
+                document.getElementById('modal-admin-auth').style.display = 'none';
+                carregarFontes();
+                carregarRegras();
+                carregarListaLogs();
+            } catch (err) {
+                erroEl.innerText = err.message || "Chave administrativa incorreta.";
+                erroEl.classList.remove('hidden');
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
-            carregarFontes();
-            carregarRegras();
-            carregarListaLogs();
+            verificarAcessoAdmin();
         });
     </script>
+
+    <!-- Modal de Autenticação Restrita de Administrador (UC11 / UC12) -->
+    <div id="modal-admin-auth" class="fixed inset-0 bg-slate-900/85 backdrop-blur-md z-50 flex items-center justify-center p-4" style="display: none;">
+        <div class="bg-white dark:bg-slate-900 border-3 border-slate-900 dark:border-slate-700 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-center">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-orange-100 dark:bg-orange-950/80 border-2 border-brand-orange flex items-center justify-center text-brand-orange text-3xl shadow-sm">
+                <i class="ph-bold ph-shield-check"></i>
+            </div>
+            <h2 class="text-2xl font-black text-slate-900 dark:text-white mb-2">Painel Restrito de Governança</h2>
+            <p class="text-slate-600 dark:text-slate-300 font-medium text-sm sm:text-base leading-relaxed mb-6">
+                Este ambiente é restrito para gestão de scrapers e logs técnicos (UC11 / UC12). Seu perfil atual é de <strong>Estudante</strong>.
+            </p>
+            <div class="space-y-4 text-left">
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-500 dark:text-slate-400 mb-1">Chave Mestre de Administrador:</label>
+                    <input type="password" id="input-admin-key" class="w-full p-3.5 rounded-xl border-2 border-slate-900 dark:border-slate-700 dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-base outline-none focus:border-brand-orange" placeholder="Digite a chave mestre (padrão: admin123)">
+                </div>
+                <div id="admin-auth-erro" class="hidden text-sm font-bold text-red-600 bg-red-50 dark:bg-red-950/50 p-3 rounded-xl border border-red-300"></div>
+                <button onclick="autenticarAdmin()" class="w-full py-3.5 rounded-xl border-2 border-slate-900 bg-brand-orange text-white font-black text-base shadow-sm hover:bg-orange-600 transition-colors flex items-center justify-center gap-2 cursor-pointer">
+                    <i class="ph-bold ph-lock-key-open"></i>
+                    <span>Autenticar como Administrador</span>
+                </button>
+                <a href="index.html" class="block text-center py-2 text-sm font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white underline">
+                    Voltar ao Portal do Estudante
+                </a>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
