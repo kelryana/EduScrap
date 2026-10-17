@@ -60,44 +60,44 @@ O **EduScrap** resolve essa dor ao atuar como um agregador e minerador automatiz
 flowchart TD
     subgraph Fontes ["Fontes Oficiais Externas"]
         UERN["Portal UERN / JOUERN"]
-        PRAE["PRAE (Estágios/Auxílios)"]
-        PROEX["PROEX (Bolsas/Projetos)"]
+        PRAE["PRAE - Estágios e Auxílios"]
+        PROEX["PROEX - Bolsas e Projetos"]
         UFERSA["Portal Editais UFERSA"]
         CIEE["Plataforma CIEE"]
         OUTRAS["MPRN / IFRN / IEL / DOM"]
     end
 
-    subgraph Ingestao ["Engine de Ingestão Concorrente (POO)"]
-        Runner["ScraperRunner (ThreadPoolExecutor)"]
-        Scrapers["Scrapers Concretos (herdam BaseScraper)"]
-        Norm["Normalizer (RegexEngine + PDF Extraction)"]
+    subgraph Ingestao ["Engine de Ingestão Concorrente - POO"]
+        Runner["ScraperRunner - ThreadPoolExecutor"]
+        Scrapers["Scrapers Concretos - herdam BaseScraper"]
+        Norm["Normalizer - RegexEngine + PDF Extraction"]
     end
 
-    subgraph Dados ["Camada de Persistência (NoSQL)"]
-        Mongo[("MongoDB 7.0 (hub_estudantes)\nMongoDatabase (Índices + Upsert)")]
-        Logs["Logs Isolados (logs/<fonte>.log)"]
-        Config["Regras Dinâmicas (config/patterns.json)"]
+    subgraph Dados ["Camada de Persistência - NoSQL"]
+        Mongo[("MongoDB 7.0 - hub_estudantes")]
+        Logs["Logs Isolados por Robô"]
+        Config["Regras Dinâmicas - patterns.json"]
     end
 
-    subgraph Servicos ["Backend API (FastAPI)"]
-        FastAPI["FastAPI (:8000)\nEndpoints REST & Swagger /docs\nModels Pydantic (OportunidadeModel)"]
+    subgraph Servicos ["Backend API - FastAPI"]
+        FastAPI["FastAPI porta 8000\nEndpoints REST e Swagger /docs\nModels Pydantic - OportunidadeModel"]
     end
 
-    subgraph Cliente ["Camada de Apresentação (Frontend)"]
-        SPA["Dashboard Discente (:3000)\nDonut SVG + Filtros + Dark Mode"]
-        AdminUI["Painel de Governança (:3000/admin.html)\nGestão de Regras e Monitor de Logs"]
-        User(("Estudante / Administrador"))
+    subgraph Cliente ["Camada de Apresentação - Frontend"]
+        SPA["Dashboard Discente porta 3000\nDonut SVG + Filtros + Dark Mode"]
+        AdminUI["Painel de Governança admin.html\nGestão de Regras e Monitor de Logs"]
+        User(["Estudante / Administrador"])
     end
 
-    Fontes -->|Download HTML / PDF| Scrapers
+    Fontes -->|Download HTML e PDF| Scrapers
     Runner --> Scrapers
     Scrapers --> Norm
-    Config -.->|Lê/Ajusta Padrões| Norm
-    Norm -->|Upsert pelo Link Canônico (RN04)| Mongo
-    Scrapers -->|Gravação Isolada (UC11)| Logs
-    Mongo -->|Consultas Indexadas < 1s| FastAPI
+    Config -.->|Leitura e Ajuste de Regras| Norm
+    Norm -->|Upsert pelo Link Canônico - RN04| Mongo
+    Scrapers -->|Gravação Isolada de Logs - UC11| Logs
+    Mongo -->|Consultas Indexadas sub-segundo| FastAPI
     FastAPI -->|JSON REST| SPA
-    FastAPI -->|APIs de Governança (UC12)| AdminUI
+    FastAPI -->|APIs de Governança - UC12| AdminUI
     User <--> SPA
     User <--> AdminUI
 ```
