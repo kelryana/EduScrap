@@ -26,8 +26,11 @@ class Settings:
 
     API_KEY: str = os.getenv("API_KEY", "")
 
+    SELENIUM_BROWSER: str = os.getenv("SELENIUM_BROWSER", "auto")
     CHROMEDRIVER_PATH: str = os.getenv("CHROMEDRIVER_PATH", "/usr/local/bin/chromedriver")
-    GECKODRIVER_PATH: str = os.getenv("GECKODRIVER_PATH", "")  
+    GECKODRIVER_PATH: str = os.getenv("GECKODRIVER_PATH", "")
+    EDGEDRIVER_PATH: str = os.getenv("EDGEDRIVER_PATH", "")
+    BRAVE_PATH: str = os.getenv("BRAVE_PATH", "")
     CIEE_CIDADE: str = os.getenv("CIEE_CIDADE", "Mossoro")
     CIEE_URL: str = os.getenv("CIEE_URL", "https://portal.ciee.org.br/")
 

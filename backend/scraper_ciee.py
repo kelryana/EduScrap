@@ -11,16 +11,16 @@ from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
-from webdriver_manager.firefox import GeckoDriverManager
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
 
 from dotenv import load_dotenv
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from driver_factory import obter_driver
 
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
@@ -73,36 +73,17 @@ class ScraperCIEEHibrido:
             return False
 
     def configurar_driver(self):
-     
         try:
-            options = Options()
-
-            options.add_argument("--headless")
-            options.add_argument("--no-sandbox")
-            options.add_argument("--disable-dev-shm-usage")
-            options.add_argument("--disable-gpu")
-            options.add_argument("--window-size=1920,1080")
-
-            # Endurecimento de Segurança do Navegador Headless (Recomendações ASIA CCS '22 - Musch et al.)
-            # Desativa plugins legados, WebRTC e protocolos vulneráveis
-            options.set_preference("general.useragent.override",
-                "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0")
-            options.set_preference("permissions.default.image", 2)
-            options.set_preference("media.peerconnection.enabled", False) # Desativa WebRTC (evita vazamento de IP real)
-            options.set_preference("dom.serviceWorkers.enabled", False)   # Desativa ServiceWorkers maliciosos
-            options.set_preference("network.http.redirection-limit", 5)   # Limita saltos de redirecionamento HTTP
-            options.set_preference("security.fileuri.strict_origin_policy", True) # Bloqueia leitura de file:// arbitrário
-        
-            if GECKODRIVER_PATH and Path(GECKODRIVER_PATH).exists():
-                service = Service(GECKODRIVER_PATH)
-            else:
-                service = Service(GeckoDriverManager().install())
-            self.driver = webdriver.Firefox(service=service, options=options)
-
-            self.driver.set_page_load_timeout(30)
-            self.driver.implicitly_wait(10)
-
-            logger.info("Firefox headless configurado")
+            preferencia = os.getenv("SELENIUM_BROWSER", "auto")
+            logger.info(f"Configurando driver Selenium (preferência: {preferencia})...")
+            self.driver = obter_driver(
+                preferencia=preferencia,
+                headless=True,
+                timeout_pagina=30,
+                timeout_implicito=10,
+                fallback=True
+            )
+            logger.info(f"Navegador {self.driver.name} headless configurado com sucesso")
             return True
 
         except Exception as e:

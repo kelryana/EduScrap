@@ -10,6 +10,7 @@ import re
 import json
 import logging
 import os
+import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -46,44 +47,17 @@ PALAVRAS_CHAVE_OPORTUNIDADES = [
 ]
 
 def criar_navegador_headless():
-   
-    opcoes = Options()
-    opcoes.add_argument("--headless=new")  # Novo modo headless mais moderno
-    opcoes.add_argument("--no-sandbox")
-    opcoes.add_argument("--disable-dev-shm-usage")
-    opcoes.add_argument("--disable-gpu")
-    opcoes.add_argument("--window-size=1920,1080")
-    opcoes.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
-    opcoes.add_argument("--lang=pt-BR")
-
-   
-    opcoes.add_experimental_option("excludeSwitches", ["enable-automation"])
-    opcoes.add_experimental_option("useAutomationExtension", False)
-
-
-    if CHROMEDRIVER_PATH and Path(CHROMEDRIVER_PATH).exists():
-        service = Service(CHROMEDRIVER_PATH)
-    else:
-        logger.warning(f"chromedriver não encontrado em '{CHROMEDRIVER_PATH}'; baixando via webdriver-manager...")
-        service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=opcoes)
-
-    
-    driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
-        "source": """
-            Object.defineProperty(navigator, 'webdriver', {
-                get: () => undefined
-            });
-            Object.defineProperty(navigator, 'plugins', {
-                get: () => [1, 2, 3, 4, 5]
-            });
-            Object.defineProperty(navigator, 'languages', {
-                get: () => ['pt-BR', 'pt', 'en']
-            });
-        """
-    })
-
-    return driver
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from driver_factory import obter_driver
+    preferencia = os.getenv("SELENIUM_BROWSER", "auto")
+    logger.info(f"Inicializando navegador para Portal UERN (preferência: {preferencia})...")
+    return obter_driver(
+        preferencia=preferencia,
+        headless=True,
+        timeout_pagina=30,
+        timeout_implicito=10,
+        fallback=True
+    )
 
 def extrair_data_do_texto(texto):
    
