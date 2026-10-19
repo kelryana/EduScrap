@@ -2,8 +2,8 @@
 """
 Fábrica unificada de WebDrivers para Selenium no projeto EduScrap.
 Permite que os scrapers rodem de forma transparente em:
-- Linux / macOS / Windows
-- Firefox / Google Chrome / Microsoft Edge / Brave
+- Linux / macOS / Windows / Docker (containers)
+- Google Chrome / Chromium / Microsoft Edge / Brave / Firefox
 Com auto-detecção do sistema operacional e fallback inteligente.
 """
 
@@ -70,25 +70,24 @@ def localizar_executavel(navegador: str) -> Optional[str]:
     """
     navegador = navegador.lower().strip()
 
-    # 1. Variável de ambiente explícita
+    # 1. Variáveis de ambiente explícitas (suporta convenções comuns como CHROME_BIN)
     env_vars = {
-        "chrome": "CHROME_BINARY_PATH",
-        "brave": "BRAVE_PATH",
-        "edge": "EDGE_BINARY_PATH",
-        "firefox": "FIREFOX_BINARY_PATH",
+        "chrome": ["CHROME_BINARY_PATH", "CHROME_BIN", "CHROMIUM_PATH"],
+        "brave": ["BRAVE_PATH", "BRAVE_BIN"],
+        "edge": ["EDGE_BINARY_PATH", "EDGE_BIN"],
+        "firefox": ["FIREFOX_BINARY_PATH", "FIREFOX_BIN"],
     }
-    env_var_name = env_vars.get(navegador)
-    if env_var_name and os.getenv(env_var_name):
-        caminho = Path(os.getenv(env_var_name))
-        if caminho.exists():
-            return str(caminho)
+    for var_name in env_vars.get(navegador, []):
+        valor = os.getenv(var_name)
+        if valor and Path(valor).exists():
+            return str(Path(valor).resolve())
 
     # 2. Busca no PATH via shutil.which
     comandos_busca = {
-        "chrome": ["google-chrome", "google-chrome-stable", "chrome", "chromium", "chromium-browser"],
+        "chrome": ["google-chrome", "google-chrome-stable", "chromium", "chromium-browser", "chrome"],
         "edge": ["msedge", "microsoft-edge", "edge"],
         "brave": ["brave-browser", "brave"],
-        "firefox": ["firefox"],
+        "firefox": ["firefox", "firefox-esr"],
     }
     for cmd in comandos_busca.get(navegador, [navegador]):
         encontrado = shutil.which(cmd)
@@ -108,6 +107,7 @@ def localizar_executavel(navegador: str) -> Optional[str]:
             "/usr/bin/google-chrome-stable",
             "/usr/bin/chromium",
             "/usr/bin/chromium-browser",
+            "/snap/bin/chromium",
             "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
         ],
         "brave": [
@@ -121,6 +121,8 @@ def localizar_executavel(navegador: str) -> Optional[str]:
         ],
         "firefox": [
             "/usr/bin/firefox",
+            "/usr/bin/firefox-esr",
+            "/snap/bin/firefox",
             "/Applications/Firefox.app/Contents/MacOS/firefox",
         ],
     }
@@ -159,7 +161,16 @@ def criar_driver_chrome(
     binary_path: Optional[str] = None,
     driver_path: Optional[str] = None,
 ) -> webdriver.Chrome:
-    """Cria e configura uma instância do Google Chrome."""
+    """Cria e configura uma instância do Google Chrome ou Chromium."""
+    if not binary_path:
+        binary_path = localizar_executavel("chrome")
+
+    # Se estiver em Linux/Docker e não houver executável instalado, avisa explicitamente
+    if not binary_path and sys.platform != "win32":
+        raise FileNotFoundError(
+            "Executável do Chrome/Chromium não foi encontrado no sistema (instale via apt: chromium)."
+        )
+
     options = ChromeOptions()
     if headless:
         options.add_argument("--headless=new")
@@ -175,16 +186,20 @@ def criar_driver_chrome(
     if binary_path:
         options.binary_location = binary_path
 
-    # Resolução do ChromeDriver
+    # Resolução do ChromeDriver (prioriza caminho local / apt no Linux antes de baixar)
     caminho_driver = driver_path or os.getenv("CHROMEDRIVER_PATH", "")
     if caminho_driver and Path(caminho_driver).exists():
         service = ChromeService(caminho_driver)
     else:
-        try:
-            service = ChromeService(ChromeDriverManager().install())
-        except Exception as err:
-            logger.debug(f"ChromeDriverManager falhou ({err}), tentando Selenium Manager nativo...")
-            service = ChromeService()
+        driver_no_path = shutil.which("chromedriver") or shutil.which("chromium-driver")
+        if driver_no_path:
+            service = ChromeService(driver_no_path)
+        else:
+            try:
+                service = ChromeService(ChromeDriverManager().install())
+            except Exception as err:
+                logger.debug(f"ChromeDriverManager falhou ({err}), tentando Selenium Manager nativo...")
+                service = ChromeService()
 
     driver = webdriver.Chrome(service=service, options=options)
     _aplicar_stealth_cdp(driver)
@@ -197,6 +212,14 @@ def criar_driver_edge(
     driver_path: Optional[str] = None,
 ) -> webdriver.Edge:
     """Cria e configura uma instância do Microsoft Edge (Chromium)."""
+    if not binary_path:
+        binary_path = localizar_executavel("edge")
+
+    if not binary_path and sys.platform != "win32":
+        raise FileNotFoundError(
+            "Executável do Microsoft Edge não foi encontrado no sistema Linux/Docker."
+        )
+
     options = EdgeOptions()
     if headless:
         options.add_argument("--headless=new")
@@ -215,14 +238,18 @@ def criar_driver_edge(
     caminho_driver = driver_path or os.getenv("EDGEDRIVER_PATH", "")
     if caminho_driver and Path(caminho_driver).exists():
         service = EdgeService(caminho_driver)
-    elif EdgeChromiumDriverManager:
-        try:
-            service = EdgeService(EdgeChromiumDriverManager().install())
-        except Exception as err:
-            logger.debug(f"EdgeChromiumDriverManager falhou ({err}), usando Selenium Manager nativo...")
-            service = EdgeService()
     else:
-        service = EdgeService()
+        driver_no_path = shutil.which("msedgedriver")
+        if driver_no_path:
+            service = EdgeService(driver_no_path)
+        elif EdgeChromiumDriverManager:
+            try:
+                service = EdgeService(EdgeChromiumDriverManager().install())
+            except Exception as err:
+                logger.debug(f"EdgeChromiumDriverManager falhou ({err}), usando Selenium Manager nativo...")
+                service = EdgeService()
+        else:
+            service = EdgeService()
 
     driver = webdriver.Edge(service=service, options=options)
     _aplicar_stealth_cdp(driver)
@@ -246,6 +273,14 @@ def criar_driver_firefox(
     driver_path: Optional[str] = None,
 ) -> webdriver.Firefox:
     """Cria e configura uma instância do Mozilla Firefox."""
+    if not binary_path:
+        binary_path = localizar_executavel("firefox")
+
+    if not binary_path and sys.platform != "win32":
+        raise FileNotFoundError(
+            "Executável do Firefox não foi encontrado no sistema (instale via apt: firefox ou firefox-esr)."
+        )
+
     options = FirefoxOptions()
     if headless:
         options.add_argument("--headless")
@@ -269,11 +304,15 @@ def criar_driver_firefox(
     if caminho_driver and Path(caminho_driver).exists():
         service = FirefoxService(caminho_driver)
     else:
-        try:
-            service = FirefoxService(GeckoDriverManager().install())
-        except Exception as err:
-            logger.debug(f"GeckoDriverManager falhou ({err}), usando Selenium Manager nativo...")
-            service = FirefoxService()
+        driver_no_path = shutil.which("geckodriver")
+        if driver_no_path:
+            service = FirefoxService(driver_no_path)
+        else:
+            try:
+                service = FirefoxService(GeckoDriverManager().install())
+            except Exception as err:
+                logger.debug(f"GeckoDriverManager falhou ({err}), usando Selenium Manager nativo...")
+                service = FirefoxService()
 
     return webdriver.Firefox(service=service, options=options)
 
@@ -288,10 +327,10 @@ def determinar_ordem_navegadores(preferencia: str = "auto") -> List[str]:
         # No Windows: Edge é nativo, Chrome e Brave são os mais comuns, Firefox secundário
         padrao = ["chrome", "edge", "brave", "firefox"]
     else:
-        # No Linux / macOS: Firefox ou Chrome costumam ser os instalados
+        # No Linux / macOS: Firefox ou Chrome
         padrao = ["firefox", "chrome", "edge", "brave"]
 
-    if preferencia in ("chrome", "google-chrome"):
+    if preferencia in ("chrome", "google-chrome", "chromium"):
         return ["chrome", "edge", "brave", "firefox"]
     elif preferencia in ("firefox", "gecko"):
         return ["firefox", "chrome", "edge", "brave"]
@@ -354,6 +393,7 @@ def obter_driver(
         f"Navegadores testados: {', '.join([n for n, _ in erros])}.\n"
         f"Detalhes dos erros:\n{detalhes}\n\n"
         f"Dica de solução:\n"
-        f"- No Windows: Instale o Google Chrome ou certifique-se que o Microsoft Edge está habilitado.\n"
-        f"- No Linux: Instale o Firefox (`sudo apt install firefox`) ou Chrome (`google-chrome-stable`)."
+        f"- Se estiver usando Docker: Atualize seu Dockerfile para instalar o Chromium (`apt-get install chromium chromium-driver`).\n"
+        f"- Se estiver no Windows: Instale o Google Chrome ou certifique-se que o Microsoft Edge está habilitado.\n"
+        f"- Se estiver no Linux nativo: Instale o Chromium (`sudo apt install chromium chromium-driver`) ou Firefox."
     )

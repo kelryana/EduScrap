@@ -5,7 +5,13 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     curl \
+    chromium \
+    chromium-driver \
     && rm -rf /var/lib/apt/lists/*
+
+ENV CHROME_BIN=/usr/bin/chromium \
+    CHROMEDRIVER_PATH=/usr/bin/chromedriver \
+    SELENIUM_BROWSER=chrome
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
