@@ -662,7 +662,14 @@ function destacarBotaoAtivo(idBotao) {
         }
     }
 
-    if (idBotao === 'btn-analises' || idBotao === 'btn-portal-usuario' || idBotao === 'btn-abrir-sidebar-filtros') {
+    const abasSemFiltroVigentes = [
+        'btn-analises',
+        'btn-portal-usuario',
+        'btn-abrir-sidebar-filtros',
+        'btn-cursos-bolsas',
+        'btn-noticias'
+    ];
+    if (abasSemFiltroVigentes.includes(idBotao)) {
         alternarExibicaoFiltroVigentes(false);
     }
 }
@@ -951,7 +958,9 @@ async function carregarDados(tipo, novaPagina = 1) {
     tipoAtual = tipo;
     paginaAtual = novaPagina;
 
-    alternarExibicaoFiltroVigentes(true);
+    const abasSemVigencia = ['cursos-bolsas', 'noticias'];
+    const exibirFiltroVigentes = !abasSemVigencia.includes(tipo);
+    alternarExibicaoFiltroVigentes(exibirFiltroVigentes);
     destacarBotaoAtivo(`btn-${tipo}`);
 
     const container = document.getElementById('container-vagas');
@@ -961,7 +970,7 @@ async function carregarDados(tipo, novaPagina = 1) {
 
     try {
         let url = `${API_URL}/${tipo}?pagina=${paginaAtual}&limite=6`;
-        if (filtroVigentesAtivo) {
+        if (filtroVigentesAtivo && exibirFiltroVigentes) {
             url += `&apenas_vigentes=true`;
         }
 
@@ -1176,6 +1185,27 @@ function renderizarCards(listaDeVagas) {
             </div>
         ` : '';
 
+        const metaDataHoraHTML = vaga.data_hora_publicacao ? `
+            <div class="card-meta-box card-meta-data-hora">
+                <i class="ph-bold ph-calendar-blank meta-icone" style="color: #0284c7;"></i>
+                <span class="meta-texto"><strong>Publicado em:</strong> ${escaparHTML(vaga.data_hora_publicacao)}</span>
+            </div>
+        ` : '';
+
+        const metaCargaHorariaHTML = vaga.carga_horaria ? `
+            <div class="card-meta-box card-meta-carga-horaria">
+                <i class="ph-bold ph-clock meta-icone" style="color: #7c3aed;"></i>
+                <span class="meta-texto"><strong>Carga horária:</strong> ${escaparHTML(vaga.carga_horaria)}</span>
+            </div>
+        ` : '';
+
+        const metaPrecoHTML = vaga.preco ? `
+            <div class="card-meta-box card-meta-preco">
+                <i class="ph-bold ph-tag meta-icone" style="color: #16a34a;"></i>
+                <span class="meta-texto"><strong>Investimento:</strong> ${escaparHTML(vaga.preco)}</span>
+            </div>
+        ` : '';
+
         const cardHTML = `
             <div class="card ${classeVencido}">
                 <div class="card-topo">
@@ -1195,6 +1225,9 @@ function renderizarCards(listaDeVagas) {
                         <span class="meta-texto"><strong>Origem:</strong> ${linkFonteHTML}</span>
                     </div>
 
+                    ${metaDataHoraHTML}
+                    ${metaCargaHorariaHTML}
+                    ${metaPrecoHTML}
                     ${metaSalarioHTML}
                     ${metaLocalHTML}
                 </div>

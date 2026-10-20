@@ -32,6 +32,37 @@ def conectar_banco():
     return db["noticias"]
 
 
+def extrair_horas_e_preco_texto(texto: str):
+    """
+    Extrai carga horária (ex: '40 horas', '15h') e preço/investimento (ex: 'Gratuito', 'R$ 99,00')
+    apenas se estiverem explicitamente mencionados no texto/snippet, sem fazer requisições extras.
+    """
+    if not texto:
+        return None, None
+
+    carga_horaria = None
+    preco = None
+
+    match_horas = re.search(
+        r"\b(\d{1,4}\s*(?:horas?|hrs?|h))\b",
+        texto,
+        re.IGNORECASE,
+    )
+    if match_horas:
+        valor_h = match_horas.group(1).strip()
+        # Evita confundir horários como "14h" se não houver contexto de duração/carga/curso
+        if re.search(r"horas?|hrs?|duraç|carga", valor_h + " " + texto, re.IGNORECASE):
+            carga_horaria = valor_h
+
+    match_preco = re.search(r"(R\$\s*\d+(?:[\.,]\d{2})?)", texto, re.IGNORECASE)
+    if match_preco:
+        preco = match_preco.group(1).strip()
+    elif re.search(r"\b(100%\s*gratuit[oa]|totalmente\s*gratuit[oa]|curso\s*gratuit[oa]|bolsa\s*integral)\b", texto, re.IGNORECASE):
+        preco = "Gratuito"
+
+    return carga_horaria, preco
+
+
 def raspar_estudar_fora(colecao):
     logger.info("-> Coletando bolsas do portal Estudar Fora (Fundação Estudar)...")
     url = "https://www.estudarfora.org.br/feed/"
@@ -58,6 +89,8 @@ def raspar_estudar_fora(colecao):
             cursos = classificacao["cursos"]
             areas = classificacao["areas"] or ["Bolsas de Estudo", "Capacitação"]
 
+            carga_horaria, preco = extrair_horas_e_preco_texto(f"{titulo} {snippet}")
+
             documento = {
                 "titulo": f"[Bolsa Internacional] {titulo}",
                 "nome": f"[Bolsa Internacional] {titulo}",
@@ -74,6 +107,10 @@ def raspar_estudar_fora(colecao):
                 "geral": classificacao["geral"],
                 "coletado_em": datetime.now().isoformat()
             }
+            if carga_horaria:
+                documento["carga_horaria"] = carga_horaria
+            if preco:
+                documento["preco"] = preco
 
             res = colecao.update_one({"link": link}, {"$set": documento}, upsert=True)
             if res.upserted_id or res.modified_count > 0:
@@ -87,7 +124,8 @@ def raspar_estudar_fora(colecao):
 
 
 def raspar_freecodecamp(colecao):
-    """freeCodeCamp Brasil: tutoriais e trilhas gratuitas de programação (RSS oficial, sem anúncios)."""
+    """freeCodeCamp Brasil: tutoriais e trilhas gratuitas de programação (RSS oficial, sem anúncios).
+    Não realiza requisições extras caso o item (ex: episódio de podcast) não explicite horas/preço."""
     logger.info("-> Coletando capacitações do freeCodeCamp Brasil (feed RSS)...")
     url = "https://www.freecodecamp.org/portuguese/news/rss/"
     headers = {"User-Agent": "Mozilla/5.0"}
@@ -115,6 +153,8 @@ def raspar_freecodecamp(colecao):
             cursos = classificacao["cursos"] or ["Ciência da Computação", "Engenharia de Software"]
             areas = ["Tecnologia", "Capacitação & Cursos"]
 
+            carga_horaria, preco = extrair_horas_e_preco_texto(f"{titulo} {snippet}")
+
             documento = {
                 "titulo": f"[freeCodeCamp] {titulo}",
                 "nome": f"[freeCodeCamp] {titulo}",
@@ -132,6 +172,10 @@ def raspar_freecodecamp(colecao):
                 "geral": False,
                 "coletado_em": datetime.now().isoformat()
             }
+            if carga_horaria:
+                documento["carga_horaria"] = carga_horaria
+            if preco:
+                documento["preco"] = preco
 
             res = colecao.update_one({"link": link}, {"$set": documento}, upsert=True)
             if res.upserted_id or res.modified_count > 0:
@@ -145,8 +189,8 @@ def raspar_freecodecamp(colecao):
 
 
 def adicionar_catalogo_cursos_gratuitos(colecao):
-    """Catálogo curado de cursos gratuitos com PÁGINA INDIVIDUAL (cada link abre o curso, não a home).
-    Substitui os antigos cards [MEC/MTE] da Escola do Trabalhador 4.0, cujo site só possui página geral."""
+    """Catálogo curado de cursos gratuitos com PÁGINA INDIVIDUAL (cada link abre o curso, não a home),
+    incluindo a carga horária e o preço/modalidade informados nas respectivas páginas."""
     logger.info("-> Cadastrando catálogo curado de cursos gratuitos (páginas individuais)...")
     cursos = [
         {
@@ -154,6 +198,8 @@ def adicionar_catalogo_cursos_gratuitos(colecao):
             "descricao": ("Módulo oficial e gratuito da Microsoft com trilha completa de IA generativa "
                           "(Azure AI). Página individual do módulo, sem anúncios."),
             "link": "https://learn.microsoft.com/pt-br/training/modules/get-started-with-ai/",
+            "carga_horaria": "1 hora",
+            "preco": "Gratuito",
             "cursos": ["Ciência da Computação", "Engenharia de Software", "Sistemas de Informação"],
             "areas": ["Tecnologia", "Capacitação & Cursos"]
         },
@@ -162,6 +208,8 @@ def adicionar_catalogo_cursos_gratuitos(colecao):
             "descricao": ("Trilha oficial gratuita da Microsoft para análise de dados e Business Intelligence "
                           "com Power BI. Página individual do módulo."),
             "link": "https://learn.microsoft.com/pt-br/training/modules/get-started-with-power-bi/",
+            "carga_horaria": "1 hora",
+            "preco": "Gratuito",
             "cursos": ["Administração", "Ciências Contábeis", "Ciência da Computação", "Estatística"],
             "areas": ["Exatas", "Tecnologia", "Capacitação & Cursos"]
         },
@@ -170,6 +218,8 @@ def adicionar_catalogo_cursos_gratuitos(colecao):
             "descricao": ("Fundamentos de Cloud Computing com Microsoft Azure, curso oficial gratuito "
                           "de nível de entrada. Página individual do módulo."),
             "link": "https://learn.microsoft.com/pt-br/training/modules/get-started-with-azure-fundamentals/",
+            "carga_horaria": "2 horas",
+            "preco": "Gratuito",
             "cursos": ["Ciência da Computação", "Sistemas de Informação", "Engenharia de Software"],
             "areas": ["Tecnologia", "Capacitação & Cursos"]
         },
@@ -179,6 +229,8 @@ def adicionar_catalogo_cursos_gratuitos(colecao):
                           "(Python, Pandas, visualização e machine learning), com certificação. "
                           "Página individual da certificação."),
             "link": "https://www.freecodecamp.org/portuguese/learn/data-analysis-with-python/",
+            "carga_horaria": "300 horas",
+            "preco": "Gratuito (com certificado)",
             "cursos": ["Ciência da Computação", "Estatística", "Matemática"],
             "areas": ["Tecnologia", "Exatas", "Capacitação & Cursos"]
         },
@@ -187,6 +239,8 @@ def adicionar_catalogo_cursos_gratuitos(colecao):
             "descricao": ("Micro-curso gratuito e prático do Kaggle Learn para iniciantes em Python, "
                           "com notebooks interativos e certificado de conclusão. Página individual do curso."),
             "link": "https://www.kaggle.com/learn/python",
+            "carga_horaria": "5 horas",
+            "preco": "Gratuito (com certificado)",
             "cursos": ["Ciência da Computação", "Estatística", "Engenharia de Software"],
             "areas": ["Tecnologia", "Exatas", "Capacitação & Cursos"]
         },
@@ -195,6 +249,8 @@ def adicionar_catalogo_cursos_gratuitos(colecao):
             "descricao": ("Treinamento oficial gratuito da Amazon Web Services sobre fundamentos de "
                           "computação em nuvem, com certificado de conclusão. Página individual do curso."),
             "link": "https://explore.skillbuilder.aws/learn/course/internal/view/elearning/126/fundamentos-da-aws-modelos-de-nuvem",
+            "carga_horaria": "1 hora",
+            "preco": "Gratuito (com certificado)",
             "cursos": ["Ciência da Computação", "Sistemas de Informação", "Engenharia de Software"],
             "areas": ["Tecnologia", "Capacitação & Cursos"]
         },
@@ -203,6 +259,8 @@ def adicionar_catalogo_cursos_gratuitos(colecao):
             "descricao": ("Curso gratuito (modo auditório) mais popular do Coursera, da Universidade de "
                           "Michigan, sobre técnicas de aprendizagem eficazes. Página individual do curso."),
             "link": "https://www.coursera.org/learn/aprender",
+            "carga_horaria": "15 horas",
+            "preco": "Gratuito (modo auditório)",
             "cursos": ["Licenciatura", "Pedagogia", "Psicologia"],
             "areas": ["Humanas", "Educação", "Capacitação & Cursos"]
         },
@@ -211,6 +269,8 @@ def adicionar_catalogo_cursos_gratuitos(colecao):
             "descricao": ("Programa completo e gratuito (auditória) do Google no Coursera para se tornar "
                           "analista de dados, incluindo Power BI e SQL. Página individual do programa."),
             "link": "https://www.coursera.org/professional-certificates/google-data-analytics",
+            "carga_horaria": "180 horas",
+            "preco": "Gratuito (modo auditório)",
             "cursos": ["Estatística", "Ciência da Computação", "Administração"],
             "areas": ["Exatas", "Tecnologia", "Capacitação & Cursos"]
         },
@@ -219,6 +279,8 @@ def adicionar_catalogo_cursos_gratuitos(colecao):
             "descricao": ("Curso 100% gratuito com certificado de conclusão emitido pela Escola Virtual da "
                           "Fundação Bradesco. Criação de planilhas, fórmulas e tabelas dinâmicas. Link individual."),
             "link": "https://www.ev.org.br/cursos/fundamentos-de-ti-e-produtividade/microsoft-excel-2016-basico",
+            "carga_horaria": "15 horas",
+            "preco": "Gratuito (com certificado)",
             "cursos": ["Administração", "Ciências Contábeis", "Economia", "Engenharia de Produção"],
             "areas": ["Gestão", "Exatas", "Capacitação & Cursos"]
         },
@@ -227,6 +289,8 @@ def adicionar_catalogo_cursos_gratuitos(colecao):
             "descricao": ("Curso gratuito com certificado oficial da Fundação Bradesco para introdução à linguagem "
                           "Python, lógica de desenvolvimento e estruturas de dados. Link individual do curso."),
             "link": "https://www.ev.org.br/cursos/desenvolvimento-de-sistemas/linguagem-de-programacao-python-basico",
+            "carga_horaria": "18 horas",
+            "preco": "Gratuito (com certificado)",
             "cursos": ["Ciência da Computação", "Engenharia de Software", "Sistemas de Informação"],
             "areas": ["Tecnologia", "Capacitação & Cursos"]
         },
@@ -235,6 +299,8 @@ def adicionar_catalogo_cursos_gratuitos(colecao):
             "descricao": ("Curso online gratuito da Fundação Getulio Vargas com declaração de conclusão. "
                           "Conceitos de escopo, prazos, custos e metodologias ágeis de projetos. Link individual."),
             "link": "https://educacao-executiva.fgv.br/cursos/online/curta-media-duracao-online/fundamentos-da-gestao-de-projetos",
+            "carga_horaria": "5 horas",
+            "preco": "Gratuito (com declaração)",
             "cursos": ["Administração", "Engenharia de Produção", "Gestão Pública"],
             "areas": ["Gestão", "Humanas", "Capacitação & Cursos"]
         },
@@ -243,6 +309,8 @@ def adicionar_catalogo_cursos_gratuitos(colecao):
             "descricao": ("Curso gratuito da FGV sobre o papel da Ciência de Dados na tomada de decisão estratégica, "
                           "métricas analíticas e Big Data, com declaração de conclusão. Link individual."),
             "link": "https://educacao-executiva.fgv.br/cursos/online/curta-media-duracao-online/introducao-ciencia-de-dados",
+            "carga_horaria": "60 horas",
+            "preco": "Gratuito (com declaração)",
             "cursos": ["Ciência da Computação", "Estatística", "Administração"],
             "areas": ["Tecnologia", "Exatas", "Capacitação & Cursos"]
         },
@@ -251,6 +319,8 @@ def adicionar_catalogo_cursos_gratuitos(colecao):
             "descricao": ("Capacitação oficial e gratuita do SEBRAE para posicionamento de marcas nas redes sociais, "
                           "análise de métricas e geração de leads. Link individual com certificado."),
             "link": "https://sebrae.com.br/sites/PortalSebrae/cursosonline/marketing-digital-para-o-empreendedor,b0d2b8a6a2862810VgnVCM100000d701210aRCRD",
+            "carga_horaria": "2 horas",
+            "preco": "Gratuito (com certificado)",
             "cursos": ["Administração", "Comunicação Social", "Publicidade"],
             "areas": ["Gestão", "Comunicação", "Capacitação & Cursos"]
         },
@@ -259,6 +329,8 @@ def adicionar_catalogo_cursos_gratuitos(colecao):
             "descricao": ("O famoso curso CS50 de Harvard oferecido gratuitamente pelo edX. C, Python, SQL, "
                           "algoritmos e desenvolvimento web com materiais didáticos de padrão internacional."),
             "link": "https://www.edx.org/learn/computer-science/harvard-university-cs50-s-introduction-to-computer-science",
+            "carga_horaria": "120 horas",
+            "preco": "Gratuito",
             "cursos": ["Ciência da Computação", "Engenharia de Software", "Sistemas de Informação"],
             "areas": ["Tecnologia", "Exatas", "Capacitação & Cursos"]
         },
@@ -276,24 +348,23 @@ def adicionar_catalogo_cursos_gratuitos(colecao):
             "tipo": "capacitacao",
             "categoria": "Capacitação & Cursos",
             "status": "Aberto",
+            "carga_horaria": t.get("carga_horaria"),
+            "preco": t.get("preco"),
             "data_publicacao": datetime.now().strftime("%Y-%m-%d"),
             "cursos": t["cursos"],
             "areas": t["areas"],
             "geral": False,
             "coletado_em": datetime.now().isoformat()
         }
-        res = colecao.update_one({"titulo": t["titulo"]}, {"$set": doc}, upsert=True)
-        if res.upserted_id or res.modified_count > 0:
-            total += 1
-            logger.info(f"   Salvo catálogo: {t['titulo']}")
+        colecao.update_one({"titulo": t["titulo"]}, {"$set": doc}, upsert=True)
+        total += 1
+        logger.info(f"   Salvo catálogo: {t['titulo']} ({t.get('carga_horaria')} - {t.get('preco')})")
 
     return total
 
 
 def limpar_fontes_antigas(colecao):
-    """Remove registros obsoletos das fontes substituídas: DIO (excesso de anúncios),
-    Escola do Trabalhador 4.0 / MTE (links apenas para página geral, sem curso individual)
-    e Alison.com (links raspados levavam só à página geral de cursos)."""
+    """Remove registros obsoletos das fontes substituídas."""
     removidos_dio = colecao.delete_many({
         "$or": [
             {"fonte": {"$regex": "Digital Innovation One|DIO", "$options": "i"}},
