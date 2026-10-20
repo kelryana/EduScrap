@@ -73,7 +73,6 @@ def _rodando_em_container() -> bool:
 
 
 def localizar_executavel(navegador: str) -> Optional[str]:
-  
     navegador = navegador.lower().strip()
 
     # 1. Variáveis de ambiente explícitas (suporta convenções comuns como CHROME_BIN)
@@ -171,10 +170,10 @@ def criar_driver_chrome(
     if not binary_path:
         binary_path = localizar_executavel("chrome")
 
-    # Se estiver em Linux/Docker e não houver executável instalado, avisa explicitamente
-    if not binary_path and sys.platform != "win32":
+    # Se não houver executável instalado (em qualquer SO), falha imediatamente sem baixar driver à toa
+    if not binary_path:
         raise FileNotFoundError(
-            "Executável do Chrome/Chromium não foi encontrado no sistema (instale via apt: chromium)."
+            "Executável do Chrome/Chromium não foi encontrado no sistema."
         )
 
     options = ChromeOptions()
@@ -221,9 +220,9 @@ def criar_driver_edge(
     if not binary_path:
         binary_path = localizar_executavel("edge")
 
-    if not binary_path and sys.platform != "win32":
+    if not binary_path:
         raise FileNotFoundError(
-            "Executável do Microsoft Edge não foi encontrado no sistema Linux/Docker."
+            "Executável do Microsoft Edge não foi encontrado no sistema."
         )
 
     options = EdgeOptions()
@@ -282,9 +281,9 @@ def criar_driver_firefox(
     if not binary_path:
         binary_path = localizar_executavel("firefox")
 
-    if not binary_path and sys.platform != "win32":
+    if not binary_path:
         raise FileNotFoundError(
-            "Executável do Firefox não foi encontrado no sistema (instale via apt: firefox ou firefox-esr)."
+            "Executável do Firefox não foi encontrado no sistema."
         )
 
     options = FirefoxOptions()
