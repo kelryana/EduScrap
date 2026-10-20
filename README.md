@@ -108,23 +108,96 @@ flowchart TD
 
 Você pode iniciar o EduScrap de duas formas:
 
+### Comparativo: Rodar Local (`start.sh`) vs. Via Docker (`docker compose`)
+
+| Aspecto | 💻 Rodando Localmente (`./start.sh` ou `make run`) | 🐳 Rodando via Docker (`docker compose`) |
+| :--- | :--- | :--- |
+| **Isolamento** | Usa o ambiente da sua máquina (Python local, venv, navegadores e MongoDB do SO). | 100% isolado em containers (MongoDB, Python 3.12, Chromium e Frontend já prontos). |
+| **Requisitos** | Requer Python 3.12, MongoDB instalado e rodando localmente, e virtualenv configurado. | Requer apenas o Docker instalado. Nada precisa ser instalado na máquina host. |
+| **Navegador** | Usa o navegador instalado no seu SO (Firefox no Linux, Edge/Chrome no Windows). | Usa o **Chromium headless** embutido dentro da imagem Linux do container. |
+| **Consumo de RAM** | Mais leve (executa diretamente na memória do SO sem camada de virtualização). | Limites definidos no compose (~1 GB para backend, 1 GB para mongo, 256 MB para frontend). |
+| **Quando Usar?** | Ideal para desenvolvimento rápido, debug passo a passo e testes com pytest. | **Recomendado para produção**, padronização entre a equipe e deploy em servidores. |
+
+---
+
 ### Opção A: Via Docker Compose (Recomendado)
 
 Sobe todos os serviços (MongoDB 7.0, API FastAPI e Frontend) em containers isolados:
 
 ```bash
+# Se tiver o plugin Compose v2 (padrão no Windows e Linux recente):
 docker compose up --build -d
+
+# Se estiver usando o Docker Compose clássico no Linux (com hífen):
+docker-compose up --build -d
 ```
 
 Para verificar o status dos containers:
 ```bash
-docker compose ps
+docker compose ps       # ou: docker-compose ps
+```
+
+Para ver os logs em tempo real:
+```bash
+docker compose logs -f  # ou: docker-compose logs -f
 ```
 
 Para parar os serviços:
 ```bash
-docker compose down
+docker compose down     # ou: docker-compose down
 ```
+
+#### 🛠️ Solução de Problemas com Docker (Troubleshooting):
+
+> [!WARNING]
+> **No Linux (Linux Mint / Ubuntu):**
+> * **Erro `FileNotFoundError: No such file or directory` ou `Error while fetching server API version`:**
+>   * *Causa:* O serviço (daemon) do Docker está desligado.
+>   * *Solução:* Inicie o serviço com:
+>     ```bash
+>     sudo systemctl start docker
+>     sudo systemctl enable docker  # (opcional: inicia junto com o sistema)
+>     ```
+> * **Erro `permission denied while trying to connect to the Docker daemon socket`:**
+>   * *Causa:* Seu usuário não pertence ao grupo `docker`.
+>   * *Solução:* Execute `sudo usermod -aG docker $USER && newgrp docker`.
+> * **Erro `unknown flag: --build` ao rodar `docker compose`:**
+>   * *Causa:* O comando foi chamado com espaço mas o plugin v2 não está instalado.
+>   * *Solução:* Use com hífen `docker-compose up --build -d` ou instale o plugin via `sudo apt install docker-compose-v2`.
+
+> [!IMPORTANT]
+> **No Windows (Dev Luiz e outros):**
+> * **Erro `error during connect: This error may indicate that the docker daemon is not running`:**
+>   * *Causa:* O aplicativo **Docker Desktop** está fechado.
+>   * *Solução:* Abra o **Docker Desktop** pelo Menu Iniciar e aguarde o ícone da baleia no canto inferior indicar *"Engine running"*.
+> * **Erro de integração com WSL2:**
+>   * No Docker Desktop, vá em *Settings $\rightarrow$ Resources $\rightarrow$ WSL Integration* e certifique-se de ativar a distribuição utilizada (ex.: Ubuntu).
+
+#### 🛑 Como Parar e Desativar o Docker do Início Automático (Economizar Memória RAM e Bateria):
+
+Se você não quer que o Docker consuma memória e recursos em segundo plano ao ligar o computador:
+
+* **No Linux (Linux Mint / Ubuntu):**
+  1. **Desativar a inicialização automática ao ligar o PC:**
+     ```bash
+     sudo systemctl disable docker docker.socket
+     ```
+  2. **Parar o serviço agora (liberar memória RAM imediatamente):**
+     ```bash
+     sudo systemctl stop docker docker.socket
+     ```
+  3. **Verificar se está parado:**
+     ```bash
+     systemctl is-active docker  # Deve retornar: inactive
+     ```
+  4. *(Quando precisar usar o Docker novamente, basta ligar sob demanda com `sudo systemctl start docker`).*
+
+* **No Windows (Docker Desktop):**
+  1. Abra o **Docker Desktop** e clique no ícone de **Configurações (Engrenagem)** no topo.
+  2. Na aba **General**, desmarque a opção:
+     ☑️ **Start Docker Desktop when you log in** $\rightarrow$ altere para desmarcado.
+  3. Clique em **Apply & restart**.
+  4. Para fechar o Docker agora e liberar RAM: clique com o botão direito no ícone da baleia (na barra de tarefas perto do relógio) e escolha **Quit Docker Desktop**.
 
 ---
 
