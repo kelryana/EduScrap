@@ -160,16 +160,20 @@ Garante a inicialização do MongoDB local, configuração dos índices de busca
 O orquestrador `ScraperRunner` em `run_scrapers.py` dispara as varreduras em threads paralelas sem degradar a API:
 
 ```bash
-# Executa todas as fontes em paralelo multi-worker (Recomendado):
+# Executa todas as fontes em paralelo multi-worker (Local):
 python run_scrapers.py
 # ou:
 make scrape
 
-# Executa apenas fontes específicas (ex.: PRAE e PROEX):
-python run_scrapers.py prae proex
+# Executa apenas fontes específicas (ex.: PRAE e CIEE):
+python run_scrapers.py prae ciee
 
 # Executa em modo sequencial:
 python run_scrapers.py --serial
+
+# Se você estiver usando o Docker Compose:
+docker compose exec backend python scraper_ciee.py
+docker compose run --rm scraper-runner python run_scrapers.py
 ```
 
 ### Fontes Integradas:
@@ -238,10 +242,78 @@ O EduScrap foi arquitetado para permitir desenvolvimento fluido em máquinas **W
 
 | Recurso / Componente | Ambiente de Desenvolvimento (Windows) | Ambiente de Implantação (Linux Mint) | Comportamento / Ação Técnica |
 |:---|:---:|:---:|:---|
+| **Navegadores & WebDrivers (Selenium)** | Auto-detecção: Chrome $\rightarrow$ Edge $\rightarrow$ Brave $\rightarrow$ Firefox | Auto-detecção: Firefox $\rightarrow$ Chromium/Chrome | **Fábrica Unificada (`driver_factory.py`):** Elimina dependências rígidas. No Windows usa navegadores Chromium instalados (Edge nativo ou Chrome); no Linux usa Firefox ou Chromium; no Docker usa Chromium pré-instalado. |
 | **Eliminação de Zombies Chrome** | `taskkill /F /IM chrome.exe` | `pkill -f chrome` | **Multiplataforma automático:** `matar_processos_chrome()` detecta `sys.platform == "win32"` e executa o utilitário nativo correspondente. |
 | **Swappiness de Memória** | Gerenciado pelo `pagefile.sys` | `vm.swappiness=10` no `/etc/sysctl.conf` | `swappiness` é exclusivo do kernel Linux. No Windows, a memória virtual é tratada nativamente sem parâmetros adicionais. |
 | **Agendamento de Notificações e Limpeza** | Execução direta manual ou Agendador de Tarefas (`schtasks`) | **Systemd Timers** (`.service` + `.timer`) | No Linux Mint, os timers garantem dependência estrita (`After=eduscrap-scraper.service`). No Windows, os scripts são executados via `python notify_users.py` ou `schtasks`. |
 | **Docker Compose Limits** | Docker Desktop (WSL2) | Docker Engine (cgroups nativos) | No Windows, o WSL2 introduz uma leve camada de overhead. Se a máquina host possuir 8 GB de RAM, os limites de containers podem ser ajustados para 512 MB durante o desenvolvimento local. |
+
+---
+
+### Guia de Navegadores para Web Scraping (CIEE & Portal UERN)
+
+Os scrapers de plataformas dinâmicas (**CIEE** e **Portal UERN**) utilizam automação headless via Selenium. Para garantir que qualquer membro da equipe consiga executar a raspagem sem conflito de navegadores, o projeto utiliza a **Fábrica de Drivers Unificada** (`backend/driver_factory.py`).
+
+#### Como Funciona por Ambiente:
+
+```mermaid
+flowchart LR
+    subgraph Ambientes ["Ambientes de Execução"]
+        DOCKER["Docker (Containers)"]
+        WIN["Windows Nativo (Dev Luiz)"]
+        LINUX["Linux Mint (Dev Ana)"]
+    end
+
+    subgraph Factory ["driver_factory.py"]
+        DETECT["Auto-Detecção do Sistema & Fallback"]
+    end
+
+    subgraph Browsers ["Navegadores Utilizados"]
+        CHROMIUM["Chromium + Driver do Container"]
+        EDGE_CHROME["Edge (Nativo) ou Google Chrome"]
+        FIREFOX["Mozilla Firefox ou Chromium"]
+    end
+
+    DOCKER --> DETECT --> CHROMIUM
+    WIN --> DETECT --> EDGE_CHROME
+    LINUX --> DETECT --> FIREFOX
+```
+
+| Ambiente | Navegador Padrão | Requisitos / Dependências | Como Executar |
+| :--- | :--- | :--- | :--- |
+| **Docker Compose** *(Qualquer SO)* | **Chromium** (embutido no container) | Nenhuma no host! Instalado automaticamente no container via `Dockerfile.backend`. | `docker compose exec backend python scraper_ciee.py`<br>ou `docker compose run --rm scraper-runner python run_scrapers.py ciee` |
+| **Windows Nativo** *(Devs sem Firefox)* | **Microsoft Edge** ou **Chrome / Brave** | Ter o **Microsoft Edge** (já vem nativo no Windows 10/11) ou **Google Chrome** instalado. Não precisa de Firefox! | `python backend/scraper_ciee.py`<br>ou `python run_scrapers.py ciee` |
+| **Linux Mint / Ubuntu** | **Mozilla Firefox** ou **Chromium** | `firefox` instalado (`sudo apt install firefox`) ou `chromium` (`sudo apt install chromium chromium-driver`). | `python backend/scraper_ciee.py`<br>ou `python run_scrapers.py ciee` |
+
+#### Variáveis de Ambiente Opcionais (`.env`):
+Caso deseje forçar um navegador ou caminho específico, adicione ao seu arquivo `.env`:
+```ini
+# Opções: auto (padrão com fallback), chrome, edge, brave, firefox
+SELENIUM_BROWSER=auto
+
+# (Opcional) Caminhos manuais para binários ou drivers:
+# CHROME_BINARY_PATH="C:\Program Files\Google\Chrome\Application\chrome.exe"
+# BRAVE_PATH="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"
+# CHROMEDRIVER_PATH="/usr/bin/chromedriver"
+# GECKODRIVER_PATH=""
+```
+
+#### Solução de Problemas Frequentes (Troubleshooting):
+
+> [!TIP]
+> **Erro: `Status code was: 127` ao rodar dentro do Docker**
+> * **Causa:** O container Docker foi iniciado a partir de uma imagem antiga sem os pacotes do Chromium instalados.
+> * **Solução:** Reconstrua as imagens do Docker sem cache:
+>   ```bash
+>   docker compose build --no-cache backend scraper-runner
+>   docker compose up -d
+>   ```
+
+> [!NOTE]
+> **Erro: `Expected browser binary location, but unable to find binary`**
+> * **Causa:** O Selenium tentou abrir o Firefox em uma máquina que não possui o Firefox instalado (comum no Windows).
+> * **Solução:** O `driver_factory.py` já faz o fallback automático para o **Edge** ou **Chrome**. Se ainda ocorrer, verifique se o Microsoft Edge ou Chrome estão instalados ou configure explicitamente no `.env`: `SELENIUM_BROWSER=edge` ou `SELENIUM_BROWSER=chrome`.
+
 
 ### 1. Limites de Recursos no Docker Compose
 Para impedir que um container monopolize a memória RAM e cause travamento no sistema (OOM Killer), o `docker-compose.yml` define limites estritos e políticas de reinicialização resilientes:
@@ -304,7 +376,7 @@ pytest -v
 ./venv/bin/pytest tests/ -v
 ```
 
-**Resultado:** `85 passed, 0 failed` (100% de sucesso).
+**Resultado:** `104 passed, 0 failed` (100% de sucesso).
 
 > **Nota:** Os testes são executados manualmente antes de cada commit. Não há pipeline de CI/CD configurado no repositório.
 
@@ -315,6 +387,7 @@ pytest -v
 ```
 EduScrap/
 ├── backend/
+│   ├── driver_factory.py         # Fábrica unificada de WebDrivers (Chrome, Edge, Brave, Firefox)
 │   ├── base_scraper.py           # Classe abstrata BaseScraper (RNF05 / Figura 11)
 │   ├── models.py                 # Modelos Pydantic de domínio (OportunidadeModel, etc.)
 │   ├── mongo_database.py         # Classe MongoDatabase para persistência NoSQL
@@ -342,6 +415,7 @@ EduScrap/
 │   ├── course_mapping.json       # Mapeamento oficial de 15 cursos e áreas
 │   └── patterns.json             # Regras compiladas de Regex para extração
 ├── tests/
+│   ├── test_driver_factory.py    # Testes de auto-detecção de navegadores e fallback Selenium
 │   ├── test_novas_funcionalidades.py # Testes de MFA, logs, GridFS, .ics e notificações
 │   ├── test_fastapi_endpoints.py # Testes dos endpoints FastAPI e admin
 │   ├── test_performance.py       # Teste de latência do feed < 1s (RNF01)
