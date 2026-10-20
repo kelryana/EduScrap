@@ -715,12 +715,14 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    transition: all 0.15s ease-in-out;
+    translate: 0px;
+    scale: 1;
+    transition: translate 0.15s ease-in-out, transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out, border-color 0.15s ease-in-out;
     position: relative;
 }
 
 .card:hover {
-    transform: translate(-3px, -3px);
+    translate: -3px -3px;
     box-shadow: 10px 10px 0px var(--color-navy);
 }
 
@@ -5347,12 +5349,28 @@ html.dark .skeleton-actions {
     border-radius: 10px;
 }
 
-/* 2. MICRO-INTERACTION BUTTONS: SPRING EASING & TACTILE PRESS */
+/* 2. MICRO-INTERACTION BUTTONS: SPRING EASING & TACTILE PRESS (Modern Web Guidance) */
+.card,
+.tab-origem-btn,
+.btn-filtro-aluno,
+.btn-busca-memphis,
+.card-link-btn,
+.btn-favoritar-card,
+.btn-calendario-card,
+.btn-compartilhar-card,
+.chip-busca-rapida,
+.hero-fonte-pill {
+    translate: 0px;
+    scale: 1;
+}
+
 .card-link-btn,
 .btn-favoritar-card,
 .btn-calendario-card,
 .btn-compartilhar-card {
-    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+    transition: translate 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+                scale 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+                transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
                 box-shadow 0.22s ease,
                 background-color 0.2s ease,
                 color 0.2s ease !important;
@@ -5363,7 +5381,8 @@ html.dark .skeleton-actions {
 .btn-favoritar-card:active,
 .btn-calendario-card:active,
 .btn-compartilhar-card:active {
-    transform: translate(2px, 2px) scale(0.98) !important;
+    translate: 2px 2px !important;
+    scale: 0.98 !important;
     box-shadow: 1.5px 1.5px 0px var(--color-navy, #0F172A) !important;
 }
 
@@ -5386,7 +5405,7 @@ html.dark .skeleton-actions {
 }
 
 .btn-compartilhar-card:hover {
-    transform: translate(-1.5px, -1.5px);
+    translate: -1.5px -1.5px;
     box-shadow: 5px 5px 0px var(--color-navy);
     background-color: #F0FDF4;
     color: #16A34A;
@@ -5403,26 +5422,6 @@ html.dark .btn-compartilhar-card:hover {
     background: #15803D;
     color: #FFFFFF;
 }
-
-/* 3. ACCESSIBILITY: PREFERS-REDUCED-MOTION (SkillValix Rule 3) */
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
-    }
-    .skeleton-box {
-        animation: none !important;
-        background: #E2E8F0 !important;
-    }
-    html.dark .skeleton-box {
-        background: #334155 !important;
-    }
-}
-
 
 /*
    ESTILOS DO NOVO SELETOR DE FONTES INSTITUCIONAIS (Neobrutalism Select)
@@ -5444,7 +5443,8 @@ html.dark .btn-compartilhar-card:hover {
     box-shadow: 4px 4px 0px var(--color-navy);
     cursor: pointer;
     outline: none;
-    transition: all 0.15s ease;
+    translate: 0px;
+    transition: translate 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
     appearance: none;
     -webkit-appearance: none;
     background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%20256%20256%22%3E%3Cpath%20fill%3D%22%23112244%22%20d%3D%22M213.66%2C101.66l-80%2C80a8%2C8%2C0%2C0%2C1-11.32%2C0l-80-80A8%2C8%2C0%2C0%2C1%2C53.66%2C90.34L128%2C164.69l74.34-74.35a8%2C8%2C0%2C0%2C1%2C11.32%2C11.32Z%22%3E%3C%2Fpath%3E%3C%2Fsvg%3E");
@@ -5454,7 +5454,7 @@ html.dark .btn-compartilhar-card:hover {
 }
 
 .tab-origem-select:hover {
-    transform: translate(-2px, -2px);
+    translate: -2px -2px;
     box-shadow: 6px 6px 0px var(--color-navy);
     background-color: #F8FAFC;
 }
@@ -5490,3 +5490,119 @@ html.dark .tab-origem-select.ativo {
     border-color: #0F172A;
     box-shadow: 4px 4px 0px #0F172A;
 }
+
+/* ============================================================
+   4. BARRA DE BUSCA COM ÍCONE E BOTÃO LIMPAR & MICRO-INTERAÇÕES LIMPAS
+   ============================================================ */
+.input-busca-container {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.input-busca-container .input-busca-memphis {
+    width: 100%;
+    padding-left: 3.2rem;
+    padding-right: 3rem;
+}
+
+.input-busca-icon {
+    position: absolute;
+    left: 1.15rem;
+    font-size: 1.35rem;
+    color: #64748B;
+    pointer-events: none;
+}
+
+.btn-limpar-busca {
+    position: absolute;
+    right: 0.9rem;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 2px solid var(--color-navy, #0F172A);
+    background: #F1F5F9;
+    color: var(--color-navy, #0F172A);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.15s ease;
+}
+
+.btn-limpar-busca[hidden] {
+    display: none;
+}
+
+.btn-limpar-busca:hover {
+    background: #FFE4E6;
+    color: #E11D48;
+}
+
+html.dark .btn-limpar-busca {
+    background: #334155;
+    color: #F8FAFC;
+    border-color: #64748B;
+}
+
+/* Faixa superior horizontal combinando com a cor da tag do card */
+.card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 7px;
+    background-color: var(--card-accent, var(--color-orange, #FF5C00));
+    border-bottom: 2px solid var(--color-navy, #0F172A);
+    border-radius: 13px 13px 0 0;
+}
+
+.card-link-btn i {
+    translate: 0px;
+    transition: translate 0.18s ease;
+}
+
+.card-link-btn:hover i {
+    translate: 3px -2px;
+}
+
+/* Fallback for older browsers without individual transform properties */
+@supports not (translate: 0px) {
+    .card:hover {
+        transform: translate(-3px, -3px);
+    }
+    .btn-compartilhar-card:hover {
+        transform: translate(-1.5px, -1.5px);
+    }
+    .card-link-btn:active,
+    .btn-favoritar-card:active,
+    .btn-calendario-card:active,
+    .btn-compartilhar-card:active {
+        transform: translate(2px, 2px) scale(0.98);
+    }
+}
+
+/* Case-by-case reduced motion handling */
+@media (prefers-reduced-motion: reduce) {
+    .skeleton-box {
+        animation: none !important;
+        background: #E2E8F0 !important;
+    }
+    html.dark .skeleton-box {
+        background: #334155 !important;
+    }
+    .grid-vagas,
+    .card,
+    .card-link-btn,
+    .btn-favoritar-card,
+    .btn-calendario-card,
+    .btn-compartilhar-card,
+    .tab-origem-btn,
+    .btn-filtro-aluno {
+        transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
+    }
+}
+

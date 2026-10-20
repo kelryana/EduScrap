@@ -199,3 +199,18 @@ test('6. CIEE: cards devem exibir título detalhado e metadados ao invés de ape
     assert.match(htmlGerado, /href="https:\/\/portal\.ciee\.org\.br\/quero-uma-vaga\/\?codigoVaga=6148015"/, 'Link deve apontar diretamente para a vaga no CIEE');
     assert.match(htmlGerado, /Ver Vaga no CIEE/, 'Texto da ação deve ser Ver Vaga no CIEE');
 });
+
+test('7. Busca rápida: atualizarBotaoLimparBusca alterna visibilidade conforme texto digitado', () => {
+    const ctx = criarContextoFrontend();
+    const input = ctx.document.getElementById('input-busca');
+    const btnLimpar = ctx.document.getElementById('btn-limpar-busca');
+
+    input.value = '';
+    ctx.atualizarBotaoLimparBusca();
+    assert.equal(btnLimpar.hidden, true, 'Botão limpar deve ficar oculto quando input está vazio');
+
+    input.value = 'computação';
+    ctx.atualizarBotaoLimparBusca();
+    assert.equal(btnLimpar.hidden, false, 'Botão limpar deve aparecer quando há termo digitado');
+});
+

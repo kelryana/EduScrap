@@ -643,7 +643,7 @@ async function carregarFeedPersonalizado() {
 }
 
 function destacarBotaoAtivo(idBotao) {
-    document.querySelectorAll('.tab-origem-btn, .btn-filtro-aluno').forEach(btn => btn.classList.remove('ativo'));
+    document.querySelectorAll('.tab-origem-btn, .btn-filtro-aluno, .chip-busca-rapida').forEach(btn => btn.classList.remove('ativo'));
     const seletorFonte = document.getElementById('seletor-fonte-institucional');
 
     const btn = document.getElementById(idBotao);
@@ -905,24 +905,31 @@ function toggleFiltroVigentes() {
 }
 
 /* ============================================================
-   Transição suave entre categorias/páginas (evita "hard cut")
-   - Conteúdo anterior fica esmaecido (não some de repente);
-   - Skeleton só aparece se a resposta demorar (> ATRASO_SKELETON_MS);
-   - Novos cards entram com fade + leve deslocamento (CSS .card).
+   Transição invisível e estável entre categorias/páginas:
+   - Respostas rápidas (< ATRASO_DIMMING_MS) trocam os cards direto sem piscar;
+   - Só esmaece levemente após ATRASO_DIMMING_MS;
+   - Skeleton só aparece se a resposta realmente demorar (> ATRASO_SKELETON_MS).
    ============================================================ */
-const ATRASO_SKELETON_MS = 350;
+const ATRASO_DIMMING_MS = 140;
+const ATRASO_SKELETON_MS = 600;
 let tokenCarregamentoAtual = 0;
 
 function iniciarCarregamentoSuave(container) {
     const meuToken = ++tokenCarregamentoAtual;
     const temConteudo = !!container.querySelector('.card');
+    let timerDimming = null;
     let timerSkeleton = null;
 
     const paginacao = document.getElementById('bloco-paginacao');
     if (paginacao) paginacao.classList.add('paginacao-carregando');
 
     if (temConteudo) {
-        container.classList.add('carregando');
+        timerDimming = setTimeout(() => {
+            if (meuToken === tokenCarregamentoAtual) {
+                container.classList.add('carregando');
+            }
+        }, ATRASO_DIMMING_MS);
+
         timerSkeleton = setTimeout(() => {
             if (meuToken === tokenCarregamentoAtual) {
                 container.classList.remove('carregando');
@@ -937,6 +944,7 @@ function iniciarCarregamentoSuave(container) {
         // false quando outra requisição mais nova já assumiu (resposta obsoleta deve ser descartada)
         ativo: () => meuToken === tokenCarregamentoAtual,
         finalizar: () => {
+            clearTimeout(timerDimming);
             clearTimeout(timerSkeleton);
             if (meuToken !== tokenCarregamentoAtual) return;
             container.classList.remove('carregando');
@@ -1049,7 +1057,7 @@ function renderizarCards(listaDeVagas) {
     const favSet = (usuarioAtual && usuarioAtual.favoritos) ? new Set(usuarioAtual.favoritos.map(String)) : new Set();
     let htmlCards = '';
 
-    listaDeVagas.forEach(vaga => {
+    listaDeVagas.forEach((vaga, idx) => {
         const idStr = String(vaga._id);
         const ehFavorito = vaga.favorito === true || favSet.has(idStr);
         const catLower = (vaga.categoria || "").toLowerCase();
@@ -1207,7 +1215,7 @@ function renderizarCards(listaDeVagas) {
         ` : '';
 
         const cardHTML = `
-            <div class="card ${classeVencido}">
+            <div class="card ${classeVencido}" style="--card-accent: ${corTag};">
                 <div class="card-topo">
                     <div class="card-tags-row">
                         <span class="card-categoria-tag" style="background-color: ${corTag};" title="${vaga.categoria || 'Geral'}">
@@ -1494,17 +1502,30 @@ function renderizarControlesPaginacao(atual, total, limite) {
 }
 
 // 1. Pesquisa Textual
+function atualizarBotaoLimparBusca() {
+    const input = document.getElementById('input-busca');
+    const btnLimpar = document.getElementById('btn-limpar-busca');
+    if (!input || !btnLimpar) return;
+    btnLimpar.hidden = !input.value || input.value.trim().length === 0;
+}
+
+function limparPesquisaRapida() {
+    const input = document.getElementById('input-busca');
+    if (input) input.value = '';
+    atualizarBotaoLimparBusca();
+    carregarDados('estagios', 1);
+}
+
 async function realizarPesquisa() {
     const termo = document.getElementById('input-busca').value;
     if (!termo) return;
+    atualizarBotaoLimparBusca();
 
     alternarExibicaoFiltroVigentes(true);
 
     const container = document.getElementById('container-vagas');
     container.style.display = 'grid';
-    tokenCarregamentoAtual++; // invalida carregamentos de categoria ainda em andamento
-    container.classList.remove('carregando');
-    renderizarSkeletons(6);
+    const carga = iniciarCarregamentoSuave(container);
 
     const antigo = document.getElementById('bloco-paginacao');
     if (antigo) antigo.remove();
@@ -1521,9 +1542,11 @@ async function realizarPesquisa() {
         }
 
         const dados = await resposta.json();
+        if (!carga.ativo()) return;
         renderizarCards(dados);
         document.querySelectorAll('.tab-origem-btn, .btn-filtro-aluno').forEach(b => b.classList.remove('ativo'));
     } catch (e) {
+        if (!carga.ativo()) return;
         console.error("Erro na pesquisa:", e);
         renderizarEstadoErro(container, {
             titulo: "Não foi possível concluir a busca",
@@ -1532,6 +1555,8 @@ async function realizarPesquisa() {
             acaoFuncao: "realizarPesquisa()",
             icone: "ph-magnifying-glass"
         });
+    } finally {
+        carga.finalizar();
     }
 }
 

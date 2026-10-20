@@ -226,10 +226,17 @@
 
         <!-- Barra de Busca Ampla e Acessível -->
         <div class="busca-wrapper">
-            <input type="text" id="input-busca"
-                class="input-busca-memphis"
-                placeholder="Pesquisar editais (ex: estágio, computação, bolsa, UERN)..."
-                onkeyup="if(event.key === 'Enter') realizarPesquisa()">
+            <div class="input-busca-container">
+                <i class="ph-bold ph-magnifying-glass input-busca-icon" aria-hidden="true"></i>
+                <input type="text" id="input-busca"
+                    class="input-busca-memphis"
+                    placeholder="Pesquisar editais (ex: estágio, computação, bolsa, UERN)..."
+                    oninput="atualizarBotaoLimparBusca()"
+                    onkeyup="if(event.key === 'Enter') realizarPesquisa()">
+                <button type="button" id="btn-limpar-busca" class="btn-limpar-busca" onclick="limparPesquisaRapida()" title="Limpar busca" aria-label="Limpar busca" hidden>
+                    <i class="ph-bold ph-x"></i>
+                </button>
+            </div>
             <button id="btn-pesquisar" class="btn-busca-memphis" onclick="realizarPesquisa()">
                 <i class="ph-bold ph-magnifying-glass"></i> Buscar
             </button>

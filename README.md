@@ -261,6 +261,42 @@ docker compose run --rm scraper-runner python run_scrapers.py
 | `ifrn` | IFRN | Processos seletivos e bolsas | `editais` |
 | `dom_mossoro` | DOM Mossoró | Editais municipais oficiais | `editais` |
 
+### 🛠️ Solução de Problemas nas Vagas do CIEE e Web Scraping (Troubleshooting):
+
+> [!TIP]
+> **1. Todos os links do CIEE levando para a página inicial geral (`https://portal.ciee.org.br/`) em vez da vaga individual:**
+> * **Sintoma:** No MongoDB Compass ou ao clicar no botão do card, o campo `link` aponta apenas para `https://portal.ciee.org.br/` em todas as vagas.
+> * **Causa:** O container HTML do card no portal do CIEE possui âncoras institucionais (`<a>`) que apontam para a home do site. Em versões anteriores, a captura genérica do primeiro `<a>` sobrescrevia a URL parametrizada da vaga.
+> * **Como foi resolvido e como corrigir seu banco:**
+>   1. O método `_montar_link` em [`backend/scraper_ciee.py`](file:///home/ana/projetos/EduScrap/backend/scraper_ciee.py) agora filtra e ignora links da homepage ou âncoras vazias (`#`, `javascript:void(0)`), fixando o link direto da oportunidade: `https://portal.ciee.org.br/quero-uma-vaga/?codigoVaga={CODIGO}`.
+>   2. **Auto-migração no `./start.sh`:** Ao rodar `./start.sh` (ou `python3 backend/database_setup.py`), o sistema localiza automaticamente documentos antigos na coleção `vagas_ciee` que estejam com o link genérico, extrai o código da vaga (ex.: `[6238649]`) e atualiza o campo `link` no MongoDB sem precisar rodar o scraper novamente.
+>   3. A API ([`backend/main.py`](file:///home/ana/projetos/EduScrap/backend/main.py)) e o Frontend ([`frontend/script.js`](file:///home/ana/projetos/EduScrap/frontend/script.js)) também convertem links genéricos em tempo real e exibem o botão **"Ver Vaga no CIEE"**.
+
+> [!TIP]
+> **2. Cards do CIEE aparecendo apenas com o título repetido `"Vaga CIEE"` (sem área, código ou bolsa):**
+> * **Sintoma:** Todos os cards da aba CIEE mostram apenas `"Vaga CIEE"` no título, ocultando a área de atuação e o valor da bolsa.
+> * **Causa:** O scraper gravava apenas a modalidade genérica no campo `titulo` e deixava a string detalhada apenas em `nome_completo`, que era ignorada pelo frontend quando `titulo` já existia.
+> * **Como foi resolvido:**
+>   1. O scraper agora salva o título completo diretamente em `titulo` e `nome` no formato `[CÓDIGO] Modalidade - Área (Remuneração)`.
+>   2. O backend e o frontend enriquecem automaticamente registros antigos e exibem linhas dedicadas com ícones para **Remuneração** (💰) e **Localidade** (📍).
+>   3. Caso queira forçar a atualização semântica de todos os registros existentes no banco local, basta rodar:
+>      ```bash
+>      ./venv/bin/python backend/enriquecer_banco.py
+>      ```
+
+> [!TIP]
+> **3. Erro `Service geckodriver exited with Status code: 127` ou navegador não encontrado (Windows / Linux / Docker):**
+> * **Causa:** Ocorria quando a máquina não possuía o Firefox instalado (comum no Windows usando apenas Edge/Chrome) ou quando o container Docker rodava uma imagem antiga em cache sem as bibliotecas do navegador.
+> * **Solução:**
+>   * **Local (Windows/Linux):** A fábrica unificada [`backend/driver_factory.py`](file:///home/ana/projetos/EduScrap/backend/driver_factory.py) detecta automaticamente o sistema operacional e faz fallback entre **Chrome, Chromium, Microsoft Edge, Brave e Firefox**. Você também pode forçar um navegador específico no `.env` com `SELENIUM_BROWSER=edge` (ou `chrome` / `firefox`).
+>   * **No Docker:** Reconstrua a imagem invalidando o cache antigo para instalar o `chromium` e `chromium-driver` nativos:
+>     ```bash
+>     docker compose down --rmi local
+>     docker compose up --build -d --force-recreate
+>     # Ou via Makefile:
+>     make docker-rebuild
+>     ```
+
 ---
 
 ## Referência da API RESTful (FastAPI)
