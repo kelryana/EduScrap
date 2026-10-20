@@ -196,4 +196,6 @@ test('6. CIEE: cards devem exibir título detalhado e metadados ao invés de ape
     assert.match(htmlGerado, /Seguridade Social Obrigatória/, 'Deve conter a área da vaga');
     assert.match(htmlGerado, /Remuneração:/, 'Deve conter linha de remuneração');
     assert.match(htmlGerado, /Local:/, 'Deve conter linha de localidade');
+    assert.match(htmlGerado, /href="https:\/\/portal\.ciee\.org\.br\/quero-uma-vaga\/\?codigoVaga=6148015"/, 'Link deve apontar diretamente para a vaga no CIEE');
+    assert.match(htmlGerado, /Ver Vaga no CIEE/, 'Texto da ação deve ser Ver Vaga no CIEE');
 });

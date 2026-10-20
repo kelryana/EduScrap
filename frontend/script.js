@@ -527,11 +527,12 @@ async function carregarFavoritos() {
     }
 
     container.style.display = 'grid';
-    container.innerHTML = '<p class="carregando">Carregando suas oportunidades salvas...</p>';
+    renderizarSkeletons(6);
 
     try {
         const resp = await fetch(`${API_URL}/favoritos`, {
-            headers: getAuthHeaders()
+            headers: getAuthHeaders(),
+            signal: AbortSignal.timeout(10000)
         });
 
         if (!resp.ok) throw new Error("Erro ao carregar favoritos");
@@ -568,18 +569,14 @@ async function carregarFavoritos() {
         renderizarCards(lista);
 
     } catch (err) {
-        container.style.display = 'block';
-        container.innerHTML = `
-            <div class="status-box" style="border-color: var(--color-red);">
-                <h3 class="status-box-titulo" style="color: var(--color-red);"><i class="ph-bold ph-warning-circle"></i> Falha ao Carregar Favoritos</h3>
-                <p class="status-box-texto">${err.message}. Verifique a conexão com o servidor.</p>
-                <div style="margin-top: 15px; display: flex; justify-content: center;">
-                    <button class="btn-hero-secondary" onclick="carregarDados('estagios', 1)">
-                        <i class="ph ph-arrow-left"></i> Voltar aos Editais
-                    </button>
-                </div>
-            </div>
-        `;
+        console.error("Erro ao carregar favoritos:", err);
+        renderizarEstadoErro(container, {
+            titulo: "Não foi possível carregar seus editais salvos",
+            mensagem: "Houve uma instabilidade temporária ao consultar seus favoritos. Por favor, tente novamente.",
+            acaoTexto: "Tentar Novamente",
+            acaoFuncao: "carregarFavoritos()",
+            icone: "ph-star"
+        });
     }
 }
 
@@ -610,11 +607,12 @@ async function carregarFeedPersonalizado() {
     }
 
     container.style.display = 'grid';
-    container.innerHTML = '<p class="carregando">Cruzando seus cursos e áreas com editais vigentes...</p>';
+    renderizarSkeletons(6);
 
     try {
         const resp = await fetch(`${API_URL}/feed/personalizado`, {
-            headers: getAuthHeaders()
+            headers: getAuthHeaders(),
+            signal: AbortSignal.timeout(10000)
         });
 
         if (!resp.ok) throw new Error("Erro ao buscar recomendações");
@@ -634,7 +632,14 @@ async function carregarFeedPersonalizado() {
         renderizarCards(lista);
 
     } catch (err) {
-        container.innerHTML = `<p class="carregando" style="color: red;">Erro ao gerar feed personalizado: ${err.message}</p>`;
+        console.error("Erro ao gerar feed personalizado:", err);
+        renderizarEstadoErro(container, {
+            titulo: "Não foi possível carregar seu feed personalizado",
+            mensagem: "Houve uma instabilidade momentânea ao cruzar seus cursos de interesse. Por favor, tente novamente.",
+            acaoTexto: "Tentar Novamente",
+            acaoFuncao: "carregarFeedPersonalizado()",
+            icone: "ph-sparkle"
+        });
     }
 }
 
@@ -926,7 +931,13 @@ async function carregarDados(tipo, novaPagina = 1) {
 
     } catch (erro) {
         console.error("Erro ao buscar dados paginados:", erro);
-        container.innerHTML = `<p class="carregando" style="color: red;">Erro ao conectar com a API: ${erro.message || 'Verifique se o backend está em execução.'}</p>`;
+        renderizarEstadoErro(container, {
+            titulo: "Não foi possível carregar as oportunidades",
+            mensagem: "Houve uma instabilidade temporária ao consultar os editais. Por favor, tente novamente.",
+            acaoTexto: "Tentar Novamente",
+            acaoFuncao: `carregarDados('${tipo}', ${paginaAtual})`,
+            icone: "ph-cloud-slash"
+        });
     }
 }
 
@@ -1048,12 +1059,23 @@ function renderizarCards(listaDeVagas) {
             `;
         }
 
-        const linkDestino = vaga.link || vaga.url || '#';
+        let linkDestino = vaga.link || vaga.url || '#';
+        if (linkDestino === 'https://portal.ciee.org.br/' || linkDestino === 'https://portal.ciee.org.br' || ((vaga.fonte === 'CIEE' || tipoAtual === 'ciee') && (!vaga.link || vaga.link === '#'))) {
+            const cod = (vaga.codigo && vaga.codigo !== 'N/A')
+                ? vaga.codigo
+                : ((tituloBruto && tituloBruto.match(/\[(\d{6,})\]/)) ? tituloBruto.match(/\[(\d{6,})\]/)[1] : null);
+            linkDestino = cod
+                ? `https://portal.ciee.org.br/quero-uma-vaga/?codigoVaga=${cod}`
+                : 'https://portal.ciee.org.br/quero-uma-vaga/';
+        }
+
         let textoAcao = 'Ver Edital Oficial';
         if (ehNoticia) {
             textoAcao = 'Ler Notícia';
         } else if (tipoAtual === 'cursos-bolsas' || vaga.tipo === 'capacitacao') {
             textoAcao = 'Ver Curso / Inscrever-se';
+        } else if (vaga.fonte === 'CIEE' || tipoAtual === 'ciee') {
+            textoAcao = 'Ver Vaga no CIEE';
         }
 
         // Botão de calendário apenas para editais/vagas VIGENTES (não faz sentido lembrete para edital encerrado ou notícia)
@@ -1243,7 +1265,8 @@ async function realizarPesquisa() {
     alternarExibicaoFiltroVigentes(true);
 
     const container = document.getElementById('container-vagas');
-    container.innerHTML = '<p class="carregando">Consultando índices no MongoDB...</p>';
+    container.style.display = 'grid';
+    renderizarSkeletons(6);
 
     const antigo = document.getElementById('bloco-paginacao');
     if (antigo) antigo.remove();
@@ -1264,7 +1287,13 @@ async function realizarPesquisa() {
         document.querySelectorAll('.tab-origem-btn, .btn-filtro-aluno').forEach(b => b.classList.remove('ativo'));
     } catch (e) {
         console.error("Erro na pesquisa:", e);
-        container.innerHTML = `<div class="status-box" style="border-color: var(--color-red);"><h3 class="status-box-titulo" style="color: var(--color-red);">Erro na Pesquisa</h3><p class="status-box-texto">${e.message}</p></div>`;
+        renderizarEstadoErro(container, {
+            titulo: "Não foi possível concluir a busca",
+            mensagem: "Houve uma instabilidade temporária ao consultar os editais. Por favor, tente novamente.",
+            acaoTexto: "Tentar Novamente",
+            acaoFuncao: "realizarPesquisa()",
+            icone: "ph-magnifying-glass"
+        });
     }
 }
 
@@ -1509,8 +1538,7 @@ async function carregarEstatisticas() {
     if (antigo) antigo.remove();
 
     const container = document.getElementById('container-vagas');
-    container.style.display = 'block';
-    container.innerHTML = '<p class="carregando">Gerando painel visual...</p>';
+    renderizarSkeletonDashboard();
 
     destacarBotaoAtivo('btn-analises');
 
@@ -1937,11 +1965,14 @@ async function carregarEstatisticas() {
 
         ajustarCoresDashboardParaTema();
     } catch (erro) {
-        container.innerHTML = `
-            <div class="status-box" style="border-color: var(--color-red);">
-                <h3 class="status-box-titulo" style="color: var(--color-red);">Falha ao gerar painel</h3>
-                <p class="status-box-texto">${erro.message}. Verifique se a API está rodando em localhost:8000.</p>
-            </div>`;
+        console.error("Erro ao gerar estatísticas:", erro);
+        renderizarEstadoErro(container, {
+            titulo: "Painel Estatístico Indisponível",
+            mensagem: "Não foi possível carregar os dados métricos das oportunidades no momento. Por favor, tente novamente em instantes.",
+            acaoTexto: "Tentar Novamente",
+            acaoFuncao: "carregarEstatisticas()",
+            icone: "ph-chart-pie-slice"
+        });
     }
 }
 
@@ -2372,6 +2403,64 @@ function renderizarSkeletons(quantidade = 6) {
         `;
     }
     container.innerHTML = skeletonsHTML;
+}
+
+function renderizarSkeletonDashboard() {
+    const container = document.getElementById('container-vagas');
+    if (!container) return;
+    container.style.display = 'block';
+    container.innerHTML = `
+        <div class="w-full max-w-[1380px] bg-white dark:bg-slate-800 rounded-3xl border-3 border-slate-900 shadow-brutal-xl p-6 sm:p-8 space-y-6 mx-auto" aria-hidden="true">
+            <div class="skeleton-box" style="height: 36px; width: 340px; margin: 0 auto 28px auto; border-radius: 8px;"></div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 sm:gap-3.5">
+                ${Array(8).fill(0).map(() => `
+                    <div class="skeleton-card" style="min-height: 110px; padding: 14px 10px; border-width: 2.5px; border-radius: 14px;">
+                        <div class="skeleton-box" style="height: 36px; width: 36px; border-radius: 10px; margin: 0 auto 10px auto;"></div>
+                        <div class="skeleton-box" style="height: 14px; width: 75%; margin: 0 auto;"></div>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <div class="skeleton-card" style="min-height: 260px; padding: 24px;">
+                    <div class="skeleton-box skeleton-title" style="margin-bottom: 24px; height: 26px;"></div>
+                    <div class="skeleton-box" style="height: 160px; width: 100%; border-radius: 12px;"></div>
+                </div>
+                <div class="skeleton-card" style="min-height: 260px; padding: 24px;">
+                    <div class="skeleton-box skeleton-title" style="margin-bottom: 24px; height: 26px;"></div>
+                    <div class="skeleton-box" style="height: 160px; width: 100%; border-radius: 12px;"></div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderizarEstadoErro(container, {
+    titulo = "Não foi possível carregar as informações",
+    mensagem = "Ocorreu uma instabilidade momentânea na conexão com as fontes de oportunidades. Por favor, tente novamente em alguns instantes.",
+    acaoTexto = "Tentar Novamente",
+    acaoFuncao = "carregarDados('estagios', 1)",
+    icone = "ph-cloud-slash"
+} = {}) {
+    if (!container) return;
+    container.style.display = 'block';
+    container.innerHTML = `
+        <div class="status-box status-box-erro-amigavel" role="alert" aria-live="assertive">
+            <div class="status-box-decor"></div>
+            <div class="status-box-icone-wrapper">
+                <i class="ph-bold ${icone}"></i>
+            </div>
+            <h3 class="status-box-titulo">${escaparHTML(titulo)}</h3>
+            <p class="status-box-texto">${escaparHTML(mensagem)}</p>
+            <div style="margin-top: 24px; display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;">
+                <button class="btn-hero-primary" onclick="${acaoFuncao}">
+                    <i class="ph-bold ph-arrow-clockwise"></i> ${escaparHTML(acaoTexto)}
+                </button>
+                <button class="btn-hero-secondary" onclick="carregarDados('estagios', 1)">
+                    <i class="ph-bold ph-house"></i> Voltar ao Início
+                </button>
+            </div>
+        </div>
+    `;
 }
 
 async function compartilharLinkEdital(titulo, link, event) {

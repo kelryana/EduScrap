@@ -71,6 +71,26 @@ def configurar_banco_avancado():
     except Exception as e:
         logger.info(f"Nota do Validador: {e}")
 
+    # Migração / Correção de links genéricos do CIEE para a página individual da vaga
+    try:
+        import re
+        col_ciee = db["vagas_ciee"]
+        docs_ciee = list(col_ciee.find({"link": {"$in": ["https://portal.ciee.org.br/", "https://portal.ciee.org.br", "", None]}}))
+        migrados = 0
+        for doc in docs_ciee:
+            cod = doc.get("codigo")
+            if not cod or cod == "N/A":
+                match = re.search(r"\[(\d{6,})\]", doc.get("nome", "") or doc.get("titulo", ""))
+                if match:
+                    cod = match.group(1)
+            novo_link = f"https://portal.ciee.org.br/quero-uma-vaga/?codigoVaga={cod}" if cod and cod != "N/A" else "https://portal.ciee.org.br/quero-uma-vaga/"
+            col_ciee.update_one({"_id": doc["_id"]}, {"$set": {"link": novo_link}})
+            migrados += 1
+        if migrados > 0:
+            logger.info(f"-> Migrados {migrados} links do CIEE para páginas individuais de estágio.")
+    except Exception as e:
+        logger.warning(f"Nota na migração de links CIEE: {e}")
+
     print("\n" + "="*60)
     logger.info("SISTEMA OTIMIZADO COM SUCESSO!")
     print("="*60 + "\n")

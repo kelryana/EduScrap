@@ -305,18 +305,25 @@ class ScraperCIEEHibrido:
         return None
 
     def _montar_link(self, card, codigo_vaga: str) -> str:
-      
-        if codigo_vaga == "N/A":
-            return URL_CIEE
-        link_detalhe = f"{URL_CIEE.rstrip('/')}/quero-uma-vaga/?codigoVaga={codigo_vaga}"
+        url_base_vagas = f"{URL_CIEE.rstrip('/')}/quero-uma-vaga/"
+        if codigo_vaga and codigo_vaga != "N/A":
+            link_esperado = f"{url_base_vagas}?codigoVaga={codigo_vaga}"
+        else:
+            link_esperado = url_base_vagas
+
         try:
-            link_elem = card.find_element(By.TAG_NAME, "a")
-            href = link_elem.get_attribute("href")
-            if href:
-                link_detalhe = href
+            links = card.find_elements(By.TAG_NAME, "a")
+            for elem in links:
+                href = elem.get_attribute("href") or ""
+                href_limpo = href.strip()
+                if not href_limpo or href_limpo in (URL_CIEE, f"{URL_CIEE.rstrip('/')}/", "#", "javascript:void(0)", "javascript:;"):
+                    continue
+                if (codigo_vaga and codigo_vaga != "N/A" and codigo_vaga in href_limpo) or "vaga" in href_limpo.lower() or "detalhe" in href_limpo.lower():
+                    return href_limpo
         except Exception:
             pass
-        return link_detalhe
+
+        return link_esperado
 
     def _parse_card(self, texto_card: str, link: str) -> dict:
         

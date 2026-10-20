@@ -367,6 +367,20 @@ def listar_todas_oportunidades(
                         titulo_doc = f"{pfx}{cargo} - {doc['area']}{sal_txt}"
                 doc["titulo"] = titulo_doc or "Oportunidade"
                 doc["nome"] = doc["titulo"]
+
+                # Normaliza link genérico do CIEE para o link individual ou vitrine direta
+                link_doc = doc.get("link") or ""
+                if link_doc in ("https://portal.ciee.org.br/", "https://portal.ciee.org.br", "", "#") and (doc.get("fonte") == "CIEE" or "ciee" in col_name):
+                    cod = doc.get("codigo")
+                    if not cod or cod == "N/A":
+                        match = re.search(r"\[(\d{6,})\]", doc.get("nome", "") or doc.get("titulo", ""))
+                        if match:
+                            cod = match.group(1)
+                    if cod and cod != "N/A":
+                        doc["link"] = f"https://portal.ciee.org.br/quero-uma-vaga/?codigoVaga={cod}"
+                    else:
+                        doc["link"] = "https://portal.ciee.org.br/quero-uma-vaga/"
+
                 doc = enriquecer_doc(doc, usuario)
 
                 if apenas_vigentes and doc.get("status_prazo") == "vencido":
@@ -525,6 +539,20 @@ def listar_ciee(
 
         vaga["nome"] = titulo_doc
         vaga["titulo"] = titulo_doc
+
+        # Normaliza link genérico do CIEE para o link individual ou vitrine direta
+        link_vaga = vaga.get("link") or ""
+        if link_vaga in ("https://portal.ciee.org.br/", "https://portal.ciee.org.br", "", "#"):
+            cod = vaga.get("codigo")
+            if not cod or cod == "N/A":
+                match = re.search(r"\[(\d{6,})\]", vaga.get("nome", "") or vaga.get("titulo", ""))
+                if match:
+                    cod = match.group(1)
+            if cod and cod != "N/A":
+                vaga["link"] = f"https://portal.ciee.org.br/quero-uma-vaga/?codigoVaga={cod}"
+            else:
+                vaga["link"] = "https://portal.ciee.org.br/quero-uma-vaga/"
+
         vaga = enriquecer_doc(vaga, usuario)
         lista_ciee.append(vaga)
 
@@ -1718,6 +1746,20 @@ def feed_personalizado(usuario: dict = Depends(obter_usuario_logado), limite: in
                         titulo_doc = f"{pfx}{cargo} - {doc['area']}{sal_txt}"
                 doc["titulo"] = titulo_doc or "Oportunidade"
                 doc["nome"] = doc["titulo"]
+
+                # Normaliza link genérico do CIEE para o link individual ou vitrine direta
+                link_doc = doc.get("link") or ""
+                if link_doc in ("https://portal.ciee.org.br/", "https://portal.ciee.org.br", "", "#") and (doc.get("fonte") == "CIEE" or "ciee" in cname):
+                    cod = doc.get("codigo")
+                    if not cod or cod == "N/A":
+                        match = re.search(r"\[(\d{6,})\]", doc.get("nome", "") or doc.get("titulo", ""))
+                        if match:
+                            cod = match.group(1)
+                    if cod and cod != "N/A":
+                        doc["link"] = f"https://portal.ciee.org.br/quero-uma-vaga/?codigoVaga={cod}"
+                    else:
+                        doc["link"] = "https://portal.ciee.org.br/quero-uma-vaga/"
+
                 doc = enriquecer_prazo(doc)
                 doc = resolver_vinculo_fonte(doc)
                 doc["favorito"] = doc_id in fav_set

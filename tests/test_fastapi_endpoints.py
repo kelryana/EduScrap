@@ -122,7 +122,7 @@ def test_fastapi_ciee_endpoint_titulo_rico(client):
                 "categoria": "Estágio",
                 "area": "Seguridade Social",
                 "salario": "R$ 1.500,00",
-                "link": "https://portal.ciee.org.br/vaga/6148015"
+                "link": "https://portal.ciee.org.br/"
             }
         ]
         mock_db.__getitem__.return_value = mock_col
@@ -133,5 +133,6 @@ def test_fastapi_ciee_endpoint_titulo_rico(client):
         assert len(dados) == 1
         assert dados[0]["titulo"] == "[6148015] Estágio - Seguridade Social (R$ 1.500,00)"
         assert dados[0]["nome"] == "[6148015] Estágio - Seguridade Social (R$ 1.500,00)"
+        assert dados[0]["link"] == "https://portal.ciee.org.br/quero-uma-vaga/?codigoVaga=6148015"
 
 

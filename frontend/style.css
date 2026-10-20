@@ -900,9 +900,75 @@ body {
     color: var(--color-navy-text, #112244);
 }
 
-/* =========================================================
+/* Estado de Erro Amigável (NN/g & Smashing Magazine Standards) */
+.status-box-erro-amigavel {
+    border: 3.5px solid var(--color-navy) !important;
+    border-radius: 18px !important;
+    background-color: #FFFFFF !important;
+    box-shadow: 7px 7px 0px var(--color-navy) !important;
+    padding: 3rem 2rem !important;
+    max-width: 620px !important;
+    margin: 2.5rem auto !important;
+    text-align: center;
+}
+
+html.dark .status-box-erro-amigavel {
+    background-color: #1E293B !important;
+    border-color: #475569 !important;
+    box-shadow: 7px 7px 0px #0F172A !important;
+}
+
+.status-box-icone-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 68px;
+    height: 68px;
+    background-color: #FFF1F2;
+    border: 2.5px solid #F43F5E;
+    border-radius: 16px;
+    color: #E11D48;
+    font-size: 2.2rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 3.5px 3.5px 0px var(--color-navy);
+}
+
+html.dark .status-box-icone-wrapper {
+    background-color: #881337;
+    border-color: #FB7185;
+    color: #FFE4E6;
+    box-shadow: 3.5px 3.5px 0px #0F172A;
+}
+
+.status-box-erro-amigavel .status-box-titulo {
+    color: var(--color-navy-text, #0F172A) !important;
+    font-size: 1.45rem !important;
+    font-weight: 800 !important;
+    text-transform: none !important;
+    letter-spacing: -0.02em !important;
+    margin-bottom: 0.6rem !important;
+}
+
+html.dark .status-box-erro-amigavel .status-box-titulo {
+    color: #F8FAFC !important;
+}
+
+.status-box-erro-amigavel .status-box-texto {
+    color: #475569 !important;
+    font-size: 1.05rem !important;
+    font-weight: 500 !important;
+    line-height: 1.55 !important;
+    max-width: 500px !important;
+    margin: 0 auto !important;
+}
+
+html.dark .status-box-erro-amigavel .status-box-texto {
+    color: #94A3B8 !important;
+}
+
+/* =
    NOVO DASHBOARD ANALÍTICO & INDICADORES GLOBAIS
-   ========================================================= */
+   = */
 .dashboard-neo-wrapper {
     display: flex;
     flex-direction: column;
@@ -911,9 +977,9 @@ body {
     margin-bottom: 2.5rem;
 }
 
-/* =========================================================
+/* 
    DESIGN UNIFICADO DO DASHBOARD (MASTER CARD)
-   ========================================================= */
+  = */
 .dash-master-unified-card {
     background: #FFFFFF;
     border: 2.5px solid var(--color-navy, #0F172A);
@@ -1390,8 +1456,6 @@ button.dash-prazo-chip:active {
     letter-spacing: 0.2px;
 }
 
-/* ---- Barra proporcional (pré-attentive encoding: a distribuição dos editais
-       é lida de imediato, sem precisar processar os números — Tufte / Cleveland & McGill) ---- */
 .dash-prazos-proporcao {
     display: flex;
     flex-direction: column;
@@ -5042,9 +5106,9 @@ html.dark [data-purpose="closed-notices-column"] button {
 }
 
 
-/* ==============================================================================
+/*
    MICRO-INTERACTIONS & SKELETON LOADERS (ICS Media / SkillValix 2026 Standards)
-   ============================================================================== */
+   */
 
 /* 1. SKELETON LOADING SHIMMER */
 @keyframes skeleton-shimmer {
@@ -5208,9 +5272,9 @@ html.dark .btn-compartilhar-card:hover {
 }
 
 
-/* ==============================================================================
+/*
    ESTILOS DO NOVO SELETOR DE FONTES INSTITUCIONAIS (Neobrutalism Select)
-   ============================================================================== */
+   */
 
 .dropdown-fontes-wrapper {
     display: inline-flex;
