@@ -14,6 +14,7 @@ urllib3.disable_warnings()
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from src.normalizer.classifier import classificar_oportunidade
+from base_scraper import configurar_log_scraper
 
 logging.basicConfig(
     level=logging.INFO,
@@ -140,4 +141,5 @@ def raspar_cpps():
 
 
 if __name__ == "__main__":
+    configurar_log_scraper("cpps_ufersa", "UFERSA (CPPS Processos Seletivos)", "editais", {"fonte": {"$regex": "CPPS", "$options": "i"}})
     raspar_cpps()

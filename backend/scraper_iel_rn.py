@@ -14,6 +14,7 @@ urllib3.disable_warnings()
 # Garante import do classificador semântico
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from src.normalizer.classifier import classificar_oportunidade
+from base_scraper import configurar_log_scraper
 
 logging.basicConfig(
     level=logging.INFO,
@@ -115,4 +116,5 @@ def raspar_iel():
 
 
 if __name__ == "__main__":
+    configurar_log_scraper("iel_rn", "IEL/RN (Estágios e Oportunidades)", "vagas", {"fonte": {"$regex": "IEL", "$options": "i"}})
     raspar_iel()

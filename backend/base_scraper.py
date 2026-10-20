@@ -1,15 +1,96 @@
 from abc import ABC, abstractmethod
+import atexit
 import os
 import re
+import sys
+import time
 import logging
+from pathlib import Path
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 from pymongo import MongoClient
 
+# Garante saída UTF-8 sem buffer no Windows e Linux para evitar UnicodeEncodeError e logs truncados
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        try:
+            _stream.reconfigure(encoding="utf-8", errors="replace", write_through=True)
+        except Exception:
+            try:
+                _stream.reconfigure(encoding="utf-8", errors="replace")
+            except Exception:
+                pass
+
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO").upper(),
-    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s"
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
 )
+
+_LOGGERS_CONFIGURADOS = set()
+
+
+def configurar_log_scraper(
+    chave_log: str,
+    nome_fonte: str,
+    colecao_nome: str,
+    filtro_contagem: Optional[Dict[str, Any]] = None,
+    logger_name: Optional[str] = None,
+) -> logging.Logger:
+    """
+    Configura logging padronizado para um scraper (execução direta ou via run_scrapers.py).
+    Quando executado diretamente (sem EDUSCRAP_RUNNER=1), grava automaticamente em
+    logs/<chave_log>.log com o cabeçalho e o rodapé esperados por _parsear_arquivo_log.
+    """
+    logger = logging.getLogger(logger_name or f"scraper_{chave_log}")
+    if chave_log in _LOGGERS_CONFIGURADOS:
+        return logger
+    _LOGGERS_CONFIGURADOS.add(chave_log)
+
+    root_logger = logging.getLogger()
+    root_logger.setLevel(os.getenv("LOG_LEVEL", "INFO").upper())
+    fmt = logging.Formatter("%(asctime)s | %(levelname)s | %(name)s | %(message)s")
+
+    # Se não estiver rodando dentro do run_scrapers.py, anexa FileHandler direto para logs/<chave_log>.log
+    if os.getenv("EDUSCRAP_RUNNER") != "1":
+        project_root = Path(__file__).resolve().parent.parent
+        logs_dir = project_root / "logs"
+        logs_dir.mkdir(exist_ok=True)
+        log_file_path = logs_dir / f"{chave_log}.log"
+        inicio = time.time()
+
+        try:
+            with open(log_file_path, "w", encoding="utf-8") as f_hdr:
+                f_hdr.write(f"=== INÍCIO DA VARREDURA: {nome_fonte} ===\n")
+                f_hdr.write(f"Data: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                f_hdr.write(f"Comando: {sys.executable} {Path(sys.argv[0]).name}\n\n")
+
+            fh = logging.FileHandler(log_file_path, mode="a", encoding="utf-8")
+            fh.setFormatter(fmt)
+            root_logger.addHandler(fh)
+
+            def _escrever_rodape():
+                duracao = round(time.time() - inicio, 1)
+                itens = 0
+                try:
+                    uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
+                    db_name = os.getenv("MONGODB_DB", "hub_estudantes")
+                    client = MongoClient(uri, serverSelectionTimeoutMS=800)
+                    itens = client[db_name][colecao_nome].count_documents(filtro_contagem or {})
+                    client.close()
+                except Exception:
+                    pass
+                try:
+                    logger.info(f"Concluído em {duracao}s! (Itens na base: {itens})")
+                    fh.flush()
+                except Exception:
+                    pass
+
+            atexit.register(_escrever_rodape)
+        except Exception as e:
+            logger.warning(f"Não foi possível inicializar arquivo de log {log_file_path}: {e}")
+
+    return logger
+
 
 class BaseScraper(ABC):
     """

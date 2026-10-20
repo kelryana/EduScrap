@@ -3,17 +3,20 @@
 import requests
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
+from datetime import datetime
 import logging
 import os
 
 from dotenv import load_dotenv
+from base_scraper import configurar_log_scraper
+
 load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"))
 
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO").upper(),
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
 )
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("scraper_noticias")
 
 MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
 MONGODB_DB = os.getenv("MONGODB_DB", "hub_estudantes")
@@ -26,7 +29,7 @@ FONTES_RSS = [
     ("Agência Brasil - Geral", "https://agenciabrasil.ebc.com.br/rss/ultimasnoticias/feed.xml", "Notícia Geral", "Agência Brasil", 8),
 ]
 
-# Fontes HTML clássicas de tecnologia (mantidas para variedade, mas agora minoritárias)
+
 def coletar_rss(colecao, nome, url, categoria, fonte, limite, headers, vistos):
     """Coleta itens de um feed RSS/Atom e salva como notícia genérica."""
     total = 0
@@ -46,7 +49,6 @@ def coletar_rss(colecao, nome, url, categoria, fonte, limite, headers, vistos):
                 continue
 
             titulo = titulo_tag.get_text(strip=True)
-            # Em feeds Atom o link pode vir no atributo href
             link = link_tag.get_text(strip=True) or link_tag.get("href", "")
 
             if not titulo or not link or link in vistos:
@@ -62,6 +64,7 @@ def coletar_rss(colecao, nome, url, categoria, fonte, limite, headers, vistos):
                 "categoria": categoria,
                 "fonte": fonte,
                 "tipo": "noticia",
+                "coletado_em": datetime.now().isoformat(),
             }
             colecao.update_one({"link": link}, {"$set": documento}, upsert=True)
             total += 1
@@ -74,11 +77,11 @@ def conectar_banco():
     client = MongoClient(MONGODB_URI)
     return client[MONGODB_DB]["vagas_noticias"]
 
+
 def atualizar_noticias_agora():
-    logger.info("\nIniciando raspagem ao vivo de múltiplas fontes (gerais + tech)...")
+    logger.info("Iniciando raspagem ao vivo de múltiplas fontes (gerais + tech)...")
     colecao = conectar_banco()
 
-    colecao.delete_many({})
     noticias_inseridas = 0
     headers = {'User-Agent': 'Mozilla/5.0'}
     vistos = set()
@@ -90,10 +93,10 @@ def atualizar_noticias_agora():
 
     try:
         logger.info("-> Buscando no G1 Tecnologia...")
-        resposta_g1 = requests.get("https://g1.globo.com/tecnologia/", headers=headers)
+        resposta_g1 = requests.get("https://g1.globo.com/tecnologia/", headers=headers, timeout=12)
         soup_g1 = BeautifulSoup(resposta_g1.text, 'html.parser')
 
-        for post in soup_g1.find_all('div', class_='feed-post-body')[:10]: # Pegando as 6 primeiras
+        for post in soup_g1.find_all('div', class_='feed-post-body')[:10]:
             titulo_tag = post.find('a', class_='gui-color-hover')
             if not titulo_tag:
                 continue
@@ -110,20 +113,20 @@ def atualizar_noticias_agora():
                 "link": link,
                 "categoria": "Notícia Tech",
                 "fonte": "G1",
-                "tipo": "noticia"
+                "tipo": "noticia",
+                "coletado_em": datetime.now().isoformat(),
             }
-            colecao.insert_one(documento)
+            colecao.update_one({"link": link}, {"$set": documento}, upsert=True)
             noticias_inseridas += 1
     except Exception as e:
         logger.error(f"Erro no G1: {e}")
 
     try:
         logger.info("-> Buscando no Canaltech...")
-        resposta_ct = requests.get("https://canaltech.com.br/ultimas/", headers=headers)
+        resposta_ct = requests.get("https://canaltech.com.br/ultimas/", headers=headers, timeout=12)
         soup_ct = BeautifulSoup(resposta_ct.text, 'html.parser')
 
         titulos = soup_ct.find_all(['h3', 'h2'])
-
         ct_count = 0
 
         for titulo_tag in titulos:
@@ -149,18 +152,23 @@ def atualizar_noticias_agora():
                 "link": link,
                 "categoria": "Notícia Tech",
                 "fonte": "Canaltech",
-                "tipo": "noticia"
+                "tipo": "noticia",
+                "coletado_em": datetime.now().isoformat(),
             }
-            colecao.insert_one(documento)
+            colecao.update_one({"link": link}, {"$set": documento}, upsert=True)
             noticias_inseridas += 1
             ct_count += 1
 
     except Exception as e:
         logger.error(f"Erro no Canaltech: {e}")
 
-    logger.info(f"Sucesso! {noticias_inseridas} notícias salvas no banco neste exato segundo.")
+    if vistos:
+        colecao.delete_many({"link": {"$nin": list(vistos)}})
+
+    logger.info(f"Sucesso! salvos: {noticias_inseridas} | Itens na base: {colecao.count_documents({})}")
     return True
 
-# Teste local
+
 if __name__ == "__main__":
+    configurar_log_scraper("noticias", "Notícias Tech (G1 e Canaltech)", "vagas_noticias")
     atualizar_noticias_agora()

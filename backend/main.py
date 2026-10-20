@@ -518,7 +518,11 @@ def listar_ciee(
 
     filtro = {}
     if apenas_vigentes:
-        filtro["data_vencimento"] = {"$gte": datetime.now()}
+        filtro["$or"] = [
+            {"data_vencimento": {"$gte": datetime.now()}},
+            {"data_vencimento": {"$exists": False}},
+            {"data_vencimento": None},
+        ]
 
     lista_ciee = []
     for vaga in colecao.find(filtro).skip(pulo).limit(limite):
@@ -702,7 +706,11 @@ def listar_portal_uern(
 
     filtro = {}
     if apenas_vigentes:
-        filtro["data_vencimento"] = {"$gte": datetime.now()}
+        filtro["$or"] = [
+            {"data_vencimento": {"$gte": datetime.now()}},
+            {"data_vencimento": {"$exists": False}},
+            {"data_vencimento": None},
+        ]
 
     lista_portal = []
     for edital in colecao.find(filtro).skip(pulo).limit(limite):
@@ -1812,35 +1820,13 @@ def acionar_todos_os_robos():
 
     inicio_varredura = datetime.now()
 
-    db["vagas_estagio"].delete_many({})
-    db["vagas_bolsa"].delete_many({})
-    db["vagas_ufersa"].delete_many({})
-    db["vagas_ciee"].delete_many({})
-
-    python_exe = sys.executable
     status_final = "Sucesso"
     detalhe_erro = None
 
-    backend_dir = os.path.dirname(os.path.abspath(__file__))
-
     try:
-        logger.info("-> A raspar PRAE...")
-        subprocess.run([python_exe, os.path.join(backend_dir, "scraper_prae.py")], cwd=backend_dir, check=False)
-
-        logger.info("-> A raspar PROEX...")
-        subprocess.run([python_exe, os.path.join(backend_dir, "scraper_proex.py")], cwd=backend_dir, check=False)
-
-        logger.info("-> A raspar UFERSA...")
-        subprocess.run([python_exe, os.path.join(backend_dir, "scraper_ufersa.py")], cwd=backend_dir, check=False)
-
-        logger.info("-> A raspar CIEE...")
-        subprocess.run([python_exe, os.path.join(backend_dir, "scraper_ciee.py")], cwd=backend_dir, check=False)
-
-        logger.info("-> A raspar Portal UERN...")
-        subprocess.run([python_exe, os.path.join(backend_dir, "scraper_portal_uern.py")], cwd=backend_dir, check=False)
-
-        logger.info("-> A raspar Notícias...")
-        atualizar_noticias_agora()
+        from run_scrapers import ScraperRunner
+        runner = ScraperRunner(max_workers=6)
+        runner.executar_paralelo()
 
         logger.info("[MIGRAÇÃO] Rodando Normalização Heurística de Dados...")
 
@@ -2013,7 +1999,7 @@ def _parsear_arquivo_log(caminho: str, max_linhas: int = 150) -> dict:
 
     # Identificação de status
     tem_erro_critico = bool(re.search(r"(\[ERRO\]|ERROR|FALHOU|Exception|TimeoutExpired|Traceback)", conteudo_str, re.IGNORECASE))
-    tem_sucesso = bool(re.search(r"(SUCESSO|Concluído|salvas|itens na base|Finalizado)", conteudo_str, re.IGNORECASE))
+    tem_sucesso = bool(re.search(r"(SUCESSO|Conclu.do|salvas|itens na base|Finalizado)", conteudo_str, re.IGNORECASE))
 
     if tem_erro_critico and not tem_sucesso:
         status = "falha"
@@ -2029,7 +2015,7 @@ def _parsear_arquivo_log(caminho: str, max_linhas: int = 150) -> dict:
     ultima_exec = data_match.group(1) if data_match else mtime
 
     # Extrai duração
-    dur_match = re.search(r"Concluído em\s+([0-9\.]+)s", conteudo_str)
+    dur_match = re.search(r"Conclu.do em\s+([0-9\.]+)s", conteudo_str)
     duracao = float(dur_match.group(1)) if dur_match else 0.0
 
     # Extrai contagem de itens

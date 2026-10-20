@@ -14,6 +14,7 @@ urllib3.disable_warnings()
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from src.normalizer.classifier import classificar_oportunidade
+from base_scraper import configurar_log_scraper
 
 logging.basicConfig(
     level=logging.INFO,
@@ -109,4 +110,5 @@ def raspar_assecom():
 
 
 if __name__ == "__main__":
+    configurar_log_scraper("assecom_ufersa", "UFERSA (ASSECOM Notícias e Editais)", "noticias", {"fonte": {"$regex": "ASSECOM", "$options": "i"}})
     raspar_assecom()

@@ -18,6 +18,7 @@ urllib3.disable_warnings()
 # Garante import do normalizador semântico
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from src.normalizer.classifier import classificar_oportunidade
+from base_scraper import configurar_log_scraper
 
 logging.basicConfig(
     level=logging.INFO,
@@ -138,4 +139,5 @@ def raspar_ifrn(paginas: int = 3):
 
 
 if __name__ == "__main__":
+    configurar_log_scraper("ifrn", "IFRN (Bolsas e Editais de Ensino)", "editais", {"fonte": {"$regex": "IFRN", "$options": "i"}})
     raspar_ifrn()

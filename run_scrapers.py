@@ -7,6 +7,17 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
 
+# Garante saída UTF-8 sem buffer no terminal principal (Windows / Linux)
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        try:
+            _stream.reconfigure(encoding="utf-8", errors="replace", write_through=True)
+        except Exception:
+            try:
+                _stream.reconfigure(encoding="utf-8", errors="replace")
+            except Exception:
+                pass
+
 PROJECT_ROOT = Path(__file__).resolve().parent
 BACKEND_DIR = PROJECT_ROOT / "backend"
 LOGS_DIR = PROJECT_ROOT / "logs"
@@ -53,71 +64,84 @@ SCRAPERS = {
         "nome": "UFERSA (CPPS Processos Seletivos)",
         "script": "scraper_cpps_ufersa.py",
         "colecao": "editais",
+        "filtro": {"fonte": {"$regex": "CPPS", "$options": "i"}},
         "icone": "📝"
     },
     "assecom_ufersa": {
         "nome": "UFERSA (ASSECOM Notícias e Editais)",
         "script": "scraper_assecom_ufersa.py",
         "colecao": "noticias",
+        "filtro": {"fonte": {"$regex": "ASSECOM", "$options": "i"}},
         "icone": "📢"
     },
     "mprn": {
         "nome": "MPRN (Processos Seletivos e Residências)",
         "script": "scraper_mprn.py",
         "colecao": "vagas",
+        "filtro": {"fonte": {"$regex": "MPRN", "$options": "i"}},
         "icone": "⚖️"
     },
     "ifrn": {
         "nome": "IFRN (Bolsas e Editais de Ensino)",
         "script": "scraper_ifrn.py",
         "colecao": "editais",
+        "filtro": {"fonte": {"$regex": "IFRN", "$options": "i"}},
         "icone": "🌿"
     },
     "iel_rn": {
         "nome": "IEL/RN (Estágios e Oportunidades)",
         "script": "scraper_iel_rn.py",
         "colecao": "vagas",
+        "filtro": {"fonte": {"$regex": "IEL", "$options": "i"}},
         "icone": "🏭"
     },
     "capacitacao_bolsas": {
         "nome": "Capacitação, freeCodeCamp e Bolsas de Estudo",
         "script": "scraper_capacitacao_bolsas.py",
         "colecao": "noticias",
+        "filtro": {"tipo": {"$in": ["capacitacao", "bolsa_estudo"]}},
         "icone": "💡"
     },
     "dom_mossoro": {
         "nome": "DOM Mossoró (Editais e Processos Seletivos)",
         "script": "scraper_dom_mossoro.py",
         "colecao": "editais",
+        "filtro": {"fonte": {"$regex": "Prefeitura de Mossoró|DOM/Mossoró", "$options": "i"}},
         "icone": "🏛️"
     }
 }
 
 def obter_python_bin():
-
-    venv_python = PROJECT_ROOT / "venv" / "bin" / "python"
-    if venv_python.exists():
-        return str(venv_python)
+    candidatos = [
+        PROJECT_ROOT / ".venv" / "Scripts" / "python.exe",
+        PROJECT_ROOT / "venv" / "Scripts" / "python.exe",
+        PROJECT_ROOT / ".venv" / "bin" / "python",
+        PROJECT_ROOT / "venv" / "bin" / "python",
+    ]
+    for c in candidatos:
+        if c.exists():
+            return str(c)
     return sys.executable
 
-def obter_contagem_colecao(nome_colecao):
-
+def obter_contagem_colecao(nome_colecao, filtro=None):
     try:
         from pymongo import MongoClient
         uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
         db_name = os.getenv("MONGODB_DB", "hub_estudantes")
         client = MongoClient(uri, serverSelectionTimeoutMS=800)
-        return client[db_name][nome_colecao].count_documents({})
+        total = client[db_name][nome_colecao].count_documents(filtro or {})
+        client.close()
+        return total
     except Exception:
         return None
 
 def executar_scraper(chave, info):
-
     python_bin = obter_python_bin()
     script_path = BACKEND_DIR / info["script"]
     log_file_path = LOGS_DIR / f"{chave}.log"
+    filtro = info.get("filtro")
 
-    contagem_antes = obter_contagem_colecao(info["colecao"])
+    contagem_antes = obter_contagem_colecao(info["colecao"], filtro)
     inicio = time.time()
 
     if not script_path.exists():
@@ -128,8 +152,15 @@ def executar_scraper(chave, info):
             "erro": f"Arquivo não encontrado: {script_path}",
             "duracao": 0,
             "log": str(log_file_path),
-            "itens": 0
+            "itens": 0,
+            "total_itens": 0
         }
+
+    env = os.environ.copy()
+    env["PYTHONUNBUFFERED"] = "1"
+    env["PYTHONIOENCODING"] = "utf-8"
+    env["PYTHONUTF8"] = "1"
+    env["EDUSCRAP_RUNNER"] = "1"
 
     with open(log_file_path, "w", encoding="utf-8") as f_log:
         f_log.write(f"=== INÍCIO DA VARREDURA: {info['nome']} ===\n")
@@ -138,13 +169,16 @@ def executar_scraper(chave, info):
         f_log.flush()
 
         try:
-            # Executa com cwd no diretório backend para resolver imports relativos
+            # Executa com -u (unbuffered) e cwd no diretório backend para resolver imports relativos
             processo = subprocess.run(
-                [python_bin, str(script_path)],
+                [python_bin, "-u", str(script_path)],
                 cwd=str(BACKEND_DIR),
                 stdout=f_log,
                 stderr=subprocess.STDOUT,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
+                env=env,
                 timeout=300  # Limite máximo de 5 minutos por scraper para evitar travamentos
             )
             sucesso = (processo.returncode == 0)
@@ -158,12 +192,22 @@ def executar_scraper(chave, info):
             erro = str(e)
             f_log.write(f"\n[ERRO] Exceção na execução: {e}\n")
 
-    duracao = round(time.time() - inicio, 1)
-    contagem_depois = obter_contagem_colecao(info["colecao"])
+        duracao = round(time.time() - inicio, 1)
+        contagem_depois = obter_contagem_colecao(info["colecao"], filtro)
 
-    itens = 0
-    if contagem_antes is not None and contagem_depois is not None:
-        itens = max(0, contagem_depois)
+        itens = 0
+        if contagem_depois is not None:
+            itens = max(0, contagem_depois)
+        elif contagem_antes is not None:
+            itens = max(0, contagem_antes)
+
+        # Grava o rodapé padronizado dentro do arquivo de log para que _parsear_arquivo_log
+        # no backend (UC11) sempre encontre duração, quantidade de itens e status final
+        if sucesso:
+            f_log.write(f"\nConcluído em {duracao}s! (Itens na base: {itens})\n")
+        else:
+            f_log.write(f"\n[ERRO] FALHOU ({erro}) após {duracao}s. (Itens na base: {itens})\n")
+        f_log.flush()
 
     return {
         "chave": chave,
@@ -295,7 +339,6 @@ def main():
     resultados = []
 
     if args.serial or total == 1:
-
         for chave, info in selecionados.items():
             print(f"  {info['icone']} Executando: {info['nome']}...")
             res = executar_scraper(chave, info)
@@ -305,7 +348,6 @@ def main():
             else:
                 print(f"     ❌ Falhou ({res['erro']}). Veja o log: {res['log']}")
     else:
-
         print("  Iniciando raspagens simultâneas em segundo plano...")
         with ThreadPoolExecutor(max_workers=min(total, 6)) as executor:
             futuros = {
@@ -325,7 +367,7 @@ def main():
     sucessos = sum(1 for r in resultados if r["sucesso"])
     falhas = total - sucessos
 
-    # Elimina processos órfãos do Chrome e drivers após a coleta (multiplataforma)
+    # Elimina processos órfãos de drivers após a coleta (multiplataforma)
     matar_processos_chrome()
 
     print("\n" + "=" * 65)
