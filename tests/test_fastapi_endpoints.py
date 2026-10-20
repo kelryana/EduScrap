@@ -108,3 +108,30 @@ def test_fastapi_auth_redefinir_senha(client):
         assert "sucesso" in data["message"].lower()
         mock_col.update_one.assert_called_once()
 
+def test_fastapi_ciee_endpoint_titulo_rico(client):
+    """Testa se o endpoint /api/ciee resolve títulos informativos e detalhados"""
+    with patch("backend.main.db") as mock_db:
+        mock_col = MagicMock()
+        mock_col.count_documents.return_value = 1
+        mock_col.find.return_value.skip.return_value.limit.return_value = [
+            {
+                "_id": "6148015abc12345678901234",
+                "titulo": "Vaga CIEE",
+                "nome_completo": "[6148015] Estágio - Seguridade Social (R$ 1.500,00)",
+                "codigo": "6148015",
+                "categoria": "Estágio",
+                "area": "Seguridade Social",
+                "salario": "R$ 1.500,00",
+                "link": "https://portal.ciee.org.br/vaga/6148015"
+            }
+        ]
+        mock_db.__getitem__.return_value = mock_col
+
+        resp = client.get("/api/ciee")
+        assert resp.status_code == 200
+        dados = resp.json()["dados"]
+        assert len(dados) == 1
+        assert dados[0]["titulo"] == "[6148015] Estágio - Seguridade Social (R$ 1.500,00)"
+        assert dados[0]["nome"] == "[6148015] Estágio - Seguridade Social (R$ 1.500,00)"
+
+

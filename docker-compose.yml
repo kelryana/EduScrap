@@ -20,6 +20,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
+    image: eduscrap-backend:v2.0-chromium
     container_name: eduscrap-backend
     restart: always
     ports:
@@ -44,6 +45,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
+    image: eduscrap-scraper-runner:v2.0-chromium
     container_name: eduscrap-scraper-runner
     command: python run_scrapers.py
     restart: "on-failure:3"

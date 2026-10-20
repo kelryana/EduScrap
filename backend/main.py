@@ -352,9 +352,21 @@ def listar_todas_oportunidades(
                     links_vistos.add(link)
 
                 doc["_id"] = str(doc["_id"])
-                # Normaliza titulo/nome
-                if "titulo" not in doc and "nome" in doc:
-                    doc["titulo"] = doc["nome"]
+                # Normaliza titulo/nome e evita titulo generico Vaga CIEE / Estágio
+                titulo_doc = doc.get("titulo") or doc.get("nome") or ""
+                if titulo_doc in ("Vaga CIEE", "Estágio", "Aprendiz", "Jovem Aprendiz", ""):
+                    nome_comp = doc.get("nome_completo")
+                    if nome_comp and nome_comp not in ("Vaga CIEE", ""):
+                        titulo_doc = nome_comp
+                    elif doc.get("area") and doc.get("area") != "Área não especificada":
+                        cod = doc.get("codigo")
+                        pfx = f"[{cod}] " if cod and cod != "N/A" else "[CIEE] "
+                        sal = doc.get("salario")
+                        sal_txt = f" ({sal})" if sal and sal != "A combinar" else ""
+                        cargo = doc.get("categoria") or "Estágio"
+                        titulo_doc = f"{pfx}{cargo} - {doc['area']}{sal_txt}"
+                doc["titulo"] = titulo_doc or "Oportunidade"
+                doc["nome"] = doc["titulo"]
                 doc = enriquecer_doc(doc, usuario)
 
                 if apenas_vigentes and doc.get("status_prazo") == "vencido":
@@ -497,8 +509,22 @@ def listar_ciee(
     lista_ciee = []
     for vaga in colecao.find(filtro).skip(pulo).limit(limite):
         vaga["_id"] = str(vaga["_id"])
-        vaga["nome"] = vaga.get("nome_completo") or vaga.get("titulo") or "Vaga CIEE"
-        vaga["titulo"] = vaga["nome"]
+        titulo_doc = vaga.get("titulo") or vaga.get("nome") or ""
+        if titulo_doc in ("Vaga CIEE", "Estágio", "Aprendiz", "Jovem Aprendiz", ""):
+            nome_comp = vaga.get("nome_completo")
+            if nome_comp and nome_comp not in ("Vaga CIEE", ""):
+                titulo_doc = nome_comp
+            else:
+                cod = vaga.get("codigo")
+                pfx = f"[{cod}] " if cod and cod != "N/A" else "[CIEE] "
+                cargo = vaga.get("categoria") or "Estágio"
+                area = vaga.get("area") or "Oportunidade"
+                sal = vaga.get("salario")
+                sal_txt = f" ({sal})" if sal and sal != "A combinar" else ""
+                titulo_doc = f"{pfx}{cargo} - {area}{sal_txt}"
+
+        vaga["nome"] = titulo_doc
+        vaga["titulo"] = titulo_doc
         vaga = enriquecer_doc(vaga, usuario)
         lista_ciee.append(vaga)
 
@@ -1678,6 +1704,20 @@ def feed_personalizado(usuario: dict = Depends(obter_usuario_logado), limite: in
             if doc_id not in ids_vistos:
                 ids_vistos.add(doc_id)
                 doc["_id"] = doc_id
+                titulo_doc = doc.get("titulo") or doc.get("nome") or ""
+                if titulo_doc in ("Vaga CIEE", "Estágio", "Aprendiz", "Jovem Aprendiz", ""):
+                    nome_comp = doc.get("nome_completo")
+                    if nome_comp and nome_comp not in ("Vaga CIEE", ""):
+                        titulo_doc = nome_comp
+                    elif doc.get("area") and doc.get("area") != "Área não especificada":
+                        cod = doc.get("codigo")
+                        pfx = f"[{cod}] " if cod and cod != "N/A" else "[CIEE] "
+                        cargo = doc.get("categoria") or "Estágio"
+                        sal = doc.get("salario")
+                        sal_txt = f" ({sal})" if sal and sal != "A combinar" else ""
+                        titulo_doc = f"{pfx}{cargo} - {doc['area']}{sal_txt}"
+                doc["titulo"] = titulo_doc or "Oportunidade"
+                doc["nome"] = doc["titulo"]
                 doc = enriquecer_prazo(doc)
                 doc = resolver_vinculo_fonte(doc)
                 doc["favorito"] = doc_id in fav_set

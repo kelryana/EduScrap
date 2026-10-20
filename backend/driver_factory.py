@@ -63,11 +63,17 @@ WINDOWS_COMMON_PATHS = {
 }
 
 
+def _rodando_em_container() -> bool:
+    """Detecta se o código está sendo executado dentro de um container Docker/Podman."""
+    return (
+        Path("/.dockerenv").exists()
+        or Path("/run/.containerenv").exists()
+        or (Path("/proc/1/cgroup").exists() and "docker" in Path("/proc/1/cgroup").read_text(errors="ignore"))
+    )
+
+
 def localizar_executavel(navegador: str) -> Optional[str]:
-    """
-    Localiza o executável do navegador especificado no sistema operacional.
-    Verifica variáveis de ambiente, PATH e caminhos conhecidos.
-    """
+  
     navegador = navegador.lower().strip()
 
     # 1. Variáveis de ambiente explícitas (suporta convenções comuns como CHROME_BIN)
@@ -388,12 +394,23 @@ def obter_driver(
 
     # Se chegou aqui, nenhum navegador pôde ser inicializado
     detalhes = "\n".join([f" - {n}: {err}" for n, err in erros])
-    raise RuntimeError(
-        f"❌ Não foi possível inicializar nenhum navegador Selenium.\n"
-        f"Navegadores testados: {', '.join([n for n, _ in erros])}.\n"
-        f"Detalhes dos erros:\n{detalhes}\n\n"
-        f"Dica de solução:\n"
-        f"- Se estiver usando Docker: Atualize seu Dockerfile para instalar o Chromium (`apt-get install chromium chromium-driver`).\n"
-        f"- Se estiver no Windows: Instale o Google Chrome ou certifique-se que o Microsoft Edge está habilitado.\n"
-        f"- Se estiver no Linux nativo: Instale o Chromium (`sudo apt install chromium chromium-driver`) ou Firefox."
-    )
+    if _rodando_em_container():
+        mensagem = (
+            f"❌ Erro no Docker: O container atual não possui o Chromium instalado (imagem antiga em cache).\n"
+            f"Navegadores testados: {', '.join([n for n, _ in erros])}.\n"
+            f"Detalhes dos erros:\n{detalhes}\n\n"
+            f"👉 Como resolver:\n"
+            f"   Execute na sua máquina host (fora do container):\n"
+            f"   docker compose build --no-cache backend scraper-runner\n"
+            f"   docker compose up -d"
+        )
+    else:
+        mensagem = (
+            f"❌ Não foi possível inicializar nenhum navegador Selenium.\n"
+            f"Navegadores testados: {', '.join([n for n, _ in erros])}.\n"
+            f"Detalhes dos erros:\n{detalhes}\n\n"
+            f"Dica de solução:\n"
+            f"- Se estiver no Windows: Instale o Google Chrome ou certifique-se que o Microsoft Edge está habilitado.\n"
+            f"- Se estiver no Linux nativo: Instale o Chromium (`sudo apt install chromium chromium-driver`) ou Firefox (`sudo apt install firefox`)."
+        )
+    raise RuntimeError(mensagem)

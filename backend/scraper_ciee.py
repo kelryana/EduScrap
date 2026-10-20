@@ -336,18 +336,17 @@ class ScraperCIEEHibrido:
             if self._eh_linha_ignorada(linha):
                 continue
 
-           
             if linha.isdigit() and len(linha) >= 6:
                 codigo_vaga = linha
                 continue
 
-            if linha in ["Estágio", "Aprendiz"]:
-                nome = linha
+            linha_lower = linha.lower()
+            if any(term in linha_lower for term in ["estágio", "estagio", "aprendiz"]):
+                nome = "Jovem Aprendiz" if "aprendiz" in linha_lower else "Estágio"
                 if j + 1 < len(linhas):
                     categoria = linhas[j + 1]
                 continue
 
-            
             if "R$" in linha:
                 salario = linha
                 continue
@@ -356,28 +355,32 @@ class ScraperCIEEHibrido:
                 empresa = linha
                 continue
 
-           
             if self._parece_endereco(linha, self.cidade):
                 endereco = linha
                 cidade_encontrada = self.cidade
                 continue
 
-            
             if not area_encontrada and 4 < len(linha) < 80:
                 area = linha
                 area_encontrada = True
                 continue
 
+        prefixo_codigo = f"[{codigo_vaga}]" if codigo_vaga and codigo_vaga != "N/A" else "[CIEE]"
+        salario_txt = f" ({salario})" if salario and salario != "A combinar" else ""
+        nome_completo = f"{prefixo_codigo} {nome} - {area}{salario_txt}"
+
         vaga = {
             "codigo": codigo_vaga,
-            "titulo": nome,
+            "titulo": nome_completo,
+            "nome": nome_completo,
             "categoria": categoria,
             "salario": salario,
             "area": area,
             "endereco": endereco,
             "cidade": cidade_encontrada if cidade_encontrada else self.cidade,
             "empresa": empresa,
-            "nome_completo": f"[{codigo_vaga}] {nome} - {area} ({salario})",
+            "nome_completo": nome_completo,
+            "descricao": f"Oportunidade {nome} em {area}. Remuneração: {salario}. Local: {endereco or cidade_encontrada or self.cidade}.",
             "link": link,
             "fonte": "CIEE",
             "coletado_em": datetime.now(),

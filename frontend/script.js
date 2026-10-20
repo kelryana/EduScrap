@@ -1016,7 +1016,16 @@ function renderizarCards(listaDeVagas) {
 
 
         const classeVencido = status === "vencido" ? "card-vencido" : "";
-        const tituloBruto = vaga.titulo || vaga.nome || vaga.nome_completo || 'Oportunidade';
+        let tituloBruto = vaga.titulo || vaga.nome || vaga.nome_completo || 'Oportunidade';
+        if (['Vaga CIEE', 'Estágio', 'Aprendiz', 'Jovem Aprendiz'].includes(tituloBruto.trim())) {
+            if (vaga.nome_completo && !['Vaga CIEE', 'Estágio', 'Aprendiz', 'Jovem Aprendiz'].includes(vaga.nome_completo.trim())) {
+                tituloBruto = vaga.nome_completo;
+            } else if (vaga.area && vaga.area !== 'Área não especificada') {
+                const cod = vaga.codigo && vaga.codigo !== 'N/A' ? `[${vaga.codigo}] ` : '[CIEE] ';
+                const sal = vaga.salario && vaga.salario !== 'A combinar' ? ` (${vaga.salario})` : '';
+                tituloBruto = `${cod}${vaga.nome || 'Estágio'} - ${vaga.area}${sal}`;
+            }
+        }
         const infoEdital = sintetizarTituloEdital(tituloBruto);
         const tituloFinal = infoEdital.tituloLimpo || tituloBruto;
 
@@ -1056,6 +1065,20 @@ function renderizarCards(listaDeVagas) {
             </button>
         ` : '';
 
+        const metaSalarioHTML = (vaga.salario && vaga.salario !== 'A combinar') ? `
+            <div class="card-meta-box card-meta-salario">
+                <i class="ph-bold ph-currency-circle-dollar meta-icone" style="color: #16a34a;"></i>
+                <span class="meta-texto"><strong>Remuneração:</strong> ${escaparHTML(vaga.salario)}</span>
+            </div>
+        ` : '';
+
+        const metaLocalHTML = (vaga.endereco || (vaga.cidade && vaga.cidade !== 'Mossoró')) ? `
+            <div class="card-meta-box card-meta-local">
+                <i class="ph-bold ph-map-pin meta-icone" style="color: #ea580c;"></i>
+                <span class="meta-texto"><strong>Local:</strong> ${escaparHTML(vaga.endereco || vaga.cidade)}</span>
+            </div>
+        ` : '';
+
         const cardHTML = `
             <div class="card ${classeVencido}">
                 <div class="card-topo">
@@ -1074,6 +1097,9 @@ function renderizarCards(listaDeVagas) {
                         <i class="ph-bold ph-buildings meta-icone"></i>
                         <span class="meta-texto"><strong>Origem:</strong> ${linkFonteHTML}</span>
                     </div>
+
+                    ${metaSalarioHTML}
+                    ${metaLocalHTML}
                 </div>
 
                 <div class="card-acoes-row">

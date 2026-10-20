@@ -20,3 +20,13 @@ scrape:
 setup:
 	./venv/bin/python backend/database_setup.py
 
+docker-run:
+	docker compose up --build -d || docker-compose up --build -d
+
+docker-rebuild:
+	docker compose build --no-cache backend scraper-runner || docker-compose build --no-cache backend scraper-runner
+	docker compose up -d || docker-compose up -d
+
+docker-stop:
+	docker compose down || docker-compose down
+

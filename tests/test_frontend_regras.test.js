@@ -171,3 +171,29 @@ test('5. formatarContagemRegressiva: cálculo de tempo regressivo', () => {
     const limitePassado = new Date(agora - 10000).toISOString();
     assert.equal(formatar(limitePassado), 'Encerrado');
 });
+
+test('6. CIEE: cards devem exibir título detalhado e metadados ao invés de apenas "Vaga CIEE"', () => {
+    const ctx = criarContextoFrontend();
+    const container = ctx.document.getElementById('container-vagas');
+
+    const vagaCieeComNomeCompleto = {
+        _id: "ciee_1",
+        titulo: "Vaga CIEE",
+        nome_completo: "[6148015] Estágio - Seguridade Social Obrigatória (R$ 1.508,42 / Mês)",
+        codigo: "6148015",
+        categoria: "Estágio/Jovem Aprendiz",
+        salario: "R$ 1.508,42 / Mês",
+        area: "Seguridade Social Obrigatória",
+        endereco: "Centro - Mossoró - RN",
+        fonte: "CIEE"
+    };
+
+    ctx.renderizarCards([vagaCieeComNomeCompleto]);
+    const htmlGerado = container.innerHTML;
+
+    assert.doesNotMatch(htmlGerado, /<h3 class="card-titulo"[^>]*>Vaga CIEE<\/h3>/, 'NÃO pode exibir apenas "Vaga CIEE" como título');
+    assert.match(htmlGerado, /6148015/, 'Deve conter o código da vaga');
+    assert.match(htmlGerado, /Seguridade Social Obrigatória/, 'Deve conter a área da vaga');
+    assert.match(htmlGerado, /Remuneração:/, 'Deve conter linha de remuneração');
+    assert.match(htmlGerado, /Local:/, 'Deve conter linha de localidade');
+});

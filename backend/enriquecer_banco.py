@@ -65,9 +65,22 @@ def enriquecer_todas_as_colecoes():
                 "geral": classificacao["geral"]
             }
 
+            # Se for do CIEE e tiver título genérico, atualiza para o título detalhado
+            if col_name == "vagas_ciee" and titulo in ("Vaga CIEE", "Estágio", "Aprendiz", "Jovem Aprendiz", ""):
+                if doc.get("nome_completo") and doc["nome_completo"] not in ("Vaga CIEE", ""):
+                    titulo = doc["nome_completo"]
+                elif doc.get("area") and doc.get("area") != "Área não especificada":
+                    cod = doc.get("codigo")
+                    pfx = f"[{cod}] " if cod and cod != "N/A" else "[CIEE] "
+                    sal = doc.get("salario")
+                    sal_txt = f" ({sal})" if sal and sal != "A combinar" else ""
+                    cargo = doc.get("categoria") or "Estágio"
+                    titulo = f"{pfx}{cargo} - {doc['area']}{sal_txt}"
+
             # Garante que titulo e status existam de forma unificada
-            if not doc.get("titulo") and titulo:
+            if (not doc.get("titulo") or doc.get("titulo") in ("Vaga CIEE", "Estágio", "Aprendiz")) and titulo:
                 update_fields["titulo"] = titulo
+                update_fields["nome"] = titulo
             if not doc.get("status"):
                 update_fields["status"] = "Aberto"
 

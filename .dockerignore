@@ -1,0 +1,34 @@
+# Git
+.git
+.gitignore
+
+# Ambientes virtuais e dependências locais
+venv/
+.venv/
+env/
+
+# Caches do Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Logs e arquivos de execução
+*.log
+backend/scraper_ciee.log
+
+# Variáveis de ambiente e segredos
+.env
+*.env.local
+
+# Documentação, testes e configurações de desenvolvimento
+tests/
+Makefile
+README.md
+README_ADMIN.md
+docs/
+
+# Docker e arquivos de build
+docker-compose*.yml
+Dockerfile*
+.dockerignore
