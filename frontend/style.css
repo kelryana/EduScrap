@@ -5424,10 +5424,11 @@ html.dark .btn-compartilhar-card:hover {
 }
 
 /*
-   ESTILOS DO NOVO SELETOR DE FONTES INSTITUCIONAIS (Neobrutalism Select)
+   ESTILOS DO SELETOR DE FONTES INSTITUCIONAIS (Dropdown Customizado com Phosphor Icons)
    */
 
 .dropdown-fontes-wrapper {
+    position: relative;
     display: inline-flex;
     align-items: center;
 }
@@ -5437,31 +5438,117 @@ html.dark .btn-compartilhar-card:hover {
     color: var(--color-navy-text, #112244);
     border: 3px solid var(--color-navy);
     border-radius: 14px;
-    padding: 13px 22px;
+    padding: 14px 22px;
     font-weight: 800;
-    font-size: 1.05rem;
+    font-size: 1.08rem;
     box-shadow: 4px 4px 0px var(--color-navy);
     cursor: pointer;
     outline: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
     translate: 0px;
-    transition: translate 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
-    appearance: none;
-    -webkit-appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%20256%20256%22%3E%3Cpath%20fill%3D%22%23112244%22%20d%3D%22M213.66%2C101.66l-80%2C80a8%2C8%2C0%2C0%2C1-11.32%2C0l-80-80A8%2C8%2C0%2C0%2C1%2C53.66%2C90.34L128%2C164.69l74.34-74.35a8%2C8%2C0%2C0%2C1%2C11.32%2C11.32Z%22%3E%3C%2Fpath%3E%3C%2Fsvg%3E");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    padding-right: 42px;
+    scale: 1;
+    transition: translate 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 }
 
-.tab-origem-select:hover {
+.tab-origem-select .seletor-fonte-icone {
+    font-size: 1.5rem;
+    color: var(--color-orange, #FF5C00);
+}
+
+.tab-origem-select .seletor-fonte-caret {
+    font-size: 1.1rem;
+    margin-left: 2px;
+    rotate: 0deg;
+    transition: rotate 0.18s ease;
+}
+
+.tab-origem-select[aria-expanded="true"] .seletor-fonte-caret {
+    rotate: 180deg;
+}
+
+.tab-origem-select:hover:not(.ativo) {
     translate: -2px -2px;
     box-shadow: 6px 6px 0px var(--color-navy);
     background-color: #F8FAFC;
 }
 
-.tab-origem-select:focus {
+.tab-origem-select:focus-visible {
     border-color: var(--color-orange, #FF5C00);
     box-shadow: 4px 4px 0px var(--color-orange, #FF5C00);
+}
+
+.tab-origem-select.ativo {
+    background-color: var(--color-navy);
+    color: #FFFFFF;
+    box-shadow: 3px 3px 0px var(--color-navy);
+    translate: 1px 1px;
+}
+
+.tab-origem-select.ativo .seletor-fonte-icone {
+    color: #FACC15;
+}
+
+.menu-fontes-institucionais {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    min-width: 100%;
+    width: max-content;
+    z-index: 50;
+    background: #FFFFFF;
+    border: 3px solid var(--color-navy);
+    border-radius: 14px;
+    box-shadow: 6px 6px 0px var(--color-navy);
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.menu-fontes-institucionais[hidden] {
+    display: none;
+}
+
+.menu-fonte-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 11px 14px;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--color-navy-text, #112244);
+    font-weight: 800;
+    font-size: 1.02rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.14s ease, border-color 0.14s ease, color 0.14s ease;
+}
+
+.menu-fonte-item i {
+    font-size: 1.35rem;
+    color: var(--color-orange, #FF5C00);
+    flex-shrink: 0;
+}
+
+.menu-fonte-item:hover,
+.menu-fonte-item:focus-visible {
+    background-color: #FFFDE7;
+    border-color: var(--color-navy);
+    outline: none;
+}
+
+.menu-fonte-item.selecionado {
+    background-color: var(--color-navy);
+    color: #FFFFFF;
+    border-color: var(--color-navy);
+}
+
+.menu-fonte-item.selecionado i {
+    color: #FACC15;
 }
 
 html.dark .tab-origem-select {
@@ -5469,19 +5556,11 @@ html.dark .tab-origem-select {
     color: #F8FAFC;
     border-color: #475569;
     box-shadow: 4px 4px 0px #0F172A;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%20256%20256%22%3E%3Cpath%20fill%3D%22%23F8FAFC%22%20d%3D%22M213.66%2C101.66l-80%2C80a8%2C8%2C0%2C0%2C1-11.32%2C0l-80-80A8%2C8%2C0%2C0%2C1%2C53.66%2C90.34L128%2C164.69l74.34-74.35a8%2C8%2C0%2C0%2C1%2C11.32%2C11.32Z%22%3E%3C%2Fpath%3E%3C%2Fsvg%3E");
 }
 
-html.dark .tab-origem-select:hover {
+html.dark .tab-origem-select:hover:not(.ativo) {
     background-color: #334155;
     border-color: #64748B;
-}
-
-.tab-origem-select.ativo {
-    background-color: var(--color-navy);
-    color: #FFFFFF;
-    box-shadow: 3px 3px 0px var(--color-navy);
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%20256%20256%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M213.66%2C101.66l-80%2C80a8%2C8%2C0%2C0%2C1-11.32%2C0l-80-80A8%2C8%2C0%2C0%2C1%2C53.66%2C90.34L128%2C164.69l74.34-74.35a8%2C8%2C0%2C0%2C1%2C11.32%2C11.32Z%22%3E%3C%2Fpath%3E%3C%2Fsvg%3E");
 }
 
 html.dark .tab-origem-select.ativo {
@@ -5489,6 +5568,36 @@ html.dark .tab-origem-select.ativo {
     color: #FFFFFF;
     border-color: #0F172A;
     box-shadow: 4px 4px 0px #0F172A;
+}
+
+html.dark .tab-origem-select.ativo .seletor-fonte-icone {
+    color: #FFFFFF;
+}
+
+html.dark .menu-fontes-institucionais {
+    background: #1E293B;
+    border-color: #475569;
+    box-shadow: 6px 6px 0px #0F172A;
+}
+
+html.dark .menu-fonte-item {
+    color: #F8FAFC;
+}
+
+html.dark .menu-fonte-item:hover,
+html.dark .menu-fonte-item:focus-visible {
+    background-color: #334155;
+    border-color: #64748B;
+}
+
+html.dark .menu-fonte-item.selecionado {
+    background-color: var(--color-orange, #FF5C00);
+    color: #FFFFFF;
+    border-color: #0F172A;
+}
+
+html.dark .menu-fonte-item.selecionado i {
+    color: #FFFFFF;
 }
 
 /* ============================================================

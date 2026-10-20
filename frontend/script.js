@@ -642,23 +642,87 @@ async function carregarFeedPersonalizado() {
     }
 }
 
-function destacarBotaoAtivo(idBotao) {
-    document.querySelectorAll('.tab-origem-btn, .btn-filtro-aluno, .chip-busca-rapida').forEach(btn => btn.classList.remove('ativo'));
+const MAPA_FONTES_INSTITUCIONAIS = {
+    'ufersa': { icone: 'ph-bank', rotulo: 'Editais UFERSA' },
+    'noticias-ufersa': { icone: 'ph-megaphone', rotulo: 'Notícias UFERSA' },
+    'ciee': { icone: 'ph-briefcase', rotulo: 'Vagas CIEE' },
+    'mprn': { icone: 'ph-scales', rotulo: 'Estágios MPRN' },
+    'ifrn': { icone: 'ph-buildings', rotulo: 'Editais IFRN' },
+    'iel': { icone: 'ph-factory', rotulo: 'Estágios IEL / FIERN' },
+    'dom': { icone: 'ph-scroll', rotulo: 'DOM Mossoró' },
+    'portal_uern': { icone: 'ph-graduation-cap', rotulo: 'Portal UERN Geral' }
+};
+
+function atualizarEstadoSeletorFonte(valorTipo) {
     const seletorFonte = document.getElementById('seletor-fonte-institucional');
+    const iconeEl = document.getElementById('seletor-fonte-icone');
+    const textoEl = document.getElementById('seletor-fonte-texto');
+    const info = valorTipo ? MAPA_FONTES_INSTITUCIONAIS[valorTipo] : null;
+
+    if (seletorFonte) {
+        if (info) {
+            seletorFonte.classList.add('ativo');
+            if (iconeEl) iconeEl.className = `ph-bold ${info.icone} seletor-fonte-icone`;
+            if (textoEl) textoEl.textContent = info.rotulo;
+        } else {
+            seletorFonte.classList.remove('ativo');
+            if (iconeEl) iconeEl.className = 'ph-bold ph-bank seletor-fonte-icone';
+            if (textoEl) textoEl.textContent = 'Filtrar por Instituição / Órgão...';
+        }
+    }
+
+    document.querySelectorAll('.menu-fonte-item').forEach(item => {
+        const selecionado = Boolean(info && item.dataset && item.dataset.valor === valorTipo);
+        item.classList.toggle('selecionado', selecionado);
+        if (item.setAttribute) item.setAttribute('aria-selected', String(selecionado));
+    });
+}
+
+function fecharMenuFontes() {
+    const menu = document.getElementById('menu-fontes-institucionais');
+    const btn = document.getElementById('seletor-fonte-institucional');
+    if (menu) menu.hidden = true;
+    if (btn && btn.setAttribute) btn.setAttribute('aria-expanded', 'false');
+}
+
+function toggleMenuFontes(event) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    const menu = document.getElementById('menu-fontes-institucionais');
+    const btn = document.getElementById('seletor-fonte-institucional');
+    if (!menu) return;
+    const vaiAbrir = menu.hidden;
+    fecharMenusLembrete();
+    menu.hidden = !vaiAbrir;
+    if (btn && btn.setAttribute) btn.setAttribute('aria-expanded', String(vaiAbrir));
+}
+
+function selecionarFonteInstitucional(valor, event) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    fecharMenuFontes();
+    if (valor) {
+        carregarDados(valor, 1);
+    }
+}
+
+function destacarBotaoAtivo(idBotao) {
+    document.querySelectorAll('.tab-origem-btn, .btn-filtro-aluno').forEach(btn => btn.classList.remove('ativo'));
 
     const btn = document.getElementById(idBotao);
     if (btn) {
         btn.classList.add('ativo');
-        if (seletorFonte) {
-            seletorFonte.classList.remove('ativo');
-            seletorFonte.value = "";
-        }
-    } else if (seletorFonte) {
+        atualizarEstadoSeletorFonte(null);
+    } else {
         const valorTipo = idBotao.replace(/^btn-/, '');
-        const optionExiste = Array.from(seletorFonte.options).some(opt => opt.value === valorTipo);
-        if (optionExiste) {
-            seletorFonte.value = valorTipo;
-            seletorFonte.classList.add('ativo');
+        if (MAPA_FONTES_INSTITUCIONAIS[valorTipo]) {
+            atualizarEstadoSeletorFonte(valorTipo);
+        } else {
+            atualizarEstadoSeletorFonte(null);
         }
     }
 
@@ -1461,13 +1525,21 @@ function baixarArquivoICS({ resumo, descricao, link, intervalo, titulo }) {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-// Fecha o menu de lembrete ao clicar fora ou pressionar Esc
+// Fecha os menus suspensos (lembrete e seletor de instituição) ao clicar fora ou pressionar Esc
 document.addEventListener('click', function(event) {
-    if (event.target && event.target.closest && event.target.closest('.lembrete-wrapper')) return;
-    fecharMenusLembrete();
+    const t = event.target;
+    if (!t || !t.closest || !t.closest('.lembrete-wrapper')) {
+        fecharMenusLembrete();
+    }
+    if (!t || !t.closest || !t.closest('.dropdown-fontes-wrapper')) {
+        fecharMenuFontes();
+    }
 });
 document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') fecharMenusLembrete();
+    if (event.key === 'Escape') {
+        fecharMenusLembrete();
+        fecharMenuFontes();
+    }
 });
 
 function renderizarControlesPaginacao(atual, total, limite) {
@@ -1490,12 +1562,12 @@ function renderizarControlesPaginacao(atual, total, limite) {
     blocoPaginacao.innerHTML = `
         <button class="btn-paginacao-nav" ${atual === 1 ? 'disabled' : ''} onclick="carregarDados('${tipoAtual}', ${atual - 1})"
             style="opacity: ${atual === 1 ? '0.5' : '1'}; cursor: ${atual === 1 ? 'not-allowed' : 'pointer'};">
-            ◀ Anterior
+            <i class="ph-bold ph-caret-left"></i> Anterior
         </button>
         <span class="paginacao-texto-info">Página ${atual} de ${totalPaginas}</span>
         <button class="btn-paginacao-nav" ${atual >= totalPaginas ? 'disabled' : ''} onclick="carregarDados('${tipoAtual}', ${atual + 1})"
             style="opacity: ${atual >= totalPaginas ? '0.5' : '1'}; cursor: ${atual >= totalPaginas ? 'not-allowed' : 'pointer'};">
-            Próximo ▶
+            Próximo <i class="ph-bold ph-caret-right"></i>
         </button>
     `;
     mainContainer.appendChild(blocoPaginacao);
@@ -1545,6 +1617,7 @@ async function realizarPesquisa() {
         if (!carga.ativo()) return;
         renderizarCards(dados);
         document.querySelectorAll('.tab-origem-btn, .btn-filtro-aluno').forEach(b => b.classList.remove('ativo'));
+        atualizarEstadoSeletorFonte(null);
     } catch (e) {
         if (!carga.ativo()) return;
         console.error("Erro na pesquisa:", e);

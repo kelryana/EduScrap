@@ -259,19 +259,52 @@
                     <i class="ph-bold ph-newspaper"></i> <span>Notícias Universitárias</span>
                 </button>
 
-                <!-- 2. Seletor de Instituições e Fontes Específicas (Elimina a rolagem infinita) -->
-                <div class="dropdown-fontes-wrapper">
-                    <select id="seletor-fonte-institucional" class="tab-origem-select" onchange="if(this.value) carregarDados(this.value)">
-                        <option value="" disabled selected>🏛️ Filtrar por Instituição / Órgão...</option>
-                        <option value="ufersa">🏛️ Editais UFERSA</option>
-                        <option value="noticias-ufersa">📢 Notícias UFERSA</option>
-                        <option value="ciee">💼 Vagas CIEE</option>
-                        <option value="mprn">⚖️ Estágios MPRN</option>
-                        <option value="ifrn">🌲 Editais IFRN</option>
-                        <option value="iel">🏭 Estágios IEL / FIERN</option>
-                        <option value="dom">📜 DOM Mossoró</option>
-                        <option value="portal_uern">🎓 Portal UERN Geral</option>
-                    </select>
+                <!-- 2. Seletor de Instituições e Fontes Específicas (Dropdown Customizado com Phosphor Icons) -->
+                <div class="dropdown-fontes-wrapper" id="dropdown-fontes-wrapper">
+                    <button type="button"
+                        id="seletor-fonte-institucional"
+                        class="tab-origem-select"
+                        onclick="toggleMenuFontes(event)"
+                        aria-haspopup="listbox"
+                        aria-expanded="false">
+                        <i class="ph-bold ph-bank seletor-fonte-icone" id="seletor-fonte-icone"></i>
+                        <span id="seletor-fonte-texto">Filtrar por Instituição / Órgão...</span>
+                        <i class="ph-bold ph-caret-down seletor-fonte-caret" aria-hidden="true"></i>
+                    </button>
+                    <div id="menu-fontes-institucionais" class="menu-fontes-institucionais" role="listbox" aria-label="Filtrar por Instituição ou Órgão" hidden>
+                        <button type="button" role="option" class="menu-fonte-item" data-valor="ufersa" onclick="selecionarFonteInstitucional('ufersa', event)">
+                            <i class="ph-bold ph-bank"></i>
+                            <span>Editais UFERSA</span>
+                        </button>
+                        <button type="button" role="option" class="menu-fonte-item" data-valor="noticias-ufersa" onclick="selecionarFonteInstitucional('noticias-ufersa', event)">
+                            <i class="ph-bold ph-megaphone"></i>
+                            <span>Notícias UFERSA</span>
+                        </button>
+                        <button type="button" role="option" class="menu-fonte-item" data-valor="ciee" onclick="selecionarFonteInstitucional('ciee', event)">
+                            <i class="ph-bold ph-briefcase"></i>
+                            <span>Vagas CIEE</span>
+                        </button>
+                        <button type="button" role="option" class="menu-fonte-item" data-valor="mprn" onclick="selecionarFonteInstitucional('mprn', event)">
+                            <i class="ph-bold ph-scales"></i>
+                            <span>Estágios MPRN</span>
+                        </button>
+                        <button type="button" role="option" class="menu-fonte-item" data-valor="ifrn" onclick="selecionarFonteInstitucional('ifrn', event)">
+                            <i class="ph-bold ph-buildings"></i>
+                            <span>Editais IFRN</span>
+                        </button>
+                        <button type="button" role="option" class="menu-fonte-item" data-valor="iel" onclick="selecionarFonteInstitucional('iel', event)">
+                            <i class="ph-bold ph-factory"></i>
+                            <span>Estágios IEL / FIERN</span>
+                        </button>
+                        <button type="button" role="option" class="menu-fonte-item" data-valor="dom" onclick="selecionarFonteInstitucional('dom', event)">
+                            <i class="ph-bold ph-scroll"></i>
+                            <span>DOM Mossoró</span>
+                        </button>
+                        <button type="button" role="option" class="menu-fonte-item" data-valor="portal_uern" onclick="selecionarFonteInstitucional('portal_uern', event)">
+                            <i class="ph-bold ph-graduation-cap"></i>
+                            <span>Portal UERN Geral</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

@@ -214,3 +214,18 @@ test('7. Busca rápida: atualizarBotaoLimparBusca alterna visibilidade conforme 
     assert.equal(btnLimpar.hidden, false, 'Botão limpar deve aparecer quando há termo digitado');
 });
 
+test('8. Seletor de Instituição: atualizarEstadoSeletorFonte usa Phosphor Icons sem emojis', () => {
+    const ctx = criarContextoFrontend();
+    const iconeEl = ctx.document.getElementById('seletor-fonte-icone');
+    const textoEl = ctx.document.getElementById('seletor-fonte-texto');
+
+    ctx.atualizarEstadoSeletorFonte('ciee');
+    assert.match(iconeEl.className, /ph-briefcase/, 'Deve aplicar o ícone ph-briefcase para CIEE');
+    assert.equal(textoEl.textContent, 'Vagas CIEE');
+
+    ctx.atualizarEstadoSeletorFonte(null);
+    assert.match(iconeEl.className, /ph-bank/, 'Deve voltar para o ícone padrão ph-bank');
+    assert.equal(textoEl.textContent, 'Filtrar por Instituição / Órgão...');
+});
+
+
