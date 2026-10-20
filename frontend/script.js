@@ -457,13 +457,12 @@ async function toggleFavorito(idOportunidade, event) {
     // Atualiza botão no card diretamente
     const btnCard = document.getElementById(`fav-btn-${idOportunidade}`);
     if (btnCard) {
-        if (!estaFavoritado) {
-            btnCard.classList.add('favoritado');
-            btnCard.innerHTML = `<i class="ph-fill ph-star"></i> <span>Salvo</span>`;
-        } else {
-            btnCard.classList.remove('favoritado');
-            btnCard.innerHTML = `<i class="ph ph-star"></i> <span>Salvar</span>`;
-        }
+        const rotulo = !estaFavoritado ? 'Remover dos favoritos' : 'Salvar oportunidade';
+        btnCard.classList.toggle('favoritado', !estaFavoritado);
+        btnCard.innerHTML = !estaFavoritado ? `<i class="ph-fill ph-star"></i>` : `<i class="ph-bold ph-star"></i>`;
+        btnCard.title = rotulo;
+        btnCard.setAttribute('aria-label', rotulo);
+        btnCard.setAttribute('aria-pressed', String(!estaFavoritado));
     }
 
     try {
@@ -898,7 +897,57 @@ function toggleFiltroVigentes() {
     }
 }
 
+/* ============================================================
+   Transição suave entre categorias/páginas (evita "hard cut")
+   - Conteúdo anterior fica esmaecido (não some de repente);
+   - Skeleton só aparece se a resposta demorar (> ATRASO_SKELETON_MS);
+   - Novos cards entram com fade + leve deslocamento (CSS .card).
+   ============================================================ */
+const ATRASO_SKELETON_MS = 350;
+let tokenCarregamentoAtual = 0;
+
+function iniciarCarregamentoSuave(container) {
+    const meuToken = ++tokenCarregamentoAtual;
+    const temConteudo = !!container.querySelector('.card');
+    let timerSkeleton = null;
+
+    const paginacao = document.getElementById('bloco-paginacao');
+    if (paginacao) paginacao.classList.add('paginacao-carregando');
+
+    if (temConteudo) {
+        container.classList.add('carregando');
+        timerSkeleton = setTimeout(() => {
+            if (meuToken === tokenCarregamentoAtual) {
+                container.classList.remove('carregando');
+                renderizarSkeletons(6);
+            }
+        }, ATRASO_SKELETON_MS);
+    } else {
+        renderizarSkeletons(6);
+    }
+
+    return {
+        // false quando outra requisição mais nova já assumiu (resposta obsoleta deve ser descartada)
+        ativo: () => meuToken === tokenCarregamentoAtual,
+        finalizar: () => {
+            clearTimeout(timerSkeleton);
+            if (meuToken !== tokenCarregamentoAtual) return;
+            container.classList.remove('carregando');
+            const pag = document.getElementById('bloco-paginacao');
+            if (pag) pag.classList.remove('paginacao-carregando');
+        }
+    };
+}
+
+function rolarParaTopoDosCards(container) {
+    const topo = container.getBoundingClientRect().top;
+    if (topo < 0) {
+        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
 async function carregarDados(tipo, novaPagina = 1) {
+    const mudouPagina = tipo === tipoAtual && novaPagina !== paginaAtual;
     tipoAtual = tipo;
     paginaAtual = novaPagina;
 
@@ -907,7 +956,8 @@ async function carregarDados(tipo, novaPagina = 1) {
 
     const container = document.getElementById('container-vagas');
     container.style.display = 'grid';
-    renderizarSkeletons(6);
+    const carga = iniciarCarregamentoSuave(container);
+    if (mudouPagina && typeof container.getBoundingClientRect === 'function') rolarParaTopoDosCards(container);
 
     try {
         let url = `${API_URL}/${tipo}?pagina=${paginaAtual}&limite=6`;
@@ -926,10 +976,12 @@ async function carregarDados(tipo, novaPagina = 1) {
         }
 
         const objetoPaginado = await resposta.json();
+        if (!carga.ativo()) return; // usuário já pediu outra categoria/página
         renderizarCards(objetoPaginado.dados);
         renderizarControlesPaginacao(objetoPaginado.pagina_atual, objetoPaginado.total_documentos, objetoPaginado.limite_por_pagina);
 
     } catch (erro) {
+        if (!carga.ativo()) return;
         console.error("Erro ao buscar dados paginados:", erro);
         renderizarEstadoErro(container, {
             titulo: "Não foi possível carregar as oportunidades",
@@ -938,12 +990,13 @@ async function carregarDados(tipo, novaPagina = 1) {
             acaoFuncao: `carregarDados('${tipo}', ${paginaAtual})`,
             icone: "ph-cloud-slash"
         });
+    } finally {
+        carga.finalizar();
     }
 }
 
 function renderizarCards(listaDeVagas) {
     const container = document.getElementById('container-vagas');
-    container.innerHTML = '';
 
     if (!listaDeVagas || listaDeVagas.length === 0) {
         container.innerHTML = `
@@ -985,6 +1038,7 @@ function renderizarCards(listaDeVagas) {
     };
 
     const favSet = (usuarioAtual && usuarioAtual.favoritos) ? new Set(usuarioAtual.favoritos.map(String)) : new Set();
+    let htmlCards = '';
 
     listaDeVagas.forEach(vaga => {
         const idStr = String(vaga._id);
@@ -1080,11 +1134,32 @@ function renderizarCards(listaDeVagas) {
 
         // Botão de calendário apenas para editais/vagas VIGENTES (não faz sentido lembrete para edital encerrado ou notícia)
         const podeExibirLembrete = !ehNoticia && status === "vigente" && (vaga.data_vencimento || vaga.data_vencimento_formatada);
+        // Menu de Lembrete: Google Agenda / Outlook abrem o evento já preenchido; .ics fica como alternativa (Apple/Outlook desktop)
         const btnCalendarioHTML = podeExibirLembrete ? `
-            <button class="btn-calendario-card" onclick="exportarCalendarioICS('${escaparHTML(tituloFinal).replace(/'/g, "\\'")}', '${vaga.data_vencimento_formatada || vaga.data_vencimento}', '${escaparHTML(linkDestino).replace(/'/g, "\\'")}', '${escaparHTML(vaga.fonte || 'Universidade').replace(/'/g, "\\'")}', event)" title="Adicionar prazo ao seu Calendário (.ics)">
-                <i class="ph-bold ph-calendar-plus"></i>
-                <span>Lembrete</span>
-            </button>
+            <div class="lembrete-wrapper"
+                data-titulo="${escaparHTML(tituloFinal)}"
+                data-vencimento="${escaparHTML(vaga.data_vencimento_formatada || vaga.data_vencimento)}"
+                data-link="${escaparHTML(linkDestino)}"
+                data-fonte="${escaparHTML(vaga.fonte || 'Universidade')}">
+                <button type="button" class="btn-calendario-card" onclick="toggleMenuLembrete(event)"
+                    aria-haspopup="menu" aria-expanded="false" title="Adicionar prazo à sua agenda">
+                    <i class="ph-bold ph-calendar-plus"></i>
+                    <span>Lembrete</span>
+                </button>
+                <div class="lembrete-menu" role="menu" hidden>
+                    <span class="lembrete-menu-titulo">Adicionar prazo em:</span>
+                    <button type="button" role="menuitem" class="lembrete-menu-item" onclick="adicionarLembrete('google', event)">
+                        <i class="ph-bold ph-google-logo"></i><span>Google Agenda</span>
+                    </button>
+                    <button type="button" role="menuitem" class="lembrete-menu-item" onclick="adicionarLembrete('outlook', event)">
+                        <i class="ph-bold ph-microsoft-outlook-logo"></i><span>Outlook</span>
+                    </button>
+                    <button type="button" role="menuitem" class="lembrete-menu-item" onclick="adicionarLembrete('ics', event)">
+                        <i class="ph-bold ph-download-simple"></i><span>Baixar arquivo (.ics)</span>
+                        <small>iPhone, Mac e outros apps</small>
+                    </button>
+                </div>
+            </div>
         ` : '';
 
         const metaSalarioHTML = (vaga.salario && vaga.salario !== 'A combinar') ? `
@@ -1135,9 +1210,10 @@ function renderizarCards(listaDeVagas) {
                     <button id="fav-btn-${idStr}"
                         class="btn-favoritar-card ${ehFavorito ? 'favoritado' : ''}"
                         onclick="toggleFavorito('${idStr}', event)"
-                        title="${ehFavorito ? 'Remover dos favoritos' : 'Salvar oportunidade'}">
+                        title="${ehFavorito ? 'Remover dos favoritos' : 'Salvar oportunidade'}"
+                        aria-label="${ehFavorito ? 'Remover dos favoritos' : 'Salvar oportunidade'}"
+                        aria-pressed="${ehFavorito ? 'true' : 'false'}">
                         <i class="${ehFavorito ? 'ph-fill ph-star' : 'ph-bold ph-star'}"></i>
-                        <span>${ehFavorito ? 'Salvo' : 'Salvar'}</span>
                     </button>
 
                     <button class="btn-compartilhar-card"
@@ -1148,50 +1224,165 @@ function renderizarCards(listaDeVagas) {
                 </div>
             </div>
         `;
-        container.innerHTML += cardHTML;
+        htmlCards += cardHTML;
+    });
+    container.innerHTML = htmlCards;
+}
+
+/* ============================================================
+   Lembrete de prazo: Google Agenda / Outlook / arquivo .ics
+   ============================================================ */
+
+// Converte "dd/mm/aaaa", "aaaa-mm-dd..." ou data parseável em {ano, mes, dia} (strings com zero à esquerda)
+function extrairDataLembrete(dataVencimento) {
+    if (!dataVencimento || dataVencimento === 'null' || dataVencimento === 'undefined') return null;
+    const texto = String(dataVencimento);
+    if (texto.includes('/')) {
+        const [d, m, a] = texto.split('/');
+        if (!d || !m || !a) return null;
+        return { ano: a.trim().slice(0, 4), mes: m.padStart(2, '0'), dia: d.padStart(2, '0') };
+    }
+    const iso = texto.match(/(\d{4})-(\d{2})-(\d{2})/);
+    if (iso) return { ano: iso[1], mes: iso[2], dia: iso[3] };
+    const dt = new Date(texto);
+    if (isNaN(dt.getTime())) return null;
+    return {
+        ano: String(dt.getFullYear()),
+        mes: String(dt.getMonth() + 1).padStart(2, '0'),
+        dia: String(dt.getDate()).padStart(2, '0')
+    };
+}
+
+// Retorna {inicio, fim} no formato AAAAMMDD para evento de dia inteiro (fim é exclusivo = dia seguinte)
+function intervaloDiaInteiro(data) {
+    const inicio = new Date(Date.UTC(+data.ano, +data.mes - 1, +data.dia));
+    const fim = new Date(inicio.getTime() + 86400000);
+    const fmt = (d) => d.toISOString().slice(0, 10).replace(/-/g, '');
+    return { inicio: fmt(inicio), fim: fmt(fim), fimISO: fim.toISOString().slice(0, 10) };
+}
+
+function fecharMenusLembrete(exceto) {
+    document.querySelectorAll('.lembrete-menu:not([hidden])').forEach(menu => {
+        if (menu === exceto) return;
+        menu.hidden = true;
+        const wrapper = menu.closest('.lembrete-wrapper');
+        const btn = wrapper && wrapper.querySelector('.btn-calendario-card');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+        const card = menu.closest('.card');
+        if (card) card.classList.remove('card-menu-aberto');
     });
 }
 
-function exportarCalendarioICS(titulo, dataVencimento, link, fonte, event) {
+function toggleMenuLembrete(event) {
     if (event) {
         event.stopPropagation();
         event.preventDefault();
     }
-    if (!dataVencimento || dataVencimento === 'null' || dataVencimento === 'undefined') {
-        alert("Este edital não possui data limite de inscrição definida.");
+    const btn = event.currentTarget;
+    const wrapper = btn.closest('.lembrete-wrapper');
+    const menu = wrapper && wrapper.querySelector('.lembrete-menu');
+    if (!menu) return;
+
+    const vaiAbrir = menu.hidden;
+    fecharMenusLembrete(menu);
+    menu.hidden = !vaiAbrir;
+    btn.setAttribute('aria-expanded', String(vaiAbrir));
+    const card = wrapper.closest('.card');
+    if (card) card.classList.toggle('card-menu-aberto', vaiAbrir);
+    if (vaiAbrir) {
+        const primeiro = menu.querySelector('.lembrete-menu-item');
+        if (primeiro) primeiro.focus();
+    }
+}
+
+function adicionarLembrete(destino, event) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    const wrapper = event && event.currentTarget.closest('.lembrete-wrapper');
+    if (!wrapper) return;
+    const { titulo, vencimento, link, fonte } = wrapper.dataset;
+    fecharMenusLembrete();
+
+    const data = extrairDataLembrete(vencimento);
+    if (!data) {
+        mostrarToast("Este edital não possui data limite reconhecível.", "erro");
         return;
     }
 
-    let ano, mes, dia;
-    if (String(dataVencimento).includes('/')) {
-        const partes = dataVencimento.split('/');
-        dia = partes[0].padStart(2, '0');
-        mes = partes[1].padStart(2, '0');
-        ano = partes[2];
-    } else {
-        const dtMatch = String(dataVencimento).match(/(\d{4})-(\d{2})-(\d{2})/);
-        if (dtMatch) {
-            ano = dtMatch[1]; mes = dtMatch[2]; dia = dtMatch[3];
-        } else {
-            const dt = new Date(dataVencimento);
-            if (isNaN(dt.getTime())) {
-                alert("Data limite em formato não reconhecido.");
-                return;
-            }
-            ano = dt.getFullYear();
-            mes = String(dt.getMonth() + 1).padStart(2, '0');
-            dia = String(dt.getDate()).padStart(2, '0');
-        }
+    const tituloLimpo = (titulo || 'Edital').replace(/[\r\n]+/g, ' ').trim();
+    const linkValido = link && link !== '#' ? link : '';
+    const resumo = `Prazo final: ${tituloLimpo}`;
+    const descricao = `Último dia de inscrições para: ${tituloLimpo}\nOrigem: ${fonte || 'Universidade'}` +
+        (linkValido ? `\nEdital oficial: ${linkValido}` : '') +
+        `\n\nLembrete criado pelo EduScrap.`;
+    const intervalo = intervaloDiaInteiro(data);
+
+    if (destino === 'google') {
+        const params = new URLSearchParams({
+            action: 'TEMPLATE',
+            text: resumo,
+            dates: `${intervalo.inicio}/${intervalo.fim}`,
+            details: descricao
+        });
+        window.open(`https://calendar.google.com/calendar/render?${params.toString()}`, '_blank', 'noopener');
+        return;
     }
 
-    const dtStart = `${ano}${mes}${dia}T080000`;
-    const dtEnd = `${ano}${mes}${dia}T235959`;
-    const nowStr = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    const uid = `eduscrap-${Date.now()}@eduscrap.uern.br`;
-    const cleanTitle = (titulo || 'Edital').replace(/[\r\n]+/g, ' ').trim();
-    const cleanDesc = `Prazo final de inscrições para o certame: ${cleanTitle}\\nOrigem: ${fonte || 'Universidade'}\\nLink oficial: ${link || ''}`;
+    if (destino === 'outlook') {
+        const params = new URLSearchParams({
+            path: '/calendar/action/compose',
+            rru: 'addevent',
+            subject: resumo,
+            startdt: `${data.ano}-${data.mes}-${data.dia}`,
+            enddt: intervalo.fimISO,
+            allday: 'true',
+            body: descricao
+        });
+        window.open(`https://outlook.live.com/calendar/0/deeplink/compose?${params.toString()}`, '_blank', 'noopener');
+        return;
+    }
 
-    const icsLines = [
+    baixarArquivoICS({ resumo, descricao, link: linkValido, intervalo, titulo: tituloLimpo });
+    mostrarToast("Arquivo baixado! Abra-o para adicionar o prazo à sua agenda.", "sucesso");
+}
+
+// Escapa texto conforme RFC 5545 (\\, ;, , e quebras de linha)
+function escaparTextoICS(texto) {
+    return String(texto || '')
+        .replace(/\\/g, '\\\\')
+        .replace(/;/g, '\\;')
+        .replace(/,/g, '\\,')
+        .replace(/\r?\n/g, '\\n');
+}
+
+// Dobra linhas com mais de 75 octetos (RFC 5545 §3.1), respeitando caracteres UTF-8 multibyte
+function dobrarLinhaICS(linha) {
+    const encoder = new TextEncoder();
+    const partes = [];
+    let atual = '';
+    let bytes = 0;
+    for (const ch of linha) {
+        const tam = encoder.encode(ch).length;
+        const limite = partes.length === 0 ? 75 : 74; // linhas de continuação começam com espaço
+        if (bytes + tam > limite) {
+            partes.push(atual);
+            atual = '';
+            bytes = 0;
+        }
+        atual += ch;
+        bytes += tam;
+    }
+    partes.push(atual);
+    return partes.join('\r\n ');
+}
+
+function baixarArquivoICS({ resumo, descricao, link, intervalo, titulo }) {
+    const agora = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    const uid = `eduscrap-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@eduscrap.uern.br`;
+
+    const linhas = [
         'BEGIN:VCALENDAR',
         'VERSION:2.0',
         'PRODID:-//EduScrap//Calendario de Editais//PT-BR',
@@ -1199,32 +1390,44 @@ function exportarCalendarioICS(titulo, dataVencimento, link, fonte, event) {
         'METHOD:PUBLISH',
         'BEGIN:VEVENT',
         `UID:${uid}`,
-        `DTSTAMP:${nowStr}`,
-        `DTSTART:${dtStart}`,
-        `DTEND:${dtEnd}`,
-        `SUMMARY:🚨 Prazo Limite: ${cleanTitle}`,
-        `DESCRIPTION:${cleanDesc}`,
-        `URL:${link || ''}`,
+        `DTSTAMP:${agora}`,
+        `DTSTART;VALUE=DATE:${intervalo.inicio}`,
+        `DTEND;VALUE=DATE:${intervalo.fim}`,
+        `SUMMARY:${escaparTextoICS(resumo)}`,
+        `DESCRIPTION:${escaparTextoICS(descricao)}`,
+        ...(link ? [`URL:${link}`] : []),
+        'TRANSP:TRANSPARENT',
         'STATUS:CONFIRMED',
         'BEGIN:VALARM',
-        'TRIGGER:-P1D',
+        'TRIGGER:-PT15H', // 09:00 do dia anterior ao prazo
         'ACTION:DISPLAY',
-        `DESCRIPTION:Lembrete: Inscrições encerram amanhã para ${cleanTitle}`,
+        `DESCRIPTION:${escaparTextoICS(`Inscrições encerram amanhã: ${titulo}`)}`,
         'END:VALARM',
         'END:VEVENT',
         'END:VCALENDAR'
-    ];
+    ].map(dobrarLinhaICS);
 
-    const icsBlob = new Blob([icsLines.join('\r\n')], { type: 'text/calendar;charset=utf-8;' });
-    const downloadUrl = URL.createObjectURL(icsBlob);
-    const linkElem = document.createElement('a');
-    linkElem.href = downloadUrl;
-    linkElem.download = `edital_${cleanTitle.substring(0, 25).toLowerCase().replace(/[^a-z0-9]/g, '_')}.ics`;
-    document.body.appendChild(linkElem);
-    linkElem.click();
-    document.body.removeChild(linkElem);
-    URL.revokeObjectURL(downloadUrl);
+    const blob = new Blob([linhas.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const nomeBase = titulo.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').substring(0, 40);
+    a.download = `prazo_${nomeBase || 'edital'}.ics`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+
+// Fecha o menu de lembrete ao clicar fora ou pressionar Esc
+document.addEventListener('click', function(event) {
+    if (event.target && event.target.closest && event.target.closest('.lembrete-wrapper')) return;
+    fecharMenusLembrete();
+});
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') fecharMenusLembrete();
+});
 
 function renderizarControlesPaginacao(atual, total, limite) {
     const antigo = document.getElementById('bloco-paginacao');
@@ -1266,6 +1469,8 @@ async function realizarPesquisa() {
 
     const container = document.getElementById('container-vagas');
     container.style.display = 'grid';
+    tokenCarregamentoAtual++; // invalida carregamentos de categoria ainda em andamento
+    container.classList.remove('carregando');
     renderizarSkeletons(6);
 
     const antigo = document.getElementById('bloco-paginacao');

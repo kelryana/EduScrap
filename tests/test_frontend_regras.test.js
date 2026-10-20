@@ -100,7 +100,7 @@ test('2. Lembrete: NÃO deve aparecer para editais com status "vencido" (encerra
 
     assert.match(htmlGerado, /badge-status-encerrado/, 'Deve exibir badge de encerrado');
     assert.doesNotMatch(htmlGerado, /btn-calendario-card/, 'NÃO pode exibir botão de Lembrete para edital vencido');
-    assert.doesNotMatch(htmlGerado, /exportarCalendarioICS/, 'NÃO deve conter chamada de exportação ICS');
+    assert.doesNotMatch(htmlGerado, /adicionarLembrete|lembrete-menu/, 'NÃO deve conter menu de lembrete');
 });
 
 test('3. Lembrete: NÃO deve aparecer para notícias, mesmo se tiverem data', () => {

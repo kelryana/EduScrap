@@ -1991,31 +1991,67 @@ html.dark .prazo-alerta-urgente {
 }
 
 /* 4. Ações no Card de Oportunidade */
+/* Transição suave e estável de conteúdo (sem saltos de posição nem sobrecarga de movimento) */
+.grid-vagas {
+    transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.grid-vagas.carregando {
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+.paginacao-carregando {
+    opacity: 0.6;
+    pointer-events: none;
+    transition: opacity 0.18s ease;
+}
+
+@keyframes skeleton-entrada {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.grid-vagas > .skeleton-card {
+    animation: skeleton-entrada 0.18s ease-out backwards;
+}
+.card {
+    container: card / inline-size;
+}
+
+.card.card-menu-aberto {
+    z-index: 30;
+}
+
 .card-acoes-row {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: 10px;
     margin-top: auto;
     padding-top: 16px;
     border-top: 2.5px dashed #CBD5E1;
 }
 
 .card-link-btn {
-    flex: 1;
+    flex: 1 1 0;
+    min-width: 0;
     background-color: #FFFFFF;
     color: var(--color-navy-text, #112244);
     border: 2.5px solid var(--color-navy);
     border-radius: 10px;
     box-shadow: 3.5px 3.5px 0px var(--color-navy);
-    padding: 13px 18px;
+    padding: 12px 14px;
     font-weight: 800;
-    font-size: 1.05rem;
+    font-size: 1rem;
+    line-height: 1.2;
+    text-align: center;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 9px;
+    gap: 8px;
     transition: all 0.15s ease-in-out;
 }
 
@@ -2031,18 +2067,20 @@ html.dark .prazo-alerta-urgente {
     box-shadow: 1.5px 1.5px 0px var(--color-navy);
 }
 
+/* Salvar: botão quadrado apenas com ícone (mesmo tamanho do Compartilhar) */
 .btn-favoritar-card {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 9px;
+    flex-shrink: 0;
+    width: 46px;
+    height: 46px;
+    padding: 0;
     background: #FFFFFF;
     border: 2.5px solid var(--color-navy);
     border-radius: 10px;
     color: var(--color-navy-text, #112244);
-    padding: 13px 18px;
-    font-weight: 800;
-    font-size: 1.02rem;
+    font-size: 1.2rem;
     cursor: pointer;
     box-shadow: 3.5px 3.5px 0px var(--color-navy);
     transition: all 0.15s ease;
@@ -2064,24 +2102,34 @@ html.dark .prazo-alerta-urgente {
     background-color: #FFF59D;
 }
 
+/* Lembrete: botão + menu suspenso */
+.lembrete-wrapper {
+    position: relative;
+    flex-shrink: 0;
+    display: flex;
+}
+
 .btn-calendario-card {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 7px;
+    height: 46px;
     background: #FFFFFF;
     border: 2.5px solid var(--color-navy);
     border-radius: 10px;
     color: var(--color-navy-text, #112244);
-    padding: 13px 16px;
+    padding: 0 14px;
     font-weight: 800;
-    font-size: 1.02rem;
+    font-size: 0.98rem;
+    white-space: nowrap;
     cursor: pointer;
     box-shadow: 3.5px 3.5px 0px var(--color-navy);
     transition: all 0.15s ease;
 }
 
-.btn-calendario-card:hover {
+.btn-calendario-card:hover,
+.btn-calendario-card[aria-expanded="true"] {
     transform: translate(-1.5px, -1.5px);
     box-shadow: 5px 5px 0px var(--color-navy);
     background-color: #EFF6FF;
@@ -2093,6 +2141,86 @@ html.dark .prazo-alerta-urgente {
     box-shadow: 1.5px 1.5px 0px var(--color-navy);
 }
 
+.lembrete-menu {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 40;
+    width: 240px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px;
+    background: #FFFFFF;
+    border: 2.5px solid var(--color-navy);
+    border-radius: 12px;
+    box-shadow: 5px 5px 0px var(--color-navy);
+}
+
+.lembrete-menu[hidden] {
+    display: none;
+}
+
+.lembrete-menu-titulo {
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #64748B;
+    padding: 2px 8px 6px;
+}
+
+.lembrete-menu-item {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    align-items: center;
+    column-gap: 10px;
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    color: var(--color-navy-text, #112244);
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.lembrete-menu-item i {
+    font-size: 1.2rem;
+}
+
+.lembrete-menu-item small {
+    grid-column: 2;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748B;
+}
+
+.lembrete-menu-item:hover,
+.lembrete-menu-item:focus-visible {
+    background: #EFF6FF;
+    border-color: var(--color-navy);
+    outline: none;
+}
+
+/* Cards estreitos com Lembrete: "Ver Edital" ocupa a linha toda e os botões secundários ficam abaixo */
+@container card (max-width: 470px) {
+    .card-acoes-row:has(.lembrete-wrapper) .card-link-btn {
+        flex: 1 1 100%;
+    }
+
+    .card-acoes-row:has(.lembrete-wrapper) .lembrete-wrapper {
+        flex: 1 1 auto;
+    }
+
+    .card-acoes-row:has(.lembrete-wrapper) .btn-calendario-card {
+        width: 100%;
+    }
+}
+
 html.dark .btn-calendario-card {
     background: #1E293B;
     color: #F8FAFC;
@@ -2100,9 +2228,33 @@ html.dark .btn-calendario-card {
     box-shadow: 3.5px 3.5px 0px #0F172A;
 }
 
-html.dark .btn-calendario-card:hover {
+html.dark .btn-calendario-card:hover,
+html.dark .btn-calendario-card[aria-expanded="true"] {
     background: #2563EB;
     color: #FFFFFF;
+}
+
+html.dark .lembrete-menu {
+    background: #1E293B;
+    border-color: #475569;
+    box-shadow: 5px 5px 0px #020617;
+}
+
+html.dark .lembrete-menu-titulo,
+html.dark .lembrete-menu-item small {
+    color: #94A3B8;
+}
+
+html.dark .lembrete-menu-item,
+html.dark .lembrete-menu-item span,
+html.dark .lembrete-menu-item i {
+    color: #F8FAFC;
+}
+
+html.dark .lembrete-menu-item:hover,
+html.dark .lembrete-menu-item:focus-visible {
+    background: #334155;
+    border-color: #64748B;
 }
 .modal-backdrop {
     position: fixed;
