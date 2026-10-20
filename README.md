@@ -178,19 +178,15 @@ docker compose down     # ou: docker-compose down
 Se você não quer que o Docker consuma memória e recursos em segundo plano ao ligar o computador:
 
 * **No Linux (Linux Mint / Ubuntu):**
-  1. **Desativar a inicialização automática ao ligar o PC:**
+  1. **Desativar e parar completamente o serviço e o socket:**
      ```bash
-     sudo systemctl disable docker docker.socket
+     sudo systemctl disable --now docker.socket docker.service
      ```
-  2. **Parar o serviço agora (liberar memória RAM imediatamente):**
+  2. **Verificar se estão ambos inativos:**
      ```bash
-     sudo systemctl stop docker docker.socket
+     systemctl is-active docker docker.socket  # Deve retornar: inactive para ambos
      ```
-  3. **Verificar se está parado:**
-     ```bash
-     systemctl is-active docker  # Deve retornar: inactive
-     ```
-  4. *(Quando precisar usar o Docker novamente, basta ligar sob demanda com `sudo systemctl start docker`).*
+  3. *(Quando precisar usar o Docker novamente, basta ligar sob demanda com `sudo systemctl start docker`).*
 
 * **No Windows (Docker Desktop):**
   1. Abra o **Docker Desktop** e clique no ícone de **Configurações (Engrenagem)** no topo.
