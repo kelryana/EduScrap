@@ -123,12 +123,17 @@ def obter_python_bin():
             return str(c)
     return sys.executable
 
-def obter_contagem_colecao(nome_colecao, filtro=None):
+def obter_contagem_colecao(nome_colecao, filtro=None, limpar_vencidos=False):
     try:
+        if str(BACKEND_DIR) not in sys.path:
+            sys.path.insert(0, str(BACKEND_DIR))
         from pymongo import MongoClient
+        from base_scraper import limpar_itens_vencidos_banco
         uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
         db_name = os.getenv("MONGODB_DB", "hub_estudantes")
         client = MongoClient(uri, serverSelectionTimeoutMS=800)
+        if limpar_vencidos:
+            limpar_itens_vencidos_banco(client[db_name])
         total = client[db_name][nome_colecao].count_documents(filtro or {})
         client.close()
         return total
@@ -193,7 +198,7 @@ def executar_scraper(chave, info):
             f_log.write(f"\n[ERRO] Exceção na execução: {e}\n")
 
         duracao = round(time.time() - inicio, 1)
-        contagem_depois = obter_contagem_colecao(info["colecao"], filtro)
+        contagem_depois = obter_contagem_colecao(info["colecao"], filtro, limpar_vencidos=True)
 
         itens = 0
         if contagem_depois is not None:

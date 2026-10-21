@@ -13,7 +13,12 @@ urllib3.disable_warnings()
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from src.normalizer.classifier import classificar_oportunidade
-from base_scraper import configurar_log_scraper
+from base_scraper import (
+    configurar_log_scraper,
+    eh_vencido_alem_do_limite,
+    limpar_itens_vencidos_banco,
+    salvar_prazo_cacheado,
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -50,6 +55,8 @@ def raspar_mprn():
 
     soup = BeautifulSoup(resp.text, "html.parser")
     posts_processados = set()
+    links_validos_sessao = set()
+    vencidos_antigos_vistos = 0
     total_salvos = 0
 
     for h in soup.find_all(["h2", "h3", "h4"]):
@@ -102,6 +109,20 @@ def raspar_mprn():
                     except Exception:
                         pass
 
+        if data_vencimento:
+            salvar_prazo_cacheado(colecao.database, href, titulo, data_vencimento)
+            if eh_vencido_alem_do_limite(data_vencimento):
+                vencidos_antigos_vistos += 1
+                colecao.delete_one({"link": href})
+                continue
+        elif vencidos_antigos_vistos >= 2:
+            # A listagem do MPRN é estritamente cronológica (mais recentes no topo).
+            # Após passar pelos itens já vencidos há >10 dias, os itens inferiores sem data no subtítulo são de meses anteriores.
+            colecao.delete_one({"link": href})
+            continue
+
+        links_validos_sessao.add(href)
+
         # Classifica cursos e áreas
         classificacao = classificar_oportunidade(titulo, snippet)
         cursos = classificacao["cursos"]
@@ -140,6 +161,13 @@ def raspar_mprn():
         if res.upserted_id or res.modified_count > 0:
             total_salvos += 1
             logger.info(f"-> Salvo MPRN: {titulo[:60]}... | Cursos: {cursos} | Áreas: {areas}")
+
+    if links_validos_sessao:
+        colecao.delete_many({
+            "fonte": {"$regex": "MPRN", "$options": "i"},
+            "link": {"$nin": list(links_validos_sessao)}
+        })
+    limpar_itens_vencidos_banco(colecao.database)
 
     logger.info(f"Finalizado MPRN! {total_salvos} processos seletivos processados/atualizados.")
     return total_salvos

@@ -10,7 +10,14 @@ import os
 
 from dotenv import load_dotenv
 from pdf_utils import extrair_data_vencimento_datetime
-from base_scraper import BaseScraper, configurar_log_scraper
+from base_scraper import (
+    BaseScraper,
+    configurar_log_scraper,
+    eh_vencido_alem_do_limite,
+    limpar_itens_vencidos_banco,
+    obter_prazo_cacheado,
+    salvar_prazo_cacheado,
+)
 
 # Carrega variáveis de ambiente do .env na raiz do projeto
 load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"))
@@ -143,8 +150,9 @@ def raspar_lista_ufersa(url_menu, ano_filtro, colecao_bd, links_visitados=None):
                             link_pdf = href_pdf
                             break
 
-                    existente = colecao_bd.find_one({"nome": nome_edital}, {"data_vencimento": 1})
-                    data_vencimento = existente.get("data_vencimento") if existente else None
+                    data_vencimento = obter_prazo_cacheado(
+                        colecao_bd.database, link=link_pdf, nome=nome_edital, colecao_atual=colecao_bd
+                    )
 
                     if not data_vencimento:
                         data_vencimento = extrair_data_vencimento(nome_edital)
@@ -152,6 +160,13 @@ def raspar_lista_ufersa(url_menu, ano_filtro, colecao_bd, links_visitados=None):
                     if not data_vencimento:
                         texto_pagina = soup_edital.get_text(" ", strip=True)
                         data_vencimento = extrair_data_vencimento_datetime(texto_pagina, link_pdf)
+
+                    if data_vencimento:
+                        salvar_prazo_cacheado(colecao_bd.database, link_pdf, nome_edital, data_vencimento)
+                        if eh_vencido_alem_do_limite(data_vencimento):
+                            colecao_bd.delete_one({"nome": nome_edital})
+                            logger.info("   [Ignorado: edital vencido há mais de 10 dias]")
+                            continue
 
                     documento = {
                         "nome": nome_edital,
@@ -196,4 +211,7 @@ if __name__ == "__main__":
     except Exception as e:
         logger.error(f"Erro ao tentar URL alternativa: {e}")
 
+    removidos = limpar_itens_vencidos_banco(colecao.database)
+    if removidos:
+        logger.info(f"Limpeza automática (>10 dias vencidos): {removidos} itens removidos.")
     logger.info(f"Finalizado UFERSA! salvos: {total} | Itens na base: {colecao.count_documents({})}")

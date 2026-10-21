@@ -21,7 +21,12 @@ if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
 from pdf_utils import extrair_data_de_texto
-from base_scraper import configurar_log_scraper
+from base_scraper import (
+    configurar_log_scraper,
+    eh_vencido_alem_do_limite,
+    limpar_itens_vencidos_banco,
+    salvar_prazo_cacheado,
+)
 from src.normalizer.classifier import classificar_oportunidade
 
 # Carrega variáveis de ambiente do .env na raiz do projeto
@@ -305,6 +310,11 @@ def minerar_portal_uern():
                     logger.info(f"   ✅ OPORTUNIDADE DETECTADA: {doc['titulo'][:75]}")
                     logger.info(f"   Palavras-chave: {', '.join(kws[:5])} | Categoria: {doc['categoria']}")
                     if dt_venc:
+                        salvar_prazo_cacheado(colecao.database, url_noticia, doc["titulo"], dt_venc)
+                        if eh_vencido_alem_do_limite(dt_venc):
+                            colecao.delete_one({"link": url_noticia})
+                            logger.info(f"   ⏭️ Ignorada: prazo vencido há mais de 10 dias ({dt_venc.strftime('%d/%m/%Y')})")
+                            continue
                         logger.info(f"   Prazo de inscrição detectado: {dt_venc.strftime('%d/%m/%Y')}")
                     else:
                         logger.info("   ℹ️ Oportunidade sem prazo específico detectado")
@@ -342,6 +352,11 @@ def minerar_portal_uern():
                         logger.info(f"   ✅ OPORTUNIDADE DETECTADA: {doc['titulo'][:75]}")
                         logger.info(f"   Palavras-chave: {', '.join(kws[:5])} | Categoria: {doc['categoria']}")
                         if dt_venc:
+                            salvar_prazo_cacheado(colecao.database, url_noticia, doc["titulo"], dt_venc)
+                            if eh_vencido_alem_do_limite(dt_venc):
+                                colecao.delete_one({"link": url_noticia})
+                                logger.info(f"   ⏭️ Ignorada: prazo vencido há mais de 10 dias ({dt_venc.strftime('%d/%m/%Y')})")
+                                continue
                             logger.info(f"   Prazo de inscrição detectado: {dt_venc.strftime('%d/%m/%Y')}")
                         else:
                             logger.info("   ℹ️ Oportunidade sem prazo específico detectado")
@@ -354,6 +369,8 @@ def minerar_portal_uern():
                 except Exception as e:
                     logger.warning(f"   ⚠️ Erro ao processar {url_noticia[:50]}: {str(e)[:80]}")
                     continue
+
+        limpar_itens_vencidos_banco(colecao.database)
 
         # Passo 4: Remove apenas registros antigos que saíram da listagem atual
         if links_ativos:

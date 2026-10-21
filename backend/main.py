@@ -19,6 +19,7 @@ PROJECT_ROOT_DIR = os.path.abspath(os.path.join(BACKEND_DIR, ".."))
 if PROJECT_ROOT_DIR not in sys.path:
     sys.path.append(PROJECT_ROOT_DIR)
 from pdf_utils import obter_snapshot_gridfs
+from base_scraper import limpar_itens_vencidos_banco
 
 load_dotenv(os.path.join(BACKEND_DIR, "..", ".env"))
 
@@ -107,6 +108,13 @@ MONGODB_DB = os.getenv("MONGODB_DB", "hub_estudantes")
 
 client = MongoClient(MONGODB_URI)
 db = client[MONGODB_DB]
+
+try:
+    _removidos_boot = limpar_itens_vencidos_banco(db)
+    if _removidos_boot:
+        logger.info(f"[LIMPEZA AUTOMÁTICA] {_removidos_boot} itens vencidos há mais de 10 dias removidos na inicialização.")
+except Exception as _e_limp:
+    logger.warning(f"Aviso na limpeza inicial de itens vencidos: {_e_limp}")
 
 def obter_usuario_logado(authorization: str = Header(default=None)):
 
@@ -926,6 +934,7 @@ def pesquisar_unificado(
 
 @app.get("/api/estatisticas")
 def obter_estatisticas():
+    limpar_itens_vencidos_banco(db)
     nome_colecoes = db.list_collection_names()
 
     # Notícias reais (exclui cards de capacitação/cursos/bolsas da aba Cursos & Bolsas)
@@ -1070,7 +1079,7 @@ def obter_estatisticas():
     ]
     contagem_categorias = {}
     for col in nome_colecoes:
-        if col in ("controle_cache", "historico_varreduras", "fontes_provedores", "usuarios"):
+        if col in ("controle_cache", "historico_varreduras", "fontes_provedores", "usuarios", "cache_prazos_pdf", "configuracoes_sistema"):
             continue
         try:
             for item in db[col].aggregate(pipeline_categoria):
@@ -1127,6 +1136,8 @@ def obter_estatisticas():
     # "editais", onde vivem MPRN, IEL, IFRN e DOM Mossoró. Assim o fluxo
     # semanal passa a contabilizar essas fontes também.
     for col in nome_colecoes:
+        if col in ("controle_cache", "historico_varreduras", "fontes_provedores", "usuarios", "cache_prazos_pdf", "configuracoes_sistema"):
+            continue
         try:
             cursor = db[col].find({}, projection={c: 1 for c in campos_data_captura})
             for doc in cursor:
