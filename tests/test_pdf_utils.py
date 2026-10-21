@@ -342,3 +342,38 @@ class TestExtrairEValidarData:
         # Should return the extracted date and 'vencido' status
         assert data == "2020-01-01"
         assert status == "vencido"
+
+
+class TestExtracaoHibridaTabelas:
+    """Testes para a abordagem híbrida de isolamento de tabelas (Khadija Mahanga)."""
+
+    def test_is_obj_in_bbox(self):
+        from backend.src.normalizer.collectors.pdf_scraper import PDFScraper
+        table_bbox = (50.0, 100.0, 300.0, 400.0)
+
+        # Objeto totalmente contido
+        obj_dentro = {"x0": 60, "top": 120, "x1": 200, "bottom": 150}
+        assert PDFScraper.is_obj_in_bbox(obj_dentro, table_bbox) is True
+
+        # Objeto fora
+        obj_fora = {"x0": 10, "top": 20, "x1": 40, "bottom": 80}
+        assert PDFScraper.is_obj_in_bbox(obj_fora, table_bbox) is False
+
+        # Objeto inválido
+        assert PDFScraper.is_obj_in_bbox(None, table_bbox) is False
+
+    def test_format_table_to_text(self):
+        from backend.src.normalizer.collectors.pdf_scraper import PDFScraper
+        tabela = [
+            ["Etapa", "Data Início", "Data Término"],
+            ["Inscrições", "10/11/2026", "20/11/2026"],
+            ["Resultado", "25/11/2026", ""]
+        ]
+        texto = PDFScraper.format_table_to_text(tabela)
+        assert "Inscrições | 10/11/2026 | 20/11/2026" in texto
+        assert "Resultado | 25/11/2026" in texto
+
+    def test_extrair_texto_pdf_hibrido_empty_or_none(self):
+        from backend.pdf_utils import extrair_texto_pdf_hibrido
+        assert extrair_texto_pdf_hibrido(None) == ""
+        assert extrair_texto_pdf_hibrido(BytesIO(b"")) == ""

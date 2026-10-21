@@ -5715,3 +5715,210 @@ html.dark .btn-limpar-busca {
     }
 }
 
+/* ==========================================================================
+   MURAL DE AVISOS FIXADOS / PRAZOS CRÍTICOS (≤ 3 DIAS) & TAGS CLICÁVEIS
+   Inspirado no Notice Board UI & Opportunity Board
+   ========================================================================== */
+
+.painel-prazos-criticos {
+    background: #FFFBEB;
+    border: 3px solid #F59E0B;
+    border-radius: 16px;
+    box-shadow: 5px 5px 0px #0F172A;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.prazos-criticos-topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px dashed rgba(245, 158, 11, 0.4);
+}
+
+.prazos-criticos-badge-pulse {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #EF4444;
+    color: #FFFFFF;
+    font-size: 0.82rem;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    border: 2px solid #0F172A;
+    box-shadow: 2px 2px 0px #0F172A;
+}
+
+.pulse-indicator {
+    width: 8px;
+    height: 8px;
+    background-color: #FFFFFF;
+    border-radius: 50%;
+    display: inline-block;
+    animation: pulse-ring 1.5s infinite;
+}
+
+@keyframes pulse-ring {
+    0% { transform: scale(0.9); opacity: 1; }
+    50% { transform: scale(1.4); opacity: 0.6; }
+    100% { transform: scale(0.9); opacity: 1; }
+}
+
+.prazos-criticos-contador {
+    font-size: 0.90rem;
+    font-weight: 700;
+    color: #92400E;
+}
+
+.prazos-criticos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.card-prazo-critico {
+    background: #FFFFFF;
+    border: 2.5px solid #0F172A;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 3px 3px 0px #0F172A;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card-prazo-critico:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0px #0F172A;
+}
+
+.card-prazo-critico-badge {
+    align-self: flex-start;
+    background: #FF5C00;
+    color: #FFFFFF;
+    font-size: 0.78rem;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 6px;
+    border: 1.5px solid #0F172A;
+    margin-bottom: 0.6rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.card-prazo-critico-titulo {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #0F172A;
+    line-height: 1.35;
+    margin-bottom: 0.6rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card-prazo-critico-rodape {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 0.6rem;
+    border-top: 1px solid #E2E8F0;
+    font-size: 0.82rem;
+}
+
+.card-prazo-critico-link {
+    color: #FF5C00;
+    font-weight: 800;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.card-prazo-critico-link:hover {
+    text-decoration: underline;
+}
+
+/* Sub-tags e Pílulas Clicáveis nos Cards */
+.tag-clicavel {
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.tag-clicavel:hover {
+    transform: translateY(-1.5px);
+    opacity: 0.92;
+}
+
+.card-subtag-pill {
+    background: #F1F5F9;
+    color: #334155;
+    border: 1.5px solid #CBD5E1;
+    border-radius: 6px;
+    font-size: 0.80rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.15s ease;
+}
+
+.card-subtag-pill:hover {
+    background: #FF5C00;
+    color: #FFFFFF;
+    border-color: #0F172A;
+    transform: translateY(-1.5px);
+    box-shadow: 2px 2px 0px #0F172A;
+}
+
+/* Modo Escuro */
+html.dark .painel-prazos-criticos {
+    background: #1C1917 !important;
+    border-color: #F59E0B !important;
+    box-shadow: 5px 5px 0px #020617 !important;
+}
+
+html.dark .prazos-criticos-contador {
+    color: #FCD34D !important;
+}
+
+html.dark .card-prazo-critico {
+    background: #111C2E !important;
+    border-color: #334155 !important;
+    box-shadow: 3px 3px 0px #020617 !important;
+}
+
+html.dark .card-prazo-critico-titulo {
+    color: #F8FAFC !important;
+}
+
+html.dark .card-prazo-critico-rodape {
+    border-top-color: #1E293B !important;
+}
+
+html.dark .card-subtag-pill {
+    background: #1E293B !important;
+    color: #94A3B8 !important;
+    border-color: #334155 !important;
+}
+
+html.dark .card-subtag-pill:hover {
+    background: #FF5C00 !important;
+    color: #FFFFFF !important;
+    border-color: #FFFFFF !important;
+    box-shadow: 2px 2px 0px #000000 !important;
+}
+

@@ -18,7 +18,7 @@ function criarContextoFrontend() {
                 this.elementos[id] = {
                     id,
                     innerHTML: '',
-                    style: {},
+                    style: { removeProperty: () => {}, setProperty: () => {} },
                     hidden: false,
                     classList: { add: () => {}, remove: () => {}, contains: () => false },
                     appendChild: () => {},
@@ -35,7 +35,7 @@ function criarContextoFrontend() {
             dataset: {},
             classList: { add: () => {}, remove: () => {} },
             setAttribute: () => {},
-            style: {}
+            style: { removeProperty: () => {}, setProperty: () => {} }
         }),
         addEventListener: () => {}
     };
@@ -226,6 +226,39 @@ test('8. Seletor de Instituição: atualizarEstadoSeletorFonte usa Phosphor Icon
     ctx.atualizarEstadoSeletorFonte(null);
     assert.match(iconeEl.className, /ph-bank/, 'Deve voltar para o ícone padrão ph-bank');
     assert.equal(textoEl.textContent, 'Filtrar por Instituição / Órgão...');
+});
+
+test('9. Tags dinâmicas e sub-tags: filtrarPorTag atualiza input e dispara pesquisa', () => {
+    const ctx = criarContextoFrontend();
+    const input = ctx.document.getElementById('input-busca');
+    let pesquisaDisparada = false;
+    ctx.realizarPesquisa = () => { pesquisaDisparada = true; };
+
+    ctx.filtrarPorTag('#Tecnologia');
+    assert.equal(input.value, 'Tecnologia', 'Deve definir o termo de busca sem o caractere #');
+    assert.equal(pesquisaDisparada, true, 'Deve disparar a rotina de pesquisa ao selecionar a tag');
+});
+
+test('10. Pinned Urgent Notices: renderizarCards exibe painel de prazos críticos para editais ≤ 3 dias', () => {
+    const ctx = criarContextoFrontend();
+    const painel = ctx.document.getElementById('painel-prazos-criticos');
+    const grid = ctx.document.getElementById('prazos-criticos-grid');
+
+    const editalCritico = {
+        _id: 'edital-critico-1',
+        titulo: 'Edital 001/2026 - PRAE Bolsa Urgente',
+        fonte: 'PRAE/UERN',
+        categoria: 'Bolsas (PROEX)',
+        data_vencimento_formatada: '22/10/2026',
+        dias_restantes: 2,
+        status_prazo: 'vigente',
+        link: 'https://prae.uern.br/edital-001'
+    };
+
+    ctx.renderizarCards([editalCritico]);
+    assert.equal(painel.style.display, 'block', 'Painel de prazos críticos deve ficar visível');
+    assert.match(grid.innerHTML, /Restam 2 dias|Encerra/, 'Card de prazo crítico deve conter contagem regressiva');
+    assert.match(grid.innerHTML, /Bolsa Urgente/, 'Card de prazo crítico deve conter o título');
 });
 
 

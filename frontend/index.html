@@ -414,6 +414,21 @@
                         </div>
                     </div>
 
+                    <!-- MURAL DE AVISOS FIXADOS / PRAZOS CRÍTICOS (≤ 3 DIAS) - Pinned Urgent Notices (Inspirado no Notice Board UI) -->
+                    <section id="painel-prazos-criticos" class="painel-prazos-criticos" style="display: none;" aria-label="Editais com prazo crítico">
+                        <div class="prazos-criticos-topo">
+                            <div class="prazos-criticos-badge-pulse">
+                                <span class="pulse-indicator"></span>
+                                <i class="ph-bold ph-warning"></i>
+                                <span>PRAZOS CRÍTICOS (≤ 3 DIAS)</span>
+                            </div>
+                            <span class="prazos-criticos-contador" id="prazos-criticos-contador">0 editais encerrando</span>
+                        </div>
+                        <div id="prazos-criticos-grid" class="prazos-criticos-grid">
+                            <!-- Cards de avisos urgentes injetados via JS -->
+                        </div>
+                    </section>
+
                     <!-- GRADE DE CARDS -->
                     <div id="container-vagas" class="grid-vagas">
                         <div class="status-box">

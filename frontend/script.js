@@ -1076,10 +1076,81 @@ async function carregarDados(tipo, novaPagina = 1) {
     }
 }
 
+function filtrarPorTag(tag, event) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    if (!tag) return;
+    const inputBusca = document.getElementById('input-busca');
+    if (inputBusca) {
+        inputBusca.value = tag.replace(/^#/, '').trim();
+        atualizarBotaoLimparBusca();
+        realizarPesquisa();
+
+        const area = document.getElementById('area-oportunidades');
+        if (area && typeof area.scrollIntoView === 'function') {
+            area.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        if (typeof mostrarToast === 'function') {
+            mostrarToast(`Filtrando oportunidades por: ${tag}`, 'info');
+        }
+    }
+}
+
+function renderizarPainelPrazosCriticos(criticos) {
+    const painel = document.getElementById('painel-prazos-criticos');
+    const grid = document.getElementById('prazos-criticos-grid');
+    const contador = document.getElementById('prazos-criticos-contador');
+    if (!painel || !grid) return;
+
+    if (!criticos || criticos.length === 0) {
+        painel.style.display = 'none';
+        grid.innerHTML = '';
+        return;
+    }
+
+    if (contador) {
+        const plural = criticos.length > 1 ? 's' : '';
+        contador.textContent = `${criticos.length} oportunidade${plural} com encerramento iminente`;
+    }
+
+    // Ordena pelo que vence mais cedo (0 dias = hoje primeiro)
+    criticos.sort((a, b) => a.dias - b.dias);
+
+    grid.innerHTML = criticos.slice(0, 6).map(item => {
+        const textoPrazo = item.dias === 0 ? 'Encerra Hoje!' : (item.dias === 1 ? 'Encerra Amanhã' : `Restam ${item.dias} dias`);
+        return `
+            <div class="card-prazo-critico">
+                <div class="card-prazo-critico-badge">
+                    <i class="ph-bold ph-alarm"></i>
+                    <span>${textoPrazo}</span>
+                </div>
+                <h4 class="card-prazo-critico-titulo" title="${escaparHTML(item.tituloFinal)}">
+                    ${escaparHTML(item.tituloFinal)}
+                </h4>
+                <div class="card-prazo-critico-rodape">
+                    <span style="color: #64748B; font-weight: 600;">
+                        <i class="ph-bold ph-buildings"></i> ${escaparHTML(item.fonte)}
+                    </span>
+                    <a href="${item.linkDestino}" target="_blank" rel="noopener noreferrer" class="card-prazo-critico-link">
+                        <span>Acessar Edital</span>
+                        <i class="ph-bold ph-arrow-up-right"></i>
+                    </a>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    painel.style.display = 'block';
+}
+
 function renderizarCards(listaDeVagas) {
     const container = document.getElementById('container-vagas');
+    const painelCriticos = document.getElementById('painel-prazos-criticos');
 
     if (!listaDeVagas || listaDeVagas.length === 0) {
+        if (painelCriticos) painelCriticos.style.display = 'none';
         container.innerHTML = `
             <div class="status-box">
                 <div class="status-box-decor"></div>
@@ -1120,6 +1191,7 @@ function renderizarCards(listaDeVagas) {
 
     const favSet = (usuarioAtual && usuarioAtual.favoritos) ? new Set(usuarioAtual.favoritos.map(String)) : new Set();
     let htmlCards = '';
+    const oportunidadesCriticas = [];
 
     listaDeVagas.forEach((vaga, idx) => {
         const idStr = String(vaga._id);
@@ -1131,9 +1203,9 @@ function renderizarCards(listaDeVagas) {
 
         let badgeStatusHTML = "";
         let status = vaga.status_prazo || "";
+        let dias = vaga.dias_restantes;
 
         if (!ehNoticia && vaga.data_vencimento_formatada) {
-            let dias = vaga.dias_restantes;
             if (typeof dias !== "number") {
                 const [d, m, a] = vaga.data_vencimento_formatada.split("/").map(Number);
                 const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
@@ -1213,6 +1285,20 @@ function renderizarCards(listaDeVagas) {
             textoAcao = 'Ver Vaga no CIEE';
         }
 
+        // Pinned Urgent Notices: captura editais com prazo crítico (≤ 3 dias) conforme RN03
+        if (!ehNoticia && status !== "vencido" && typeof dias === "number" && dias >= 0 && dias <= 3) {
+            oportunidadesCriticas.push({
+                vaga,
+                tituloFinal,
+                linkDestino,
+                dias,
+                status,
+                dataVencimento: vaga.data_vencimento_formatada || vaga.data_vencimento,
+                fonte: vaga.fonte || 'Universidade',
+                categoria: categoriaFormatada
+            });
+        }
+
         // Botão de calendário apenas para editais/vagas VIGENTES (não faz sentido lembrete para edital encerrado ou notícia)
         const podeExibirLembrete = !ehNoticia && status === "vigente" && (vaga.data_vencimento || vaga.data_vencimento_formatada);
         // Menu de Lembrete: Google Agenda / Outlook abrem o evento já preenchido; .ics fica como alternativa (Apple/Outlook desktop)
@@ -1278,13 +1364,28 @@ function renderizarCards(listaDeVagas) {
             </div>
         ` : '';
 
+        // Sub-tags clicáveis nos cards (Notice Board / Hashtags pattern)
+        const tagsPillsHTML = (Array.isArray(vaga.tags) && vaga.tags.length > 0)
+            ? vaga.tags.slice(0, 3).map(tag => `
+                <button type="button" class="card-subtag-pill"
+                    onclick="filtrarPorTag('${escaparHTML(tag)}', event)"
+                    title="Filtrar por #${escaparHTML(tag)}">
+                    #${escaparHTML(tag)}
+                </button>
+            `).join('')
+            : '';
+
         const cardHTML = `
             <div class="card ${classeVencido}" style="--card-accent: ${corTag};">
                 <div class="card-topo">
                     <div class="card-tags-row">
-                        <span class="card-categoria-tag" style="background-color: ${corTag};" title="${vaga.categoria || 'Geral'}">
+                        <button type="button" class="card-categoria-tag tag-clicavel"
+                            onclick="filtrarPorTag('${escaparHTML(vaga.categoria || categoriaFormatada)}', event)"
+                            style="background-color: ${corTag};"
+                            title="Filtrar por ${escaparHTML(vaga.categoria || 'Geral')}">
                             ${categoriaFormatada}
-                        </span>
+                        </button>
+                        ${tagsPillsHTML}
                         ${badgeStatusHTML}
                     </div>
 
@@ -1332,6 +1433,9 @@ function renderizarCards(listaDeVagas) {
         htmlCards += cardHTML;
     });
     container.innerHTML = htmlCards;
+
+    // Renderiza painel de avisos fixados de prazos críticos (≤ 3 dias)
+    renderizarPainelPrazosCriticos(oportunidadesCriticas);
 }
 
 /* ============================================================

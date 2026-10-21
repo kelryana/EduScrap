@@ -255,6 +255,39 @@ def extrair_texto_pdf(arquivo_pdf_bytes: BytesIO, max_paginas: int = 10) -> str:
 
     return texto
 
+def extrair_texto_pdf_hibrido(arquivo_pdf_bytes: BytesIO, max_paginas: int = 10) -> str:
+    """
+    Abordagem Híbrida (Khadija Mahanga): Extrai texto e tabelas de PDFs não estruturados,
+    isolando cronogramas em tabelas e evitando colisões de layout multi-colunas.
+    """
+    if not arquivo_pdf_bytes:
+        return ""
+    try:
+        import pdfplumber
+        try:
+            from backend.src.normalizer.collectors.pdf_scraper import PDFScraper
+        except ImportError:
+            from src.normalizer.collectors.pdf_scraper import PDFScraper
+        arquivo_pdf_bytes.seek(0)
+        scraper = PDFScraper()
+        full_text = []
+        with pdfplumber.open(arquivo_pdf_bytes) as pdf:
+            limite = min(len(pdf.pages), max_paginas) if max_paginas > 0 else len(pdf.pages)
+            for i in range(limite):
+                page = pdf.pages[i]
+                txt = scraper.extract_page_hybrid(page)
+                if txt:
+                    full_text.append(txt)
+        resultado = "\n\n".join(full_text)
+        if resultado and len(resultado.strip()) > 10:
+            logger.info(f"Texto extraído via PDF híbrido (pdfplumber + tabelas): {len(resultado)} caracteres")
+            return resultado
+    except Exception as e:
+        logger.debug(f"Falha na extração híbrida do PDF, recorrendo ao extrator clássico: {e}")
+
+    # Fallback para o extrator padrão
+    return extrair_texto_pdf(arquivo_pdf_bytes, max_paginas=max_paginas)
+
 def extrair_data_de_texto(texto: str) -> Optional[str]:
 
     if not texto or len(texto) < 5:
@@ -377,7 +410,7 @@ def extrair_data_vencimento_pdf(url_pdf: str, timeout: int = 15) -> Optional[str
         return None
 
     
-    texto = extrair_texto_pdf(pdf_bytes, max_paginas=5)
+    texto = extrair_texto_pdf_hibrido(pdf_bytes, max_paginas=5)
     if not texto:
         return None
 
