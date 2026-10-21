@@ -11,15 +11,18 @@ echo "============================================================"
 
 kill_port_processes() {
     local port=$1
-    echo "  -> Verificando processos na porta $port..."
+    echo "  -> Verificando e liberando processos na porta $port..."
+    if command -v fuser >/dev/null 2>&1; then
+        fuser -k -9 "${port}/tcp" 2>/dev/null || true
+    fi
     if command -v lsof >/dev/null 2>&1; then
         local pids=$(lsof -ti:$port 2>/dev/null || true)
         if [ ! -z "$pids" ]; then
             echo "  -> Matando processos na porta $port (PID: $pids)..."
             kill -9 $pids 2>/dev/null || true
-            sleep 1
         fi
     fi
+    sleep 1
 }
 
 if [ -f ".venv/Scripts/activate" ]; then
