@@ -546,7 +546,6 @@ EduScrap/
 Projeto acadêmico desenvolvido para a **Universidade do Estado do Rio Grande do Norte (UERN)**:
 
   GitHub: [@kelryana](https://github.com/kelryana)
-  GitHub: [@PatoDesoxigenado](https://github.com/PatoDesoxigenado)
 
 ---
 
