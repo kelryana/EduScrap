@@ -26,12 +26,13 @@ FUSO_BRASILIA = timezone(timedelta(hours=-3))
 
 # Fontes em formato RSS/Atom: (nome_feed, url, categoria_exibicao, fonte_exibicao, max_itens)
 FONTES_RSS = [
-    ("G1 Educação", "https://g1.globo.com/rss/g1/educacao/", "Notícia Educação", "G1", 8),
-    ("G1 Saúde", "https://g1.globo.com/rss/g1/saude/", "Notícia Saúde", "G1", 8),
-    ("Agência Brasil", "https://agenciabrasil.ebc.com.br/rss/educacao/feed.xml", "Notícia Educação", "Agência Brasil", 8),
-    ("Agência Brasil - Geral", "https://agenciabrasil.ebc.com.br/rss/ultimasnoticias/feed.xml", "Notícia Geral", "Agência Brasil", 8),
-    ("G1 Tecnologia", "https://g1.globo.com/rss/g1/tecnologia/", "Notícia Tech", "G1", 8),
-    ("Canaltech", "https://canaltech.com.br/rss/", "Notícia Tech", "Canaltech", 8),
+    ("G1 Tecnologia", "https://g1.globo.com/rss/g1/tecnologia/", "Notícia Tech", "G1", 10),
+    ("Canaltech", "https://canaltech.com.br/rss/", "Notícia Tech", "Canaltech", 10),
+    ("Agência Brasil - Geral", "https://agenciabrasil.ebc.com.br/rss/ultimasnoticias/feed.xml", "Notícia Geral", "Agência Brasil", 16),
+    ("G1 Educação", "https://g1.globo.com/rss/g1/educacao/", "Notícia Educação", "G1", 10),
+    ("Agência Brasil - Educação", "https://agenciabrasil.ebc.com.br/rss/educacao/feed.xml", "Notícia Educação", "Agência Brasil", 10),
+    ("G1 Saúde", "https://g1.globo.com/rss/g1/saude/", "Notícia Saúde", "G1", 12),
+    ("Agência Brasil - Saúde", "https://agenciabrasil.ebc.com.br/rss/saude/feed.xml", "Notícia Saúde", "Agência Brasil", 10),
 ]
 
 

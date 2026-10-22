@@ -34,3 +34,4 @@ pyotp>=2.9.0
 # Utilities
 
 logging>=0.4.9
+psutil>=5.9.0

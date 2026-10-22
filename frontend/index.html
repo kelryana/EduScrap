@@ -49,46 +49,31 @@
       }
     </script>
 
-    <link rel="stylesheet" href="style.css?v=20261019_v8">
+    <link rel="stylesheet" href="style.css?v=20261022_v10">
 </head>
 <body class="bg-[#FAFBFD] text-brand-dark min-h-screen bg-grid-pattern font-sans antialiased selection:bg-brand-yellow selection:text-brand-dark">
 
     <section id="landing-hero" class="landing-section w-full max-w-[1520px] mx-auto px-4 sm:px-6">
 
-        <nav class="landing-navbar">
+        <!-- Barra de Topo Minimalista da Landing Page (Visitantes Não Logados) -->
+        <div class="landing-top-bar flex items-center justify-between py-4 px-6 mb-6 bg-white border-3 border-brand-dark rounded-2xl shadow-brutal">
             <div class="nav-brand" style="display: inline-flex; align-items: center; gap: 12px;">
-                <img src="assets/logo.png" data-logo-light="assets/logo.png" data-logo-dark="assets/logo_temaescuro.png" alt="EduScrap Logo" class="nav-brand-img h-12 sm:h-14 w-auto" height="52" style="height: 76px !important; max-height: 80px !important; width: auto !important; object-fit: contain; display: block; flex-shrink: 0;">
-                <span class="nav-brand-title" style="font-size: 2rem; font-weight: 900; line-height: 1; display: inline-flex; align-items: center;">
+                <img src="assets/logo.png" data-logo-light="assets/logo.png" data-logo-dark="assets/logo_temaescuro.png" alt="EduScrap Logo" class="nav-brand-img h-12 sm:h-14 w-auto" height="52" style="height: 68px !important; max-height: 72px !important; width: auto !important; object-fit: contain; display: block; flex-shrink: 0;">
+                <span class="nav-brand-title" style="font-size: 1.9rem; font-weight: 900; line-height: 1; display: inline-flex; align-items: center;">
                     <span class="brand-edu">Edu</span><span class="brand-scrap" style="color: #FF5C00;">Scrap</span>
                 </span>
             </div>
 
-            <div class="nav-links">
-                <a href="#landing-hero" class="nav-link">Início</a>
-                <a href="#area-oportunidades" class="nav-link">Oportunidades</a>
-                <a href="#area-oportunidades" onclick="carregarFeedPersonalizado()" class="nav-link">Recomendados</a>
-                <a href="#area-oportunidades" onclick="carregarEstatisticas()" class="nav-link">Métricas</a>
-                <a href="admin.html" id="nav-link-admin" class="nav-link font-bold text-brand-orange" title="Painel de Governança Técnica (UC11/UC12)" style="display: none;">Admin</a>
-            </div>
-
             <div class="nav-actions-container">
-                <button id="btn-theme-toggle" class="btn-theme-toggle" onclick="toggleTheme()" aria-label="Alternar entre modo escuro e claro" title="Alternar entre modo escuro e claro">
-                    <i class="ph-bold ph-moon theme-toggle-icon" id="theme-toggle-icon"></i>
-                    <span class="theme-toggle-text" id="theme-toggle-text">Escuro</span>
+                <button class="btn-theme-toggle" onclick="toggleTheme()" aria-label="Alternar entre modo escuro e claro" title="Alternar entre modo escuro e claro">
+                    <i class="ph-bold ph-moon theme-toggle-icon"></i>
+                    <span class="theme-toggle-text">Escuro</span>
                 </button>
-
-                <div id="nav-auth-area">
-                    <div class="nav-user-box" style="padding: 10px 18px; font-size: 1.12rem;">
-                        <span class="nav-user-tag" style="font-size: 1.12rem;">
-                            <i class="ph-bold ph-student"></i> Olá, <strong id="user-name-display">Estudante</strong>
-                        </span>
-                        <button class="btn-nav-mini btn-nav-logout" onclick="fazerLogout()" title="Sair da Conta" style="width: 36px; height: 36px; font-size: 1.25rem;">
-                            <i class="ph-bold ph-sign-out"></i>
-                        </button>
-                    </div>
-                </div>
+                <a href="login.html?aba=login" class="btn-nav-auth" style="text-decoration: none;">
+                    <i class="ph-bold ph-sign-in"></i> <span>Já tenho conta</span>
+                </a>
             </div>
-        </nav>
+        </div>
 
         <div class="relative w-full max-w-full py-10 my-4 mx-auto">
 
@@ -173,14 +158,10 @@
                   </p>
 
                   <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-5 pt-3">
-                    <a href="#area-oportunidades" class="px-8 sm:px-10 py-4.5 sm:py-5 rounded-2xl border-3 border-brand-dark bg-brand-orange hover:bg-brand-orange-hover text-white font-extrabold text-xl sm:text-2xl shadow-brutal neo-btn inline-flex items-center justify-center gap-3 whitespace-nowrap">
-                      <span>Explorar Oportunidades</span>
-                      <span class="text-2xl">→</span>
-                    </a>
-
-                    <a href="login.html?aba=register" class="px-8 sm:px-10 py-4.5 sm:py-5 rounded-2xl border-3 border-brand-dark bg-white hover:bg-slate-50 text-brand-dark font-extrabold text-xl sm:text-2xl shadow-brutal neo-btn inline-flex items-center justify-center gap-3 whitespace-nowrap" style="text-decoration: none;">
+                    <a href="login.html?aba=register" class="px-8 sm:px-10 py-4.5 sm:py-5 rounded-2xl border-3 border-brand-dark bg-brand-orange hover:bg-brand-orange-hover text-white font-extrabold text-xl sm:text-2xl shadow-brutal neo-btn inline-flex items-center justify-center gap-3 whitespace-nowrap" style="text-decoration: none;">
                       <i class="ph-bold ph-student"></i>
                       <span>Criar Perfil de Aluno</span>
+                      <span class="text-2xl">→</span>
                     </a>
                   </div>
 
@@ -213,10 +194,64 @@
             </div>
 
         </div>
+
+        <!-- Seção Extra da Página Inicial (Não Logado): Dashboard de Métricas do Site -->
+        <!-- Seção do Dashboard de Métricas na Página Inicial (Aparece ao rolar a página) -->
+        <div id="landing-dashboard-section" class="w-full mt-12 mb-8 pt-4">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center gap-2.5 px-5 py-1.5 rounded-full bg-amber-100 border-2 border-brand-dark shadow-brutal-sm font-display font-extrabold text-sm sm:text-base text-brand-dark mb-3">
+                    <span class="text-brand-orange text-lg">✦</span>
+                    <span>Métricas & Oportunidades em Tempo Real</span>
+                </div>
+                <h2 class="font-display font-black text-3xl sm:text-4xl text-brand-dark tracking-tight">
+                    Panorama Geral do Hub EduScrap
+                </h2>
+                <p class="text-slate-600 text-lg font-medium max-w-2xl mx-auto mt-2">
+                    Acompanhe ao vivo o resumo de editais, estágios e prazos monitorados no ecossistema universitário.
+                </p>
+            </div>
+            <div id="landing-dashboard-container"></div>
+        </div>
     </section>
 
 
-    <div id="area-oportunidades" class="app-container">
+    <div id="area-oportunidades" class="app-container" style="display: none;">
+        <!-- Menu Flutuante Superior (Acompanha o Scroll na Página de Pesquisa) -->
+        <nav class="landing-navbar navbar-pesquisa-sticky">
+            <div class="nav-brand" style="display: inline-flex; align-items: center; gap: 12px; cursor: pointer;" onclick="carregarDados('estagios', 1)">
+                <img src="assets/logo.png" data-logo-light="assets/logo.png" data-logo-dark="assets/logo_temaescuro.png" alt="EduScrap Logo" class="nav-brand-img h-12 sm:h-14 w-auto" height="52" style="height: 76px !important; max-height: 80px !important; width: auto !important; object-fit: contain; display: block; flex-shrink: 0;">
+                <span class="nav-brand-title" style="font-size: 2rem; font-weight: 900; line-height: 1; display: inline-flex; align-items: center;">
+                    <span class="brand-edu">Edu</span><span class="brand-scrap" style="color: #FF5C00;">Scrap</span>
+                </span>
+            </div>
+
+            <div class="nav-links">
+                <a href="javascript:void(0)" onclick="carregarDados('estagios', 1)" class="nav-link">Oportunidades</a>
+                <a href="javascript:void(0)" onclick="carregarFeedPersonalizado()" class="nav-link">Recomendados</a>
+                <a href="javascript:void(0)" onclick="carregarEstatisticas()" class="nav-link">Métricas</a>
+                <a href="javascript:void(0)" onclick="alternarSidebarPerfil()" class="nav-link">Personalização</a>
+                <a href="admin.html" id="nav-link-admin" class="nav-link font-bold text-brand-orange" title="Painel de Governança Técnica (UC11/UC12)" style="display: none;">Admin</a>
+            </div>
+
+            <div class="nav-actions-container">
+                <button id="btn-theme-toggle" class="btn-theme-toggle" onclick="toggleTheme()" aria-label="Alternar entre modo escuro e claro" title="Alternar entre modo escuro e claro">
+                    <i class="ph-bold ph-moon theme-toggle-icon" id="theme-toggle-icon"></i>
+                    <span class="theme-toggle-text" id="theme-toggle-text">Escuro</span>
+                </button>
+
+                <div id="nav-auth-area">
+                    <div class="nav-user-box" style="padding: 10px 18px; font-size: 1.12rem;">
+                        <span class="nav-user-tag" style="font-size: 1.12rem;">
+                            <i class="ph-bold ph-student"></i> Olá, <strong id="user-name-display">Estudante</strong>
+                        </span>
+                        <button class="btn-nav-mini btn-nav-logout" onclick="fazerLogout()" title="Sair da Conta" style="width: 36px; height: 36px; font-size: 1.25rem;">
+                            <i class="ph-bold ph-sign-out"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
         <!-- Header da Seção de Oportunidades -->
         <header class="header-memphis">
             <div class="logo-box">
@@ -341,6 +376,18 @@
                             </div>
                         </div>
 
+                        <!-- Atalhos Rápidos do Menu Lateral (Dashboard de Métricas & Portal Completo) -->
+                        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px;">
+                            <button type="button" class="btn-submit-memphis" style="width: 100%; background: #FFF8E1; color: #0F172A; justify-content: flex-start; gap: 10px;" onclick="fecharSidebarPerfil(); carregarEstatisticas();">
+                                <i class="ph-bold ph-chart-bar" style="color: #FF5C00; font-size: 1.3rem;"></i>
+                                <span>Dashboard de Métricas</span>
+                            </button>
+                            <button type="button" class="btn-submit-memphis" style="width: 100%; background: #F8FAFC; color: #0F172A; justify-content: flex-start; gap: 10px;" onclick="fecharSidebarPerfil(); carregarPortalUsuario();">
+                                <i class="ph-bold ph-user-gear" style="color: #0F172A; font-size: 1.3rem;"></i>
+                                <span>Configurações da Conta</span>
+                            </button>
+                        </div>
+
                         <form id="form-perfil-preferencias-sidebar" onsubmit="salvarPreferenciasPerfil(event)">
                             <div class="form-group-memphis">
                                 <div class="label-com-subtexto">
@@ -399,7 +446,11 @@
                             <button id="btn-favoritos" class="btn-filtro-aluno" onclick="carregarFavoritos()">
                                 <i class="ph-bold ph-star"></i> <span>Salvos (<strong id="contador-favoritos">0</strong>)</span>
                             </button>
-                            <button id="btn-abrir-sidebar-filtros" class="btn-filtro-aluno" onclick="carregarPortalUsuario()">
+                            <button id="btn-abrir-sidebar-filtros" class="btn-filtro-aluno" onclick="alternarSidebarPerfil()">
+                                <i class="ph-bold ph-sliders-horizontal"></i>
+                                <span>Personalização</span>
+                            </button>
+                            <button id="btn-portal-usuario" class="btn-filtro-aluno" onclick="carregarPortalUsuario()">
                                 <i class="ph-bold ph-user-circle"></i>
                                 <span>Meu Perfil</span>
                             </button>
@@ -533,11 +584,12 @@
             <a href="#">Política de Privacidade</a>
             <a href="#">Termos de Uso</a>
             <a href="#">Contato</a>
+            <a href="https://github.com/kelryana/EduScrap" target="_blank" rel="noopener noreferrer">GitHub</a>
         </div>
         </div>
     </footer>
 
-    <script src="script.js?v=20261019_v8"></script>
+    <script src="script.js?v=20261022_v10"></script>
     <script>
         function scrollParaBusca() {
             const target = document.getElementById('area-oportunidades');

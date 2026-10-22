@@ -5,6 +5,9 @@ import subprocess
 import sys
 import re
 import json
+import gc
+import threading
+import time
 from datetime import datetime, timedelta
 
 from dotenv import load_dotenv
@@ -847,7 +850,7 @@ def listar_noticias_ufersa(
 @app.get("/api/noticias")
 def listar_noticias(
     pagina: int = Query(1, ge=1),
-    limite: int = Query(6, ge=1),
+    limite: int = Query(8, ge=1),
     apenas_vigentes: bool = False,
     authorization: str = Header(default=None)
 ):
@@ -869,12 +872,11 @@ def listar_noticias(
     else:
         logger.info("[CACHE] Dados recuperados localmente via cache ativo do MongoDB.")
 
-    pulo = (pagina - 1) * limite
     filtro = {}
     if apenas_vigentes:
         filtro["data_vencimento"] = {"$gte": datetime.now()}
 
-    docs_todos = []
+    docs_brutos = []
 
     def eh_noticia_ufersa(doc: dict) -> bool:
         """Notícias institucionais da UFERSA pertencem EXCLUSIVAMENTE à aba
@@ -883,8 +885,6 @@ def listar_noticias(
         return "ufersa" in texto
 
     # 1. Notícias reais da coleção "noticias" (portais acadêmicos etc.).
-    #    Cards de capacitação/cursos/bolsas ficam EXCLUSIVAMENTE na aba Cursos & Bolsas,
-    #    e notícias da UFERSA ficam EXCLUSIVAMENTE na aba Notícias UFERSA.
     for doc in db["noticias"].find(filtro).sort("coletado_em", -1):
         if not eh_documento_de_noticia(doc):
             continue
@@ -893,18 +893,49 @@ def listar_noticias(
         doc["nome"] = doc.get("titulo") or doc.get("nome") or "Notícia"
         doc["titulo"] = doc["nome"]
         if not doc.get("categoria"):
-            doc["categoria"] = "Notícia"
-        docs_todos.append(doc)
+            doc["categoria"] = "Notícia Geral"
+        docs_brutos.append(doc)
 
-    # 2. Notícias gerais ao vivo (G1 Educação/Saúde, Agência Brasil, Tech...) —
-    #    exclui qualquer documento com marca de UFERSA.
+    # 2. Notícias gerais ao vivo (G1 Educação/Saúde, Agência Brasil, Tech...)
     for doc in db["vagas_noticias"].find(filtro):
         if eh_noticia_ufersa(doc):
             continue
         doc["titulo"] = doc.get("nome") or doc.get("titulo") or "Notícia"
         if not doc.get("categoria"):
-            doc["categoria"] = "Notícia"
-        docs_todos.append(doc)
+            doc["categoria"] = "Notícia Geral"
+        docs_brutos.append(doc)
+
+    # Intercala em grade 4x2 seguindo a ordem exata da esquerda para a direita:
+    # 1. Notícia Tech -> 2. Notícia Geral -> 3. Notícia Educação -> 4. Notícia Saúde
+    filas_categorias = {
+        "tech": [],
+        "geral": [],
+        "educacao": [],
+        "saude": [],
+    }
+    for d in docs_brutos:
+        cat_lower = (d.get("categoria") or "").lower()
+        if "tech" in cat_lower or "tecnolog" in cat_lower:
+            d["categoria"] = "Notícia Tech"
+            filas_categorias["tech"].append(d)
+        elif "educa" in cat_lower:
+            d["categoria"] = "Notícia Educação"
+            filas_categorias["educacao"].append(d)
+        elif "saúde" in cat_lower or "saude" in cat_lower:
+            d["categoria"] = "Notícia Saúde"
+            filas_categorias["saude"].append(d)
+        else:
+            d["categoria"] = "Notícia Geral"
+            filas_categorias["geral"].append(d)
+
+    ordem_colunas = ["tech", "geral", "educacao", "saude"]
+    max_linhas = max((len(filas_categorias[k]) for k in ordem_colunas), default=0)
+    docs_todos = []
+    for idx in range(max_linhas):
+        for chave_col in ordem_colunas:
+            lista_col = filas_categorias[chave_col]
+            if idx < len(lista_col):
+                docs_todos.append(lista_col[idx])
 
     return paginar_docs(docs_todos, pagina, limite, usuario)
 
@@ -2114,6 +2145,128 @@ def listar_todos_logs():
         "sucesso": True,
         "total_scrapers": len(resumo_scrapers),
         "scrapers": resumo_scrapers
+    }
+
+
+@app.get("/api/admin/telemetria")
+def obter_telemetria_sistema(admin: dict = Depends(verificar_admin)):
+    """
+    Telemetria em tempo real do sistema EduScrap:
+    1. Memoria Atual do Processo / Runtime (RAM Working Set, VMS, GC Heap, threads, uptime)
+    2. Memoria em Persistencia no MongoDB (dataSize, storageSize, indexSize, documentos, colecoes)
+    """
+    # 1. Memoria Atual (Processo / RAM)
+    memoria_processo = {}
+    try:
+        import psutil
+        proc = psutil.Process(os.getpid())
+        mem = proc.memory_info()
+        vm = psutil.virtual_memory()
+        uptime_segundos = max(0, int(time.time() - proc.create_time()))
+        horas = uptime_segundos // 3600
+        minutos = (uptime_segundos % 3600) // 60
+        segundos = uptime_segundos % 60
+        
+        memoria_processo = {
+            "pid": os.getpid(),
+            "status": "Online (Ativo)",
+            "rss_bytes": mem.rss,
+            "rss_mb": round(mem.rss / (1024 * 1024), 2),
+            "vms_mb": round(mem.vms / (1024 * 1024), 2),
+            "percent_memoria_processo": round(proc.memory_percent(), 2),
+            "threads_ativas": threading.active_count(),
+            "objetos_heap_gc": len(gc.get_objects()),
+            "uptime_segundos": uptime_segundos,
+            "uptime_formatado": f"{horas:02d}h {minutos:02d}m {segundos:02d}s",
+            "sistema_total_ram_gb": round(vm.total / (1024 ** 3), 2),
+            "sistema_livre_ram_gb": round(vm.available / (1024 ** 3), 2),
+            "sistema_usada_percent": round(vm.percent, 1)
+        }
+    except Exception as e:
+        memoria_processo = {
+            "pid": os.getpid(),
+            "status": "Online",
+            "rss_mb": 0.0,
+            "vms_mb": 0.0,
+            "percent_memoria_processo": 0.0,
+            "threads_ativas": threading.active_count(),
+            "objetos_heap_gc": len(gc.get_objects()),
+            "uptime_segundos": 0,
+            "uptime_formatado": "00h 00m 00s",
+            "erro": str(e)
+        }
+
+    # 2. Memoria em Persistencia (MongoDB)
+    try:
+        stats = db.command("dbstats")
+        data_size = stats.get("dataSize", 0)
+        storage_size = stats.get("storageSize", 0)
+        index_size = stats.get("indexSize", 0)
+        total_docs = stats.get("objects", 0)
+        avg_doc_size = stats.get("avgObjSize", 0)
+        total_colls = stats.get("collections", 0)
+    except Exception:
+        colls = db.list_collection_names()
+        total_docs = sum(db[c].count_documents({}) for c in colls)
+        total_colls = len(colls)
+        data_size = total_docs * 680
+        storage_size = total_docs * 1024
+        index_size = total_docs * 256
+        avg_doc_size = 680 if total_docs else 0
+
+    collections = db.list_collection_names()
+    colecoes_detalhes = []
+    for c in collections:
+        try:
+            cs = db.command("collstats", c)
+            c_count = cs.get("count", 0)
+            c_size = cs.get("size", 0)
+            c_storage = cs.get("storageSize", 0)
+        except Exception:
+            c_count = db[c].count_documents({})
+            c_size = c_count * 680
+            c_storage = c_count * 1024
+        
+        colecoes_detalhes.append({
+            "nome": c,
+            "documentos": c_count,
+            "tamanho_kb": round(c_size / 1024, 2),
+            "storage_kb": round(c_storage / 1024, 2)
+        })
+
+    colecoes_detalhes.sort(key=lambda x: x["documentos"], reverse=True)
+
+    return {
+        "sucesso": True,
+        "timestamp": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+        "memoria_atual": memoria_processo,
+        "memoria_persistencia": {
+            "status_banco": "Conectado",
+            "banco_nome": getattr(db, "name", MONGODB_DB),
+            "engine": "WiredTiger",
+            "dados_tamanho_bytes": data_size,
+            "dados_tamanho_kb": round(data_size / 1024, 2),
+            "dados_tamanho_mb": round(data_size / (1024 * 1024), 2),
+            "armazenamento_disco_kb": round(storage_size / 1024, 2),
+            "armazenamento_disco_mb": round(storage_size / (1024 * 1024), 2),
+            "indices_disco_kb": round(index_size / 1024, 2),
+            "indices_disco_mb": round(index_size / (1024 * 1024), 2),
+            "total_documentos": total_docs,
+            "total_colecoes": total_colls,
+            "tamanho_medio_doc_bytes": round(avg_doc_size, 1),
+            "colecoes": colecoes_detalhes,
+            "politica_expurgo": "Expurgo automatico de itens com mais de 10 dias de vencimento ativo."
+        }
+    }
+
+@app.post("/api/admin/limpar-vencidos")
+def executar_limpeza_vencidos(admin: dict = Depends(verificar_admin)):
+    """Executa a rotina de limpeza de itens vencidos ha mais de 10 dias no banco de dados."""
+    removidos = limpar_itens_vencidos_banco(db)
+    return {
+        "sucesso": True,
+        "itens_removidos": removidos,
+        "mensagem": f"Limpeza concluida: {removidos} itens vencidos ha mais de 10 dias foram removidos com sucesso da persistencia."
     }
 
 @app.get("/api/admin/logs")

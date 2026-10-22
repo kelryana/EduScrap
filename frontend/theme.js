@@ -58,16 +58,17 @@
 
     // Atualiza ícone e texto do botão (lua/sol + "Escuro"/"Claro").
     function updateToggleUI() {
-        const icon = document.getElementById('theme-toggle-icon');
-        const text = document.getElementById('theme-toggle-text');
-        const btn = document.getElementById('btn-theme-toggle');
         const dark = isDark();
-        if (icon) {
+        document.querySelectorAll('.theme-toggle-icon, #theme-toggle-icon').forEach(function (icon) {
             icon.classList.toggle('ph-moon', !dark);
             icon.classList.toggle('ph-sun', dark);
-        }
-        if (text) text.textContent = dark ? 'Claro' : 'Escuro';
-        if (btn) btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+        });
+        document.querySelectorAll('.theme-toggle-text, #theme-toggle-text').forEach(function (text) {
+            text.textContent = dark ? 'Claro' : 'Escuro';
+        });
+        document.querySelectorAll('.btn-theme-toggle, #btn-theme-toggle').forEach(function (btn) {
+            btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+        });
     }
 
     // Aplica imediatamente (o script roda no <head>, antes do body existir;

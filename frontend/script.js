@@ -19,12 +19,53 @@ let tipoAtual = 'estagios';
 let filtroVigentesAtivo = false;
 let usuarioAtual = null;
 
-window.addEventListener('DOMContentLoaded', () => {
+function irParaCadastroComFeedback() {
+    mostrarToast("Crie seu perfil de estudante para explorar todas as oportunidades!", "info");
+    setTimeout(() => {
+        window.location.href = "login.html?aba=register";
+    }, 450);
+}
+
+function estaAutenticado() {
+    return Boolean(usuarioAtual && getAuthToken());
+}
+
+function atualizarVisibilidadePaginas() {
+    const landingHero = document.getElementById('landing-hero');
+    const areaOportunidades = document.getElementById('area-oportunidades');
+    const logado = estaAutenticado();
+
+    if (landingHero) {
+        landingHero.style.display = logado ? 'none' : 'block';
+        if (!logado) {
+            // Garante que o dashboard da landing page seja populado imediatamente
+            const landingDash = document.getElementById('landing-dashboard-container');
+            if (landingDash && (!landingDash.children.length || !landingDash.querySelector('[data-purpose="dashboard-wrapper"]'))) {
+                carregarEstatisticas('#landing-dashboard-container');
+            }
+        }
+    }
+    if (areaOportunidades) {
+        areaOportunidades.style.display = logado ? 'block' : 'none';
+    }
+}
+
+function inicializarApp() {
     inicializarAutenticacao();
     configurarChipsClick();
-    carregarDados('estagios');
-    verificarNovoUsuarioOnboarding();
-});
+    if (estaAutenticado()) {
+        carregarDados('estagios');
+        verificarNovoUsuarioOnboarding();
+    } else {
+        carregarEstatisticas('#landing-dashboard-container');
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', inicializarApp);
+} else {
+    inicializarApp();
+}
 
 function verificarNovoUsuarioOnboarding() {
     if (localStorage.getItem('eduscrap_novo_usuario') === 'true') {
@@ -114,6 +155,8 @@ function atualizarInterfaceUsuario() {
         navAdmin.style.display = isAdmin ? 'inline-block' : 'none';
     }
 
+    atualizarVisibilidadePaginas();
+
     const totalFavs = (usuarioAtual && usuarioAtual.favoritos) ? usuarioAtual.favoritos.length : 0;
     if (contadorFav) contadorFav.innerText = totalFavs;
 
@@ -182,7 +225,8 @@ function fazerLogout() {
     fecharModalPerfil();
     fecharSidebarPerfil(); // Close sidebar if open
     mostrarToast("Você saiu da sua conta.", "info");
-    carregarDados('estagios');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    carregarEstatisticas('#landing-dashboard-container');
 }
 
 function abrirModalAuth(aba = 'login') {
@@ -500,6 +544,7 @@ async function carregarFavoritos() {
     tipoAtual = 'favoritos';
     alternarExibicaoFiltroVigentes(true);
     const container = document.getElementById('container-vagas');
+    if (container) container.classList.remove('grid-vagas-4x2');
     const antigo = document.getElementById('bloco-paginacao');
     if (antigo) antigo.remove();
 
@@ -583,6 +628,7 @@ async function carregarFeedPersonalizado() {
     tipoAtual = 'personalizado';
     alternarExibicaoFiltroVigentes(true);
     const container = document.getElementById('container-vagas');
+    if (container) container.classList.remove('grid-vagas-4x2');
     const antigo = document.getElementById('bloco-paginacao');
     if (antigo) antigo.remove();
 
@@ -978,7 +1024,7 @@ const ATRASO_DIMMING_MS = 140;
 const ATRASO_SKELETON_MS = 600;
 let tokenCarregamentoAtual = 0;
 
-function iniciarCarregamentoSuave(container) {
+function iniciarCarregamentoSuave(container, qtdSkeletons = 6) {
     const meuToken = ++tokenCarregamentoAtual;
     const temConteudo = !!container.querySelector('.card');
     let timerDimming = null;
@@ -997,11 +1043,11 @@ function iniciarCarregamentoSuave(container) {
         timerSkeleton = setTimeout(() => {
             if (meuToken === tokenCarregamentoAtual) {
                 container.classList.remove('carregando');
-                renderizarSkeletons(6);
+                renderizarSkeletons(qtdSkeletons);
             }
         }, ATRASO_SKELETON_MS);
     } else {
-        renderizarSkeletons(6);
+        renderizarSkeletons(qtdSkeletons);
     }
 
     return {
@@ -1026,10 +1072,15 @@ function rolarParaTopoDosCards(container) {
 }
 
 async function carregarDados(tipo, novaPagina = 1) {
+    if (!estaAutenticado() && document.getElementById('landing-hero')) {
+        abrirModalAuth('register');
+        return;
+    }
     const mudouPagina = tipo === tipoAtual && novaPagina !== paginaAtual;
     tipoAtual = tipo;
     paginaAtual = novaPagina;
 
+    const limitePagina = tipo === 'noticias' ? 8 : 6;
     const abasSemVigencia = ['cursos-bolsas', 'noticias'];
     const exibirFiltroVigentes = !abasSemVigencia.includes(tipo);
     alternarExibicaoFiltroVigentes(exibirFiltroVigentes);
@@ -1037,11 +1088,12 @@ async function carregarDados(tipo, novaPagina = 1) {
 
     const container = document.getElementById('container-vagas');
     container.style.display = 'grid';
-    const carga = iniciarCarregamentoSuave(container);
+    container.classList.toggle('grid-vagas-4x2', tipo === 'noticias');
+    const carga = iniciarCarregamentoSuave(container, limitePagina);
     if (mudouPagina && typeof container.getBoundingClientRect === 'function') rolarParaTopoDosCards(container);
 
     try {
-        let url = `${API_URL}/${tipo}?pagina=${paginaAtual}&limite=6`;
+        let url = `${API_URL}/${tipo}?pagina=${paginaAtual}&limite=${limitePagina}`;
         if (filtroVigentesAtivo && exibirFiltroVigentes) {
             url += `&apenas_vigentes=true`;
         }
@@ -1701,6 +1753,7 @@ async function realizarPesquisa() {
 
     const container = document.getElementById('container-vagas');
     container.style.display = 'grid';
+    container.classList.remove('grid-vagas-4x2');
     const carga = iniciarCarregamentoSuave(container);
 
     const antigo = document.getElementById('bloco-paginacao');
@@ -1774,10 +1827,11 @@ function sanitizarItemEdital(titulo) {
 }
 
 function alternarAbaPrazos(aba, btn) {
+    const escopo = (btn && typeof btn.closest === 'function' && btn.closest('[data-purpose="dashboard-wrapper"]')) || document;
     if (!btn) {
-        btn = document.querySelector(`[data-purpose="tab-filters"] button[data-aba="${aba}"]`);
+        btn = escopo.querySelector(`[data-purpose="tab-filters"] button[data-aba="${aba}"]`);
     }
-    const todosBotoes = document.querySelectorAll('[data-purpose="tab-filters"] button');
+    const todosBotoes = escopo.querySelectorAll('[data-purpose="tab-filters"] button');
     todosBotoes.forEach(b => {
         b.className = 'px-4 sm:px-5 py-2.5 bg-white text-slate-800 rounded-xl text-xs sm:text-sm md:text-base font-extrabold flex items-center space-x-2 border-2 border-slate-900 hover:bg-slate-50 transition cursor-pointer';
         const svg = b.querySelector('svg');
@@ -1795,11 +1849,11 @@ function alternarAbaPrazos(aba, btn) {
         }
     }
 
-    const colProximos = document.getElementById('col-prazos-proximos');
-    const colEncerrados = document.getElementById('col-prazos-encerrados');
-    const grid = document.getElementById('dash-prazos-listas-grid');
-    const tituloColAbertos = document.getElementById('dash-titulo-col-abertos');
-    const msgSemRetaFinal = document.getElementById('dash-msg-sem-reta-final');
+    const colProximos = escopo.querySelector('#col-prazos-proximos') || document.getElementById('col-prazos-proximos');
+    const colEncerrados = escopo.querySelector('#col-prazos-encerrados') || document.getElementById('col-prazos-encerrados');
+    const grid = escopo.querySelector('#dash-prazos-listas-grid') || document.getElementById('dash-prazos-listas-grid');
+    const tituloColAbertos = escopo.querySelector('#dash-titulo-col-abertos') || document.getElementById('dash-titulo-col-abertos');
+    const msgSemRetaFinal = escopo.querySelector('#dash-msg-sem-reta-final') || document.getElementById('dash-msg-sem-reta-final');
     if (!colProximos || !colEncerrados) return;
 
     const cardsAbertos = colProximos.querySelectorAll('[data-edital-tipo="aberto"]');
@@ -1862,7 +1916,8 @@ function alternarAbaPrazos(aba, btn) {
 }
 
 function alternarListaEncerrados(btn) {
-    const extras = document.getElementById('lista-encerrados-extras');
+    const escopo = (btn && typeof btn.closest === 'function' && btn.closest('[data-purpose="dashboard-wrapper"]')) || document;
+    const extras = escopo.querySelector('#lista-encerrados-extras') || document.getElementById('lista-encerrados-extras');
     if (!extras) return;
     const estaAberto = extras.style.display === 'block';
     extras.style.display = estaAberto ? 'none' : 'block';
@@ -1970,17 +2025,25 @@ function animarNumero(el, alvo, duracao = 900) {
     requestAnimationFrame(passo);
 }
 
-async function carregarEstatisticas() {
-    tipoAtual = 'indicadores';
-    alternarExibicaoFiltroVigentes(false);
+async function carregarEstatisticas(targetSelector = '#container-vagas') {
+    const ehLanding = targetSelector === '#landing-dashboard-container';
+    const container = ehLanding
+        ? document.getElementById('landing-dashboard-container')
+        : document.getElementById('container-vagas');
+    if (!container) return;
 
-    const antigo = document.getElementById('bloco-paginacao');
-    if (antigo) antigo.remove();
+    if (!ehLanding) {
+        tipoAtual = 'indicadores';
+        alternarExibicaoFiltroVigentes(false);
+        container.classList.remove('grid-vagas-4x2');
 
-    const container = document.getElementById('container-vagas');
-    renderizarSkeletonDashboard();
+        const antigo = document.getElementById('bloco-paginacao');
+        if (antigo) antigo.remove();
 
-    destacarBotaoAtivo('btn-analises');
+        destacarBotaoAtivo('btn-analises');
+    }
+
+    renderizarSkeletonDashboard(container);
 
     try {
         const resposta = await fetch(`${API_URL}/estatisticas`, {
@@ -2156,7 +2219,7 @@ async function carregarEstatisticas() {
                 <!-- BEGIN: TopMetricCardsGrid -->
                 <section class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 sm:gap-3.5" data-purpose="metric-cards">
                     ${kpis.map(k => `
-                    <div onclick="${k.acao}" class="relative bg-white border-2 border-slate-900 rounded-2xl pt-4 pb-3.5 px-2.5 flex flex-col items-center justify-between text-center shadow-[0_2px_0_0_rgba(15,23,42,0.9)] hover:shadow-md transition-all cursor-pointer group">
+                    <div onclick="${ehLanding ? "irParaCadastroComFeedback()" : k.acao}" class="relative bg-white border-2 border-slate-900 rounded-2xl pt-4 pb-3.5 px-2.5 flex flex-col items-center justify-between text-center shadow-[0_2px_0_0_rgba(15,23,42,0.9)] hover:shadow-md transition-all cursor-pointer group">
                         <span class="absolute top-0 inset-x-3 h-1.5 ${k.accent} rounded-b-md"></span>
                         <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl ${k.boxBg} border-2 flex items-center justify-center mb-2 shadow-sm group-hover:scale-105 transition-transform">
                             ${k.svg}
@@ -2242,7 +2305,7 @@ async function carregarEstatisticas() {
                                     hPx = 18;
                                 }
                                 return `
-                                <div class="flex-1 max-w-[95px] flex flex-col items-center group cursor-pointer" onclick="carregarDados('${cat.id}')" title="${cat.rotulo}: ${cat.total} oportunidades (Clique para abrir)">
+                                <div class="flex-1 max-w-[95px] flex flex-col items-center group cursor-pointer" onclick="${ehLanding ? "irParaCadastroComFeedback()" : `carregarDados('${cat.id}')`}" title="${cat.rotulo}: ${cat.total} oportunidades (Clique para abrir)">
                                     <span class="text-sm sm:text-base md:text-lg font-black text-slate-900 mb-2 tracking-tight group-hover:scale-110 transition-transform">${cat.total}</span>
                                     <div class="w-7 sm:w-8 md:w-8.5 ${cat.corClass} rounded-full border-2 border-slate-900 shadow-[2px_2px_0px_0px_rgba(15,23,42,0.9)] transition-all duration-200 group-hover:scale-105 group-hover:shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]" style="height: ${hPx}px;"></div>
                                     <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-slate-900 flex items-center justify-center bg-white mt-2.5 shadow-[1px_1px_0px_0px_rgba(15,23,42,0.8)] group-hover:bg-slate-50 transition-colors">
@@ -2425,6 +2488,7 @@ async function carregarPortalUsuario() {
     }
 
     const container = document.getElementById('container-vagas');
+    if (container) container.classList.remove('grid-vagas-4x2');
     const antigo = document.getElementById('bloco-paginacao');
     if (antigo) antigo.remove();
 
@@ -2845,8 +2909,8 @@ function renderizarSkeletons(quantidade = 6) {
     container.innerHTML = skeletonsHTML;
 }
 
-function renderizarSkeletonDashboard() {
-    const container = document.getElementById('container-vagas');
+function renderizarSkeletonDashboard(targetContainer = null) {
+    const container = targetContainer || document.getElementById('container-vagas');
     if (!container) return;
     container.style.display = 'block';
     container.innerHTML = `

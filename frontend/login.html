@@ -839,6 +839,21 @@
                         </div>
                     </div>
 
+                    <!-- Personalização de Cursos e Áreas de Interesse já no Cadastro -->
+                    <div class="form-group-memphis mb-5">
+                        <label class="label-memphis">
+                            <i class="ph-bold ph-graduation-cap text-brand-orange"></i> Cursos de Interesse (Personalize seu Feed):
+                        </label>
+                        <div class="chips-container mt-2" id="reg-chips-cursos"></div>
+                    </div>
+
+                    <div class="form-group-memphis mb-5">
+                        <label class="label-memphis">
+                            <i class="ph-bold ph-bookmarks text-brand-orange"></i> Áreas Complementares de Interesse:
+                        </label>
+                        <div class="chips-container mt-2" id="reg-chips-areas"></div>
+                    </div>
+
                     <!-- Termo LGPD e Notificações por Email -->
                     <div class="flex items-center gap-3.5 my-5 p-4 bg-slate-50 dark:bg-slate-800/90 rounded-xl border-2 border-slate-900/20 dark:border-slate-700">
                         <input type="checkbox" id="reg-receber-emails" checked class="w-6 h-6 accent-brand-orange cursor-pointer flex-shrink-0">
@@ -853,7 +868,7 @@
                         <div>
                             <span class="text-brand-dark dark:text-white font-black text-xl sm:text-2xl block">Personalização Inteligente de Vagas</span>
                             <p class="text-base sm:text-lg font-medium text-slate-700 dark:text-slate-200 mt-1.5 leading-relaxed">
-                                Você poderá escolher seus cursos e áreas de interesse a qualquer momento no seu <strong class="text-brand-orange font-extrabold underline decoration-2">Perfil</strong> após entrar na conta para filtrar seu feed de editais.
+                                Ao concluir o cadastro, você será direcionado automaticamente para a <strong class="text-brand-orange font-extrabold underline decoration-2">Página de Pesquisa e Filtros</strong> com seu perfil configurado.
                             </p>
                         </div>
                     </div>
@@ -1016,12 +1031,45 @@
     <script>
         const API_URL = "http://localhost:8000/api";
 
+        const TODOS_CURSOS_REG = [
+            "Ciência da Computação", "Sistemas de Informação", "Medicina",
+            "Enfermagem", "Direito", "Administração", "Ciências Contábeis",
+            "Educação Física", "Letras", "História", "Pedagogia",
+            "Ciências Biológicas", "Serviço Social", "Geografia", "Filosofia"
+        ];
+
+        const TODAS_AREAS_REG = [
+            "Tecnologia", "Saúde", "Humanas", "Exatas",
+            "Extensão", "Pesquisa", "Inovação"
+        ];
+
+        function renderizarChipsCadastro() {
+            const containerCursos = document.getElementById('reg-chips-cursos');
+            if (containerCursos && containerCursos.children.length === 0) {
+                containerCursos.innerHTML = TODOS_CURSOS_REG.map(curso =>
+                    `<button type="button" class="chip-opcao" data-valor="${curso}"><span class="chip-check"><i class="ph-bold ph-check"></i></span> ${curso}</button>`
+                ).join('');
+            }
+            const containerAreas = document.getElementById('reg-chips-areas');
+            if (containerAreas && containerAreas.children.length === 0) {
+                containerAreas.innerHTML = TODAS_AREAS_REG.map(area =>
+                    `<button type="button" class="chip-opcao" data-valor="${area}"><span class="chip-check"><i class="ph-bold ph-check"></i></span> ${area}</button>`
+                ).join('');
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
+            renderizarChipsCadastro();
             configurarChipsClick();
 
-            // Detectar parâmetro na URL (ex: login.html?aba=register ou login.html?aba=reset)
+            // Se o usuário já estiver autenticado e entrar em login.html sem forçar aba de recuperação, vai direto para a página de pesquisa
             const urlParams = new URLSearchParams(window.location.search);
             const aba = urlParams.get('aba') || urlParams.get('tab');
+            if (localStorage.getItem('eduscrap_token') && localStorage.getItem('eduscrap_user') && aba !== 'reset') {
+                window.location.href = "index.html";
+                return;
+            }
+
             if (aba === 'register' || aba === 'cadastro') {
                 alternarAba('register');
             } else if (aba === 'reset' || aba === 'redefinir' || aba === 'recuperar') {
@@ -1361,6 +1409,9 @@
             btnSubmit.innerHTML = '<span>Criando perfil seguro...</span> <i class="ph-bold ph-spinner animate-spin"></i>';
 
             try {
+                const cursosSelecionados = obterChipsSelecionados('reg-chips-cursos');
+                const areasSelecionadas = obterChipsSelecionados('reg-chips-areas');
+
                 const resp = await fetch(`${API_URL}/auth/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1369,8 +1420,8 @@
                         matricula,
                         email,
                         senha,
-                        cursos: [],
-                        areas: [],
+                        cursos: cursosSelecionados,
+                        areas: areasSelecionadas,
                         receber_emails
                     })
                 });
@@ -1403,7 +1454,9 @@
 
                 localStorage.setItem('eduscrap_token', data.token);
                 localStorage.setItem('eduscrap_user', JSON.stringify(data.user));
-                localStorage.setItem('eduscrap_novo_usuario', 'true');
+                if (cursosSelecionados.length === 0 && areasSelecionadas.length === 0) {
+                    localStorage.setItem('eduscrap_novo_usuario', 'true');
+                }
 
                 btnSubmit.innerHTML = '<span>Conta criada! Redirecionando...</span> <i class="ph-bold ph-check"></i>';
 
