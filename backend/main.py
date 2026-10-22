@@ -968,29 +968,6 @@ def obter_estatisticas():
     limpar_itens_vencidos_banco(db)
     nome_colecoes = db.list_collection_names()
 
-    # Notícias reais (exclui cards de capacitação/cursos/bolsas da aba Cursos & Bolsas)
-    noticias_reais = [d for d in db["noticias"].find({}) if eh_documento_de_noticia(d)]
-    total_noticias_ufersa = sum(
-        1 for d in noticias_reais if "ufersa" in (d.get("fonte") or "").lower()
-    ) + db["vagas_noticias"].count_documents({"tipo": "noticia"})
-
-    totais = {
-        "estagios": db["vagas_estagio"].count_documents({}),
-        "bolsas": db["vagas_bolsa"].count_documents({}),
-        "ufersa": db["vagas_ufersa"].count_documents({}),
-        "ciee": db["vagas_ciee"].count_documents({}),
-        "noticias": db["vagas_noticias"].count_documents({}) + len(noticias_reais),
-        "noticias_ufersa": total_noticias_ufersa,
-        "cursos_bolsas": db["noticias"].count_documents({"tipo": {"$in": ["capacitacao", "bolsa_estudo"]}}),
-        "portal_uern": db["vagas_portal_uern"].count_documents({}),
-    }
-
-    # ---- Fontes que NÃO têm coleção dedicada ----
-    # Os scrapers de MPRN e IEL gravam na coleção "vagas"; IFRN e DOM Mossoró
-    # gravam na coleção "editais". As contagens por fonte são feitas pelo campo
-    # "fonte", espelhando exatamente os filtros dos endpoints /api/mprn, /api/iel,
-    # /api/ifrn e /api/dom. Assim o KPI "DOM Mossoró" (e MPRN/IEL/IFRN) deixa de
-    # retornar 0 por consultar coleções fantasmas ("vagas_mprn", "vagas_dom"...).
     def _contar_por_fonte(colecao_nome, regex_fonte):
         try:
             return db[colecao_nome].count_documents(
@@ -999,18 +976,65 @@ def obter_estatisticas():
         except Exception:
             return 0
 
-    extras_fonte = {
-        "mprn": _contar_por_fonte("vagas", r"MPRN|Ministério Público"),
-        "iel": _contar_por_fonte("vagas", r"IEL"),
-        "ifrn": _contar_por_fonte("editais", r"IFRN"),
-        "dom": _contar_por_fonte("editais", r"Prefeitura de Mossoró|DOM/Mossoró"),
-    }
-    # Soma (não substitui): se um dia existirem coleções dedicadas além dos
-    # documentos compartilhados, nenhuma captação é perdida.
-    for chave, valor in extras_fonte.items():
-        totais[chave] = (totais.get(chave) or 0) + valor
+    # 1. Estágios (PRAE + CIEE + MPRN + IEL)
+    estagios_prae = db["vagas_estagio"].count_documents({})
+    ciee = db["vagas_ciee"].count_documents({})
+    mprn = _contar_por_fonte("vagas", r"MPRN|Ministério Público")
+    iel = _contar_por_fonte("vagas", r"IEL")
+    total_estagios = estagios_prae + ciee + mprn + iel
 
-    total_geral = sum(totais.values())
+    # 2. Bolsas (PROEX)
+    total_bolsas = db["vagas_bolsa"].count_documents({})
+
+    # 3. Editais UFERSA (PROAE + Editais CPPS)
+    ufersa_proae = db["vagas_ufersa"].count_documents({})
+    ufersa_editais = _contar_por_fonte("editais", r"UFERSA")
+    total_ufersa = ufersa_proae + ufersa_editais
+
+    # 4. Cursos & Capacitação (cursos gratuitos, bolsas de estudo da Fundação Estudar, etc.)
+    total_cursos = db["noticias"].count_documents({"tipo": {"$in": ["capacitacao", "bolsa_estudo"]}})
+
+    # 5. Notícias Universitárias Reais (UFERSA ASSECOM + Notícias Tech, Geral, Educação, Saúde)
+    noticias_reais = [d for d in db["noticias"].find({}) if eh_documento_de_noticia(d)]
+    total_noticias = len(noticias_reais) + db["vagas_noticias"].count_documents({"tipo": "noticia"})
+
+    # 6. Portal UERN (minerado)
+    total_portal_uern = db["vagas_portal_uern"].count_documents({})
+
+    # 7. Diário Oficial de Mossoró (DOM)
+    total_dom = _contar_por_fonte("editais", r"Prefeitura de Mossoró|DOM/Mossoró")
+
+    # 8. IFRN (Editais e Pesquisa)
+    total_ifrn = _contar_por_fonte("editais", r"IFRN")
+
+    # As 8 categorias canônicas do hub (mutuamente exclusivas e que cobrem 100% dos dados sem duplicação)
+    totais = {
+        "estagios": total_estagios,
+        "bolsas": total_bolsas,
+        "ufersa": total_ufersa,
+        "cursos_bolsas": total_cursos,
+        "noticias": total_noticias,
+        "portal_uern": total_portal_uern,
+        "dom": total_dom,
+        "ifrn": total_ifrn,
+        # Chaves de granularidade para compatibilidade retroativa com filtros:
+        "ciee": ciee,
+        "mprn": mprn,
+        "iel": iel,
+        "estagios_prae": estagios_prae,
+    }
+
+    # Total geral é rigorosamente a soma das 8 categorias canônicas (elimina duplicação de notícias e dados fantasmas)
+    total_geral = (
+        total_estagios
+        + total_bolsas
+        + total_ufersa
+        + total_cursos
+        + total_noticias
+        + total_portal_uern
+        + total_dom
+        + total_ifrn
+    )
 
     agora = datetime.now()
     janela_limite = agora + timedelta(days=7)
@@ -1207,13 +1231,26 @@ def obter_estatisticas():
             ultima_varredura = None
 
     # ---- Ranking real das origens monitoradas (para o radar de fontes) ----
+    fontes_individuais = [
+        {"origem": "noticias", "nome": "Notícias Gerais / Tech", "total": db["vagas_noticias"].count_documents({"tipo": "noticia"})},
+        {"origem": "noticias_ufersa", "nome": "Notícias UFERSA", "total": len(noticias_reais)},
+        {"origem": "ifrn", "nome": "Editais IFRN", "total": total_ifrn},
+        {"origem": "cursos_bolsas", "nome": "Cursos & Capacitação", "total": total_cursos},
+        {"origem": "dom", "nome": "DOM Mossoró", "total": total_dom},
+        {"origem": "ciee", "nome": "Estágios CIEE", "total": ciee},
+        {"origem": "portal_uern", "nome": "Portal UERN", "total": total_portal_uern},
+        {"origem": "ufersa", "nome": "Editais UFERSA", "total": total_ufersa},
+        {"origem": "iel", "nome": "Estágios IEL", "total": iel},
+        {"origem": "mprn", "nome": "Residência MPRN", "total": mprn},
+        {"origem": "bolsas", "nome": "Bolsas PROEX UERN", "total": total_bolsas},
+        {"origem": "estagios", "nome": "Estágios PRAE UERN", "total": estagios_prae},
+    ]
     ranking_fontes = sorted(
-        [{"origem": chave, "total": valor} for chave, valor in totais.items() if valor > 0],
+        [f for f in fontes_individuais if f["total"] > 0],
         key=lambda item: item["total"],
         reverse=True
     )
-
-    canais_monitorados = sum(1 for v in totais.values() if v and v > 0)
+    canais_monitorados = len(ranking_fontes)
 
     return {
         "totais": totais,

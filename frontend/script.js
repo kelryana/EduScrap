@@ -1771,6 +1771,11 @@ async function realizarPesquisa() {
         }
 
         const dados = await resposta.json();
+
+        if (ehLanding) {
+            renderizarDashboardLanding(container, dados);
+            return;
+        }
         if (!carga.ativo()) return;
         renderizarCards(dados);
         document.querySelectorAll('.tab-origem-btn, .btn-filtro-aluno').forEach(b => b.classList.remove('ativo'));
@@ -2025,6 +2030,316 @@ function animarNumero(el, alvo, duracao = 900) {
     requestAnimationFrame(passo);
 }
 
+
+/**
+ * Renderiza o Dashboard Expandido da Landing Page (Visitantes Não Logados).
+ * Apresenta uma visão ampla, dinâmica e rica em dados consolidados e divisão por fontes.
+ */
+function renderizarDashboardLanding(container, dados) {
+    if (!container) return;
+
+    const totais = dados.totais || {};
+    const totalEstagios = (totais.estagios !== undefined)
+        ? totais.estagios
+        : ((totais.ciee || 0) + (totais.mprn || 0) + (totais.iel || 0) + (totais.estagios_prae || 0));
+    const totalBolsas = totais.bolsas || 0;
+    const totalUfersa = totais.ufersa || 0;
+    const totalCursosBolsas = totais.cursos_bolsas || 0;
+    const totalTech = totais.noticias || 0;
+    const totalUern = totais.portal_uern || 0;
+    const totalDom = totais.dom || 0;
+    const totalIfrn = totais.ifrn || 0;
+    const totalGeral = dados.total_geral || (totalEstagios + totalBolsas + totalUfersa + totalCursosBolsas + totalTech + totalUern + totalDom + totalIfrn);
+    const retaFinal = dados.reta_final_urgente || 0;
+    const canais = dados.canais_monitorados || 12;
+    const vigentes = dados.vigentes || 0;
+    const vencidos = dados.vencidos || 0;
+    const editaisAbertos = dados.editais_abertos || dados.proximos_a_vencer || [];
+    const rankingFontes = Array.isArray(dados.ranking_fontes) ? dados.ranking_fontes : [];
+    const fluxoSemanal = Array.isArray(dados.fluxo_semanal) ? dados.fluxo_semanal : [];
+
+    // Mapeamento das Fontes com nomes legíveis, ícones e cores neobrutalistas
+    const mapaFontesInfo = {
+        'noticias_ufersa': { nome: 'Notícias UFERSA', icone: 'ph-newspaper', cor: '#8B5CF6' },
+        'noticias': { nome: 'Notícias Universitárias / Tech', icone: 'ph-newspaper-clipping', cor: '#10B981' },
+        'ifrn': { nome: 'IFRN (Editais & Pesquisa)', icone: 'ph-graduation-cap', cor: '#059669' },
+        'cursos_bolsas': { nome: 'Cursos & Capacitação', icone: 'ph-certificate', cor: '#F59E0B' },
+        'dom': { nome: 'DOM Mossoró (Diário Oficial)', icone: 'ph-file-text', cor: '#EC4899' },
+        'ciee': { nome: 'Estágios CIEE', icone: 'ph-briefcase', cor: '#FF5C00' },
+        'portal_uern': { nome: 'Portal de Editais UERN', icone: 'ph-buildings', cor: '#2563EB' },
+        'iel': { nome: 'IEL Estágios RN', icone: 'ph-student', cor: '#0284C7' },
+        'mprn': { nome: 'Residência MPRN', icone: 'ph-scales', cor: '#DC2626' },
+        'bolsas': { nome: 'Bolsas PROEX UERN', icone: 'ph-coins', cor: '#06B6D4' },
+        'estagios': { nome: 'Estágios PRAE UERN', icone: 'ph-handshake', cor: '#F97316' },
+        'ufersa': { nome: 'Editais PROAE UFERSA', icone: 'ph-scroll', cor: '#7C3AED' }
+    };
+
+    // Cálculos do Donut SVG de Prazos
+    const totalPrazosCalculo = Math.max(vigentes + vencidos, 1);
+    const circ = 289;
+    let lenAbertosTotal = (vigentes / totalPrazosCalculo) * circ;
+    if (vigentes > 0 && lenAbertosTotal < 16) lenAbertosTotal = 16;
+    let lenAbertosNormais = (Math.max(vigentes - retaFinal, 0) / totalPrazosCalculo) * circ;
+    if (vigentes > retaFinal && lenAbertosNormais < 10) lenAbertosNormais = 10;
+    if (vigentes === retaFinal) lenAbertosNormais = 0;
+    const dashOffsetVencendo = Math.max(0, Math.min(289, Math.round(circ - lenAbertosTotal)));
+    const dashOffsetAberto = Math.max(0, Math.min(289, Math.round(circ - lenAbertosNormais)));
+
+    let html = `
+        <div class="w-full bg-white dark:bg-slate-900 rounded-3xl border-3 border-brand-dark dark:border-slate-700 shadow-brutal-xl p-6 sm:p-8 md:p-10 space-y-10" data-purpose="landing-dashboard-expanded">
+            
+            <!-- 1. Quatro Mega-Cards Consolidados (KPIs Impactantes) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <!-- Card Total -->
+                <div class="relative bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-2xl p-6 shadow-brutal dark:shadow-[4px_4px_0px_#000] overflow-hidden">
+                    <span class="absolute top-0 inset-x-0 h-2 bg-brand-orange"></span>
+                    <div class="flex items-center justify-between mb-3 pt-1">
+                        <span class="text-xs font-black uppercase text-slate-500 dark:text-slate-400">Total no Hub</span>
+                        <span class="px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950/80 text-brand-orange font-bold text-[10px] border border-orange-300 dark:border-orange-800">
+                            Ao Vivo
+                        </span>
+                    </div>
+                    <div class="text-4xl sm:text-5xl font-black text-brand-dark dark:text-white">${totalGeral}</div>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 font-semibold mt-2">Oportunidades e informativos consolidados</p>
+                </div>
+
+                <!-- Card Vigentes -->
+                <div class="relative bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-2xl p-6 shadow-brutal dark:shadow-[4px_4px_0px_#000] overflow-hidden">
+                    <span class="absolute top-0 inset-x-0 h-2 bg-emerald-500"></span>
+                    <div class="flex items-center justify-between mb-3 pt-1">
+                        <span class="text-xs font-black uppercase text-slate-500 dark:text-slate-400">Inscrições Abertas</span>
+                        <span class="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-bold text-[10px] border border-emerald-300 dark:border-emerald-800">
+                            Vigentes
+                        </span>
+                    </div>
+                    <div class="text-4xl sm:text-5xl font-black text-emerald-600 dark:text-emerald-400">${vigentes}</div>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 font-semibold mt-2">Editais com prazo de inscrição aberto agora</p>
+                </div>
+
+                <!-- Card Reta Final -->
+                <div class="relative bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-2xl p-6 shadow-brutal dark:shadow-[4px_4px_0px_#000] overflow-hidden">
+                    <span class="absolute top-0 inset-x-0 h-2 bg-amber-500"></span>
+                    <div class="flex items-center justify-between mb-3 pt-1">
+                        <span class="text-xs font-black uppercase text-slate-500 dark:text-slate-400">Reta Final</span>
+                        <span class="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-300 font-bold text-[10px] border border-amber-300 dark:border-amber-800">
+                            &le; 7 dias
+                        </span>
+                    </div>
+                    <div class="text-4xl sm:text-5xl font-black text-amber-600 dark:text-amber-400">${retaFinal}</div>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 font-semibold mt-2">Editais com encerramento iminente</p>
+                </div>
+
+                <!-- Card Fontes Monitoradas -->
+                <div class="relative bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-2xl p-6 shadow-brutal dark:shadow-[4px_4px_0px_#000] overflow-hidden">
+                    <span class="absolute top-0 inset-x-0 h-2 bg-purple-600"></span>
+                    <div class="flex items-center justify-between mb-3 pt-1">
+                        <span class="text-xs font-black uppercase text-slate-500 dark:text-slate-400">Fontes Oficiais</span>
+                        <span class="px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/80 text-purple-900 dark:text-purple-300 font-bold text-[10px] border border-purple-300 dark:border-purple-800">
+                            Canais Ativos
+                        </span>
+                    </div>
+                    <div class="text-4xl sm:text-5xl font-black text-purple-600 dark:text-purple-400">${canais}</div>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 font-semibold mt-2">Pró-reitorias, portais e agências integradas</p>
+                </div>
+            </div>
+
+            <!-- 2. Painel Principal: Como os Dados Estão Divididos Entre as Fontes -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                <!-- Coluna Esquerda: Distribuição Detalhada por Fonte -->
+                <div class="lg:col-span-7 bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-2xl p-6 sm:p-7 shadow-brutal dark:shadow-[4px_4px_0px_#000]">
+                    <div class="flex items-center justify-between mb-6 pb-3 border-b-2 border-slate-200 dark:border-slate-700">
+                        <div>
+                            <h3 class="font-display font-black text-xl sm:text-2xl text-brand-dark dark:text-white flex items-center gap-2">
+                                <i class="ph-bold ph-chart-bar-horizontal text-brand-orange text-2xl"></i>
+                                <span>Divisão de Dados Entre as Fontes</span>
+                            </h3>
+                            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-semibold mt-1">
+                                Proporção e contagem fiel de oportunidades coletadas de cada origem
+                            </p>
+                        </div>
+                        <span class="hidden sm:inline-flex px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-600">
+                            ${rankingFontes.length} Provedores
+                        </span>
+                    </div>
+
+                    <div class="space-y-4 max-h-[460px] overflow-y-auto pr-2">
+                        ${rankingFontes.map(rf => {
+                            const info = mapaFontesInfo[rf.origem] || { nome: rf.origem.toUpperCase(), icone: 'ph-globe', cor: '#FF5C00' };
+                            const percent = totalGeral > 0 ? ((rf.total / totalGeral) * 100).toFixed(1) : 0;
+                            return `
+                                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border-2 border-slate-200 dark:border-slate-700 hover:border-brand-dark dark:hover:border-slate-500 transition-all">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-7 h-7 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm" style="background-color: ${info.cor};">
+                                                <i class="ph-bold ${info.icone}"></i>
+                                            </div>
+                                            <span class="font-bold text-sm text-slate-900 dark:text-white">${info.nome}</span>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="font-black text-sm text-slate-900 dark:text-white">${rf.total}</span>
+                                            <span class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">(${percent}%)</span>
+                                        </div>
+                                    </div>
+                                    <div class="w-full bg-slate-200 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden border border-slate-300 dark:border-slate-600">
+                                        <div class="h-full rounded-full landing-source-bar-fill" style="width: ${percent}%; background-color: ${info.cor};"></div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+
+                <!-- Coluna Direita: Vigência e Fluxo Semanal -->
+                <div class="lg:col-span-5 space-y-6">
+                    
+                    <!-- Card Prazos e Vigência (Donut) -->
+                    <div class="bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-2xl p-6 shadow-brutal dark:shadow-[4px_4px_0px_#000]">
+                        <h3 class="font-display font-black text-lg text-brand-dark dark:text-white mb-4 flex items-center gap-2">
+                            <i class="ph-bold ph-chart-pie-slice text-emerald-500 text-xl"></i>
+                            <span>Status de Vigência dos Editais</span>
+                        </h3>
+                        
+                        <div class="flex flex-col sm:flex-row items-center justify-around gap-6">
+                            <!-- SVG Donut -->
+                            <div class="relative w-36 h-36 flex items-center justify-center shrink-0">
+                                <svg class="w-36 h-36 transform -rotate-90" viewBox="0 0 120 120">
+                                    <circle cx="60" cy="60" fill="transparent" r="46" stroke="#ef4444" stroke-width="16"></circle>
+                                    <circle cx="60" cy="60" fill="transparent" r="46" stroke="#f97316" stroke-dasharray="289" stroke-dashoffset="${dashOffsetVencendo}" stroke-width="16"></circle>
+                                    <circle cx="60" cy="60" fill="transparent" r="46" stroke="#10b981" stroke-dasharray="289" stroke-dashoffset="${dashOffsetAberto}" stroke-linecap="round" stroke-width="16"></circle>
+                                    <circle cx="60" cy="60" fill="none" r="38" stroke="#0f172a" stroke-width="2"></circle>
+                                    <circle cx="60" cy="60" fill="none" r="54" stroke="#0f172a" stroke-width="2"></circle>
+                                </svg>
+                                <div class="absolute inset-0 m-auto w-12 h-12 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center border-2 border-slate-900 dark:border-slate-600 shadow-sm">
+                                    <i class="ph-bold ph-calendar text-brand-dark dark:text-white text-base"></i>
+                                </div>
+                            </div>
+
+                            <!-- Legenda Prazos -->
+                            <div class="space-y-3 w-full sm:w-auto">
+                                <div class="flex items-center justify-between sm:justify-start gap-3">
+                                    <span class="w-3.5 h-3.5 rounded-full bg-emerald-500 border border-slate-900 shrink-0"></span>
+                                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300">Inscrições Abertas:</span>
+                                    <strong class="text-sm font-black text-slate-900 dark:text-white">${vigentes}</strong>
+                                </div>
+                                <div class="flex items-center justify-between sm:justify-start gap-3">
+                                    <span class="w-3.5 h-3.5 rounded-full bg-amber-500 border border-slate-900 shrink-0"></span>
+                                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300">Reta Final (&le; 7d):</span>
+                                    <strong class="text-sm font-black text-slate-900 dark:text-white">${retaFinal}</strong>
+                                </div>
+                                <div class="flex items-center justify-between sm:justify-start gap-3">
+                                    <span class="w-3.5 h-3.5 rounded-full bg-rose-500 border border-slate-900 shrink-0"></span>
+                                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300">Encerrados:</span>
+                                    <strong class="text-sm font-black text-slate-900 dark:text-white">${vencidos}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Fluxo Semanal -->
+                    <div class="bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-2xl p-6 shadow-brutal dark:shadow-[4px_4px_0px_#000]">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-display font-black text-base text-brand-dark dark:text-white flex items-center gap-2">
+                                <i class="ph-bold ph-trend-up text-brand-orange text-xl"></i>
+                                <span>Fluxo Semanal de Publicações</span>
+                            </h3>
+                            <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400">Últimos 7 dias</span>
+                        </div>
+                        <div class="flex items-end justify-between gap-2 pt-2 h-28">
+                            ${(() => {
+                                const maxFluxo = Math.max(...fluxoSemanal.map(f => f.valor), 1);
+                                return fluxoSemanal.map(f => {
+                                    const h = Math.max(14, Math.round((f.valor / maxFluxo) * 75));
+                                    return `
+                                        <div class="flex-1 flex flex-col items-center">
+                                            <span class="text-[10px] font-black text-slate-800 dark:text-slate-200 mb-1">${f.valor}</span>
+                                            <div class="w-full max-w-[28px] rounded-t-lg border-2 border-brand-dark dark:border-slate-600 transition-all hover:opacity-80" style="height: ${h}px; background-color: ${f.cor || '#FF5C00'};"></div>
+                                            <span class="text-[9px] font-black uppercase text-slate-600 dark:text-slate-400 mt-1.5">${f.dia}</span>
+                                        </div>
+                                    `;
+                                }).join('');
+                            })()}
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- 3. Vitrine dos Editais com Prazos Abertos Agora -->
+            ${editaisAbertos.length > 0 ? `
+                <div class="pt-6 border-t-2 border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="font-display font-black text-xl sm:text-2xl text-brand-dark dark:text-white flex items-center gap-2">
+                                <i class="ph-bold ph-bell-ringing text-brand-orange text-2xl"></i>
+                                <span>Editais com Inscrições Abertas no Momento</span>
+                            </h3>
+                            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-semibold mt-1">
+                                Seleções vigentes com prazos futuros detectados automaticamente
+                            </p>
+                        </div>
+                        <a href="login.html?aba=register" class="hidden sm:inline-flex px-4 py-2 rounded-xl bg-brand-orange text-white text-xs font-black border-2 border-brand-dark shadow-brutal-sm hover:bg-brand-orange-hover transition-all" style="text-decoration: none;">
+                            Ver Todos os Editais →
+                        </a>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        ${editaisAbertos.slice(0, 6).map(ed => `
+                            <div class="p-5 bg-white dark:bg-slate-800 border-2.5 border-brand-dark dark:border-slate-700 rounded-2xl shadow-brutal-sm flex flex-col justify-between hover:-translate-y-1 transition-all">
+                                <div>
+                                    <div class="flex items-center justify-between mb-2.5">
+                                        <span class="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-black text-[11px] border border-emerald-300 dark:border-emerald-700">
+                                            Inscrições Abertas
+                                        </span>
+                                        <span class="text-xs font-mono font-bold text-slate-500 dark:text-slate-400">
+                                            Até ${ed.data || "A definir"}
+                                        </span>
+                                    </div>
+                                    <h4 class="font-black text-sm text-slate-900 dark:text-white leading-snug line-clamp-3 mb-3" title="${ed.titulo}">
+                                        ${ed.titulo}
+                                    </h4>
+                                </div>
+                                <div class="pt-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                    <a href="${ed.link}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs font-black text-brand-orange hover:underline">
+                                        <i class="ph-bold ph-arrow-square-out text-sm"></i>
+                                        <span>Acessar Edital Oficial</span>
+                                    </a>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : ''}
+
+            <!-- 4. Final Call To Action (Inspirado no PDF Anatomy of a Landing Page) -->
+            <div class="bg-gradient-to-r from-amber-400 via-brand-yellow to-brand-orange border-3 border-brand-dark rounded-3xl p-8 sm:p-10 shadow-brutal-xl text-center relative overflow-hidden">
+                <div class="relative z-10 max-w-2xl mx-auto space-y-4">
+                    <span class="inline-block px-4 py-1.5 rounded-full bg-white border-2 border-brand-dark shadow-brutal-sm text-xs font-black text-brand-dark uppercase tracking-wider">
+                        ✦ COMECE AGORA MESMO
+                    </span>
+                    <h3 class="font-display font-black text-3xl sm:text-4xl text-brand-dark tracking-tight leading-tight">
+                        Nunca mais perca um edital ou bolsa na sua universidade.
+                    </h3>
+                    <p class="text-slate-900 font-bold text-base sm:text-lg">
+                        Crie seu perfil de estudante em menos de 1 minuto e tenha um portal feito sob medida para seu curso.
+                    </p>
+                    <div class="pt-2">
+                        <a href="login.html?aba=register" class="px-8 sm:px-10 py-4.5 rounded-2xl border-3 border-brand-dark bg-brand-dark text-white hover:bg-slate-800 font-extrabold text-lg sm:text-xl shadow-brutal inline-flex items-center justify-center gap-3 transition-all" style="text-decoration: none;">
+                            <i class="ph-bold ph-student text-2xl text-brand-yellow"></i>
+                            <span>Criar Perfil do Aluno</span>
+                            <span class="text-2xl text-brand-orange">→</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    `;
+
+    container.innerHTML = html;
+}
+
 async function carregarEstatisticas(targetSelector = '#container-vagas') {
     const ehLanding = targetSelector === '#landing-dashboard-container';
     const container = ehLanding
@@ -2056,14 +2371,19 @@ async function carregarEstatisticas(targetSelector = '#container-vagas') {
 
         const dados = await resposta.json();
         const totais = dados.totais || {};
-        const totalEstagios = (totais.estagios || 0) + (totais.mprn || 0) + (totais.iel || 0) + (totais.ciee || 0);
+        const totalEstagios = (totais.estagios !== undefined)
+            ? totais.estagios
+            : ((totais.ciee || 0) + (totais.mprn || 0) + (totais.iel || 0) + (totais.estagios_prae || 0));
         const totalBolsas = totais.bolsas || 0;
-        const totalTech = totais.noticias || 0;
-        const totalCursosBolsas = totais.cursos_bolsas || 0;
         const totalUfersa = totais.ufersa || 0;
+        const totalCursosBolsas = totais.cursos_bolsas || 0;
+        const totalTech = totais.noticias || 0;
         const totalUern = totais.portal_uern || 0;
         const totalDom = totais.dom || 0;
-        const totalGeral = dados.total_geral || (totalEstagios + totalBolsas + totalTech + totalUfersa + totalUern);
+        const totalIfrn = totais.ifrn || 0;
+        // Total Geral matematicamente consistente com a soma exata de todas as categorias
+        const somaCategorias = totalEstagios + totalBolsas + totalUfersa + totalCursosBolsas + totalTech + totalUern + totalDom + totalIfrn;
+        const totalGeral = dados.total_geral || somaCategorias;
         const retaFinal = dados.reta_final_urgente || 0;
         const canais = dados.canais_monitorados || 0;
         const vigentes = dados.vigentes || 0;
@@ -2136,6 +2456,14 @@ async function carregarEstatisticas(targetSelector = '#container-vagas') {
                 boxBg: 'bg-pink-50 border-pink-300 text-pink-600',
                 svg: `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" stroke-linecap="round" stroke-linejoin="round"></path></svg>`,
                 acao: "carregarDados('dom')"
+            },
+            {
+                rotulo: 'IFRN (EDITAIS & PESQUISA)',
+                numero: totalIfrn,
+                accent: 'bg-emerald-600',
+                boxBg: 'bg-emerald-50 border-emerald-300 text-emerald-700',
+                svg: `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M4.26 10.147L12 5.25l7.74 4.897M4.26 10.147l7.74 4.897 7.74-4.897M4.26 10.147v4.603a7.5 7.5 0 0015.48 0v-4.603" stroke-linecap="round" stroke-linejoin="round"></path></svg>`,
+                acao: "carregarDados('ifrn')"
             }
         ];
 
@@ -2189,6 +2517,13 @@ async function carregarEstatisticas(targetSelector = '#container-vagas') {
                 total: totalDom,
                 corClass: 'bg-[#f43f5e]',
                 svg: `<svg class="w-3.5 h-3.5 text-slate-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"></path></svg>`
+            },
+            {
+                id: 'ifrn',
+                rotulo: 'IFRN',
+                total: totalIfrn,
+                corClass: 'bg-[#059669]',
+                svg: `<svg class="w-3.5 h-3.5 text-slate-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292" stroke-linecap="round" stroke-linejoin="round"></path></svg>`
             }
         ];
         const maxBarraValor = Math.max(...categoriasBarras.map(c => c.total), 1);
@@ -2217,7 +2552,7 @@ async function carregarEstatisticas(targetSelector = '#container-vagas') {
                 <!-- END: HeaderSection -->
 
                 <!-- BEGIN: TopMetricCardsGrid -->
-                <section class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 sm:gap-3.5" data-purpose="metric-cards">
+                <section class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 xl:grid-cols-9 gap-3 sm:gap-3.5" data-purpose="metric-cards">
                     ${kpis.map(k => `
                     <div onclick="${ehLanding ? "irParaCadastroComFeedback()" : k.acao}" class="relative bg-white border-2 border-slate-900 rounded-2xl pt-4 pb-3.5 px-2.5 flex flex-col items-center justify-between text-center shadow-[0_2px_0_0_rgba(15,23,42,0.9)] hover:shadow-md transition-all cursor-pointer group">
                         <span class="absolute top-0 inset-x-3 h-1.5 ${k.accent} rounded-b-md"></span>

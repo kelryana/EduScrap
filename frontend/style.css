@@ -5966,3 +5966,50 @@ html.dark .card-subtag-pill:hover {
     box-shadow: 2px 2px 0px #000000 !important;
 }
 
+
+/* ==========================================================================
+   LANDING PAGE (ESTILO ANATOMY OF A LANDING PAGE - NEOBRUTALISM)
+   ========================================================================== */
+
+.landing-section-divider {
+    position: relative;
+    width: 100%;
+    height: 72px;
+    margin-top: -36px;
+    margin-bottom: -36px;
+    z-index: 15;
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgba(250, 251, 253, 0) 0%, rgba(250, 251, 253, 0.9) 50%, rgba(250, 251, 253, 0) 100%);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+html.dark .landing-section-divider {
+    background: linear-gradient(to bottom, rgba(15, 23, 42, 0) 0%, rgba(15, 23, 42, 0.9) 50%, rgba(15, 23, 42, 0) 100%);
+}
+
+.landing-card-elevate {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.landing-card-elevate:hover {
+    transform: translateY(-4px);
+    box-shadow: 6px 6px 0px #0F172A;
+}
+
+html.dark .landing-card-elevate:hover {
+    box-shadow: 6px 6px 0px #020617;
+}
+
+.landing-fontes-card {
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.landing-fontes-card:hover {
+    transform: translateY(-3px);
+    border-color: #FF5C00 !important;
+}
+
+.landing-source-bar-fill {
+    transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
