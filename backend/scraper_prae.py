@@ -10,7 +10,14 @@ import os
 
 from dotenv import load_dotenv
 from pdf_utils import extrair_data_vencimento_datetime
-from base_scraper import BaseScraper, configurar_log_scraper
+from base_scraper import (
+    BaseScraper,
+    configurar_log_scraper,
+    eh_vencido_alem_do_limite,
+    limpar_itens_vencidos_banco,
+    obter_prazo_cacheado,
+    salvar_prazo_cacheado,
+)
 
 # Carrega variáveis de ambiente do .env na raiz do projeto
 load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"))
@@ -168,9 +175,10 @@ def raspar_pagina_prae(url, colecao_bd, links_vistos=None):
             if nome_edital.endswith("-"):
                 nome_edital = nome_edital[:-1].strip()
 
-            # Reaproveita data_vencimento já extraída no banco para evitar re-download de PDFs antigos
-            existente = colecao_bd.find_one({"link": link_pdf}, {"data_vencimento": 1})
-            data_vencimento = existente.get("data_vencimento") if existente else None
+            # Reaproveita data_vencimento já extraída no banco ou cache de prazos para evitar re-download de PDFs antigos
+            data_vencimento = obter_prazo_cacheado(
+                colecao_bd.database, link=link_pdf, nome=nome_edital, colecao_atual=colecao_bd
+            )
 
             if not data_vencimento:
                 data_vencimento = extrair_data_vencimento(texto_bruto)
@@ -182,6 +190,12 @@ def raspar_pagina_prae(url, colecao_bd, links_vistos=None):
             if not data_vencimento:
                 # Título raramente traz o prazo: lê o PDF do edital
                 data_vencimento = extrair_data_vencimento_datetime(texto_bruto, link_pdf)
+
+            if data_vencimento:
+                salvar_prazo_cacheado(colecao_bd.database, link_pdf, nome_edital, data_vencimento)
+                if eh_vencido_alem_do_limite(data_vencimento):
+                    colecao_bd.delete_one({"link": link_pdf})
+                    continue
 
             documento = {
                 "nome": nome_edital,
@@ -226,4 +240,7 @@ if __name__ == "__main__":
         except Exception as e:
             logger.error(f"Erro ao processar a página {pagina}: {e}")
 
+    removidos = limpar_itens_vencidos_banco(colecao.database)
+    if removidos:
+        logger.info(f"Limpeza automática (>10 dias vencidos): {removidos} itens removidos.")
     logger.info(f"Finalizado! salvos: {total_sessao} | Itens na base: {colecao.count_documents({})}")

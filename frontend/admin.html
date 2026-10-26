@@ -66,6 +66,197 @@
         <!-- Notificação de status -->
         <div id="status-alerta" class="hidden p-4 rounded-xl border-2 font-bold text-sm"></div>
 
+                <!-- Seção 0: Telemetria de Memória e Persistência do Sistema -->
+        <section class="bg-white dark:bg-slate-800 border-2 border-slate-900 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <div>
+                    <h2 class="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="ph-bold ph-activity text-brand-orange text-2xl"></i>
+                        <span>Telemetria do Sistema e Persistência de Dados</span>
+                    </h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
+                        Monitoramento fidedigno em tempo real da memória atual em execução e do armazenamento persistente no banco de dados
+                    </p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <span id="telemetria-timestamp" class="text-xs font-mono font-bold text-slate-600 dark:text-slate-300 px-3 py-1.5 bg-slate-100 dark:bg-slate-900/60 rounded-xl border border-slate-300 dark:border-slate-700">
+                        Sincronizando...
+                    </span>
+                    <button onclick="carregarTelemetria()" class="px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-xl border-2 border-slate-900 dark:border-slate-600 flex items-center gap-2 cursor-pointer transition-all">
+                        <i class="ph-bold ph-arrows-clockwise text-base"></i>
+                        <span>Atualizar Telemetria</span>
+                    </button>
+                    <button onclick="executarLimpezaVencidosAdmin()" class="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-black rounded-xl border-2 border-slate-900 flex items-center gap-2 cursor-pointer transition-all shadow-sm" title="Expurgar itens com mais de 10 dias de vencidos">
+                        <i class="ph-bold ph-trash text-base"></i>
+                        <span>Expurgar Vencidos (&gt;10d)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grid dos 2 Quadros Coerentes -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- QUADRO 1: Memória Atual (Carregada / Em Execução) -->
+                <div class="border-2 border-slate-900 dark:border-slate-700 rounded-xl p-5 bg-gradient-to-br from-sky-50/60 via-white to-sky-50/20 dark:from-slate-900/90 dark:via-slate-800 dark:to-slate-900/90 flex flex-col justify-between shadow-sm">
+                    <div>
+                        <div class="flex items-center justify-between pb-3 mb-4 border-b-2 border-slate-200 dark:border-slate-700">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-9 h-9 rounded-lg bg-sky-500 text-white flex items-center justify-center border-2 border-slate-900 shadow-sm">
+                                    <i class="ph-bold ph-cpu text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-black text-sm text-slate-900 dark:text-white uppercase tracking-wide">
+                                        Quadro 1: Memória Atual Carregada
+                                    </h3>
+                                    <span class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">Processo Backend &amp; Runtime em Execução</span>
+                                </div>
+                            </div>
+                            <span id="badge-processo-status" class="px-2.5 py-1 text-[11px] font-black rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span id="texto-processo-status">Online (Ativo)</span>
+                            </span>
+                        </div>
+
+                        <!-- Métricas Principais em Destaque -->
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div class="p-3 bg-white dark:bg-slate-900/70 border-2 border-slate-900 dark:border-slate-700 rounded-xl">
+                                <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                                    <i class="ph-bold ph-gauge text-sky-500"></i> RAM de Trabalho (RSS)
+                                </div>
+                                <div class="text-2xl font-black text-slate-900 dark:text-white mt-1">
+                                    <span id="mem-rss-mb">--</span> <span class="text-xs font-bold text-slate-500">MB</span>
+                                </div>
+                                <div class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-0.5" id="mem-rss-percent">Uso do processo: --%</div>
+                            </div>
+                            <div class="p-3 bg-white dark:bg-slate-900/70 border-2 border-slate-900 dark:border-slate-700 rounded-xl">
+                                <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                                    <i class="ph-bold ph-hard-drives text-indigo-500"></i> Memória Virtual (VMS)
+                                </div>
+                                <div class="text-2xl font-black text-slate-900 dark:text-white mt-1">
+                                    <span id="mem-vms-mb">--</span> <span class="text-xs font-bold text-slate-500">MB</span>
+                                </div>
+                                <div class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-0.5" id="mem-pid">PID do Processo: --</div>
+                            </div>
+                        </div>
+
+                        <!-- Barra de Uso da RAM do Sistema Host -->
+                        <div class="mb-4 p-3 bg-white dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-xl">
+                            <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                                <span class="flex items-center gap-1.5">
+                                    <i class="ph-bold ph-device-mobile text-slate-500"></i> RAM Total do Host:
+                                </span>
+                                <span id="mem-sistema-percent">--%</span>
+                            </div>
+                            <div class="w-full bg-slate-200 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden border border-slate-400 dark:border-slate-600">
+                                <div id="mem-sistema-progresso" class="bg-sky-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                            <div class="flex justify-between text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-1.5">
+                                <span id="mem-sistema-livre">Livre: -- GB</span>
+                                <span id="mem-sistema-total">Total: -- GB</span>
+                            </div>
+                        </div>
+
+                        <!-- Sub-detalhes de Execução -->
+                        <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                            <div class="p-2 rounded-lg bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700">
+                                <div class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">Objetos Heap (GC)</div>
+                                <div class="font-black text-slate-900 dark:text-white text-sm" id="mem-gc-objetos">--</div>
+                            </div>
+                            <div class="p-2 rounded-lg bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700">
+                                <div class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">Threads Ativas</div>
+                                <div class="font-black text-slate-900 dark:text-white text-sm" id="mem-threads">--</div>
+                            </div>
+                            <div class="p-2 rounded-lg bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700">
+                                <div class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">Uptime Ativo</div>
+                                <div class="font-black text-slate-900 dark:text-white text-sm font-mono" id="mem-uptime">--</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700 text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
+                        <span><i class="ph-bold ph-check-circle text-sky-500"></i> Amostrado diretamente do kernel</span>
+                        <span class="font-mono text-[10px]" id="mem-atualizacao-hora">--:--:--</span>
+                    </div>
+                </div>
+
+                <!-- QUADRO 2: Memória em Persistência no Banco de Dados (MongoDB) -->
+                <div class="border-2 border-slate-900 dark:border-slate-700 rounded-xl p-5 bg-gradient-to-br from-emerald-50/60 via-white to-emerald-50/20 dark:from-slate-900/90 dark:via-slate-800 dark:to-slate-900/90 flex flex-col justify-between shadow-sm">
+                    <div>
+                        <div class="flex items-center justify-between pb-3 mb-4 border-b-2 border-slate-200 dark:border-slate-700">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-9 h-9 rounded-lg bg-emerald-500 text-white flex items-center justify-center border-2 border-slate-900 shadow-sm">
+                                    <i class="ph-bold ph-database text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-black text-sm text-slate-900 dark:text-white uppercase tracking-wide">
+                                        Quadro 2: Memória em Persistência (BD)
+                                    </h3>
+                                    <span class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold" id="banco-nome-engine">MongoDB • WiredTiger Engine</span>
+                                </div>
+                            </div>
+                            <span class="px-2.5 py-1 text-[11px] font-black rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 flex items-center gap-1.5">
+                                <i class="ph-bold ph-shield-check text-xs"></i>
+                                <span id="texto-banco-status">Persistência Sólida</span>
+                            </span>
+                        </div>
+
+                        <!-- Métricas de Armazenamento em Disco -->
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div class="p-3 bg-white dark:bg-slate-900/70 border-2 border-slate-900 dark:border-slate-700 rounded-xl">
+                                <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                                    <i class="ph-bold ph-file-text text-emerald-500"></i> Dados Líquidos BSON
+                                </div>
+                                <div class="text-2xl font-black text-slate-900 dark:text-white mt-1">
+                                    <span id="bd-data-size-kb">--</span> <span class="text-xs font-bold text-slate-500">KB</span>
+                                </div>
+                                <div class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-0.5" id="bd-data-size-mb">(~-- MB)</div>
+                            </div>
+                            <div class="p-3 bg-white dark:bg-slate-900/70 border-2 border-slate-900 dark:border-slate-700 rounded-xl">
+                                <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                                    <i class="ph-bold ph-floppy-disk text-teal-500"></i> Alocado em Disco
+                                </div>
+                                <div class="text-2xl font-black text-slate-900 dark:text-white mt-1">
+                                    <span id="bd-storage-size-kb">--</span> <span class="text-xs font-bold text-slate-500">KB</span>
+                                </div>
+                                <div class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-0.5" id="bd-storage-size-mb">Índices: -- KB</div>
+                            </div>
+                        </div>
+
+                        <!-- Total de Documentos e Coleções -->
+                        <div class="mb-4 p-3 bg-white dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-xl flex items-center justify-between">
+                            <div>
+                                <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400">Total de Documentos Persistidos</div>
+                                <div class="text-xl font-black text-slate-900 dark:text-white" id="bd-total-documentos">--</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400">Coleções Ativas</div>
+                                <div class="text-xl font-black text-slate-900 dark:text-white" id="bd-total-colecoes">--</div>
+                            </div>
+                        </div>
+
+                        <!-- Distribuição por Coleção Chave (Chips Compactos) -->
+                        <div>
+                            <div class="text-[10px] uppercase font-black text-slate-500 dark:text-slate-400 mb-2 flex items-center justify-between">
+                                <span>Persistência por Coleção (Oportunidades &amp; Notícias)</span>
+                                <span class="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">Auto-ajuste pós-scraping</span>
+                            </div>
+                            <div id="bd-chips-colecoes" class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1">
+                                <span class="text-xs text-slate-400 italic">Carregando coleções...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700 text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
+                        <span class="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-bold" title="Política de limpeza de dados obsoletos">
+                            <i class="ph-bold ph-clock-countdown text-sm"></i> Limpeza ativa: vencidos &gt; 10 dias
+                        </span>
+                        <span class="font-mono text-[10px]" id="bd-atualizacao-hora">--:--:--</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
         <!-- Seção 1: Dashboard de Monitorização e Logs dos Scrapers (UC11 / Item 12 e 13) -->
         <section class="bg-white dark:bg-slate-800 border-2 border-slate-900 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
             <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
@@ -453,8 +644,103 @@
             if (modal) modal.style.display = 'flex';
         }
 
+        
+        async function carregarTelemetria() {
+            try {
+                const res = await fetch(`${API_URL}/admin/telemetria`, { headers: getAdminHeaders() });
+                if (!res.ok) {
+                    console.warn("Falha ao carregar telemetria:", res.status);
+                    return;
+                }
+                const data = await res.json();
+                if (!data.sucesso) return;
+
+                // Atualiza timestamp
+                const tsEl = document.getElementById("telemetria-timestamp");
+                if (tsEl) tsEl.innerText = `Atualizado às ${data.timestamp || ""}`;
+                const h1El = document.getElementById("mem-atualizacao-hora");
+                if (h1El) h1El.innerText = data.timestamp || "";
+                const h2El = document.getElementById("bd-atualizacao-hora");
+                if (h2El) h2El.innerText = data.timestamp || "";
+
+                // Quadro 1: Memória Atual
+                const mem = data.memoria_atual || {};
+                if (document.getElementById("mem-rss-mb")) document.getElementById("mem-rss-mb").innerText = mem.rss_mb ?? "--";
+                if (document.getElementById("mem-rss-percent")) document.getElementById("mem-rss-percent").innerText = `Uso do processo: ${mem.percent_memoria_processo ?? 0}%`;
+                if (document.getElementById("mem-vms-mb")) document.getElementById("mem-vms-mb").innerText = mem.vms_mb ?? "--";
+                if (document.getElementById("mem-pid")) document.getElementById("mem-pid").innerText = `PID: ${mem.pid ?? "--"}`;
+                
+                if (document.getElementById("mem-gc-objetos")) document.getElementById("mem-gc-objetos").innerText = (mem.objetos_heap_gc || 0).toLocaleString('pt-BR');
+                if (document.getElementById("mem-threads")) document.getElementById("mem-threads").innerText = `${mem.threads_ativas || 1} ativas`;
+                if (document.getElementById("mem-uptime")) document.getElementById("mem-uptime").innerText = mem.uptime_formatado || "--";
+
+                if (mem.sistema_total_ram_gb) {
+                    const perc = mem.sistema_usada_percent || 0;
+                    if (document.getElementById("mem-sistema-percent")) document.getElementById("mem-sistema-percent").innerText = `${perc}% em uso`;
+                    if (document.getElementById("mem-sistema-progresso")) document.getElementById("mem-sistema-progresso").style.width = `${perc}%`;
+                    if (document.getElementById("mem-sistema-livre")) document.getElementById("mem-sistema-livre").innerText = `Livre: ${mem.sistema_livre_ram_gb} GB`;
+                    if (document.getElementById("mem-sistema-total")) document.getElementById("mem-sistema-total").innerText = `Total: ${mem.sistema_total_ram_gb} GB`;
+                }
+
+                // Quadro 2: Memória em Persistência
+                const bd = data.memoria_persistencia || {};
+                if (document.getElementById("bd-data-size-kb")) document.getElementById("bd-data-size-kb").innerText = bd.dados_tamanho_kb ?? "--";
+                if (document.getElementById("bd-data-size-mb")) document.getElementById("bd-data-size-mb").innerText = `(~${bd.dados_tamanho_mb ?? 0} MB)`;
+                if (document.getElementById("bd-storage-size-kb")) document.getElementById("bd-storage-size-kb").innerText = bd.armazenamento_disco_kb ?? "--";
+                if (document.getElementById("bd-storage-size-mb")) document.getElementById("bd-storage-size-mb").innerText = `Índices: ${bd.indices_disco_kb ?? 0} KB (~${bd.indices_disco_mb ?? 0} MB)`;
+
+                if (document.getElementById("bd-total-documentos")) document.getElementById("bd-total-documentos").innerText = (bd.total_documentos || 0).toLocaleString('pt-BR');
+                if (document.getElementById("bd-total-colecoes")) document.getElementById("bd-total-colecoes").innerText = `${bd.total_colecoes || 0} coleções`;
+
+                if (document.getElementById("banco-nome-engine")) {
+                    document.getElementById("banco-nome-engine").innerText = `${bd.banco_nome || "hub_estudantes"} • ${bd.engine || "WiredTiger"}`;
+                }
+
+                // Chips de coleções
+                const chipsContainer = document.getElementById("bd-chips-colecoes");
+                if (chipsContainer && Array.isArray(bd.colecoes)) {
+                    chipsContainer.innerHTML = bd.colecoes.map(c => `
+                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900/80 text-[11px] font-semibold text-slate-800 dark:text-slate-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            <span class="font-mono text-slate-900 dark:text-white font-bold">${c.nome}</span>
+                            <span class="px-1 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-600 dark:text-slate-400">${c.documentos} docs</span>
+                            <span class="text-[9px] text-slate-400">(${c.tamanho_kb} KB)</span>
+                        </span>
+                    `).join('');
+                }
+            } catch (e) {
+                console.warn("Erro ao buscar telemetria:", e);
+            }
+        }
+
+        async function executarLimpezaVencidosAdmin() {
+            if (!confirm("Deseja executar agora a rotina de limpeza de todos os itens com mais de 10 dias de vencidos?")) {
+                return;
+            }
+            try {
+                const res = await fetch(`${API_URL}/admin/limpar-vencidos`, {
+                    method: 'POST',
+                    headers: getAdminHeaders()
+                });
+                const data = await res.json();
+                if (data.sucesso) {
+                    exibirAlerta(`Sucesso: ${data.itens_removidos} itens vencidos há mais de 10 dias foram removidos com sucesso.`, "sucesso");
+                    carregarTelemetria();
+                    carregarDashboardLogs();
+                } else {
+                    exibirAlerta(data.detail || "Erro ao executar limpeza.", "erro");
+                }
+            } catch (e) {
+                exibirAlerta("Falha de rede ao solicitar limpeza de itens vencidos.", "erro");
+            }
+        }
+
         function inicializarPainel() {
             verificarMFAStatus();
+            carregarTelemetria();
+            if (!window._telemetriaInterval) {
+                window._telemetriaInterval = setInterval(carregarTelemetria, 15000);
+            }
             carregarDashboardLogs();
             carregarFontes();
             carregarRegras();

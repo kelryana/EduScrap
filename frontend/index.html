@@ -49,46 +49,31 @@
       }
     </script>
 
-    <link rel="stylesheet" href="style.css?v=20261019_v8">
+    <link rel="stylesheet" href="style.css?v=20261022_v10">
 </head>
 <body class="bg-[#FAFBFD] text-brand-dark min-h-screen bg-grid-pattern font-sans antialiased selection:bg-brand-yellow selection:text-brand-dark">
 
     <section id="landing-hero" class="landing-section w-full max-w-[1520px] mx-auto px-4 sm:px-6">
 
-        <nav class="landing-navbar">
+        <!-- Barra de Topo Minimalista da Landing Page (Visitantes Não Logados) -->
+        <div class="landing-top-bar flex items-center justify-between py-4 px-6 mb-6 bg-white border-3 border-brand-dark rounded-2xl shadow-brutal">
             <div class="nav-brand" style="display: inline-flex; align-items: center; gap: 12px;">
-                <img src="assets/logo.png" data-logo-light="assets/logo.png" data-logo-dark="assets/logo_temaescuro.png" alt="EduScrap Logo" class="nav-brand-img h-12 sm:h-14 w-auto" height="52" style="height: 76px !important; max-height: 80px !important; width: auto !important; object-fit: contain; display: block; flex-shrink: 0;">
-                <span class="nav-brand-title" style="font-size: 2rem; font-weight: 900; line-height: 1; display: inline-flex; align-items: center;">
+                <img src="assets/logo.png" data-logo-light="assets/logo.png" data-logo-dark="assets/logo_temaescuro.png" alt="EduScrap Logo" class="nav-brand-img h-12 sm:h-14 w-auto" height="52" style="height: 68px !important; max-height: 72px !important; width: auto !important; object-fit: contain; display: block; flex-shrink: 0;">
+                <span class="nav-brand-title" style="font-size: 1.9rem; font-weight: 900; line-height: 1; display: inline-flex; align-items: center;">
                     <span class="brand-edu">Edu</span><span class="brand-scrap" style="color: #FF5C00;">Scrap</span>
                 </span>
             </div>
 
-            <div class="nav-links">
-                <a href="#landing-hero" class="nav-link">Início</a>
-                <a href="#area-oportunidades" class="nav-link">Oportunidades</a>
-                <a href="#area-oportunidades" onclick="carregarFeedPersonalizado()" class="nav-link">Recomendados</a>
-                <a href="#area-oportunidades" onclick="carregarEstatisticas()" class="nav-link">Métricas</a>
-                <a href="admin.html" id="nav-link-admin" class="nav-link font-bold text-brand-orange" title="Painel de Governança Técnica (UC11/UC12)" style="display: none;">Admin</a>
-            </div>
-
             <div class="nav-actions-container">
-                <button id="btn-theme-toggle" class="btn-theme-toggle" onclick="toggleTheme()" aria-label="Alternar entre modo escuro e claro" title="Alternar entre modo escuro e claro">
-                    <i class="ph-bold ph-moon theme-toggle-icon" id="theme-toggle-icon"></i>
-                    <span class="theme-toggle-text" id="theme-toggle-text">Escuro</span>
+                <button class="btn-theme-toggle" onclick="toggleTheme()" aria-label="Alternar entre modo escuro e claro" title="Alternar entre modo escuro e claro">
+                    <i class="ph-bold ph-moon theme-toggle-icon"></i>
+                    <span class="theme-toggle-text">Escuro</span>
                 </button>
-
-                <div id="nav-auth-area">
-                    <div class="nav-user-box" style="padding: 10px 18px; font-size: 1.12rem;">
-                        <span class="nav-user-tag" style="font-size: 1.12rem;">
-                            <i class="ph-bold ph-student"></i> Olá, <strong id="user-name-display">Estudante</strong>
-                        </span>
-                        <button class="btn-nav-mini btn-nav-logout" onclick="fazerLogout()" title="Sair da Conta" style="width: 36px; height: 36px; font-size: 1.25rem;">
-                            <i class="ph-bold ph-sign-out"></i>
-                        </button>
-                    </div>
-                </div>
+                <a href="login.html?aba=login" class="btn-nav-auth" style="text-decoration: none;">
+                    <i class="ph-bold ph-sign-in"></i> <span>Já tenho conta</span>
+                </a>
             </div>
-        </nav>
+        </div>
 
         <div class="relative w-full max-w-full py-10 my-4 mx-auto">
 
@@ -173,14 +158,10 @@
                   </p>
 
                   <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-5 pt-3">
-                    <a href="#area-oportunidades" class="px-8 sm:px-10 py-4.5 sm:py-5 rounded-2xl border-3 border-brand-dark bg-brand-orange hover:bg-brand-orange-hover text-white font-extrabold text-xl sm:text-2xl shadow-brutal neo-btn inline-flex items-center justify-center gap-3 whitespace-nowrap">
-                      <span>Explorar Oportunidades</span>
-                      <span class="text-2xl">→</span>
-                    </a>
-
-                    <a href="login.html?aba=register" class="px-8 sm:px-10 py-4.5 sm:py-5 rounded-2xl border-3 border-brand-dark bg-white hover:bg-slate-50 text-brand-dark font-extrabold text-xl sm:text-2xl shadow-brutal neo-btn inline-flex items-center justify-center gap-3 whitespace-nowrap" style="text-decoration: none;">
+                    <a href="login.html?aba=register" class="px-8 sm:px-10 py-4.5 sm:py-5 rounded-2xl border-3 border-brand-dark bg-brand-orange hover:bg-brand-orange-hover text-white font-extrabold text-xl sm:text-2xl shadow-brutal neo-btn inline-flex items-center justify-center gap-3 whitespace-nowrap" style="text-decoration: none;">
                       <i class="ph-bold ph-student"></i>
                       <span>Criar Perfil de Aluno</span>
+                      <span class="text-2xl">→</span>
                     </a>
                   </div>
 
@@ -213,10 +194,463 @@
             </div>
 
         </div>
+
+
+        <!-- ========================================================================= -->
+        <!-- TRANSIÇÃO 1: GRADIENTE + DESFOQUE DO HERO PARA FUNCIONALIDADES           -->
+        <!-- ========================================================================= -->
+        <div class="landing-section-divider"></div>
+
+        <div class="relative w-full flex items-center justify-center my-6 z-20">
+            <a href="#secao-funcionalidades" class="px-5 py-2.5 rounded-full bg-white dark:bg-slate-800 border-2.5 border-brand-dark dark:border-slate-600 shadow-brutal-sm text-xs font-black text-brand-dark dark:text-white uppercase tracking-wider inline-flex items-center gap-2 hover:-translate-y-1 hover:shadow-brutal transition-all" style="text-decoration: none;">
+                <span>Explorar Funcionalidades</span>
+                <i class="ph-bold ph-arrow-down text-brand-orange animate-bounce"></i>
+            </a>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- SEÇÃO 1: PRINCIPAIS FUNCIONALIDADES DO SISTEMA (FEATURES / BENEFÍCIOS)     -->
+        <!-- ========================================================================= -->
+        <section id="secao-funcionalidades" class="w-full my-12 pt-6">
+            <div class="text-center max-w-3xl mx-auto mb-10">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 dark:bg-amber-950/80 border-2 border-brand-dark dark:border-amber-700 shadow-brutal-sm font-display font-extrabold text-xs sm:text-sm text-brand-dark dark:text-amber-300 mb-3">
+                    <span class="text-brand-orange text-base">✦</span>
+                    <span>TECNOLOGIA A FAVOR DO ESTUDANTE</span>
+                </div>
+                <h2 class="font-display font-black text-3xl sm:text-4xl lg:text-5xl text-brand-dark dark:text-white tracking-tight leading-tight">
+                    Principais Funcionalidades do Sistema
+                </h2>
+                <p class="text-slate-700 dark:text-slate-200 text-base sm:text-lg font-medium mt-3 leading-relaxed">
+                    O EduScrap automatiza todo o trabalho repetitivo de rastrear editais, monitorar prazos e garimpar oportunidades para que você nunca fique para trás.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+                <!-- Card 1: Raspagem Automatizada -->
+                <div class="bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-3xl p-6 sm:p-8 shadow-brutal dark:shadow-[4px_4px_0px_#000] landing-card-elevate flex flex-col justify-between">
+                    <div>
+                        <div class="w-14 h-14 rounded-2xl bg-brand-orange border-3 border-brand-dark text-white flex items-center justify-center shadow-brutal-sm mb-5">
+                            <i class="ph-bold ph-robot text-3xl"></i>
+                        </div>
+                        <h3 class="font-display font-black text-xl sm:text-2xl text-brand-dark dark:text-white mb-2">
+                            Varredura Automatizada Multi-Fontes
+                        </h3>
+                        <p class="text-slate-700 dark:text-slate-200 text-sm sm:text-base leading-relaxed font-medium">
+                            Robôs inteligentes de coleta navegam continuamente pelos portais da UERN, UFERSA, CIEE e órgãos oficiais, indexando novas vagas e editais no momento exato em que são publicados.
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap gap-2 mt-6 pt-4 border-t-2 border-slate-200 dark:border-slate-700">
+                        <span class="px-2.5 py-1 rounded-lg bg-orange-100 dark:bg-orange-950/70 text-orange-900 dark:text-orange-300 border border-orange-300 dark:border-orange-800 font-bold text-xs">
+                            Monitoramento 24/7
+                        </span>
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs">
+                            Coleta Sem Intervenção
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Card 2: Mineração de Prazos em PDFs -->
+                <div class="bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-3xl p-6 sm:p-8 shadow-brutal dark:shadow-[4px_4px_0px_#000] landing-card-elevate flex flex-col justify-between">
+                    <div>
+                        <div class="w-14 h-14 rounded-2xl bg-sky-500 border-3 border-brand-dark text-white flex items-center justify-center shadow-brutal-sm mb-5">
+                            <i class="ph-bold ph-file-text text-3xl"></i>
+                        </div>
+                        <h3 class="font-display font-black text-xl sm:text-2xl text-brand-dark dark:text-white mb-2">
+                            Mineração e Detecção de Prazos em Editais
+                        </h3>
+                        <p class="text-slate-700 dark:text-slate-200 text-sm sm:text-base leading-relaxed font-medium">
+                            Nossos algoritmos processam documentos e anexos em PDF da PRAE e PROEX, identificando cronogramas, datas de encerramento e retificações para classificar vigências em tempo real.
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap gap-2 mt-6 pt-4 border-t-2 border-slate-200 dark:border-slate-700">
+                        <span class="px-2.5 py-1 rounded-lg bg-sky-100 dark:bg-sky-950/70 text-sky-900 dark:text-sky-300 border border-sky-300 dark:border-sky-800 font-bold text-xs">
+                            Leitura Inteligente de PDFs
+                        </span>
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs">
+                            Contagem Regressiva
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Card 3: Personalização por Perfil de Aluno -->
+                <div class="bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-3xl p-6 sm:p-8 shadow-brutal dark:shadow-[4px_4px_0px_#000] landing-card-elevate flex flex-col justify-between">
+                    <div>
+                        <div class="w-14 h-14 rounded-2xl bg-purple-600 border-3 border-brand-dark text-white flex items-center justify-center shadow-brutal-sm mb-5">
+                            <i class="ph-bold ph-student text-3xl"></i>
+                        </div>
+                        <h3 class="font-display font-black text-xl sm:text-2xl text-brand-dark dark:text-white mb-2">
+                            Recomendações por Perfil Acadêmico
+                        </h3>
+                        <p class="text-slate-700 dark:text-slate-200 text-sm sm:text-base leading-relaxed font-medium">
+                            Personalize seu curso, universidade e áreas de preferência. O portal gera um feed exclusivo de editais compatíveis com a sua graduação, poupando seu tempo de procurar em vão.
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap gap-2 mt-6 pt-4 border-t-2 border-slate-200 dark:border-slate-700">
+                        <span class="px-2.5 py-1 rounded-lg bg-purple-100 dark:bg-purple-950/70 text-purple-900 dark:text-purple-300 border border-purple-300 dark:border-purple-800 font-bold text-xs">
+                            Feed Recomendado
+                        </span>
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs">
+                            Filtro por Curso e Campus
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Card 4: Organização em Eixos Temáticos -->
+                <div class="bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-3xl p-6 sm:p-8 shadow-brutal dark:shadow-[4px_4px_0px_#000] landing-card-elevate flex flex-col justify-between">
+                    <div>
+                        <div class="w-14 h-14 rounded-2xl bg-emerald-500 border-3 border-brand-dark text-white flex items-center justify-center shadow-brutal-sm mb-5">
+                            <i class="ph-bold ph-squares-four text-3xl"></i>
+                        </div>
+                        <h3 class="font-display font-black text-xl sm:text-2xl text-brand-dark dark:text-white mb-2">
+                            Organização Estruturada em Eixos
+                        </h3>
+                        <p class="text-slate-700 dark:text-slate-200 text-sm sm:text-base leading-relaxed font-medium">
+                            Separação visual clara entre Estágios Remunerados, Bolsas de Apoio e Extensão, Cursos e Capacitação e Notícias da comunidade acadêmica em abas dedicadas e responsivas.
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap gap-2 mt-6 pt-4 border-t-2 border-slate-200 dark:border-slate-700">
+                        <span class="px-2.5 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-950/70 text-emerald-900 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 font-bold text-xs">
+                            4 Abas Especializadas
+                        </span>
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs">
+                            Links Oficiais Preservados
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- TRANSIÇÃO 2: GRADIENTE + DESFOQUE ENTRE FUNCIONALIDADES E FONTES          -->
+        <!-- ========================================================================= -->
+        <div class="landing-section-divider"></div>
+
+        <!-- ========================================================================= -->
+        <!-- SEÇÃO 2: FONTES OFICIAIS MONITORADAS (AUTHORITY & TRUST)                   -->
+        <!-- ========================================================================= -->
+        <section id="secao-fontes" class="w-full my-12 pt-6">
+            <div class="text-center max-w-3xl mx-auto mb-10">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 dark:bg-amber-950/80 border-2 border-brand-dark dark:border-amber-700 shadow-brutal-sm font-display font-extrabold text-xs sm:text-sm text-brand-dark dark:text-amber-300 mb-3">
+                    <span class="text-brand-orange text-base">✦</span>
+                    <span>ORIGEM COMPROVADA E SEGURA</span>
+                </div>
+                <h2 class="font-display font-black text-3xl sm:text-4xl lg:text-5xl text-brand-dark dark:text-white tracking-tight leading-tight">
+                    Fontes Oficiais Conectadas
+                </h2>
+                <p class="text-slate-700 dark:text-slate-200 text-base sm:text-lg font-medium mt-3 leading-relaxed">
+                    Informações auditadas e mineradas diretamente dos canais oficiais das instituições de ensino superior e agentes de integração.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Fonte 1: UERN -->
+                <div class="bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-2xl p-6 shadow-brutal dark:shadow-[4px_4px_0px_#000] landing-fontes-card flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-700 font-black text-xs">
+                                Universidade Estadual
+                            </span>
+                            <span class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-extrabold text-xs">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                Conexão Ativa
+                            </span>
+                        </div>
+                        <h3 class="font-display font-black text-xl text-brand-dark dark:text-white mb-2">
+                            UERN (PRAE &amp; PROEX)
+                        </h3>
+                        <p class="text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-medium leading-relaxed">
+                            Monitoramento das pró-reitorias de Assuntos Estudantis e de Extensão: auxílio moradia, auxílio creche, inclusão digital e editais PIBEX.
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400">
+                        <span>portal.uern.br</span>
+                        <i class="ph-bold ph-shield-check text-emerald-500 text-base"></i>
+                    </div>
+                </div>
+
+                <!-- Fonte 2: UFERSA -->
+                <div class="bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-2xl p-6 shadow-brutal dark:shadow-[4px_4px_0px_#000] landing-fontes-card flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-800 dark:text-purple-300 border border-purple-300 dark:border-purple-700 font-black text-xs">
+                                Universidade Federal
+                            </span>
+                            <span class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-extrabold text-xs">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                Conexão Ativa
+                            </span>
+                        </div>
+                        <h3 class="font-display font-black text-xl text-brand-dark dark:text-white mb-2">
+                            UFERSA (PROAE &amp; Editais)
+                        </h3>
+                        <p class="text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-medium leading-relaxed">
+                            Acompanhamento de processos seletivos, bolsas de apoio à permanência estudantil e oportunidades acadêmicas no semiárido potiguar.
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400">
+                        <span>proae.ufersa.edu.br</span>
+                        <i class="ph-bold ph-shield-check text-emerald-500 text-base"></i>
+                    </div>
+                </div>
+
+                <!-- Fonte 3: CIEE -->
+                <div class="bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-2xl p-6 shadow-brutal dark:shadow-[4px_4px_0px_#000] landing-fontes-card flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-950 text-orange-800 dark:text-orange-300 border border-orange-300 dark:border-orange-700 font-black text-xs">
+                                Agente de Estágio
+                            </span>
+                            <span class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-extrabold text-xs">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                Conexão Ativa
+                            </span>
+                        </div>
+                        <h3 class="font-display font-black text-xl text-brand-dark dark:text-white mb-2">
+                            CIEE (Estágios Remunerados)
+                        </h3>
+                        <p class="text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-medium leading-relaxed">
+                            Extração diária de oportunidades formais de estágio com valor da bolsa-auxílio, carga horária e município discriminados.
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400">
+                        <span>ciee.org.br</span>
+                        <i class="ph-bold ph-shield-check text-emerald-500 text-base"></i>
+                    </div>
+                </div>
+
+                <!-- Fonte 4: IFRN -->
+                <div class="bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-2xl p-6 shadow-brutal dark:shadow-[4px_4px_0px_#000] landing-fontes-card flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 font-black text-xs">
+                                Rede Federal
+                            </span>
+                            <span class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-extrabold text-xs">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                Conexão Ativa
+                            </span>
+                        </div>
+                        <h3 class="font-display font-black text-xl text-brand-dark dark:text-white mb-2">
+                            IFRN &amp; Pesquisa
+                        </h3>
+                        <p class="text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-medium leading-relaxed">
+                            Processos seletivos públicos, editais de bolsas de formação técnica e tecnológica e chamadas de extensão comunitária.
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400">
+                        <span>portal.ifrn.edu.br</span>
+                        <i class="ph-bold ph-shield-check text-emerald-500 text-base"></i>
+                    </div>
+                </div>
+
+                <!-- Fonte 5: MPRN e DOM -->
+                <div class="bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-2xl p-6 shadow-brutal dark:shadow-[4px_4px_0px_#000] landing-fontes-card flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-700 font-black text-xs">
+                                Órgãos Governamentais
+                            </span>
+                            <span class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-extrabold text-xs">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                Conexão Ativa
+                            </span>
+                        </div>
+                        <h3 class="font-display font-black text-xl text-brand-dark dark:text-white mb-2">
+                            MPRN &amp; DOM Mossoró
+                        </h3>
+                        <p class="text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-medium leading-relaxed">
+                            Seleções de residência jurídica, estágios ministeriais remunerados e publicações do Diário Oficial do Município.
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400">
+                        <span>mprn.mp.br • dom.mossoro.rn.gov.br</span>
+                        <i class="ph-bold ph-shield-check text-emerald-500 text-base"></i>
+                    </div>
+                </div>
+
+                <!-- Fonte 6: Portais de Notícias & Cursos -->
+                <div class="bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-2xl p-6 shadow-brutal dark:shadow-[4px_4px_0px_#000] landing-fontes-card flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700 font-black text-xs">
+                                Comunicação &amp; Tech
+                            </span>
+                            <span class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-extrabold text-xs">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                Conexão Ativa
+                            </span>
+                        </div>
+                        <h3 class="font-display font-black text-xl text-brand-dark dark:text-white mb-2">
+                            Notícias &amp; Cursos Livres
+                        </h3>
+                        <p class="text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-medium leading-relaxed">
+                            Resumo diário de notícias acadêmicas e de tecnologia (G1, Canaltech, TecMundo) e cursos gratuitos com certificados.
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400">
+                        <span>Canais Mídia &amp; Open Source</span>
+                        <i class="ph-bold ph-shield-check text-emerald-500 text-base"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- TRANSIÇÃO 3: GRADIENTE + DESFOQUE ENTRE FONTES E UTILIDADE                -->
+        <!-- ========================================================================= -->
+        <div class="landing-section-divider"></div>
+
+        <!-- ========================================================================= -->
+        <!-- SEÇÃO 3: PARA O QUE É ÚTIL ESSE SITE? (BENEFÍCIOS REAIS / CASOS DE USO)   -->
+        <!-- ========================================================================= -->
+        <section id="secao-utilidades" class="w-full my-12 pt-6">
+            <div class="text-center max-w-3xl mx-auto mb-10">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 dark:bg-amber-950/80 border-2 border-brand-dark dark:border-amber-700 shadow-brutal-sm font-display font-extrabold text-xs sm:text-sm text-brand-dark dark:text-amber-300 mb-3">
+                    <span class="text-brand-orange text-base">✦</span>
+                    <span>RESOLVENDO AS MAIORES DORES DO ESTUDANTE</span>
+                </div>
+                <h2 class="font-display font-black text-3xl sm:text-4xl lg:text-5xl text-brand-dark dark:text-white tracking-tight leading-tight">
+                    Para o Que Serve o EduScrap?
+                </h2>
+                <p class="text-slate-700 dark:text-slate-200 text-base sm:text-lg font-medium mt-3 leading-relaxed">
+                    Criado sob medida para solucionar a falta de visibilidade, a dispersão de documentos e a perda desnecessária de oportunidades na vida universitária.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+                <!-- Benefício 1: Prazos sem sustos -->
+                <div class="bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-3xl p-6 sm:p-8 shadow-brutal dark:shadow-[4px_4px_0px_#000] landing-card-elevate">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-amber-400 border-2.5 border-brand-dark text-brand-dark flex items-center justify-center shrink-0 shadow-brutal-sm">
+                            <i class="ph-bold ph-hourglass-high text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-display font-black text-xl text-brand-dark dark:text-white mb-2">
+                                Acompanhar Editais Sem Perder Inscrições
+                            </h3>
+                            <p class="text-slate-700 dark:text-slate-200 text-sm sm:text-base font-medium leading-relaxed">
+                                Nada é mais frustrante do que descobrir que o prazo daquele auxílio alimentação ou bolsa PIBEX acabou ontem. O EduScrap mostra a contagem regressiva e destaca editais em reta final para você agir a tempo.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Benefício 2: Fim das dezenas de abas -->
+                <div class="bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-3xl p-6 sm:p-8 shadow-brutal dark:shadow-[4px_4px_0px_#000] landing-card-elevate">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-brand-orange border-2.5 border-brand-dark text-white flex items-center justify-center shrink-0 shadow-brutal-sm">
+                            <i class="ph-bold ph-browsers text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-display font-black text-xl text-brand-dark dark:text-white mb-2">
+                                Centralização Total: Chega de 15 Abas Abertas
+                            </h3>
+                            <p class="text-slate-700 dark:text-slate-200 text-sm sm:text-base font-medium leading-relaxed">
+                                Você não precisa mais ficar navegando em sites antigos de pró-reitorias, baixando anexos dispersos ou checando murais físicos. Encontre tudo organizado e pesquisável em segundos.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Benefício 3: Estágios e bolsas do seu curso -->
+                <div class="bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-3xl p-6 sm:p-8 shadow-brutal dark:shadow-[4px_4px_0px_#000] landing-card-elevate">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-500 border-2.5 border-brand-dark text-white flex items-center justify-center shrink-0 shadow-brutal-sm">
+                            <i class="ph-bold ph-briefcase text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-display font-black text-xl text-brand-dark dark:text-white mb-2">
+                                Estágios e Bolsas Compatíveis com Seu Curso
+                            </h3>
+                            <p class="text-slate-700 dark:text-slate-200 text-sm sm:text-base font-medium leading-relaxed">
+                                Veja na hora a remuneração, local e carga horária das vagas do CIEE e residências. Ao configurar seu perfil, receba no topo as oportunidades diretamente conectadas com sua área de graduação.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Benefício 4: Notícias e horas complementares -->
+                <div class="bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-3xl p-6 sm:p-8 shadow-brutal dark:shadow-[4px_4px_0px_#000] landing-card-elevate">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-sky-500 border-2.5 border-brand-dark text-white flex items-center justify-center shrink-0 shadow-brutal-sm">
+                            <i class="ph-bold ph-newspaper text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-display font-black text-xl text-brand-dark dark:text-white mb-2">
+                                Notícias do Campus &amp; Cursos para Horas Complementares
+                            </h3>
+                            <p class="text-slate-700 dark:text-slate-200 text-sm sm:text-base font-medium leading-relaxed">
+                                Acompanhe os principais fatos acadêmicos e descubra cursos livres gratuitos com certificados para acelerar o cumprimento das horas complementares exigidas pelo seu curso.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- TRANSIÇÃO 4: GRADIENTE + DESFOQUE PARA O DASHBOARD EXPANDIDO              -->
+        <!-- ========================================================================= -->
+        <div class="landing-section-divider"></div>
+
+        <!-- ========================================================================= -->
+        <!-- SEÇÃO 4: DASHBOARD EXPANDIDO DE MÉTRICAS E DIVISÃO POR FONTES              -->
+        <!-- ========================================================================= -->
+        <div id="landing-dashboard-section" class="w-full mt-12 mb-16 pt-4">
+            <div class="text-center max-w-3xl mx-auto mb-10">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 dark:bg-amber-950/80 border-2 border-brand-dark dark:border-amber-700 shadow-brutal-sm font-display font-extrabold text-xs sm:text-sm text-brand-dark dark:text-amber-300 mb-3">
+                    <span class="text-brand-orange text-base">✦</span>
+                    <span>MÉTRICAS &amp; OPORTUNIDADES EM TEMPO REAL</span>
+                </div>
+                <h2 class="font-display font-black text-3xl sm:text-4xl lg:text-5xl text-brand-dark dark:text-white tracking-tight leading-tight">
+                    Panorama Geral do Hub EduScrap
+                </h2>
+                <p class="text-slate-700 dark:text-slate-200 text-base sm:text-lg font-medium mt-3 leading-relaxed">
+                    Acompanhe ao vivo o volume consolidado de oportunidades rastreadas e a divisão de dados entre todas as fontes monitoradas.
+                </p>
+            </div>
+            <div id="landing-dashboard-container"></div>
+        </div>
     </section>
 
 
-    <div id="area-oportunidades" class="app-container">
+    <div id="area-oportunidades" class="app-container" style="display: none;">
+        <!-- Menu Flutuante Superior (Acompanha o Scroll na Página de Pesquisa) -->
+        <nav class="landing-navbar navbar-pesquisa-sticky">
+            <div class="nav-brand" style="display: inline-flex; align-items: center; gap: 12px; cursor: pointer;" onclick="carregarDados('estagios', 1)">
+                <img src="assets/logo.png" data-logo-light="assets/logo.png" data-logo-dark="assets/logo_temaescuro.png" alt="EduScrap Logo" class="nav-brand-img h-12 sm:h-14 w-auto" height="52" style="height: 76px !important; max-height: 80px !important; width: auto !important; object-fit: contain; display: block; flex-shrink: 0;">
+                <span class="nav-brand-title" style="font-size: 2rem; font-weight: 900; line-height: 1; display: inline-flex; align-items: center;">
+                    <span class="brand-edu">Edu</span><span class="brand-scrap" style="color: #FF5C00;">Scrap</span>
+                </span>
+            </div>
+
+            <div class="nav-links">
+                <a href="javascript:void(0)" onclick="carregarDados('estagios', 1)" class="nav-link">Oportunidades</a>
+                <a href="javascript:void(0)" onclick="carregarFeedPersonalizado()" class="nav-link">Recomendados</a>
+                <a href="javascript:void(0)" onclick="carregarEstatisticas()" class="nav-link">Métricas</a>
+                <a href="javascript:void(0)" onclick="alternarSidebarPerfil()" class="nav-link">Personalização</a>
+                <a href="admin.html" id="nav-link-admin" class="nav-link font-bold text-brand-orange" title="Painel de Governança Técnica (UC11/UC12)" style="display: none;">Admin</a>
+            </div>
+
+            <div class="nav-actions-container">
+                <button id="btn-theme-toggle" class="btn-theme-toggle" onclick="toggleTheme()" aria-label="Alternar entre modo escuro e claro" title="Alternar entre modo escuro e claro">
+                    <i class="ph-bold ph-moon theme-toggle-icon" id="theme-toggle-icon"></i>
+                    <span class="theme-toggle-text" id="theme-toggle-text">Escuro</span>
+                </button>
+
+                <div id="nav-auth-area">
+                    <div class="nav-user-box" style="padding: 10px 18px; font-size: 1.12rem;">
+                        <span class="nav-user-tag" style="font-size: 1.12rem;">
+                            <i class="ph-bold ph-student"></i> Olá, <strong id="user-name-display">Estudante</strong>
+                        </span>
+                        <button class="btn-nav-mini btn-nav-logout" onclick="fazerLogout()" title="Sair da Conta" style="width: 36px; height: 36px; font-size: 1.25rem;">
+                            <i class="ph-bold ph-sign-out"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
         <!-- Header da Seção de Oportunidades -->
         <header class="header-memphis">
             <div class="logo-box">
@@ -341,6 +775,18 @@
                             </div>
                         </div>
 
+                        <!-- Atalhos Rápidos do Menu Lateral (Dashboard de Métricas & Portal Completo) -->
+                        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px;">
+                            <button type="button" class="btn-submit-memphis" style="width: 100%; background: #FFF8E1; color: #0F172A; justify-content: flex-start; gap: 10px;" onclick="fecharSidebarPerfil(); carregarEstatisticas();">
+                                <i class="ph-bold ph-chart-bar" style="color: #FF5C00; font-size: 1.3rem;"></i>
+                                <span>Dashboard de Métricas</span>
+                            </button>
+                            <button type="button" class="btn-submit-memphis" style="width: 100%; background: #F8FAFC; color: #0F172A; justify-content: flex-start; gap: 10px;" onclick="fecharSidebarPerfil(); carregarPortalUsuario();">
+                                <i class="ph-bold ph-user-gear" style="color: #0F172A; font-size: 1.3rem;"></i>
+                                <span>Configurações da Conta</span>
+                            </button>
+                        </div>
+
                         <form id="form-perfil-preferencias-sidebar" onsubmit="salvarPreferenciasPerfil(event)">
                             <div class="form-group-memphis">
                                 <div class="label-com-subtexto">
@@ -399,7 +845,11 @@
                             <button id="btn-favoritos" class="btn-filtro-aluno" onclick="carregarFavoritos()">
                                 <i class="ph-bold ph-star"></i> <span>Salvos (<strong id="contador-favoritos">0</strong>)</span>
                             </button>
-                            <button id="btn-abrir-sidebar-filtros" class="btn-filtro-aluno" onclick="carregarPortalUsuario()">
+                            <button id="btn-abrir-sidebar-filtros" class="btn-filtro-aluno" onclick="alternarSidebarPerfil()">
+                                <i class="ph-bold ph-sliders-horizontal"></i>
+                                <span>Personalização</span>
+                            </button>
+                            <button id="btn-portal-usuario" class="btn-filtro-aluno" onclick="carregarPortalUsuario()">
                                 <i class="ph-bold ph-user-circle"></i>
                                 <span>Meu Perfil</span>
                             </button>
@@ -533,11 +983,12 @@
             <a href="#">Política de Privacidade</a>
             <a href="#">Termos de Uso</a>
             <a href="#">Contato</a>
+            <a href="https://github.com/kelryana/EduScrap" target="_blank" rel="noopener noreferrer">GitHub</a>
         </div>
         </div>
     </footer>
 
-    <script src="script.js?v=20261019_v8"></script>
+    <script src="script.js?v=20261022_v10"></script>
     <script>
         function scrollParaBusca() {
             const target = document.getElementById('area-oportunidades');

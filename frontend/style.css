@@ -27,7 +27,7 @@ body {
     background-color: #FAFBFD;
     color: #0F172A;
     min-height: 100vh;
-    overflow-x: hidden;
+    overflow-x: clip;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -83,22 +83,51 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.35rem 2.4rem;
+    padding: 1.1rem 2.2rem;
     background: #FFFFFF;
     border: 3px solid var(--color-navy);
     border-radius: 16px;
     box-shadow: 6px 6px 0px var(--color-navy);
     margin-bottom: 2.2rem;
+    gap: 1.5rem;
+}
+
+.landing-navbar .nav-brand {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.landing-navbar .nav-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 10px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.navbar-pesquisa-sticky {
+    position: sticky;
+    top: 14px;
+    z-index: 1000;
+    margin-bottom: 2.6rem;
 }
 
 .nav-link {
     color: var(--color-navy-text, #112244);
     text-decoration: none;
     font-weight: 800;
-    font-size: 1.38rem;
-    padding: 10px 20px;
+    font-size: 1.15rem;
+    padding: 8px 18px;
     border-radius: 10px;
     transition: all 0.15s ease;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .nav-link:hover {
@@ -110,6 +139,7 @@ body {
     display: flex;
     align-items: center;
     gap: 14px;
+    flex-shrink: 0;
 }
 
 .btn-theme-toggle {
@@ -700,8 +730,21 @@ body {
     min-height: 520px;
 }
 
+/* Paginação 4x2 para Notícias Universitárias (4 colunas x 2 linhas = 8 cards) */
+.grid-vagas.grid-vagas-4x2 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.5rem;
+}
+
+@media (max-width: 1179px) {
+    .grid-vagas.grid-vagas-4x2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
 @media (max-width: 679px) {
-    .grid-vagas {
+    .grid-vagas,
+    .grid-vagas.grid-vagas-4x2 {
         grid-template-columns: 1fr;
     }
 }
@@ -3264,7 +3307,8 @@ html.dark .bg-halftone {
 }
 
 /* Barra de Navegação */
-html.dark .landing-navbar {
+html.dark .landing-navbar,
+html.dark .landing-top-bar {
     background: #111C2E !important;
     border-color: #334155 !important;
     box-shadow: 6px 6px 0px #020617 !important;
@@ -5922,3 +5966,50 @@ html.dark .card-subtag-pill:hover {
     box-shadow: 2px 2px 0px #000000 !important;
 }
 
+
+/* ==========================================================================
+   LANDING PAGE (ESTILO ANATOMY OF A LANDING PAGE - NEOBRUTALISM)
+   ========================================================================== */
+
+.landing-section-divider {
+    position: relative;
+    width: 100%;
+    height: 72px;
+    margin-top: -36px;
+    margin-bottom: -36px;
+    z-index: 15;
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgba(250, 251, 253, 0) 0%, rgba(250, 251, 253, 0.9) 50%, rgba(250, 251, 253, 0) 100%);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+html.dark .landing-section-divider {
+    background: linear-gradient(to bottom, rgba(15, 23, 42, 0) 0%, rgba(15, 23, 42, 0.9) 50%, rgba(15, 23, 42, 0) 100%);
+}
+
+.landing-card-elevate {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.landing-card-elevate:hover {
+    transform: translateY(-4px);
+    box-shadow: 6px 6px 0px #0F172A;
+}
+
+html.dark .landing-card-elevate:hover {
+    box-shadow: 6px 6px 0px #020617;
+}
+
+.landing-fontes-card {
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.landing-fontes-card:hover {
+    transform: translateY(-3px);
+    border-color: #FF5C00 !important;
+}
+
+.landing-source-bar-fill {
+    transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+}

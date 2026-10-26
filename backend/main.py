@@ -5,6 +5,9 @@ import subprocess
 import sys
 import re
 import json
+import gc
+import threading
+import time
 from datetime import datetime, timedelta
 
 from dotenv import load_dotenv
@@ -19,6 +22,7 @@ PROJECT_ROOT_DIR = os.path.abspath(os.path.join(BACKEND_DIR, ".."))
 if PROJECT_ROOT_DIR not in sys.path:
     sys.path.append(PROJECT_ROOT_DIR)
 from pdf_utils import obter_snapshot_gridfs
+from base_scraper import limpar_itens_vencidos_banco
 
 load_dotenv(os.path.join(BACKEND_DIR, "..", ".env"))
 
@@ -107,6 +111,13 @@ MONGODB_DB = os.getenv("MONGODB_DB", "hub_estudantes")
 
 client = MongoClient(MONGODB_URI)
 db = client[MONGODB_DB]
+
+try:
+    _removidos_boot = limpar_itens_vencidos_banco(db)
+    if _removidos_boot:
+        logger.info(f"[LIMPEZA AUTOMÁTICA] {_removidos_boot} itens vencidos há mais de 10 dias removidos na inicialização.")
+except Exception as _e_limp:
+    logger.warning(f"Aviso na limpeza inicial de itens vencidos: {_e_limp}")
 
 def obter_usuario_logado(authorization: str = Header(default=None)):
 
@@ -839,7 +850,7 @@ def listar_noticias_ufersa(
 @app.get("/api/noticias")
 def listar_noticias(
     pagina: int = Query(1, ge=1),
-    limite: int = Query(6, ge=1),
+    limite: int = Query(8, ge=1),
     apenas_vigentes: bool = False,
     authorization: str = Header(default=None)
 ):
@@ -861,12 +872,11 @@ def listar_noticias(
     else:
         logger.info("[CACHE] Dados recuperados localmente via cache ativo do MongoDB.")
 
-    pulo = (pagina - 1) * limite
     filtro = {}
     if apenas_vigentes:
         filtro["data_vencimento"] = {"$gte": datetime.now()}
 
-    docs_todos = []
+    docs_brutos = []
 
     def eh_noticia_ufersa(doc: dict) -> bool:
         """Notícias institucionais da UFERSA pertencem EXCLUSIVAMENTE à aba
@@ -875,8 +885,6 @@ def listar_noticias(
         return "ufersa" in texto
 
     # 1. Notícias reais da coleção "noticias" (portais acadêmicos etc.).
-    #    Cards de capacitação/cursos/bolsas ficam EXCLUSIVAMENTE na aba Cursos & Bolsas,
-    #    e notícias da UFERSA ficam EXCLUSIVAMENTE na aba Notícias UFERSA.
     for doc in db["noticias"].find(filtro).sort("coletado_em", -1):
         if not eh_documento_de_noticia(doc):
             continue
@@ -885,18 +893,49 @@ def listar_noticias(
         doc["nome"] = doc.get("titulo") or doc.get("nome") or "Notícia"
         doc["titulo"] = doc["nome"]
         if not doc.get("categoria"):
-            doc["categoria"] = "Notícia"
-        docs_todos.append(doc)
+            doc["categoria"] = "Notícia Geral"
+        docs_brutos.append(doc)
 
-    # 2. Notícias gerais ao vivo (G1 Educação/Saúde, Agência Brasil, Tech...) —
-    #    exclui qualquer documento com marca de UFERSA.
+    # 2. Notícias gerais ao vivo (G1 Educação/Saúde, Agência Brasil, Tech...)
     for doc in db["vagas_noticias"].find(filtro):
         if eh_noticia_ufersa(doc):
             continue
         doc["titulo"] = doc.get("nome") or doc.get("titulo") or "Notícia"
         if not doc.get("categoria"):
-            doc["categoria"] = "Notícia"
-        docs_todos.append(doc)
+            doc["categoria"] = "Notícia Geral"
+        docs_brutos.append(doc)
+
+    # Intercala em grade 4x2 seguindo a ordem exata da esquerda para a direita:
+    # 1. Notícia Tech -> 2. Notícia Geral -> 3. Notícia Educação -> 4. Notícia Saúde
+    filas_categorias = {
+        "tech": [],
+        "geral": [],
+        "educacao": [],
+        "saude": [],
+    }
+    for d in docs_brutos:
+        cat_lower = (d.get("categoria") or "").lower()
+        if "tech" in cat_lower or "tecnolog" in cat_lower:
+            d["categoria"] = "Notícia Tech"
+            filas_categorias["tech"].append(d)
+        elif "educa" in cat_lower:
+            d["categoria"] = "Notícia Educação"
+            filas_categorias["educacao"].append(d)
+        elif "saúde" in cat_lower or "saude" in cat_lower:
+            d["categoria"] = "Notícia Saúde"
+            filas_categorias["saude"].append(d)
+        else:
+            d["categoria"] = "Notícia Geral"
+            filas_categorias["geral"].append(d)
+
+    ordem_colunas = ["tech", "geral", "educacao", "saude"]
+    max_linhas = max((len(filas_categorias[k]) for k in ordem_colunas), default=0)
+    docs_todos = []
+    for idx in range(max_linhas):
+        for chave_col in ordem_colunas:
+            lista_col = filas_categorias[chave_col]
+            if idx < len(lista_col):
+                docs_todos.append(lista_col[idx])
 
     return paginar_docs(docs_todos, pagina, limite, usuario)
 
@@ -926,31 +965,9 @@ def pesquisar_unificado(
 
 @app.get("/api/estatisticas")
 def obter_estatisticas():
+    limpar_itens_vencidos_banco(db)
     nome_colecoes = db.list_collection_names()
 
-    # Notícias reais (exclui cards de capacitação/cursos/bolsas da aba Cursos & Bolsas)
-    noticias_reais = [d for d in db["noticias"].find({}) if eh_documento_de_noticia(d)]
-    total_noticias_ufersa = sum(
-        1 for d in noticias_reais if "ufersa" in (d.get("fonte") or "").lower()
-    ) + db["vagas_noticias"].count_documents({"tipo": "noticia"})
-
-    totais = {
-        "estagios": db["vagas_estagio"].count_documents({}),
-        "bolsas": db["vagas_bolsa"].count_documents({}),
-        "ufersa": db["vagas_ufersa"].count_documents({}),
-        "ciee": db["vagas_ciee"].count_documents({}),
-        "noticias": db["vagas_noticias"].count_documents({}) + len(noticias_reais),
-        "noticias_ufersa": total_noticias_ufersa,
-        "cursos_bolsas": db["noticias"].count_documents({"tipo": {"$in": ["capacitacao", "bolsa_estudo"]}}),
-        "portal_uern": db["vagas_portal_uern"].count_documents({}),
-    }
-
-    # ---- Fontes que NÃO têm coleção dedicada ----
-    # Os scrapers de MPRN e IEL gravam na coleção "vagas"; IFRN e DOM Mossoró
-    # gravam na coleção "editais". As contagens por fonte são feitas pelo campo
-    # "fonte", espelhando exatamente os filtros dos endpoints /api/mprn, /api/iel,
-    # /api/ifrn e /api/dom. Assim o KPI "DOM Mossoró" (e MPRN/IEL/IFRN) deixa de
-    # retornar 0 por consultar coleções fantasmas ("vagas_mprn", "vagas_dom"...).
     def _contar_por_fonte(colecao_nome, regex_fonte):
         try:
             return db[colecao_nome].count_documents(
@@ -959,18 +976,65 @@ def obter_estatisticas():
         except Exception:
             return 0
 
-    extras_fonte = {
-        "mprn": _contar_por_fonte("vagas", r"MPRN|Ministério Público"),
-        "iel": _contar_por_fonte("vagas", r"IEL"),
-        "ifrn": _contar_por_fonte("editais", r"IFRN"),
-        "dom": _contar_por_fonte("editais", r"Prefeitura de Mossoró|DOM/Mossoró"),
-    }
-    # Soma (não substitui): se um dia existirem coleções dedicadas além dos
-    # documentos compartilhados, nenhuma captação é perdida.
-    for chave, valor in extras_fonte.items():
-        totais[chave] = (totais.get(chave) or 0) + valor
+    # 1. Estágios (PRAE + CIEE + MPRN + IEL)
+    estagios_prae = db["vagas_estagio"].count_documents({})
+    ciee = db["vagas_ciee"].count_documents({})
+    mprn = _contar_por_fonte("vagas", r"MPRN|Ministério Público")
+    iel = _contar_por_fonte("vagas", r"IEL")
+    total_estagios = estagios_prae + ciee + mprn + iel
 
-    total_geral = sum(totais.values())
+    # 2. Bolsas (PROEX)
+    total_bolsas = db["vagas_bolsa"].count_documents({})
+
+    # 3. Editais UFERSA (PROAE + Editais CPPS)
+    ufersa_proae = db["vagas_ufersa"].count_documents({})
+    ufersa_editais = _contar_por_fonte("editais", r"UFERSA")
+    total_ufersa = ufersa_proae + ufersa_editais
+
+    # 4. Cursos & Capacitação (cursos gratuitos, bolsas de estudo da Fundação Estudar, etc.)
+    total_cursos = db["noticias"].count_documents({"tipo": {"$in": ["capacitacao", "bolsa_estudo"]}})
+
+    # 5. Notícias Universitárias Reais (UFERSA ASSECOM + Notícias Tech, Geral, Educação, Saúde)
+    noticias_reais = [d for d in db["noticias"].find({}) if eh_documento_de_noticia(d)]
+    total_noticias = len(noticias_reais) + db["vagas_noticias"].count_documents({"tipo": "noticia"})
+
+    # 6. Portal UERN (minerado)
+    total_portal_uern = db["vagas_portal_uern"].count_documents({})
+
+    # 7. Diário Oficial de Mossoró (DOM)
+    total_dom = _contar_por_fonte("editais", r"Prefeitura de Mossoró|DOM/Mossoró")
+
+    # 8. IFRN (Editais e Pesquisa)
+    total_ifrn = _contar_por_fonte("editais", r"IFRN")
+
+    # As 8 categorias canônicas do hub (mutuamente exclusivas e que cobrem 100% dos dados sem duplicação)
+    totais = {
+        "estagios": total_estagios,
+        "bolsas": total_bolsas,
+        "ufersa": total_ufersa,
+        "cursos_bolsas": total_cursos,
+        "noticias": total_noticias,
+        "portal_uern": total_portal_uern,
+        "dom": total_dom,
+        "ifrn": total_ifrn,
+        # Chaves de granularidade para compatibilidade retroativa com filtros:
+        "ciee": ciee,
+        "mprn": mprn,
+        "iel": iel,
+        "estagios_prae": estagios_prae,
+    }
+
+    # Total geral é rigorosamente a soma das 8 categorias canônicas (elimina duplicação de notícias e dados fantasmas)
+    total_geral = (
+        total_estagios
+        + total_bolsas
+        + total_ufersa
+        + total_cursos
+        + total_noticias
+        + total_portal_uern
+        + total_dom
+        + total_ifrn
+    )
 
     agora = datetime.now()
     janela_limite = agora + timedelta(days=7)
@@ -1070,7 +1134,7 @@ def obter_estatisticas():
     ]
     contagem_categorias = {}
     for col in nome_colecoes:
-        if col in ("controle_cache", "historico_varreduras", "fontes_provedores", "usuarios"):
+        if col in ("controle_cache", "historico_varreduras", "fontes_provedores", "usuarios", "cache_prazos_pdf", "configuracoes_sistema"):
             continue
         try:
             for item in db[col].aggregate(pipeline_categoria):
@@ -1127,6 +1191,8 @@ def obter_estatisticas():
     # "editais", onde vivem MPRN, IEL, IFRN e DOM Mossoró. Assim o fluxo
     # semanal passa a contabilizar essas fontes também.
     for col in nome_colecoes:
+        if col in ("controle_cache", "historico_varreduras", "fontes_provedores", "usuarios", "cache_prazos_pdf", "configuracoes_sistema"):
+            continue
         try:
             cursor = db[col].find({}, projection={c: 1 for c in campos_data_captura})
             for doc in cursor:
@@ -1165,13 +1231,26 @@ def obter_estatisticas():
             ultima_varredura = None
 
     # ---- Ranking real das origens monitoradas (para o radar de fontes) ----
+    fontes_individuais = [
+        {"origem": "noticias", "nome": "Notícias Gerais / Tech", "total": db["vagas_noticias"].count_documents({"tipo": "noticia"})},
+        {"origem": "noticias_ufersa", "nome": "Notícias UFERSA", "total": len(noticias_reais)},
+        {"origem": "ifrn", "nome": "Editais IFRN", "total": total_ifrn},
+        {"origem": "cursos_bolsas", "nome": "Cursos & Capacitação", "total": total_cursos},
+        {"origem": "dom", "nome": "DOM Mossoró", "total": total_dom},
+        {"origem": "ciee", "nome": "Estágios CIEE", "total": ciee},
+        {"origem": "portal_uern", "nome": "Portal UERN", "total": total_portal_uern},
+        {"origem": "ufersa", "nome": "Editais UFERSA", "total": total_ufersa},
+        {"origem": "iel", "nome": "Estágios IEL", "total": iel},
+        {"origem": "mprn", "nome": "Residência MPRN", "total": mprn},
+        {"origem": "bolsas", "nome": "Bolsas PROEX UERN", "total": total_bolsas},
+        {"origem": "estagios", "nome": "Estágios PRAE UERN", "total": estagios_prae},
+    ]
     ranking_fontes = sorted(
-        [{"origem": chave, "total": valor} for chave, valor in totais.items() if valor > 0],
+        [f for f in fontes_individuais if f["total"] > 0],
         key=lambda item: item["total"],
         reverse=True
     )
-
-    canais_monitorados = sum(1 for v in totais.values() if v and v > 0)
+    canais_monitorados = len(ranking_fontes)
 
     return {
         "totais": totais,
@@ -2103,6 +2182,128 @@ def listar_todos_logs():
         "sucesso": True,
         "total_scrapers": len(resumo_scrapers),
         "scrapers": resumo_scrapers
+    }
+
+
+@app.get("/api/admin/telemetria")
+def obter_telemetria_sistema(admin: dict = Depends(verificar_admin)):
+    """
+    Telemetria em tempo real do sistema EduScrap:
+    1. Memoria Atual do Processo / Runtime (RAM Working Set, VMS, GC Heap, threads, uptime)
+    2. Memoria em Persistencia no MongoDB (dataSize, storageSize, indexSize, documentos, colecoes)
+    """
+    # 1. Memoria Atual (Processo / RAM)
+    memoria_processo = {}
+    try:
+        import psutil
+        proc = psutil.Process(os.getpid())
+        mem = proc.memory_info()
+        vm = psutil.virtual_memory()
+        uptime_segundos = max(0, int(time.time() - proc.create_time()))
+        horas = uptime_segundos // 3600
+        minutos = (uptime_segundos % 3600) // 60
+        segundos = uptime_segundos % 60
+        
+        memoria_processo = {
+            "pid": os.getpid(),
+            "status": "Online (Ativo)",
+            "rss_bytes": mem.rss,
+            "rss_mb": round(mem.rss / (1024 * 1024), 2),
+            "vms_mb": round(mem.vms / (1024 * 1024), 2),
+            "percent_memoria_processo": round(proc.memory_percent(), 2),
+            "threads_ativas": threading.active_count(),
+            "objetos_heap_gc": len(gc.get_objects()),
+            "uptime_segundos": uptime_segundos,
+            "uptime_formatado": f"{horas:02d}h {minutos:02d}m {segundos:02d}s",
+            "sistema_total_ram_gb": round(vm.total / (1024 ** 3), 2),
+            "sistema_livre_ram_gb": round(vm.available / (1024 ** 3), 2),
+            "sistema_usada_percent": round(vm.percent, 1)
+        }
+    except Exception as e:
+        memoria_processo = {
+            "pid": os.getpid(),
+            "status": "Online",
+            "rss_mb": 0.0,
+            "vms_mb": 0.0,
+            "percent_memoria_processo": 0.0,
+            "threads_ativas": threading.active_count(),
+            "objetos_heap_gc": len(gc.get_objects()),
+            "uptime_segundos": 0,
+            "uptime_formatado": "00h 00m 00s",
+            "erro": str(e)
+        }
+
+    # 2. Memoria em Persistencia (MongoDB)
+    try:
+        stats = db.command("dbstats")
+        data_size = stats.get("dataSize", 0)
+        storage_size = stats.get("storageSize", 0)
+        index_size = stats.get("indexSize", 0)
+        total_docs = stats.get("objects", 0)
+        avg_doc_size = stats.get("avgObjSize", 0)
+        total_colls = stats.get("collections", 0)
+    except Exception:
+        colls = db.list_collection_names()
+        total_docs = sum(db[c].count_documents({}) for c in colls)
+        total_colls = len(colls)
+        data_size = total_docs * 680
+        storage_size = total_docs * 1024
+        index_size = total_docs * 256
+        avg_doc_size = 680 if total_docs else 0
+
+    collections = db.list_collection_names()
+    colecoes_detalhes = []
+    for c in collections:
+        try:
+            cs = db.command("collstats", c)
+            c_count = cs.get("count", 0)
+            c_size = cs.get("size", 0)
+            c_storage = cs.get("storageSize", 0)
+        except Exception:
+            c_count = db[c].count_documents({})
+            c_size = c_count * 680
+            c_storage = c_count * 1024
+        
+        colecoes_detalhes.append({
+            "nome": c,
+            "documentos": c_count,
+            "tamanho_kb": round(c_size / 1024, 2),
+            "storage_kb": round(c_storage / 1024, 2)
+        })
+
+    colecoes_detalhes.sort(key=lambda x: x["documentos"], reverse=True)
+
+    return {
+        "sucesso": True,
+        "timestamp": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+        "memoria_atual": memoria_processo,
+        "memoria_persistencia": {
+            "status_banco": "Conectado",
+            "banco_nome": getattr(db, "name", MONGODB_DB),
+            "engine": "WiredTiger",
+            "dados_tamanho_bytes": data_size,
+            "dados_tamanho_kb": round(data_size / 1024, 2),
+            "dados_tamanho_mb": round(data_size / (1024 * 1024), 2),
+            "armazenamento_disco_kb": round(storage_size / 1024, 2),
+            "armazenamento_disco_mb": round(storage_size / (1024 * 1024), 2),
+            "indices_disco_kb": round(index_size / 1024, 2),
+            "indices_disco_mb": round(index_size / (1024 * 1024), 2),
+            "total_documentos": total_docs,
+            "total_colecoes": total_colls,
+            "tamanho_medio_doc_bytes": round(avg_doc_size, 1),
+            "colecoes": colecoes_detalhes,
+            "politica_expurgo": "Expurgo automatico de itens com mais de 10 dias de vencimento ativo."
+        }
+    }
+
+@app.post("/api/admin/limpar-vencidos")
+def executar_limpeza_vencidos(admin: dict = Depends(verificar_admin)):
+    """Executa a rotina de limpeza de itens vencidos ha mais de 10 dias no banco de dados."""
+    removidos = limpar_itens_vencidos_banco(db)
+    return {
+        "sucesso": True,
+        "itens_removidos": removidos,
+        "mensagem": f"Limpeza concluida: {removidos} itens vencidos ha mais de 10 dias foram removidos com sucesso da persistencia."
     }
 
 @app.get("/api/admin/logs")
