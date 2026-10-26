@@ -12,6 +12,11 @@ echo "============================================================"
 kill_port_processes() {
     local port=$1
     echo "  -> Verificando e liberando processos na porta $port..."
+    if [ "$port" = "8000" ]; then
+        pkill -9 -f "uvicorn.*8000" 2>/dev/null || true
+    elif [ "$port" = "3000" ]; then
+        pkill -9 -f "http\.server.*3000" 2>/dev/null || true
+    fi
     if command -v fuser >/dev/null 2>&1; then
         fuser -k -9 "${port}/tcp" 2>/dev/null || true
     fi
