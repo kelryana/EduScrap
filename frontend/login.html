@@ -839,11 +839,16 @@
                         </div>
                     </div>
 
-                    <!-- Personalização de Cursos e Áreas de Interesse já no Cadastro -->
+                    <!-- Personalização de Cursos e Áreas de Interesse já no Cadastro (Regra 6: Reversão Fácil) -->
                     <div class="form-group-memphis mb-5">
-                        <label class="label-memphis">
-                            <i class="ph-bold ph-graduation-cap text-brand-orange"></i> Cursos de Interesse (Personalize seu Feed):
-                        </label>
+                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                            <label class="label-memphis">
+                                <i class="ph-bold ph-graduation-cap text-brand-orange"></i> Cursos de Interesse (Personalize seu Feed):
+                            </label>
+                            <button type="button" class="btn-limpar-chips" onclick="limparSelecaoChipsCadastro()" title="Desmarcar todos os cursos e áreas selecionados">
+                                <i class="ph-bold ph-arrow-counter-clockwise"></i> <span>Limpar Seleção</span>
+                            </button>
+                        </div>
                         <div class="chips-container mt-2" id="reg-chips-cursos"></div>
                     </div>
 
@@ -1138,6 +1143,27 @@
             });
             return selecionados;
         }
+
+        // Regra 6 (Shneiderman): Reversão fácil da seleção de chips no cadastro
+        function limparSelecaoChipsCadastro() {
+            ['reg-chips-cursos', 'reg-chips-areas'].forEach(id => {
+                const container = document.getElementById(id);
+                if (!container) return;
+                container.querySelectorAll('.chip-opcao.chip-selecionado').forEach(btn => {
+                    btn.classList.remove('chip-selecionado');
+                });
+            });
+        }
+
+        // Regra 2 (Shneiderman): Atalho Esc para limpar alertas ou fechar painel lateral
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                ['login-erro', 'register-erro', 'reset-erro'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                });
+            }
+        });
 
         // Função para mostrar / ocultar senha (Olhinho)
         function toggleSenhaVisibilidade(inputId, iconId) {

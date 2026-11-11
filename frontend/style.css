@@ -6013,3 +6013,201 @@ html.dark .landing-card-elevate:hover {
 .landing-source-bar-fill {
     transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+/* ==========================================================================
+   ACESSIBILIDADE E REGRAS DE OURO DE SHNEIDERMAN (WCAG, ATALHOS E REVERSÃO)
+   ========================================================================== */
+
+/* Regra 2 & Web Design Guidelines: Foco visível de alto contraste para teclado (Tab) */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.chip-opcao:focus-visible,
+.tab-origem-btn:focus-visible,
+.btn-filtro-aluno:focus-visible,
+.menu-fonte-item:focus-visible,
+[role="button"]:focus-visible {
+    outline: 3px solid #FF5C00 !important;
+    outline-offset: 2px !important;
+    z-index: 20;
+}
+
+html.dark button:focus-visible,
+html.dark a:focus-visible,
+html.dark input:focus-visible,
+html.dark select:focus-visible,
+html.dark textarea:focus-visible,
+html.dark .chip-opcao:focus-visible,
+html.dark .tab-origem-btn:focus-visible,
+html.dark .btn-filtro-aluno:focus-visible {
+    outline: 3px solid #FACC15 !important;
+    outline-offset: 2px !important;
+}
+
+/* Estados explícitos para disabled / loading (Web Design Guidelines & Regra 3) */
+button:disabled,
+.btn-loading {
+    opacity: 0.65 !important;
+    cursor: not-allowed !important;
+    pointer-events: none;
+}
+
+/* Regra 2: Indicador de atalho de teclado [/] na barra de busca */
+.busca-kbd-hint {
+    position: absolute;
+    right: 52px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #F1F5F9;
+    color: #475569;
+    border: 2px solid #0F172A;
+    border-radius: 6px;
+    box-shadow: 2px 2px 0px #0F172A;
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    pointer-events: none;
+    user-select: none;
+    transition: opacity 0.15s ease;
+}
+
+.input-busca-memphis:focus ~ .busca-kbd-hint {
+    opacity: 0;
+}
+
+html.dark .busca-kbd-hint {
+    background: #1E293B;
+    color: #E2E8F0;
+    border-color: #64748B;
+    box-shadow: 2px 2px 0px #020617;
+}
+
+@media (max-width: 640px) {
+    .busca-kbd-hint {
+        display: none;
+    }
+}
+
+/* Regra 6 & Regra 8: Banner de Filtro Ativo com Reversão Fácil (Undo / Desfazer) */
+.banner-filtro-ativo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    background: #FFFBEB;
+    border: 2.5px solid #0F172A;
+    border-radius: 14px;
+    box-shadow: 4px 4px 0px #0F172A;
+    padding: 12px 18px;
+    margin-bottom: 18px;
+}
+
+.banner-filtro-ativo-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #0F172A;
+}
+
+.banner-filtro-ativo-info i {
+    color: #FF5C00;
+    font-size: 1.25rem;
+}
+
+.banner-filtro-termo {
+    background: #FF5C00;
+    color: #FFFFFF;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 8px;
+    border: 1.5px solid #0F172A;
+    font-size: 0.88rem;
+}
+
+.btn-desfazer-filtro {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #FFFFFF;
+    color: #0F172A;
+    border: 2px solid #0F172A;
+    border-radius: 10px;
+    box-shadow: 2px 2px 0px #0F172A;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-desfazer-filtro:hover {
+    background: #FACC15;
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0px #0F172A;
+}
+
+html.dark .banner-filtro-ativo {
+    background: #1E293B !important;
+    border-color: #FACC15 !important;
+    box-shadow: 4px 4px 0px #020617 !important;
+}
+
+html.dark .banner-filtro-ativo-info {
+    color: #F8FAFC !important;
+}
+
+html.dark .btn-desfazer-filtro {
+    background: #0F172A !important;
+    color: #F8FAFC !important;
+    border-color: #94A3B8 !important;
+    box-shadow: 2px 2px 0px #020617 !important;
+}
+
+html.dark .btn-desfazer-filtro:hover {
+    background: #FF5C00 !important;
+    color: #FFFFFF !important;
+    border-color: #FFFFFF !important;
+}
+
+/* Regra 6: Botão compacto para Limpar Seleção de Chips (Undo) */
+.btn-limpar-chips {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #F8FAFC;
+    color: #334155;
+    border: 1.5px solid #0F172A;
+    border-radius: 8px;
+    box-shadow: 2px 2px 0px #0F172A;
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-limpar-chips:hover {
+    background: #FEE2E2;
+    color: #991B1B;
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0px #0F172A;
+}
+
+html.dark .btn-limpar-chips {
+    background: #1E293B;
+    color: #E2E8F0;
+    border-color: #64748B;
+    box-shadow: 2px 2px 0px #020617;
+}
+
+html.dark .btn-limpar-chips:hover {
+    background: #7F1D1D;
+    color: #FEE2E2;
+}
+

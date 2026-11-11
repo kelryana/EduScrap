@@ -338,6 +338,24 @@ function obterChipsSelecionados(containerId) {
     return selecionados;
 }
 
+// Regra 6 (Shneiderman): Reversão fácil da seleção de chips com um clique
+function limparSelecaoChips(...containerIds) {
+    let desmarcados = 0;
+    containerIds.forEach(id => {
+        const container = document.getElementById(id);
+        if (!container) return;
+        container.querySelectorAll('.chip-opcao.chip-selecionado').forEach(btn => {
+            btn.classList.remove('chip-selecionado');
+            desmarcados++;
+        });
+    });
+    if (desmarcados > 0) {
+        mostrarToast("Seleção de cursos e áreas limpa. Salve para aplicar ou escolha novos filtros.", "info");
+    } else {
+        mostrarToast("Nenhum filtro de curso ou área estava selecionado.", "info");
+    }
+}
+
 async function executarLogin(e) {
     e.preventDefault();
     const email = document.getElementById('login-email').value.trim();
@@ -1076,6 +1094,7 @@ async function carregarDados(tipo, novaPagina = 1) {
         abrirModalAuth('register');
         return;
     }
+    atualizarBannerFiltroAtivo('');
     const mudouPagina = tipo === tipoAtual && novaPagina !== paginaAtual;
     tipoAtual = tipo;
     paginaAtual = novaPagina;
@@ -1729,18 +1748,36 @@ function renderizarControlesPaginacao(atual, total, limite) {
     mainContainer.appendChild(blocoPaginacao);
 }
 
-// 1. Pesquisa Textual
+// 1. Pesquisa Textual & Banner de Filtro Ativo (Regra 6 & Regra 8)
+function atualizarBannerFiltroAtivo(termo = '') {
+    const banner = document.getElementById('banner-filtro-ativo');
+    const spanTermo = document.getElementById('banner-filtro-termo');
+    if (!banner || !spanTermo) return;
+    const limpo = (termo || '').trim();
+    if (limpo.length > 0) {
+        spanTermo.textContent = limpo;
+        banner.style.display = 'flex';
+    } else {
+        spanTermo.textContent = '';
+        banner.style.display = 'none';
+    }
+}
+
 function atualizarBotaoLimparBusca() {
     const input = document.getElementById('input-busca');
     const btnLimpar = document.getElementById('btn-limpar-busca');
+    const kbdHint = document.getElementById('busca-kbd-hint');
     if (!input || !btnLimpar) return;
-    btnLimpar.hidden = !input.value || input.value.trim().length === 0;
+    const temTexto = Boolean(input.value && input.value.trim().length > 0);
+    btnLimpar.hidden = !temTexto;
+    if (kbdHint) kbdHint.style.display = temTexto ? 'none' : '';
 }
 
 function limparPesquisaRapida() {
     const input = document.getElementById('input-busca');
     if (input) input.value = '';
     atualizarBotaoLimparBusca();
+    atualizarBannerFiltroAtivo('');
     carregarDados('estagios', 1);
 }
 
@@ -1748,6 +1785,7 @@ async function realizarPesquisa() {
     const termo = document.getElementById('input-busca').value;
     if (!termo) return;
     atualizarBotaoLimparBusca();
+    atualizarBannerFiltroAtivo(termo);
 
     alternarExibicaoFiltroVigentes(true);
 
@@ -2966,8 +3004,13 @@ async function carregarPortalUsuario() {
 
                 <!-- PREFERÊNCIAS DE CURSOS PARA O FEED -->
                 <div>
-                    <h3 class="portal-secao-titulo"><i class="ph-bold ph-sparkle"></i> Cursos de Interesse para o Feed 'Para Você'</h3>
-                    <p style="color: #64748B; font-size: 0.95rem; margin-top: -8px; margin-bottom: 14px;">Selecione os cursos abaixo para personalizar suas recomendações diárias de editais:</p>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+                        <h3 class="portal-secao-titulo" style="margin-bottom: 6px;"><i class="ph-bold ph-sparkle"></i> Cursos de Interesse para o Feed 'Para Você'</h3>
+                        <button type="button" class="btn-limpar-chips" onclick="limparSelecaoChips('portal-chips-cursos', 'portal-chips-areas')" title="Desmarcar todos os cursos e áreas selecionados">
+                            <i class="ph-bold ph-arrow-counter-clockwise"></i> <span>Limpar Seleção</span>
+                        </button>
+                    </div>
+                    <p style="color: #64748B; font-size: 0.95rem; margin-bottom: 14px;">Selecione os cursos abaixo para personalizar suas recomendações diárias de editais:</p>
                     <div class="chips-container" id="portal-chips-cursos">
                         ${TODOS_CURSOS.map(curso => {
                             const sel = cursosSalvos.includes(curso) ? 'chip-selecionado' : '';
@@ -3183,12 +3226,38 @@ function mostrarToast(mensagem, tipo = 'info') {
     }, 3500);
 }
 
-// Add keyboard support for closing sidebar
+// Regra 2 (Shneiderman): Atalhos de teclado para usuários frequentes ('/', 'Ctrl+K', 'Esc')
 document.addEventListener('keydown', function(event) {
+    const tagAtiva = (document.activeElement && document.activeElement.tagName) ? document.activeElement.tagName.toUpperCase() : '';
+    const digitandoEmCampo = ['INPUT', 'TEXTAREA', 'SELECT'].includes(tagAtiva) || (document.activeElement && document.activeElement.isContentEditable);
+
+    // Atalho '/' ou 'Ctrl+K' para focar instantaneamente na barra de busca
+    if (((event.key === '/' && !digitandoEmCampo) || ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k'))) {
+        const inputBusca = document.getElementById('input-busca');
+        const areaOp = document.getElementById('area-oportunidades');
+        if (inputBusca && areaOp && areaOp.style.display !== 'none') {
+            event.preventDefault();
+            inputBusca.focus();
+            inputBusca.select();
+        }
+        return;
+    }
+
     if (event.key === 'Escape') {
         const sidebar = document.getElementById('sidebar-perfil');
         if (sidebar && sidebar.classList.contains('aberto')) {
             fecharSidebarPerfil();
+            return;
+        }
+        const modalPerfil = document.getElementById('modal-perfil');
+        if (modalPerfil && modalPerfil.style.display !== 'none') {
+            fecharModalPerfil();
+            return;
+        }
+        const inputBusca = document.getElementById('input-busca');
+        if (inputBusca && document.activeElement === inputBusca && inputBusca.value.trim().length > 0) {
+            limparPesquisaRapida();
+            inputBusca.blur();
         }
     }
 });

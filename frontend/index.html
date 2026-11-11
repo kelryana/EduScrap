@@ -658,16 +658,18 @@
             </div>
         </header>
 
-        <!-- Barra de Busca Ampla e Acessível -->
+        <!-- Barra de Busca Ampla e Acessível (Regra 2: Atalho de Teclado '/') -->
         <div class="busca-wrapper">
             <div class="input-busca-container">
                 <i class="ph-bold ph-magnifying-glass input-busca-icon" aria-hidden="true"></i>
                 <input type="text" id="input-busca"
                     class="input-busca-memphis"
-                    placeholder="Pesquisar editais (ex: estágio, computação, bolsa, UERN)..."
+                    placeholder="Pesquisar editais (ex: estágio, computação, bolsa, UERN)... Pressione [/] para focar"
+                    aria-label="Pesquisar editais e oportunidades"
                     oninput="atualizarBotaoLimparBusca()"
                     onkeyup="if(event.key === 'Enter') realizarPesquisa()">
-                <button type="button" id="btn-limpar-busca" class="btn-limpar-busca" onclick="limparPesquisaRapida()" title="Limpar busca" aria-label="Limpar busca" hidden>
+                <kbd id="busca-kbd-hint" class="busca-kbd-hint" title="Pressione '/' ou 'Ctrl+K' para focar na busca">/</kbd>
+                <button type="button" id="btn-limpar-busca" class="btn-limpar-busca" onclick="limparPesquisaRapida()" title="Limpar busca (Esc)" aria-label="Limpar busca" hidden>
                     <i class="ph-bold ph-x"></i>
                 </button>
             </div>
@@ -789,11 +791,16 @@
 
                         <form id="form-perfil-preferencias-sidebar" onsubmit="salvarPreferenciasPerfil(event)">
                             <div class="form-group-memphis">
-                                <div class="label-com-subtexto">
-                                    <label class="label-memphis">
-                                        <i class="ph-bold ph-graduation-cap"></i> Cursos de Interesse:
-                                    </label>
-                                    <span class="label-subtexto">O feed 'Para Você' exibirá editais dessas áreas</span>
+                                <div class="label-com-subtexto" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+                                    <div>
+                                        <label class="label-memphis">
+                                            <i class="ph-bold ph-graduation-cap"></i> Cursos de Interesse:
+                                        </label>
+                                        <span class="label-subtexto">O feed 'Para Você' exibirá editais dessas áreas</span>
+                                    </div>
+                                    <button type="button" class="btn-limpar-chips" onclick="limparSelecaoChips('perfil-chips-cursos-sidebar', 'perfil-chips-areas-sidebar')" title="Desmarcar todos os cursos e áreas">
+                                        <i class="ph-bold ph-arrow-counter-clockwise"></i> <span>Limpar Seleção</span>
+                                    </button>
                                 </div>
                                 <div class="chips-container" id="perfil-chips-cursos-sidebar">
                                     <!-- Injetado dinamicamente via JS com chip-check -->
@@ -862,6 +869,19 @@
                                 <span class="toggle-label">Mostrar apenas editais vigentes</span>
                             </label>
                         </div>
+                    </div>
+
+                    <!-- BANNER DE FILTRO ATIVO (Regra 6: Reversão Fácil & Regra 8: Redução da Memória de Curto Prazo) -->
+                    <div id="banner-filtro-ativo" class="banner-filtro-ativo" style="display: none;" role="status" aria-live="polite">
+                        <div class="banner-filtro-ativo-info">
+                            <i class="ph-bold ph-funnel"></i>
+                            <span>Filtro ativo:</span>
+                            <span id="banner-filtro-termo" class="banner-filtro-termo"></span>
+                        </div>
+                        <button type="button" class="btn-desfazer-filtro" onclick="limparPesquisaRapida()" title="Remover filtro e voltar à listagem completa">
+                            <i class="ph-bold ph-arrow-counter-clockwise"></i>
+                            <span>Desfazer / Limpar Filtro</span>
+                        </button>
                     </div>
 
                     <!-- MURAL DE AVISOS FIXADOS / PRAZOS CRÍTICOS (≤ 3 DIAS) - Pinned Urgent Notices (Inspirado no Notice Board UI) -->

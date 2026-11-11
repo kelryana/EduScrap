@@ -82,11 +82,11 @@
                     <span id="telemetria-timestamp" class="text-xs font-mono font-bold text-slate-600 dark:text-slate-300 px-3 py-1.5 bg-slate-100 dark:bg-slate-900/60 rounded-xl border border-slate-300 dark:border-slate-700">
                         Sincronizando...
                     </span>
-                    <button onclick="carregarTelemetria()" class="px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-xl border-2 border-slate-900 dark:border-slate-600 flex items-center gap-2 cursor-pointer transition-all">
+                    <button id="btn-atualizar-telemetria" onclick="carregarTelemetria(true)" class="px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-xl border-2 border-slate-900 dark:border-slate-600 flex items-center gap-2 cursor-pointer transition-all">
                         <i class="ph-bold ph-arrows-clockwise text-base"></i>
                         <span>Atualizar Telemetria</span>
                     </button>
-                    <button onclick="executarLimpezaVencidosAdmin()" class="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-black rounded-xl border-2 border-slate-900 flex items-center gap-2 cursor-pointer transition-all shadow-sm" title="Expurgar itens com mais de 10 dias de vencidos">
+                    <button id="btn-expurgar-vencidos" onclick="executarLimpezaVencidosAdmin()" class="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-black rounded-xl border-2 border-slate-900 flex items-center gap-2 cursor-pointer transition-all shadow-sm" title="Expurgar itens com mais de 10 dias de vencidos">
                         <i class="ph-bold ph-trash text-base"></i>
                         <span>Expurgar Vencidos (&gt;10d)</span>
                     </button>
@@ -645,7 +645,12 @@
         }
 
         
-        async function carregarTelemetria() {
+        async function carregarTelemetria(manual = false) {
+            const btn = document.getElementById('btn-atualizar-telemetria');
+            if (manual && btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-base"></i> <span>Atualizando...</span>';
+            }
             try {
                 const res = await fetch(`${API_URL}/admin/telemetria`, { headers: getAdminHeaders() });
                 if (!res.ok) {
@@ -710,12 +715,22 @@
                 }
             } catch (e) {
                 console.warn("Erro ao buscar telemetria:", e);
+            } finally {
+                if (manual && btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="ph-bold ph-arrows-clockwise text-base"></i> <span>Atualizar Telemetria</span>';
+                }
             }
         }
 
         async function executarLimpezaVencidosAdmin() {
             if (!confirm("Deseja executar agora a rotina de limpeza de todos os itens com mais de 10 dias de vencidos?")) {
                 return;
+            }
+            const btn = document.getElementById('btn-expurgar-vencidos');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-base"></i> <span>Expurgando...</span>';
             }
             try {
                 const res = await fetch(`${API_URL}/admin/limpar-vencidos`, {
@@ -732,6 +747,11 @@
                 }
             } catch (e) {
                 exibirAlerta("Falha de rede ao solicitar limpeza de itens vencidos.", "erro");
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="ph-bold ph-trash text-base"></i> <span>Expurgar Vencidos (&gt;10d)</span>';
+                }
             }
         }
 
@@ -821,6 +841,22 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             verificarAcessoAdmin();
+        });
+
+        // Regra 2 (Shneiderman): Atalho de teclado Esc para fechar modais do painel admin
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                const mSetup = document.getElementById("modal-setup-mfa");
+                if (mSetup && mSetup.style.display !== "none") {
+                    mSetup.style.display = "none";
+                    return;
+                }
+                const mRegras = document.getElementById("modal-confirmar-mfa-regras");
+                if (mRegras && mRegras.style.display !== "none") {
+                    mRegras.style.display = "none";
+                    return;
+                }
+            }
         });
     </script>
 
