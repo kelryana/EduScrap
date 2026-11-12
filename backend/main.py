@@ -379,9 +379,12 @@ def listar_todas_oportunidades(
                 doc["titulo"] = titulo_doc or "Oportunidade"
                 doc["nome"] = doc["titulo"]
 
-                # Normaliza link genérico do CIEE para o link individual ou vitrine direta
+                # Normaliza link do CIEE para o link individual direto ou vitrine
                 link_doc = doc.get("link") or ""
-                if link_doc in ("https://portal.ciee.org.br/", "https://portal.ciee.org.br", "", "#") and (doc.get("fonte") == "CIEE" or "ciee" in col_name):
+                if "/quero-uma-vaga/quero-uma-vaga" in link_doc:
+                    link_doc = link_doc.replace("/quero-uma-vaga/quero-uma-vaga", "/quero-uma-vaga")
+                    doc["link"] = link_doc
+                if doc.get("fonte") == "CIEE" or "ciee" in col_name:
                     cod = doc.get("codigo")
                     if not cod or cod == "N/A":
                         match = re.search(r"\[(\d{6,})\]", doc.get("nome", "") or doc.get("titulo", ""))
@@ -389,7 +392,7 @@ def listar_todas_oportunidades(
                             cod = match.group(1)
                     if cod and cod != "N/A":
                         doc["link"] = f"https://portal.ciee.org.br/quero-uma-vaga/?codigoVaga={cod}"
-                    else:
+                    elif not link_doc or link_doc in ("https://portal.ciee.org.br/", "https://portal.ciee.org.br", "", "#"):
                         doc["link"] = "https://portal.ciee.org.br/quero-uma-vaga/"
 
                 doc = enriquecer_doc(doc, usuario)
@@ -555,18 +558,20 @@ def listar_ciee(
         vaga["nome"] = titulo_doc
         vaga["titulo"] = titulo_doc
 
-        # Normaliza link genérico do CIEE para o link individual ou vitrine direta
+        # Normaliza link do CIEE para o link individual direto ou vitrine
         link_vaga = vaga.get("link") or ""
-        if link_vaga in ("https://portal.ciee.org.br/", "https://portal.ciee.org.br", "", "#"):
-            cod = vaga.get("codigo")
-            if not cod or cod == "N/A":
-                match = re.search(r"\[(\d{6,})\]", vaga.get("nome", "") or vaga.get("titulo", ""))
-                if match:
-                    cod = match.group(1)
-            if cod and cod != "N/A":
-                vaga["link"] = f"https://portal.ciee.org.br/quero-uma-vaga/?codigoVaga={cod}"
-            else:
-                vaga["link"] = "https://portal.ciee.org.br/quero-uma-vaga/"
+        if "/quero-uma-vaga/quero-uma-vaga" in link_vaga:
+            link_vaga = link_vaga.replace("/quero-uma-vaga/quero-uma-vaga", "/quero-uma-vaga")
+            vaga["link"] = link_vaga
+        cod = vaga.get("codigo")
+        if not cod or cod == "N/A":
+            match = re.search(r"\[(\d{6,})\]", vaga.get("nome", "") or vaga.get("titulo", ""))
+            if match:
+                cod = match.group(1)
+        if cod and cod != "N/A":
+            vaga["link"] = f"https://portal.ciee.org.br/quero-uma-vaga/?codigoVaga={cod}"
+        elif not link_vaga or link_vaga in ("https://portal.ciee.org.br/", "https://portal.ciee.org.br", "", "#"):
+            vaga["link"] = "https://portal.ciee.org.br/quero-uma-vaga/"
 
         vaga = enriquecer_doc(vaga, usuario)
         lista_ciee.append(vaga)
@@ -945,22 +950,83 @@ def pesquisar_unificado(
     authorization: str = Header(default=None)
 ):
     usuario = obter_usuario_opcional(authorization)
-    colecoes = ["vagas_estagio", "vagas_bolsa", "vagas_ufersa", "vagas_ciee", "vagas_portal_uern"]
+    # Coleções oficiais que concentram editais, vagas, bolsas e notícias
+    colecoes_busca = [
+        "vagas_bolsa", "vagas_estagio", "editais", "vagas_ciee",
+        "vagas_ufersa", "vagas_portal_uern", "vagas", "noticias", "vagas_noticias"
+    ]
+    nomes_existentes = set(db.list_collection_names())
     resultados = []
-    for col_name in db.list_collection_names():
-        if col_name in colecoes:
+    links_vistos = set()
+
+    regex_termo = re.compile(re.escape(termo), re.IGNORECASE)
+
+    for col_name in colecoes_busca:
+        if col_name in nomes_existentes:
             try:
-                cursor = db[col_name].find({"$text": {"$search": termo}})
-                for doc in cursor:
+                filtro_busca = {
+                    "$or": [
+                        {"nome": regex_termo},
+                        {"titulo": regex_termo},
+                        {"categoria": regex_termo},
+                        {"descricao": regex_termo},
+                        {"fonte": regex_termo},
+                        {"tags": regex_termo}
+                    ]
+                }
+                for doc in db[col_name].find(filtro_busca).limit(60):
+                    link = doc.get("link")
+                    if link and link in links_vistos:
+                        continue
+                    if link:
+                        links_vistos.add(link)
+
                     doc["_id"] = str(doc["_id"])
+                    # Normaliza títulos genéricos (CIEE / Estágio)
+                    titulo_doc = doc.get("titulo") or doc.get("nome") or ""
+                    if titulo_doc in ("Vaga CIEE", "Estágio", "Aprendiz", "Jovem Aprendiz", ""):
+                        nome_comp = doc.get("nome_completo")
+                        if nome_comp and nome_comp not in ("Vaga CIEE", ""):
+                            titulo_doc = nome_comp
+                        elif doc.get("area") and doc.get("area") != "Área não especificada":
+                            cod = doc.get("codigo")
+                            pfx = f"[{cod}] " if cod and cod != "N/A" else "[CIEE] "
+                            sal = doc.get("salario")
+                            sal_txt = f" ({sal})" if sal and sal != "A combinar" else ""
+                            cargo = doc.get("categoria") or "Estágio"
+                            titulo_doc = f"{pfx}{cargo} - {doc['area']}{sal_txt}"
+                    doc["titulo"] = titulo_doc or "Oportunidade"
+                    doc["nome"] = doc["titulo"]
+
+                    # Normaliza link do CIEE para o link individual direto ou vitrine
+                    link_doc = doc.get("link") or ""
+                    if "/quero-uma-vaga/quero-uma-vaga" in link_doc:
+                        link_doc = link_doc.replace("/quero-uma-vaga/quero-uma-vaga", "/quero-uma-vaga")
+                        doc["link"] = link_doc
+                    if doc.get("fonte") == "CIEE" or "ciee" in col_name:
+                        cod = doc.get("codigo")
+                        if not cod or cod == "N/A":
+                            match = re.search(r"\[(\d{6,})\]", doc.get("nome", "") or doc.get("titulo", ""))
+                            if match:
+                                cod = match.group(1)
+                        if cod and cod != "N/A":
+                            doc["link"] = f"https://portal.ciee.org.br/quero-uma-vaga/?codigoVaga={cod}"
+                        elif not link_doc or link_doc in ("https://portal.ciee.org.br/", "https://portal.ciee.org.br", "", "#"):
+                            doc["link"] = "https://portal.ciee.org.br/quero-uma-vaga/"
+
                     doc = enriquecer_doc(doc, usuario)
                     resultados.append(doc)
-            except Exception:
-                cursor = db[col_name].find({"nome": {"$regex": termo, "$options": "i"}})
-                for doc in cursor:
-                    doc["_id"] = str(doc["_id"])
-                    doc = enriquecer_doc(doc, usuario)
-                    resultados.append(doc)
+            except Exception as e:
+                logger.warning(f"Erro ao pesquisar na coleção {col_name}: {e}")
+
+    # Ordenação de relevância temporal: vigentes com prazo mais próximo primeiro
+    def ordenar_busca(d):
+        v = d.get("data_vencimento")
+        if isinstance(v, datetime):
+            return (0 if v >= datetime.now() else 2, v)
+        return (1, datetime.max)
+
+    resultados.sort(key=ordenar_busca)
     return resultados
 
 @app.get("/api/estatisticas")
@@ -1834,9 +1900,12 @@ def feed_personalizado(usuario: dict = Depends(obter_usuario_logado), limite: in
                 doc["titulo"] = titulo_doc or "Oportunidade"
                 doc["nome"] = doc["titulo"]
 
-                # Normaliza link genérico do CIEE para o link individual ou vitrine direta
+                # Normaliza link do CIEE para o link individual direto ou vitrine
                 link_doc = doc.get("link") or ""
-                if link_doc in ("https://portal.ciee.org.br/", "https://portal.ciee.org.br", "", "#") and (doc.get("fonte") == "CIEE" or "ciee" in cname):
+                if "/quero-uma-vaga/quero-uma-vaga" in link_doc:
+                    link_doc = link_doc.replace("/quero-uma-vaga/quero-uma-vaga", "/quero-uma-vaga")
+                    doc["link"] = link_doc
+                if doc.get("fonte") == "CIEE" or "ciee" in cname:
                     cod = doc.get("codigo")
                     if not cod or cod == "N/A":
                         match = re.search(r"\[(\d{6,})\]", doc.get("nome", "") or doc.get("titulo", ""))
@@ -1844,7 +1913,7 @@ def feed_personalizado(usuario: dict = Depends(obter_usuario_logado), limite: in
                             cod = match.group(1)
                     if cod and cod != "N/A":
                         doc["link"] = f"https://portal.ciee.org.br/quero-uma-vaga/?codigoVaga={cod}"
-                    else:
+                    elif not link_doc or link_doc in ("https://portal.ciee.org.br/", "https://portal.ciee.org.br", "", "#"):
                         doc["link"] = "https://portal.ciee.org.br/quero-uma-vaga/"
 
                 doc = enriquecer_prazo(doc)

@@ -27,6 +27,19 @@ kill_port_processes() {
             kill -9 $pids 2>/dev/null || true
         fi
     fi
+    # Suporte robusto para Windows (Git Bash / PowerShell / CMD)
+    if command -v powershell.exe >/dev/null 2>&1; then
+        powershell.exe -NoProfile -Command "(Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue).OwningProcess | Where-Object { \$_ -gt 0 } | ForEach-Object { Stop-Process -Id \$_ -Force -ErrorAction SilentlyContinue }" 2>/dev/null || true
+    fi
+    if command -v netstat >/dev/null 2>&1; then
+        local win_pids=$(netstat -ano 2>/dev/null | grep -i "LISTENING" | grep ":$port" | awk '{print $NF}' | tr -d '\r' | sort -u)
+        for wpid in $win_pids; do
+            if [ -n "$wpid" ] && [ "$wpid" -gt 0 ] 2>/dev/null; then
+                echo "  -> Liberando porta $port no Windows (PID: $wpid)..."
+                cmd.exe /c "taskkill /F /PID $wpid" 2>/dev/null || taskkill //F //PID "$wpid" 2>/dev/null || true
+            fi
+        done
+    fi
     sleep 1
 }
 

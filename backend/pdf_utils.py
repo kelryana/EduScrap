@@ -137,6 +137,13 @@ def validar_url_segura_ssrf(url: str) -> bool:
     if hostname in ("localhost", "127.0.0.1", "::1") or hostname.endswith((".localhost", ".local", ".internal")):
         return False
 
+    # Domínios e portais acadêmicos oficiais com tráfego autorizado
+    dominios_permitidos = (
+        "uern.br", "ufersa.edu.br", "ifrn.edu.br", "mprn.mp.br",
+        "ciee.org.br", "fiern.org.br", "mossoro.rn.gov.br", "gov.br"
+    )
+    eh_dominio_oficial = any(hostname == d or hostname.endswith("." + d) for d in dominios_permitidos)
+
     # Resolução de DNS e validação de IP
     try:
         # Se for um IP literal no hostname, valida imediatamente
@@ -150,14 +157,16 @@ def validar_url_segura_ssrf(url: str) -> bool:
             # Não é IP literal, tenta resolver via DNS
             ip_alvo = socket.gethostbyname(hostname)
             ip_obj = ipaddress.ip_address(ip_alvo)
-            if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local or ip_obj.is_reserved:
-                return False
+            # Endpoints de metadados de nuvem são bloqueados incondicionalmente
             if str(ip_obj) in ("169.254.169.254", "169.254.170.2"):
+                return False
+            # IPs privados são bloqueados, a não ser que seja um domínio institucional autorizado (ex: DNS local/intranet da universidade)
+            if (ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local or ip_obj.is_reserved) and not eh_dominio_oficial:
                 return False
     except Exception:
         # Em ambientes de teste offline/sandbox sem gateway externo,
-        # rejeita apenas se parecer um hostname ou padrão de rede privada
-        if hostname.startswith(("10.", "192.168.", "172.", "127.")):
+        # rejeita apenas se parecer um hostname ou padrão de rede privada não autorizado
+        if hostname.startswith(("10.", "192.168.", "172.", "127.")) and not eh_dominio_oficial:
             return False
 
     return True

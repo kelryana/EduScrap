@@ -56,7 +56,7 @@ MONGO_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
 DB_NAME = os.getenv("MONGODB_DB", "hub_estudantes")
 COLLECTION_NAME = os.getenv("CIEE_COLLECTION", "vagas_ciee")
 CIDADE = os.getenv("CIEE_CIDADE", "Mossoró")
-URL_CIEE = os.getenv("CIEE_URL", "https://portal.ciee.org.br/")
+URL_CIEE = os.getenv("CIEE_URL", "https://portal.ciee.org.br/quero-uma-vaga/")
 GECKODRIVER_PATH = os.getenv("GECKODRIVER_PATH", "")  # vazio => download automático
 
 logging.basicConfig(
@@ -256,28 +256,35 @@ class ScraperCIEEHibrido:
                 else:
                     campo.send_keys(Keys.RETURN)
 
-                # PASSO 5: Aguardar dinamicamente a atualização dos cards para a cidade filtrada
-                fim_espera = time.time() + 8.0
+                # PASSO 5: Aguardar dinamicamente a atualização e estabilização de TODOS os cards para a cidade filtrada
+                time.sleep(2.0)
+                fim_espera = time.time() + 10.0
                 filtro_aplicado = False
+                qtd_anterior = 0
+                estavel_ciclos = 0
+
                 while time.time() < fim_espera:
                     resumo_atual = self._obter_resumo_dom_vagas()
+                    qtd_atual = len(resumo_atual)
                     if resumo_atual:
                         locais_texto = " ".join(r.get("local", "") for r in resumo_atual)
-                        primeiro_atual = resumo_atual[0].get("codigo")
-                        if (
-                            cidade_sem_acento in _sem_acentos(locais_texto).upper()
-                            or (primeiro_codigo_antes and primeiro_atual != primeiro_codigo_antes)
-                        ):
-                            filtro_aplicado = True
-                            break
-                    time.sleep(0.25)
+                        if cidade_sem_acento in _sem_acentos(locais_texto).upper():
+                            if qtd_atual == qtd_anterior and qtd_atual > 0:
+                                estavel_ciclos += 1
+                                if estavel_ciclos >= 2:
+                                    filtro_aplicado = True
+                                    break
+                            else:
+                                estavel_ciclos = 0
+                            qtd_anterior = qtd_atual
+                    time.sleep(0.5)
 
                 if not filtro_aplicado:
                     time.sleep(1.5)
 
                 resumo_pos = self._obter_resumo_dom_vagas()
                 if resumo_pos:
-                    logger.info(f"Busca por '{self.cidade}' confirmada! ({len(resumo_pos)} vagas na 1ª página)")
+                    logger.info(f"Busca por '{self.cidade}' confirmada! ({len(resumo_pos)} vagas renderizadas)")
                     return True
 
                 pagina_texto = _sem_acentos(self.driver.page_source).lower()
@@ -394,7 +401,7 @@ class ScraperCIEEHibrido:
         return None
 
     def _montar_link(self, card, codigo_vaga: str) -> str:
-        url_base_vagas = f"{URL_CIEE.rstrip('/')}/quero-uma-vaga/"
+        url_base_vagas = "https://portal.ciee.org.br/quero-uma-vaga/"
         if codigo_vaga and codigo_vaga != "N/A":
             return f"{url_base_vagas}?codigoVaga={codigo_vaga}"
 
@@ -542,7 +549,7 @@ class ScraperCIEEHibrido:
         horario = re.sub(r"\s+", " ", (item.get("horario") or "").strip())
         salario = re.sub(r"\s+", " ", (item.get("salario") or "").replace("\xa0", " ").strip()) or "A combinar"
 
-        url_base_vagas = f"{URL_CIEE.rstrip('/')}/quero-uma-vaga/"
+        url_base_vagas = "https://portal.ciee.org.br/quero-uma-vaga/"
         if codigo_vaga != "N/A":
             link = f"{url_base_vagas}?codigoVaga={codigo_vaga}"
         else:
@@ -579,39 +586,46 @@ class ScraperCIEEHibrido:
 
         return vaga
 
-    def _carregar_paginacao(self, max_cliques: int = 10):
+    def _carregar_paginacao(self, max_cliques: int = 6):
         cliques = 0
         try:
             self.driver.implicitly_wait(0)
             while cliques < max_cliques:
-                try:
-                    botoes = self.driver.find_elements(
-                        By.XPATH, "//*[contains(text(), 'Carregar mais')]"
-                    )
-                    visiveis = [b for b in botoes if b.is_displayed()]
-                    if not visiveis:
-                        break
+                self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                time.sleep(0.8)
 
-                    alvo = visiveis[-1]
-                    qtd_antes = len(self.driver.find_elements(By.CSS_SELECTOR, "a.vaga-row"))
-                    self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", alvo)
-                    self.driver.execute_script("arguments[0].click();", alvo)
-                    cliques += 1
-                    logger.info(f"Paginação: clique {cliques} em 'Carregar mais'")
+                qtd_antes = len(self.driver.find_elements(By.CSS_SELECTOR, "a.vaga-row"))
 
-                    # Aguarda os novos cards serem inseridos no DOM (máx 2.5s)
-                    fim = time.time() + 2.5
-                    carregou_novos = False
-                    while time.time() < fim:
-                        qtd_atual = len(self.driver.find_elements(By.CSS_SELECTOR, "a.vaga-row"))
-                        if qtd_atual > qtd_antes:
-                            carregou_novos = True
-                            break
-                        time.sleep(0.2)
-                    if not carregou_novos:
-                        break
-                except Exception:
+                clicou = self.driver.execute_script(
+                    """
+                    const btns = Array.from(document.querySelectorAll('button, a, div'))
+                        .filter(el => (el.innerText || el.textContent || '').trim().toLowerCase().includes('carregar mais'));
+                    for (const b of btns) {
+                        b.scrollIntoView({block: 'center'});
+                        b.click();
+                        return true;
+                    }
+                    return false;
+                    """
+                )
+                if not clicou:
                     break
+
+                cliques += 1
+                logger.info(f"Paginação: clique {cliques} em 'Carregar mais'")
+
+                fim = time.time() + 3.0
+                carregou_novos = False
+                while time.time() < fim:
+                    qtd_atual = len(self.driver.find_elements(By.CSS_SELECTOR, "a.vaga-row"))
+                    if qtd_atual > qtd_antes:
+                        carregou_novos = True
+                        break
+                    time.sleep(0.3)
+                if not carregou_novos:
+                    break
+        except Exception as e:
+            logger.debug(f"Fim da paginação: {e}")
         finally:
             try:
                 self.driver.implicitly_wait(2)
@@ -646,25 +660,32 @@ class ScraperCIEEHibrido:
             except Exception:
                 time.sleep(1)
 
-            # PASSO 1: tratar paginação (Carregar mais)
+            # Scroll e carregar mais páginas/cards
             self._carregar_paginacao()
+            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(0.8)
 
             # PASSO 2: extração estruturada ultrarrápida via JS de todos os cards a.vaga-row
             itens_dom = []
             try:
                 itens_dom = self.driver.execute_script(
                     """
-                    return Array.from(document.querySelectorAll('a.vaga-row')).map(card => ({
-                        codigo: (card.querySelector('.cod-vaga')?.textContent || '').trim(),
-                        tipo: (card.querySelector('.tipo-vaga')?.textContent || '').trim(),
-                        descricao: (card.querySelector('.descricao')?.textContent || '').trim(),
-                        area: (card.querySelector('.info-area')?.textContent || '').trim(),
-                        local: (card.querySelector('.info-local')?.textContent || '').trim(),
-                        horario: (card.querySelector('.info-horario')?.textContent || '').trim(),
-                        salario: (card.querySelector('.info-salario')?.textContent || '').trim(),
-                        href: card.getAttribute('href') || '',
-                        texto: card.innerText || card.textContent || ''
-                    }));
+                    return Array.from(document.querySelectorAll('a.vaga-row')).map(card => {
+                        const classMatch = card.className.match(/tipo-vaga-([^\\s]+)/);
+                        const classTipo = classMatch ? classMatch[1] : '';
+                        const tipoTexto = (card.querySelector('.tipo-vaga')?.textContent || classTipo || '').trim();
+                        return {
+                            codigo: (card.querySelector('.cod-vaga')?.textContent || '').trim(),
+                            tipo: tipoTexto,
+                            descricao: (card.querySelector('.descricao')?.textContent || '').trim(),
+                            area: (card.querySelector('.info-area')?.textContent || '').trim(),
+                            local: (card.querySelector('.info-local')?.textContent || '').trim(),
+                            horario: (card.querySelector('.info-horario')?.textContent || '').trim(),
+                            salario: (card.querySelector('.info-salario')?.textContent || '').trim(),
+                            href: card.getAttribute('href') || '',
+                            texto: card.innerText || card.textContent || ''
+                        };
+                    });
                     """
                 )
             except Exception:
@@ -859,8 +880,15 @@ class ScraperCIEEHibrido:
 
         try:
             logger.info("Acessando CIEE...")
-            self.driver.get(URL_CIEE)
-            time.sleep(1.5)
+            try:
+                self.driver.get(URL_CIEE)
+            except Exception as e_get:
+                logger.warning(f"Timeout ou lentidão inicial ao carregar CIEE ({e_get}). Interrompendo renderização pendente e continuando...")
+                try:
+                    self.driver.execute_script("window.stop();")
+                except Exception:
+                    pass
+            time.sleep(2)
 
             if not self.buscar_cidade():
                 logger.error("Falha na busca")

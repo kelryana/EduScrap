@@ -1222,11 +1222,26 @@ function renderizarCards(listaDeVagas) {
 
     if (!listaDeVagas || listaDeVagas.length === 0) {
         if (painelCriticos) painelCriticos.style.display = 'none';
+        const termoBusca = (document.getElementById('input-busca')?.value || '').trim();
+        const mensagemSemResultado = termoBusca
+            ? `Não foram encontrados editais ou oportunidades com o termo "<strong>${escaparHTML(termoBusca)}</strong>". Tente palavras mais gerais como <em>bolsa</em>, <em>estágio</em> ou o nome do seu curso.`
+            : "Não foram localizadas oportunidades para o filtro selecionado.";
+
         container.innerHTML = `
-            <div class="status-box">
+            <div class="status-box" role="status" aria-live="polite">
                 <div class="status-box-decor"></div>
+                <div class="status-box-icone-wrapper" style="margin-bottom: 12px;">
+                    <i class="ph-bold ph-magnifying-glass" style="font-size: 2.2rem; color: #FF5C00;"></i>
+                </div>
                 <h3 class="status-box-titulo">Nenhum Resultado Encontrado</h3>
-                <p class="status-box-texto">Não foram localizadas oportunidades para o filtro selecionado.</p>
+                <p class="status-box-texto">${mensagemSemResultado}</p>
+                ${termoBusca ? `
+                    <div style="margin-top: 20px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                        <button class="btn-hero-secondary" onclick="limparPesquisaRapida()" style="font-size: 0.95rem; padding: 10px 20px;">
+                            <i class="ph-bold ph-arrow-counter-clockwise"></i> Limpar Busca & Ver Todos
+                        </button>
+                    </div>
+                ` : ''}
             </div>
         `;
         return;
@@ -1338,13 +1353,18 @@ function renderizarCards(listaDeVagas) {
         }
 
         let linkDestino = vaga.link || vaga.url || '#';
-        if (linkDestino === 'https://portal.ciee.org.br/' || linkDestino === 'https://portal.ciee.org.br' || ((vaga.fonte === 'CIEE' || tipoAtual === 'ciee') && (!vaga.link || vaga.link === '#'))) {
+        if (vaga.fonte === 'CIEE' || tipoAtual === 'ciee' || (linkDestino && linkDestino.includes('ciee.org.br'))) {
+            if (linkDestino && linkDestino.includes('/quero-uma-vaga/quero-uma-vaga')) {
+                linkDestino = linkDestino.replace('/quero-uma-vaga/quero-uma-vaga', '/quero-uma-vaga');
+            }
             const cod = (vaga.codigo && vaga.codigo !== 'N/A')
                 ? vaga.codigo
                 : ((tituloBruto && tituloBruto.match(/\[(\d{6,})\]/)) ? tituloBruto.match(/\[(\d{6,})\]/)[1] : null);
-            linkDestino = cod
-                ? `https://portal.ciee.org.br/quero-uma-vaga/?codigoVaga=${cod}`
-                : 'https://portal.ciee.org.br/quero-uma-vaga/';
+            if (cod) {
+                linkDestino = `https://portal.ciee.org.br/quero-uma-vaga/?codigoVaga=${cod}`;
+            } else if (!linkDestino || linkDestino === '#' || linkDestino === 'https://portal.ciee.org.br/' || linkDestino === 'https://portal.ciee.org.br') {
+                linkDestino = 'https://portal.ciee.org.br/quero-uma-vaga/';
+            }
         }
 
         let textoAcao = 'Ver Edital Oficial';
@@ -1782,8 +1802,14 @@ function limparPesquisaRapida() {
 }
 
 async function realizarPesquisa() {
-    const termo = document.getElementById('input-busca').value;
-    if (!termo) return;
+    const inputBusca = document.getElementById('input-busca');
+    const termo = (inputBusca?.value || '').trim();
+    if (!termo || termo.length < 2) {
+        if (typeof mostrarToast === 'function') {
+            mostrarToast("Digite pelo menos 2 caracteres para pesquisar oportunidades.", "aviso");
+        }
+        return;
+    }
     atualizarBotaoLimparBusca();
     atualizarBannerFiltroAtivo(termo);
 
@@ -1805,12 +1831,17 @@ async function realizarPesquisa() {
         });
 
         if (!resposta.ok) {
+            if (resposta.status === 422 || resposta.status === 404) {
+                if (!carga.ativo()) return;
+                renderizarCards([]);
+                return;
+            }
             throw new Error(`Erro na pesquisa: ${resposta.status}`);
         }
 
         const dados = await resposta.json();
 
-        if (ehLanding) {
+        if (typeof ehLanding !== 'undefined' && ehLanding) {
             renderizarDashboardLanding(container, dados);
             return;
         }
