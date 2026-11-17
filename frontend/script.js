@@ -643,8 +643,283 @@ async function carregarFavoritos() {
     }
 }
 
+let _ultimoFeedPersonalizado = [];
+let _modoParaVoceListaCompleta = false;
+
+function resolverLinkOportunidade(vaga) {
+    let linkDestino = (vaga && (vaga.link || vaga.url)) || '#';
+    const tituloBruto = (vaga && (vaga.titulo || vaga.nome || vaga.nome_completo)) || '';
+    if ((vaga && vaga.fonte === 'CIEE') || (linkDestino && linkDestino.includes('ciee.org.br'))) {
+        if (linkDestino && linkDestino.includes('/quero-uma-vaga/quero-uma-vaga')) {
+            linkDestino = linkDestino.replace('/quero-uma-vaga/quero-uma-vaga', '/quero-uma-vaga');
+        }
+        const cod = (vaga && vaga.codigo && vaga.codigo !== 'N/A')
+            ? vaga.codigo
+            : ((tituloBruto && tituloBruto.match(/\[(\d{6,})\]/)) ? tituloBruto.match(/\[(\d{6,})\]/)[1] : null);
+        if (cod) {
+            linkDestino = `https://portal.ciee.org.br/quero-uma-vaga/?codigoVaga=${cod}`;
+        } else if (!linkDestino || linkDestino === '#' || linkDestino === 'https://portal.ciee.org.br/' || linkDestino === 'https://portal.ciee.org.br') {
+            linkDestino = 'https://portal.ciee.org.br/quero-uma-vaga/';
+        }
+    }
+    return linkDestino;
+}
+
+function classificarGrupoParaVoce(vaga) {
+    const fonte = ((vaga && vaga.fonte) || '').toLowerCase();
+    const cat = ((vaga && vaga.categoria) || '').toLowerCase();
+    const titulo = ((vaga && (vaga.titulo || vaga.nome)) || '').toLowerCase();
+    const tipo = ((vaga && vaga.tipo) || '').toLowerCase();
+
+    if (
+        tipo === 'capacitacao' ||
+        fonte.includes('dio') || fonte.includes('microsoft') ||
+        fonte.includes('estudar fora') || fonte.includes('fundação estudar') ||
+        fonte.includes('trabalho') ||
+        cat.includes('capacitação') || cat.includes('capacitacao') || cat.includes('curso') ||
+        cat.includes('bolsa de estudos')
+    ) {
+        return 'cursos-bolsas';
+    }
+
+    if (
+        tipo === 'noticia' ||
+        cat.startsWith('notícia') || cat.startsWith('noticia') ||
+        fonte.includes('g1') || fonte.includes('canaltech') || fonte.includes('tecmundo') ||
+        fonte.includes('assecom') || (fonte.includes('ufersa') && cat.includes('comunicação'))
+    ) {
+        return 'noticias';
+    }
+
+    if (
+        fonte.includes('prae') || fonte.includes('ciee') ||
+        fonte.includes('mprn') || fonte.includes('iel') ||
+        cat.includes('estágio') || cat.includes('estagio') ||
+        titulo.includes('estágio') || titulo.includes('estagio') || titulo.includes('aprendiz')
+    ) {
+        return 'estagios';
+    }
+
+    return 'bolsas';
+}
+
+function alternarModoParaVoce(mostrarListaCompleta) {
+    _modoParaVoceListaCompleta = Boolean(mostrarListaCompleta);
+    const container = document.getElementById('container-vagas');
+    if (!container) return;
+
+    if (_modoParaVoceListaCompleta) {
+        container.style.display = 'grid';
+        renderizarCards(_ultimoFeedPersonalizado);
+        const aviso = document.createElement('div');
+        aviso.className = 'para-voce-voltar-bar';
+        aviso.innerHTML = `
+            <span>Exibindo todos os <strong>${_ultimoFeedPersonalizado.length}</strong> itens recomendados para o seu perfil</span>
+            <button type="button" class="btn-para-voce-toggle" onclick="alternarModoParaVoce(false)">
+                <i class="ph-bold ph-squares-four"></i> Voltar aos Cards Resumidos
+            </button>
+        `;
+        container.prepend(aviso);
+    } else {
+        renderizarFeedPersonalizadoAgrupado(container, _ultimoFeedPersonalizado);
+    }
+}
+
+function renderizarFeedPersonalizadoAgrupado(container, lista) {
+    if (!container) return;
+    const antigo = document.getElementById('bloco-paginacao');
+    if (antigo) antigo.remove();
+
+    if (!lista || lista.length === 0) {
+        container.style.display = 'grid';
+        renderizarCards([]);
+        return;
+    }
+
+    container.style.display = 'block';
+    const favSet = (usuarioAtual && usuarioAtual.favoritos) ? new Set(usuarioAtual.favoritos.map(String)) : new Set();
+
+    const gruposConfig = [
+        {
+            chave: 'estagios',
+            titulo: 'Estágios & Mercado',
+            subtitulo: 'Vagas PRAE, CIEE, MPRN e IEL alinhadas ao seu perfil',
+            icone: 'ph-briefcase',
+            corTopo: '#FF5C00',
+            badgeBg: 'rgba(255, 92, 0, 0.12)',
+            badgeCor: '#C2410C',
+            acaoAba: "carregarDados('estagios', 1)",
+            acaoTexto: 'Explorar Estágios'
+        },
+        {
+            chave: 'bolsas',
+            titulo: 'Bolsas & Editais Acadêmicos',
+            subtitulo: 'PROEX, UFERSA, IFRN, Portal UERN e Diário Oficial',
+            icone: 'ph-coins',
+            corTopo: '#0F172A',
+            badgeBg: 'rgba(15, 23, 42, 0.08)',
+            badgeCor: '#0F172A',
+            acaoAba: "carregarDados('bolsas', 1)",
+            acaoTexto: 'Explorar Bolsas & Editais'
+        },
+        {
+            chave: 'cursos-bolsas',
+            titulo: 'Cursos & Capacitação',
+            subtitulo: 'Certificações gratuitas, trilhas tech e bolsas de estudo',
+            icone: 'ph-book-open',
+            corTopo: '#7C3AED',
+            badgeBg: 'rgba(124, 58, 237, 0.12)',
+            badgeCor: '#6D28D9',
+            acaoAba: "carregarDados('cursos-bolsas', 1)",
+            acaoTexto: 'Explorar Cursos'
+        },
+        {
+            chave: 'noticias',
+            titulo: 'Notícias & Comunicados',
+            subtitulo: 'Destaques UFERSA, UERN e atualizações relevantes',
+            icone: 'ph-newspaper',
+            corTopo: '#059669',
+            badgeBg: 'rgba(5, 150, 105, 0.12)',
+            badgeCor: '#047857',
+            acaoAba: "carregarDados('noticias', 1)",
+            acaoTexto: 'Explorar Notícias'
+        }
+    ];
+
+    const buckets = { 'estagios': [], 'bolsas': [], 'cursos-bolsas': [], 'noticias': [] };
+    lista.forEach(item => {
+        const g = classificarGrupoParaVoce(item);
+        if (buckets[g]) buckets[g].push(item);
+    });
+
+    const prefs = (usuarioAtual && usuarioAtual.preferencias) || {};
+    const cursosUsuario = Array.isArray(prefs.cursos) ? prefs.cursos : [];
+    const areasUsuario = Array.isArray(prefs.areas) ? prefs.areas : [];
+    const tagsPerfil = [...cursosUsuario, ...areasUsuario].slice(0, 6);
+
+    const chipsHTML = tagsPerfil.length > 0
+        ? tagsPerfil.map(t => `<span class="para-voce-perfil-chip">${escaparHTML(t)}</span>`).join('')
+        : `<span class="para-voce-perfil-chip">Feed Geral (configure seu curso em Personalização)</span>`;
+
+    const cardsGruposHTML = gruposConfig.map(cfg => {
+        const itens = buckets[cfg.chave] || [];
+        const top4 = itens.slice(0, 4);
+
+        const listaItensHTML = top4.length > 0
+            ? top4.map(vaga => {
+                const idStr = String(vaga._id);
+                const ehFav = vaga.favorito === true || favSet.has(idStr);
+                const tituloBruto = vaga.titulo || vaga.nome || vaga.nome_completo || 'Oportunidade';
+                const infoEdital = sintetizarTituloEdital(tituloBruto);
+                const tituloLimpo = infoEdital.tituloLimpo || formatarTituloEdital(tituloBruto);
+                const fonteLabel = vaga.fonte || normalizarCategoriaTag(vaga.categoria, cfg.chave, vaga);
+                const linkDestino = resolverLinkOportunidade(vaga);
+                const prazoTxt = (!vaga.tipo || vaga.tipo !== 'noticia') && vaga.data_vencimento_formatada
+                    ? `<span class="para-voce-item-prazo"><i class="ph-bold ph-calendar"></i> ${escaparHTML(vaga.data_vencimento_formatada)}</span>`
+                    : '';
+
+                return `
+                    <div class="para-voce-item" onclick="window.open('${escaparHTML(linkDestino)}', '_blank', 'noopener,noreferrer')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.open('${escaparHTML(linkDestino)}','_blank','noopener,noreferrer');}">
+                        <div class="para-voce-item-main">
+                            <div class="para-voce-item-titulo" title="${escaparHTML(tituloLimpo)}">
+                                ${escaparHTML(tituloLimpo)}
+                            </div>
+                            <div class="para-voce-item-meta">
+                                <span class="para-voce-item-fonte">${escaparHTML(fonteLabel)}</span>
+                                ${prazoTxt}
+                            </div>
+                        </div>
+                        <div class="para-voce-item-actions" onclick="event.stopPropagation()">
+                            <button type="button"
+                                    id="fav-btn-${idStr}"
+                                    class="btn-fav-card para-voce-fav-btn ${ehFav ? 'favoritado' : ''}"
+                                    onclick="toggleFavorito('${idStr}', event)"
+                                    title="${ehFav ? 'Remover dos favoritos' : 'Salvar oportunidade'}"
+                                    aria-label="${ehFav ? 'Remover dos favoritos' : 'Salvar oportunidade'}"
+                                    aria-pressed="${ehFav ? 'true' : 'false'}">
+                                <i class="${ehFav ? 'ph-fill' : 'ph-bold'} ph-star"></i>
+                            </button>
+                            <a href="${escaparHTML(linkDestino)}"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="para-voce-item-abrir"
+                               title="Abrir oportunidade original"
+                               aria-label="Abrir oportunidade original">
+                                <i class="ph-bold ph-arrow-up-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('')
+            : `
+                <div class="para-voce-vazio">
+                    <i class="ph-bold ph-magnifying-glass"></i>
+                    <p>Nenhum item específico encontrado nesta categoria para o seu perfil no momento.</p>
+                </div>
+            `;
+
+        return `
+            <article class="para-voce-grupo-card" style="--grupo-cor: ${cfg.corTopo};">
+                <div class="para-voce-grupo-barra" style="background-color: ${cfg.corTopo};"></div>
+                <header class="para-voce-grupo-header">
+                    <div class="para-voce-grupo-titulo-wrap">
+                        <div class="para-voce-grupo-icone" style="background-color: ${cfg.corTopo};">
+                            <i class="ph-bold ${cfg.icone}"></i>
+                        </div>
+                        <div>
+                            <h3 class="para-voce-grupo-titulo">${cfg.titulo}</h3>
+                            <p class="para-voce-grupo-subtitulo">${cfg.subtitulo}</p>
+                        </div>
+                    </div>
+                    <span class="para-voce-grupo-count" style="background-color: ${cfg.badgeBg}; color: ${cfg.badgeCor};">
+                        ${itens.length} ${itens.length === 1 ? 'item' : 'itens'}
+                    </span>
+                </header>
+
+                <div class="para-voce-itens-lista">
+                    ${listaItensHTML}
+                </div>
+
+                <footer class="para-voce-grupo-footer">
+                    <button type="button" class="para-voce-btn-explorar" onclick="${cfg.acaoAba}">
+                        <span>${cfg.acaoTexto}</span>
+                        <i class="ph-bold ph-arrow-right"></i>
+                    </button>
+                </footer>
+            </article>
+        `;
+    }).join('');
+
+    container.innerHTML = `
+        <section class="para-voce-wrapper" aria-label="Resumo personalizado para o seu perfil">
+            <div class="para-voce-header-banner">
+                <div class="para-voce-header-info">
+                    <div class="para-voce-badge-topo">
+                        <i class="ph-bold ph-sparkle"></i>
+                        <span>CURADORIA PARA O SEU PERFIL</span>
+                    </div>
+                    <h2 class="para-voce-titulo-principal">Principais destaques por categoria</h2>
+                    <div class="para-voce-perfil-chips">
+                        ${chipsHTML}
+                    </div>
+                </div>
+                <div class="para-voce-header-acoes">
+                    <button type="button" class="btn-para-voce-toggle" onclick="alternarModoParaVoce(true)">
+                        <i class="ph-bold ph-list-bullets"></i> Ver Lista Completa (${lista.length})
+                    </button>
+                </div>
+            </div>
+
+            <div class="para-voce-grupos-grid">
+                ${cardsGruposHTML}
+            </div>
+        </section>
+    `;
+}
+
 async function carregarFeedPersonalizado() {
     tipoAtual = 'personalizado';
+    _modoParaVoceListaCompleta = false;
     alternarExibicaoFiltroVigentes(true);
     const container = document.getElementById('container-vagas');
     if (container) container.classList.remove('grid-vagas-4x2');
@@ -693,7 +968,8 @@ async function carregarFeedPersonalizado() {
             });
         }
 
-        renderizarCards(lista);
+        _ultimoFeedPersonalizado = lista;
+        renderizarFeedPersonalizadoAgrupado(container, lista);
 
     } catch (err) {
         console.error("Erro ao gerar feed personalizado:", err);

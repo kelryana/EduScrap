@@ -49,7 +49,7 @@
       }
     </script>
 
-    <link rel="stylesheet" href="style.css?v=20261117_v2">
+    <link rel="stylesheet" href="style.css?v=20261117_v3">
 </head>
 <body class="bg-[#FAFBFD] text-brand-dark min-h-screen bg-grid-pattern font-sans antialiased selection:bg-brand-yellow selection:text-brand-dark">
 
@@ -348,10 +348,6 @@
                             <span class="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-700 font-black text-xs">
                                 Universidade Estadual
                             </span>
-                            <span class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-extrabold text-xs">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                Conexão Ativa
-                            </span>
                         </div>
                         <h3 class="font-display font-black text-xl text-brand-dark dark:text-white mb-2">
                             UERN (PRAE &amp; PROEX)
@@ -372,10 +368,6 @@
                         <div class="flex items-center justify-between mb-4">
                             <span class="px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-800 dark:text-purple-300 border border-purple-300 dark:border-purple-700 font-black text-xs">
                                 Universidade Federal
-                            </span>
-                            <span class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-extrabold text-xs">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                Conexão Ativa
                             </span>
                         </div>
                         <h3 class="font-display font-black text-xl text-brand-dark dark:text-white mb-2">
@@ -398,10 +390,6 @@
                             <span class="px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-950 text-orange-800 dark:text-orange-300 border border-orange-300 dark:border-orange-700 font-black text-xs">
                                 Agente de Estágio
                             </span>
-                            <span class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-extrabold text-xs">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                Conexão Ativa
-                            </span>
                         </div>
                         <h3 class="font-display font-black text-xl text-brand-dark dark:text-white mb-2">
                             CIEE (Estágios Remunerados)
@@ -422,10 +410,6 @@
                         <div class="flex items-center justify-between mb-4">
                             <span class="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 font-black text-xs">
                                 Rede Federal
-                            </span>
-                            <span class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-extrabold text-xs">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                Conexão Ativa
                             </span>
                         </div>
                         <h3 class="font-display font-black text-xl text-brand-dark dark:text-white mb-2">
@@ -448,10 +432,6 @@
                             <span class="px-3 py-1 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-700 font-black text-xs">
                                 Órgãos Governamentais
                             </span>
-                            <span class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-extrabold text-xs">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                Conexão Ativa
-                            </span>
                         </div>
                         <h3 class="font-display font-black text-xl text-brand-dark dark:text-white mb-2">
                             MPRN &amp; DOM Mossoró
@@ -472,10 +452,6 @@
                         <div class="flex items-center justify-between mb-4">
                             <span class="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700 font-black text-xs">
                                 Comunicação &amp; Tech
-                            </span>
-                            <span class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-extrabold text-xs">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                Conexão Ativa
                             </span>
                         </div>
                         <h3 class="font-display font-black text-xl text-brand-dark dark:text-white mb-2">
@@ -690,6 +666,12 @@
                 <button id="btn-noticias" class="tab-origem-btn" onclick="carregarDados('noticias')">
                     <i class="ph-bold ph-newspaper"></i> <span>Notícias Universitárias</span>
                 </button>
+                <button id="btn-personalizado" class="btn-filtro-aluno" onclick="carregarFeedPersonalizado()">
+                    <i class="ph-bold ph-sparkle"></i> <span>Para Você</span>
+                </button>
+                <button id="btn-favoritos" class="btn-filtro-aluno" onclick="carregarFavoritos()">
+                    <i class="ph-bold ph-star"></i> <span>Salvos (<strong id="contador-favoritos">0</strong>)</span>
+                </button>
 
                 <!-- 2. Seletor de Instituições e Fontes Específicas (Dropdown Customizado com Phosphor Icons) -->
                 <div class="dropdown-fontes-wrapper" id="dropdown-fontes-wrapper">
@@ -839,26 +821,9 @@
 
                 <!-- COLUNA PRINCIPAL DE CONTEÚDO (Toolbar de Filtros + Grid de Oportunidades) -->
                 <div class="conteudo-principal-coluna">
-                    <!-- BARRA DE UTILITÁRIOS E FILTROS DO ESTUDANTE -->
-                    <div class="student-toolbar">
-                        <div class="student-toolbar-left">
-                            <button id="btn-personalizado" class="btn-filtro-aluno" onclick="carregarFeedPersonalizado()">
-                                <i class="ph-bold ph-sparkle"></i> <span>Para Você</span>
-                            </button>
-                            <button id="btn-favoritos" class="btn-filtro-aluno" onclick="carregarFavoritos()">
-                                <i class="ph-bold ph-star"></i> <span>Salvos (<strong id="contador-favoritos">0</strong>)</span>
-                            </button>
-                            <button id="btn-abrir-sidebar-filtros" class="btn-filtro-aluno" onclick="alternarSidebarPerfil()">
-                                <i class="ph-bold ph-sliders-horizontal"></i>
-                                <span>Personalização</span>
-                            </button>
-                            <button id="btn-portal-usuario" class="btn-filtro-aluno" onclick="carregarPortalUsuario()">
-                                <i class="ph-bold ph-user-circle"></i>
-                                <span>Meu Perfil</span>
-                            </button>
-                        </div>
-
-                        <div class="student-toolbar-right" id="toolbar-filtro-vigentes">
+                    <!-- BARRA CENTRALIZADA DO FILTRO DE EDITAIS VIGENTES -->
+                    <div class="student-toolbar student-toolbar-vigentes-only" id="toolbar-filtro-vigentes">
+                        <div class="student-toolbar-right">
                             <label class="toggle-vigentes-container" for="filtroVigentes">
                                 <input type="checkbox" id="filtroVigentes" onchange="toggleFiltroVigentes()">
                                 <span class="custom-checkbox"></span>
