@@ -49,7 +49,7 @@
       }
     </script>
 
-    <link rel="stylesheet" href="style.css?v=20261022_v10">
+    <link rel="stylesheet" href="style.css?v=20261117_v2">
 </head>
 <body class="bg-[#FAFBFD] text-brand-dark min-h-screen bg-grid-pattern font-sans antialiased selection:bg-brand-yellow selection:text-brand-dark">
 
@@ -75,7 +75,7 @@
             </div>
         </div>
 
-        <div class="relative w-full max-w-full py-10 my-4 mx-auto">
+        <div data-scroll-stage="hero" class="landing-scroll-stage relative w-full max-w-full py-10 my-4 mx-auto z-[10]">
 
             <div class="hidden sm:flex absolute -top-5 left-4 sm:left-6 flex-row gap-2 select-none pointer-events-none text-slate-800 font-black text-2xl tracking-widest z-0">
               + + +
@@ -199,7 +199,6 @@
         <!-- ========================================================================= -->
         <!-- TRANSIÇÃO 1: GRADIENTE + DESFOQUE DO HERO PARA FUNCIONALIDADES           -->
         <!-- ========================================================================= -->
-        <div class="landing-section-divider"></div>
 
         <div class="relative w-full flex items-center justify-center my-6 z-20">
             <a href="#secao-funcionalidades" class="px-5 py-2.5 rounded-full bg-white dark:bg-slate-800 border-2.5 border-brand-dark dark:border-slate-600 shadow-brutal-sm text-xs font-black text-brand-dark dark:text-white uppercase tracking-wider inline-flex items-center gap-2 hover:-translate-y-1 hover:shadow-brutal transition-all" style="text-decoration: none;">
@@ -211,8 +210,8 @@
         <!-- ========================================================================= -->
         <!-- SEÇÃO 1: PRINCIPAIS FUNCIONALIDADES DO SISTEMA (FEATURES / BENEFÍCIOS)     -->
         <!-- ========================================================================= -->
-        <section id="secao-funcionalidades" class="w-full my-12 pt-6">
-            <div class="text-center max-w-3xl mx-auto mb-10">
+        <section id="secao-funcionalidades" data-scroll-stage="funcionalidades" class="landing-scroll-stage relative w-full my-12 pt-6 z-[20]">
+            <div class="text-center max-w-3xl mx-auto mb-10 landing-reveal">
                 <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 dark:bg-amber-950/80 border-2 border-brand-dark dark:border-amber-700 shadow-brutal-sm font-display font-extrabold text-xs sm:text-sm text-brand-dark dark:text-amber-300 mb-3">
                     <span class="text-brand-orange text-base">✦</span>
                     <span>TECNOLOGIA A FAVOR DO ESTUDANTE</span>
@@ -227,7 +226,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                 <!-- Card 1: Raspagem Automatizada -->
-                <div class="bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-3xl p-6 sm:p-8 shadow-brutal dark:shadow-[4px_4px_0px_#000] landing-card-elevate flex flex-col justify-between">
+                <div class="bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-3xl p-6 sm:p-8 shadow-brutal dark:shadow-[4px_4px_0px_#000] landing-card-elevate landing-reveal flex flex-col justify-between" style="--reveal-delay: 40ms;">
                     <div>
                         <div class="w-14 h-14 rounded-2xl bg-brand-orange border-3 border-brand-dark text-white flex items-center justify-center shadow-brutal-sm mb-5">
                             <i class="ph-bold ph-robot text-3xl"></i>
@@ -250,7 +249,7 @@
                 </div>
 
                 <!-- Card 2: Mineração de Prazos em PDFs -->
-                <div class="bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-3xl p-6 sm:p-8 shadow-brutal dark:shadow-[4px_4px_0px_#000] landing-card-elevate flex flex-col justify-between">
+                <div class="bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-3xl p-6 sm:p-8 shadow-brutal dark:shadow-[4px_4px_0px_#000] landing-card-elevate landing-reveal flex flex-col justify-between" style="--reveal-delay: 110ms;">
                     <div>
                         <div class="w-14 h-14 rounded-2xl bg-sky-500 border-3 border-brand-dark text-white flex items-center justify-center shadow-brutal-sm mb-5">
                             <i class="ph-bold ph-file-text text-3xl"></i>
@@ -273,7 +272,7 @@
                 </div>
 
                 <!-- Card 3: Personalização por Perfil de Aluno -->
-                <div class="bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-3xl p-6 sm:p-8 shadow-brutal dark:shadow-[4px_4px_0px_#000] landing-card-elevate flex flex-col justify-between">
+                <div class="bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-3xl p-6 sm:p-8 shadow-brutal dark:shadow-[4px_4px_0px_#000] landing-card-elevate landing-reveal flex flex-col justify-between" style="--reveal-delay: 180ms;">
                     <div>
                         <div class="w-14 h-14 rounded-2xl bg-purple-600 border-3 border-brand-dark text-white flex items-center justify-center shadow-brutal-sm mb-5">
                             <i class="ph-bold ph-student text-3xl"></i>
@@ -296,7 +295,7 @@
                 </div>
 
                 <!-- Card 4: Organização em Eixos Temáticos -->
-                <div class="bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-3xl p-6 sm:p-8 shadow-brutal dark:shadow-[4px_4px_0px_#000] landing-card-elevate flex flex-col justify-between">
+                <div class="bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-3xl p-6 sm:p-8 shadow-brutal dark:shadow-[4px_4px_0px_#000] landing-card-elevate landing-reveal flex flex-col justify-between" style="--reveal-delay: 250ms;">
                     <div>
                         <div class="w-14 h-14 rounded-2xl bg-emerald-500 border-3 border-brand-dark text-white flex items-center justify-center shadow-brutal-sm mb-5">
                             <i class="ph-bold ph-squares-four text-3xl"></i>
@@ -323,13 +322,12 @@
         <!-- ========================================================================= -->
         <!-- TRANSIÇÃO 2: GRADIENTE + DESFOQUE ENTRE FUNCIONALIDADES E FONTES          -->
         <!-- ========================================================================= -->
-        <div class="landing-section-divider"></div>
 
         <!-- ========================================================================= -->
         <!-- SEÇÃO 2: FONTES OFICIAIS MONITORADAS (AUTHORITY & TRUST)                   -->
         <!-- ========================================================================= -->
-        <section id="secao-fontes" class="w-full my-12 pt-6">
-            <div class="text-center max-w-3xl mx-auto mb-10">
+        <section id="secao-fontes" data-scroll-stage="fontes" class="landing-scroll-stage relative w-full my-12 pt-6 z-[30]">
+            <div class="text-center max-w-3xl mx-auto mb-10 landing-reveal">
                 <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 dark:bg-amber-950/80 border-2 border-brand-dark dark:border-amber-700 shadow-brutal-sm font-display font-extrabold text-xs sm:text-sm text-brand-dark dark:text-amber-300 mb-3">
                     <span class="text-brand-orange text-base">✦</span>
                     <span>ORIGEM COMPROVADA E SEGURA</span>
@@ -498,13 +496,12 @@
         <!-- ========================================================================= -->
         <!-- TRANSIÇÃO 3: GRADIENTE + DESFOQUE ENTRE FONTES E UTILIDADE                -->
         <!-- ========================================================================= -->
-        <div class="landing-section-divider"></div>
 
         <!-- ========================================================================= -->
         <!-- SEÇÃO 3: PARA O QUE É ÚTIL ESSE SITE? (BENEFÍCIOS REAIS / CASOS DE USO)   -->
         <!-- ========================================================================= -->
-        <section id="secao-utilidades" class="w-full my-12 pt-6">
-            <div class="text-center max-w-3xl mx-auto mb-10">
+        <section id="secao-utilidades" data-scroll-stage="utilidades" class="landing-scroll-stage relative w-full my-12 pt-6 z-[40]">
+            <div class="text-center max-w-3xl mx-auto mb-10 landing-reveal">
                 <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 dark:bg-amber-950/80 border-2 border-brand-dark dark:border-amber-700 shadow-brutal-sm font-display font-extrabold text-xs sm:text-sm text-brand-dark dark:text-amber-300 mb-3">
                     <span class="text-brand-orange text-base">✦</span>
                     <span>RESOLVENDO AS MAIORES DORES DO ESTUDANTE</span>
@@ -591,13 +588,12 @@
         <!-- ========================================================================= -->
         <!-- TRANSIÇÃO 4: GRADIENTE + DESFOQUE PARA O DASHBOARD EXPANDIDO              -->
         <!-- ========================================================================= -->
-        <div class="landing-section-divider"></div>
 
         <!-- ========================================================================= -->
         <!-- SEÇÃO 4: DASHBOARD EXPANDIDO DE MÉTRICAS E DIVISÃO POR FONTES              -->
         <!-- ========================================================================= -->
-        <div id="landing-dashboard-section" class="w-full mt-12 mb-16 pt-4">
-            <div class="text-center max-w-3xl mx-auto mb-10">
+        <div id="landing-dashboard-section" data-scroll-stage="dashboard" class="landing-scroll-stage relative w-full mt-12 mb-16 pt-4 z-[50]">
+            <div class="text-center max-w-3xl mx-auto mb-10 landing-reveal">
                 <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 dark:bg-amber-950/80 border-2 border-brand-dark dark:border-amber-700 shadow-brutal-sm font-display font-extrabold text-xs sm:text-sm text-brand-dark dark:text-amber-300 mb-3">
                     <span class="text-brand-orange text-base">✦</span>
                     <span>MÉTRICAS &amp; OPORTUNIDADES EM TEMPO REAL</span>
@@ -1008,7 +1004,7 @@
         </div>
     </footer>
 
-    <script src="script.js?v=20261022_v10"></script>
+    <script src="script.js?v=20261117_v1"></script>
     <script>
         function scrollParaBusca() {
             const target = document.getElementById('area-oportunidades');

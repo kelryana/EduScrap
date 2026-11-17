@@ -5971,21 +5971,66 @@ html.dark .card-subtag-pill:hover {
    LANDING PAGE (ESTILO ANATOMY OF A LANDING PAGE - NEOBRUTALISM)
    ========================================================================== */
 
-.landing-section-divider {
+/* Camadas de sobreposição suave durante o scroll (estilo MagicUI / ReactBits / 21st.dev) */
+.landing-scroll-stage {
     position: relative;
-    width: 100%;
-    height: 72px;
-    margin-top: -36px;
-    margin-bottom: -36px;
-    z-index: 15;
-    pointer-events: none;
-    background: linear-gradient(to bottom, rgba(250, 251, 253, 0) 0%, rgba(250, 251, 253, 0.9) 50%, rgba(250, 251, 253, 0) 100%);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
+    transform-origin: center top;
+    will-change: transform, filter, opacity;
+    transition: filter 0.14s ease-out;
 }
 
-html.dark .landing-section-divider {
-    background: linear-gradient(to bottom, rgba(15, 23, 42, 0) 0%, rgba(15, 23, 42, 0.9) 50%, rgba(15, 23, 42, 0) 100%);
+/* Revelação blur-fade suave para cabeçalhos, cards e blocos da landing */
+.landing-anim-ready .landing-reveal {
+    opacity: 0;
+    transform: translateY(26px) scale(0.985);
+    filter: blur(6px);
+    will-change: opacity, transform, filter;
+}
+
+.landing-anim-ready .landing-reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+    transition:
+        opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+        filter 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    transition-delay: var(--reveal-delay, 0ms);
+}
+
+/* Animação de surgimento do Dashboard Expandido ao chegar nele no scroll */
+.landing-anim-ready [data-purpose="landing-dashboard-expanded"] {
+    opacity: 0;
+    transform: translateY(32px) scale(0.98);
+    filter: blur(6px);
+    will-change: opacity, transform, filter;
+}
+
+.landing-anim-ready [data-purpose="landing-dashboard-expanded"].is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+    transition:
+        opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+        filter 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.landing-anim-ready .dash-landing-kpi {
+    opacity: 0;
+    transform: translateY(18px) scale(0.97);
+    filter: blur(4px);
+}
+
+.landing-anim-ready [data-purpose="landing-dashboard-expanded"].is-visible .dash-landing-kpi {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+    transition:
+        opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+        filter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    transition-delay: var(--reveal-delay, 0ms);
 }
 
 .landing-card-elevate {
@@ -6011,7 +6056,7 @@ html.dark .landing-card-elevate:hover {
 }
 
 .landing-source-bar-fill {
-    transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: width 1.05s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ==========================================================================

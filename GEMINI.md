@@ -30,6 +30,12 @@ Este documento define as regras mandatórias, ferramentas e princípios de desig
 * **Validação Automatizada de UI:** Testes de regressão visual, fluxos end-to-end (E2E), navegação de usuário e validação de acessibilidade.
 * **Inspeção de Estados Reais:** Assegurar que componentes interativos (dropdowns, abas, modais, filtros e botões) respondam sem quebras de layout.
 
+### 1.6. Referências de Design & Motion Adotadas
+Para elevação visual, micro-interações e transições da landing page e componentes interativos do EduScrap, adotam-se como referências oficiais:
+* **Motion & Scroll Reveals:** `magicui.design`, `reactbits.dev`, `21st.dev` (transições *blur-fade*, revelação progressiva via `IntersectionObserver`, contagem animada de métricas e sobreposição suave entre seções no scroll).
+* **Componentes & Micro-interações:** `uiverse.io`, `designeer.xyz`, `inspora.design`.
+* **Padrões de Produto & Layout:** `mobbin.com`, `styles.refero.design` (hierarquia clara, espaçamento respirável e ritmo visual consistente).
+
 ---
 
 ## 2. As 8 Regras de Ouro do Design de Interface de Ben Shneiderman

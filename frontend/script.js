@@ -57,6 +57,7 @@ function inicializarApp() {
         carregarDados('estagios');
         verificarNovoUsuarioOnboarding();
     } else {
+        iniciarAnimacoesScrollLanding();
         carregarEstatisticas('#landing-dashboard-container');
     }
 }
@@ -2154,13 +2155,15 @@ function renderizarDashboardLanding(container, dados) {
     const dashOffsetVencendo = Math.max(0, Math.min(289, Math.round(circ - lenAbertosTotal)));
     const dashOffsetAberto = Math.max(0, Math.min(289, Math.round(circ - lenAbertosNormais)));
 
+    const animAtiva = Boolean(document.getElementById('landing-hero')?.classList.contains('landing-anim-ready'));
+
     let html = `
         <div class="w-full bg-white dark:bg-slate-900 rounded-3xl border-3 border-brand-dark dark:border-slate-700 shadow-brutal-xl p-6 sm:p-8 md:p-10 space-y-10" data-purpose="landing-dashboard-expanded">
             
             <!-- 1. Quatro Mega-Cards Consolidados (KPIs Impactantes) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 <!-- Card Total -->
-                <div class="relative bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-2xl p-6 shadow-brutal dark:shadow-[4px_4px_0px_#000] overflow-hidden">
+                <div class="dash-landing-kpi relative bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-2xl p-6 shadow-brutal dark:shadow-[4px_4px_0px_#000] overflow-hidden" style="--reveal-delay: 60ms;">
                     <span class="absolute top-0 inset-x-0 h-2 bg-brand-orange"></span>
                     <div class="flex items-center justify-between mb-3 pt-1">
                         <span class="text-xs font-black uppercase text-slate-500 dark:text-slate-400">Total no Hub</span>
@@ -2168,12 +2171,12 @@ function renderizarDashboardLanding(container, dados) {
                             Ao Vivo
                         </span>
                     </div>
-                    <div class="text-4xl sm:text-5xl font-black text-brand-dark dark:text-white">${totalGeral}</div>
+                    <div class="text-4xl sm:text-5xl font-black text-brand-dark dark:text-white" data-count-target="${totalGeral}">${totalGeral}</div>
                     <p class="text-xs text-slate-600 dark:text-slate-300 font-semibold mt-2">Oportunidades e informativos consolidados</p>
                 </div>
 
                 <!-- Card Vigentes -->
-                <div class="relative bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-2xl p-6 shadow-brutal dark:shadow-[4px_4px_0px_#000] overflow-hidden">
+                <div class="dash-landing-kpi relative bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-2xl p-6 shadow-brutal dark:shadow-[4px_4px_0px_#000] overflow-hidden" style="--reveal-delay: 140ms;">
                     <span class="absolute top-0 inset-x-0 h-2 bg-emerald-500"></span>
                     <div class="flex items-center justify-between mb-3 pt-1">
                         <span class="text-xs font-black uppercase text-slate-500 dark:text-slate-400">Inscrições Abertas</span>
@@ -2181,12 +2184,12 @@ function renderizarDashboardLanding(container, dados) {
                             Vigentes
                         </span>
                     </div>
-                    <div class="text-4xl sm:text-5xl font-black text-emerald-600 dark:text-emerald-400">${vigentes}</div>
+                    <div class="text-4xl sm:text-5xl font-black text-emerald-600 dark:text-emerald-400" data-count-target="${vigentes}">${vigentes}</div>
                     <p class="text-xs text-slate-600 dark:text-slate-300 font-semibold mt-2">Editais com prazo de inscrição aberto agora</p>
                 </div>
 
                 <!-- Card Reta Final -->
-                <div class="relative bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-2xl p-6 shadow-brutal dark:shadow-[4px_4px_0px_#000] overflow-hidden">
+                <div class="dash-landing-kpi relative bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-2xl p-6 shadow-brutal dark:shadow-[4px_4px_0px_#000] overflow-hidden" style="--reveal-delay: 220ms;">
                     <span class="absolute top-0 inset-x-0 h-2 bg-amber-500"></span>
                     <div class="flex items-center justify-between mb-3 pt-1">
                         <span class="text-xs font-black uppercase text-slate-500 dark:text-slate-400">Reta Final</span>
@@ -2194,12 +2197,12 @@ function renderizarDashboardLanding(container, dados) {
                             &le; 7 dias
                         </span>
                     </div>
-                    <div class="text-4xl sm:text-5xl font-black text-amber-600 dark:text-amber-400">${retaFinal}</div>
+                    <div class="text-4xl sm:text-5xl font-black text-amber-600 dark:text-amber-400" data-count-target="${retaFinal}">${retaFinal}</div>
                     <p class="text-xs text-slate-600 dark:text-slate-300 font-semibold mt-2">Editais com encerramento iminente</p>
                 </div>
 
                 <!-- Card Fontes Monitoradas -->
-                <div class="relative bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-2xl p-6 shadow-brutal dark:shadow-[4px_4px_0px_#000] overflow-hidden">
+                <div class="dash-landing-kpi relative bg-white dark:bg-slate-800 border-3 border-brand-dark dark:border-slate-700 rounded-2xl p-6 shadow-brutal dark:shadow-[4px_4px_0px_#000] overflow-hidden" style="--reveal-delay: 300ms;">
                     <span class="absolute top-0 inset-x-0 h-2 bg-purple-600"></span>
                     <div class="flex items-center justify-between mb-3 pt-1">
                         <span class="text-xs font-black uppercase text-slate-500 dark:text-slate-400">Fontes Oficiais</span>
@@ -2207,7 +2210,7 @@ function renderizarDashboardLanding(container, dados) {
                             Canais Ativos
                         </span>
                     </div>
-                    <div class="text-4xl sm:text-5xl font-black text-purple-600 dark:text-purple-400">${canais}</div>
+                    <div class="text-4xl sm:text-5xl font-black text-purple-600 dark:text-purple-400" data-count-target="${canais}">${canais}</div>
                     <p class="text-xs text-slate-600 dark:text-slate-300 font-semibold mt-2">Pró-reitorias, portais e agências integradas</p>
                 </div>
             </div>
@@ -2251,7 +2254,7 @@ function renderizarDashboardLanding(container, dados) {
                                         </div>
                                     </div>
                                     <div class="w-full bg-slate-200 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden border border-slate-300 dark:border-slate-600">
-                                        <div class="h-full rounded-full landing-source-bar-fill" style="width: ${percent}%; background-color: ${info.cor};"></div>
+                                        <div class="h-full rounded-full landing-source-bar-fill" data-target-width="${percent}%" style="width: ${animAtiva ? '0%' : percent + '%'}; background-color: ${info.cor};"></div>
                                     </div>
                                 </div>
                             `;
@@ -2407,6 +2410,162 @@ function renderizarDashboardLanding(container, dados) {
     `;
 
     container.innerHTML = html;
+    registrarDashboardParaAnimacao(container);
+}
+
+let _landingScrollObserver = null;
+let _landingDashboardObserver = null;
+let _landingScrollListenerAtivo = false;
+
+function animarDashboardLanding(container) {
+    if (!container) return;
+    const wrapper = container.querySelector('[data-purpose="landing-dashboard-expanded"]');
+    if (!wrapper || wrapper.dataset.animado === '1') return;
+    wrapper.dataset.animado = '1';
+    wrapper.classList.add('is-visible');
+
+    // Expande suavemente as barras de divisão por fontes
+    wrapper.querySelectorAll('.landing-source-bar-fill[data-target-width]').forEach((bar, idx) => {
+        const alvo = bar.getAttribute('data-target-width') || '0%';
+        setTimeout(() => {
+            bar.style.width = alvo;
+        }, 120 + idx * 45);
+    });
+
+    // Contagem animada dos 4 Mega-KPIs ao surgir na tela
+    wrapper.querySelectorAll('[data-count-target]').forEach((el, idx) => {
+        const alvo = parseInt(el.getAttribute('data-count-target'), 10);
+        if (!isNaN(alvo) && typeof animarNumero === 'function') {
+            el.textContent = '0';
+            setTimeout(() => {
+                animarNumero(el, alvo, 850);
+            }, 80 + idx * 70);
+        }
+    });
+}
+
+function registrarDashboardParaAnimacao(container) {
+    if (!container) return;
+    const wrapper = container.querySelector('[data-purpose="landing-dashboard-expanded"]');
+    if (!wrapper) return;
+
+    const landingHero = document.getElementById('landing-hero');
+    if (!landingHero || !landingHero.classList.contains('landing-anim-ready') || typeof IntersectionObserver === 'undefined') {
+        wrapper.classList.add('is-visible');
+        wrapper.querySelectorAll('.landing-source-bar-fill[data-target-width]').forEach(bar => {
+            bar.style.width = bar.getAttribute('data-target-width') || '0%';
+        });
+        return;
+    }
+
+    // Se o usuário já rolou até o dashboard antes do fetch terminar, anima imediatamente
+    const rect = wrapper.getBoundingClientRect();
+    if (rect.top < (window.innerHeight || 800) * 0.92) {
+        requestAnimationFrame(() => animarDashboardLanding(container));
+        return;
+    }
+
+    if (_landingDashboardObserver) {
+        _landingDashboardObserver.disconnect();
+    }
+    _landingDashboardObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                animarDashboardLanding(container);
+                _landingDashboardObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+
+    _landingDashboardObserver.observe(wrapper);
+}
+
+function iniciarAnimacoesScrollLanding() {
+    const landingHero = document.getElementById('landing-hero');
+    if (!landingHero || typeof window === 'undefined') return;
+
+    landingHero.classList.add('landing-anim-ready');
+
+    // Aplica revelação escalonada nos cards de Fontes e Utilidades sem alterar HTML interno
+    document.querySelectorAll('#secao-fontes .landing-fontes-card').forEach((card, idx) => {
+        card.classList.add('landing-reveal');
+        card.style.setProperty('--reveal-delay', `${idx * 65}ms`);
+    });
+    document.querySelectorAll('#secao-utilidades .landing-card-elevate').forEach((card, idx) => {
+        card.classList.add('landing-reveal');
+        card.style.setProperty('--reveal-delay', `${idx * 75}ms`);
+    });
+
+    const alvosReveal = landingHero.querySelectorAll('.landing-reveal');
+    if (typeof IntersectionObserver !== 'undefined') {
+        if (_landingScrollObserver) _landingScrollObserver.disconnect();
+        _landingScrollObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    _landingScrollObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+        alvosReveal.forEach(el => {
+            const r = el.getBoundingClientRect();
+            if (r.top < (window.innerHeight || 800) * 0.92) {
+                el.classList.add('is-visible');
+            } else {
+                _landingScrollObserver.observe(el);
+            }
+        });
+    } else {
+        alvosReveal.forEach(el => el.classList.add('is-visible'));
+    }
+
+    // Efeito contínuo de sobreposição + leve desfoque na seção anterior durante o scroll
+    if (!_landingScrollListenerAtivo) {
+        _landingScrollListenerAtivo = true;
+        let rafPendente = false;
+
+        const atualizarEstagiosScroll = () => {
+            rafPendente = false;
+            if (!landingHero || landingHero.style.display === 'none') return;
+
+            const stages = landingHero.querySelectorAll('[data-scroll-stage]');
+            stages.forEach((stage, idx) => {
+                // A última seção (dashboard) não é sobreposta por nenhuma outra seção abaixo
+                if (idx === stages.length - 1) {
+                    stage.style.filter = '';
+                    stage.style.transform = '';
+                    stage.style.opacity = '';
+                    return;
+                }
+
+                const rect = stage.getBoundingClientRect();
+                if (rect.top < 0 && rect.bottom > 0) {
+                    const distanciaSaida = Math.max(rect.height * 0.72, 260);
+                    const progresso = Math.min(1, Math.max(0, -rect.top / distanciaSaida));
+                    const blurPx = (progresso * 3.5).toFixed(2);
+                    const escala = (1 - progresso * 0.028).toFixed(4);
+                    const deslocY = (progresso * 22).toFixed(1);
+                    const opacidade = (1 - progresso * 0.34).toFixed(3);
+
+                    stage.style.filter = `blur(${blurPx}px)`;
+                    stage.style.transform = `translate3d(0, ${deslocY}px, 0) scale(${escala})`;
+                    stage.style.opacity = opacidade;
+                } else {
+                    stage.style.filter = '';
+                    stage.style.transform = '';
+                    stage.style.opacity = '';
+                }
+            });
+        };
+
+        window.addEventListener('scroll', () => {
+            if (!rafPendente) {
+                rafPendente = true;
+                requestAnimationFrame(atualizarEstagiosScroll);
+            }
+        }, { passive: true });
+    }
 }
 
 async function carregarEstatisticas(targetSelector = '#container-vagas') {
